@@ -1,0 +1,531 @@
+import { 
+  UserProfile, 
+  Goal, 
+  TimeBlock, 
+  HardDeadline, 
+  InterruptionRecord, 
+  UndeclaredGap,
+  HabitCard,
+  WeeklyExperiment,
+  ActionNudge,
+  SuperAdminAISuggestion
+} from '../types';
+
+export const PROFILES: Record<string, UserProfile> = {
+  owner: {
+    id: 'owner',
+    name: 'Chủ doanh nghiệp (Business Owner)',
+    type: 'owner',
+    title: 'Chủ doanh nghiệp / Sáng lập viên',
+    description: 'Vừa làm chiến lược vừa xử lý phát sinh, đổi vai liên tục (vận hành, bán hàng, ra quyết định). Cần giữ nhịp mục tiêu lớn.',
+    split: {
+      deepWork: 50,
+      interruptions: 30,
+      meetings: 20,
+      other: 0,
+    },
+    interruptionReserveMins: 90,
+    focusBlockDurationMins: 90,
+    reminderIntensity: 'standard',
+    personalAnchors: {
+      lunchTime: '12:00',
+      dinnerTime: '19:00',
+      windDownTime: '22:30',
+    },
+    ageBand: '<45',
+  },
+  manager: {
+    id: 'manager',
+    name: 'Quản lý đa nhiệm (Multitasking Manager)',
+    type: 'manager',
+    title: 'Quản lý dự án / Trưởng nhóm',
+    description: 'Liên tục bị gián đoạn bởi đội ngũ và họp hành. Cần điểm quay lại (return point) rõ ràng để không mất dấu công việc.',
+    split: {
+      deepWork: 25,
+      interruptions: 35,
+      meetings: 35,
+      other: 5,
+    },
+    interruptionReserveMins: 120,
+    focusBlockDurationMins: 45,
+    reminderIntensity: 'high',
+    personalAnchors: {
+      lunchTime: '12:00',
+      dinnerTime: '19:30',
+      windDownTime: '23:00',
+    },
+    ageBand: '<45',
+  },
+  technical: {
+    id: 'technical',
+    name: 'Chuyên gia kỹ thuật (Technical Specialist)',
+    type: 'technical',
+    title: 'Lập trình viên / Kỹ sư / Chuyên gia dữ liệu',
+    description: 'Cần khối thời gian tập trung dài (deep work 90-120 phút), chặn tối đa gián đoạn ngoài kế hoạch.',
+    split: {
+      deepWork: 70,
+      interruptions: 10,
+      meetings: 10,
+      other: 10,
+    },
+    interruptionReserveMins: 45,
+    focusBlockDurationMins: 120,
+    reminderIntensity: 'gentle',
+    personalAnchors: {
+      lunchTime: '12:30',
+      dinnerTime: '19:30',
+      windDownTime: '23:30',
+    },
+    ageBand: '<45',
+  },
+  admin: {
+    id: 'admin',
+    name: 'Hành chính & Hỗ trợ (Admin & Support)',
+    type: 'admin',
+    title: 'Chuyên viên văn phòng / Trợ lý / Vận hành',
+    description: 'Nhiệm vụ lặp lại theo khung giờ cố định, danh sách kiểm tra ca làm việc, xử lý yêu cầu phát sinh tức thì.',
+    split: {
+      deepWork: 20,
+      interruptions: 30,
+      meetings: 15,
+      other: 35,
+    },
+    interruptionReserveMins: 90,
+    focusBlockDurationMins: 45,
+    reminderIntensity: 'standard',
+    personalAnchors: {
+      lunchTime: '11:45',
+      dinnerTime: '18:30',
+      windDownTime: '22:00',
+    },
+    ageBand: '<45',
+  },
+  trade: {
+    id: 'trade',
+    name: 'Thương mại & Dịch vụ (Trade & Service)',
+    type: 'trade',
+    title: 'Bán hàng / Tư vấn viên / Dịch vụ khách hàng',
+    description: 'Theo ca làm việc và lịch hẹn đối tác, ưu tiên nhập liệu nhanh bằng giọng nói, phản ứng linh hoạt.',
+    split: {
+      deepWork: 20,
+      interruptions: 40,
+      meetings: 30,
+      other: 10,
+    },
+    interruptionReserveMins: 120,
+    focusBlockDurationMins: 30,
+    reminderIntensity: 'high',
+    personalAnchors: {
+      lunchTime: '12:00',
+      dinnerTime: '19:00',
+      windDownTime: '22:30',
+    },
+    ageBand: '<45',
+  },
+  freelancer: {
+    id: 'freelancer',
+    name: 'Làm việc tự do (Freelancer)',
+    type: 'freelancer',
+    title: 'Freelancer / Tư vấn độc lập',
+    description: 'Phục vụ nhiều khách hàng song song, deadline giao hàng nghiêm ngặt, cần đo lường thời gian theo từng khách.',
+    split: {
+      deepWork: 60,
+      interruptions: 20,
+      meetings: 15,
+      other: 5,
+    },
+    interruptionReserveMins: 60,
+    focusBlockDurationMins: 75,
+    reminderIntensity: 'standard',
+    personalAnchors: {
+      lunchTime: '12:30',
+      dinnerTime: '19:30',
+      windDownTime: '23:30',
+    },
+    ageBand: '<45',
+  },
+};
+
+export const INITIAL_GOALS: Goal[] = [
+  {
+    id: 'g-1',
+    name: 'Ra mắt TAIO Time App MVP v1.0',
+    measurableResult: '50 người dùng thử nghiệm hoàn thành onboarding < 60s và dùng 7 ngày',
+    horizonDays: 70,
+    dailyBudgetMins: 120,
+    deadline: '09/01/2027',
+    workArea: 'Product',
+    progressPercent: 42,
+    color: '#6366f1',
+    milestones: [
+      { id: 'm-1', goalId: 'g-1', name: 'Hoàn thiện Spec & 6 Profiles (PRD v0.11)', dueDate: '15/11/2026', status: 'completed' },
+      { id: 'm-2', goalId: 'g-1', name: 'Build 4 màn hình cốt lõi & Priority Matrix', dueDate: '30/11/2026', status: 'pending' },
+      { id: 'm-3', goalId: 'g-1', name: 'Thử nghiệm Founder dùng thực tế 14 ngày', dueDate: '15/12/2026', status: 'pending' },
+      { id: 'm-4', goalId: 'g-1', name: 'Test với 5 người dùng/mỗi profile', dueDate: '05/01/2027', status: 'pending' },
+    ],
+  },
+  {
+    id: 'g-2',
+    name: 'Xây kênh nội dung TAIO Club Brand Seeding',
+    measurableResult: 'Đạt 5.000 followers, duy trì 1 video/tuần chia sẻ phương pháp quản lý thời gian',
+    horizonDays: 90,
+    dailyBudgetMins: 60,
+    deadline: '31/01/2027',
+    workArea: 'Business',
+    progressPercent: 28,
+    color: '#10b981',
+    milestones: [
+      { id: 'm-21', goalId: 'g-2', name: 'Kịch bản 4 video đầu tiên #TAIOCLUB', dueDate: '05/11/2026', status: 'completed' },
+      { id: 'm-22', goalId: 'g-2', name: 'Tổ chức mini-vote chọn tên chính thức của App', dueDate: '20/12/2026', status: 'pending' },
+    ],
+  },
+  {
+    id: 'g-3',
+    name: 'Tối ưu thể lực & Duy trì năng lượng làm việc',
+    measurableResult: 'Ngủ đủ 7h/đêm, tập gym/chạy bộ 3 buổi/tuần, cắt giảm việc nhậu khuya đột xuất',
+    horizonDays: 180,
+    dailyBudgetMins: 45,
+    deadline: '30/03/2027',
+    workArea: 'Personal',
+    progressPercent: 65,
+    color: '#f59e0b',
+    milestones: [
+      { id: 'm-31', goalId: 'g-3', name: 'Thiết lập ngân sách giao lưu tối đa 2 buổi/tuần', dueDate: '01/11/2026', status: 'completed' },
+      { id: 'm-32', goalId: 'g-3', name: 'Kiểm soát giờ về trước 22:00 cùng bộ đệm di chuyển', dueDate: '15/11/2026', status: 'pending' },
+    ],
+  },
+];
+
+export const INITIAL_BLOCKS: TimeBlock[] = [
+  {
+    id: 'b-1',
+    title: 'Thiết kế luồng "Có việc đột xuất" (Interruption Card) & Check-in',
+    startTime: '09:00',
+    endTime: '10:30',
+    type: 'deep',
+    status: 'done',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP v1.0',
+    milestoneName: 'Build 4 màn hình cốt lõi & Priority Matrix',
+    stepNumber: 1,
+    totalSteps: 5,
+    returnPoint: 'Đã hoàn tất cấu trúc state cho 4 quyết định: Làm ngay, Lên lịch, Ủy quyền, Từ chối.',
+    quadrant: 1,
+    isImportant: true,
+    isUrgent: true,
+    estimatedMinutes: 90,
+    ageDays: 1,
+  },
+  {
+    id: 'b-2',
+    title: 'Họp rà soát tiến độ tuần cùng Tech Lead & UI Designer',
+    startTime: '10:45',
+    endTime: '11:45',
+    type: 'meeting',
+    status: 'done',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP v1.0',
+    milestoneName: 'Build 4 màn hình cốt lõi & Priority Matrix',
+    stepNumber: 2,
+    totalSteps: 5,
+    quadrant: 3,
+    isImportant: false,
+    isUrgent: true,
+    estimatedMinutes: 60,
+    ageDays: 2,
+  },
+  {
+    id: 'b-4',
+    title: 'Xây dựng màn hình Now & Cơ chế đếm ngược thời gian còn lại',
+    startTime: '14:00',
+    endTime: '15:30',
+    type: 'deep',
+    status: 'in_progress',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP v1.0',
+    milestoneName: 'Build 4 màn hình cốt lõi & Priority Matrix',
+    stepNumber: 3,
+    totalSteps: 5,
+    returnPoint: 'Đang kết nối nút "Có việc đột xuất" và bảng tóm tắt 3 câu hỏi cốt lõi.',
+    quadrant: 1,
+    isImportant: true,
+    isUrgent: true,
+    estimatedMinutes: 90,
+    ageDays: 1,
+  },
+  {
+    id: 'b-5',
+    title: 'Khung giờ dự phòng giải quyết việc phát sinh trong ngày',
+    startTime: '15:45',
+    endTime: '16:30',
+    type: 'interruption',
+    status: 'planned',
+    quadrant: 3,
+    isImportant: false,
+    isUrgent: true,
+    estimatedMinutes: 45,
+    ageDays: 1,
+  },
+  {
+    id: 'b-6',
+    title: 'Quay video chia sẻ #TAIOCLUB: "Làm sao quản lý thời gian khi bị gián đoạn liên tục?"',
+    startTime: '16:45',
+    endTime: '17:45',
+    type: 'deep',
+    status: 'planned',
+    goalId: 'g-2',
+    goalName: 'Xây kênh nội dung TAIO Club Brand Seeding',
+    milestoneName: 'Kịch bản 4 video đầu tiên #TAIOCLUB',
+    stepNumber: 4,
+    totalSteps: 5,
+    quadrant: 2,
+    isImportant: true,
+    isUrgent: false,
+    estimatedMinutes: 60,
+    ageDays: 3,
+  },
+  // Extra backlogged tasks for Priority Matrix (B16)
+  {
+    id: 'b-8',
+    title: 'Học và ứng dụng AI tool mới cho tối ưu quy trình',
+    startTime: '18:30',
+    endTime: '19:15',
+    type: 'deep',
+    status: 'planned',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP v1.0',
+    quadrant: 2,
+    isImportant: true,
+    isUrgent: false,
+    estimatedMinutes: 45,
+    ageDays: 5,
+  },
+  {
+    id: 'b-9',
+    title: 'Gửi phản hồi cho nhóm bạn học về ý tưởng meetup',
+    startTime: '19:30',
+    endTime: '19:50',
+    type: 'personal',
+    status: 'planned',
+    quadrant: 4,
+    isImportant: false,
+    isUrgent: false,
+    estimatedMinutes: 20,
+    ageDays: 9, // >7 days aging marker
+  },
+  {
+    id: 'b-10',
+    title: 'Dọn dẹp hòm thư và unsub các newsletter cũ',
+    startTime: '20:00',
+    endTime: '20:30',
+    type: 'personal',
+    status: 'planned',
+    quadrant: 4,
+    isImportant: false,
+    isUrgent: false,
+    estimatedMinutes: 30,
+    ageDays: 12, // >7 days aging marker
+  },
+];
+
+export const INITIAL_DEADLINES: HardDeadline[] = [
+  {
+    id: 'd-1',
+    title: 'Hạn chót gửi bản tóm tắt tuần cho đối tác Minh',
+    time: '16:00',
+    source: 'manual',
+    isCritical: true,
+  },
+  {
+    id: 'd-2',
+    title: 'Cuộc gọi chốt danh mục đầu tư angel với anh Tuấn',
+    time: '19:30',
+    source: 'calendar',
+    isCritical: false,
+  },
+];
+
+export const INITIAL_INTERRUPTIONS: InterruptionRecord[] = [
+  {
+    id: 'int-1',
+    timestamp: '10:15',
+    title: 'Khách hàng VIP gọi hỏi báo giá dự án mở rộng',
+    minutes: 15,
+    decision: 'do_now',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP v1.0',
+    returnPoint: 'Đang viết mục B5 của spec, đã lưu nháp đoạn 3.',
+    sourcePerson: 'Anh Tuấn (Đối tác VIP)',
+    whatType: 'client',
+    sourceType: 'client',
+  },
+  {
+    id: 'int-2',
+    timestamp: '11:10',
+    title: 'Lời mời đi cafe tán gẫu lúc 15:00',
+    minutes: 45,
+    decision: 'decline',
+    returnPoint: 'Đã từ chối khéo léo để bảo vệ khối tập trung chiều nay.',
+    sourcePerson: 'Bạn Hoàng (Bạn thân)',
+    whatType: 'friends',
+    sourceType: 'friend',
+  },
+];
+
+export const INITIAL_GAPS: UndeclaredGap[] = [
+  {
+    id: 'gap-1',
+    start: '13:15',
+    end: '13:45',
+    durationMins: 30,
+    label: undefined,
+  },
+];
+
+export const IMPORTANT_NOT_URGENT_BACKLOG = [
+  { id: 'inu-1', title: 'Viết bài chia sẻ tuần #TAIOCLUB trên LinkedIn & Facebook', defaultMinutes: 60, goalId: 'g-2' },
+  { id: 'inu-2', title: 'Rà soát chi phí vận hành & dòng tiền tháng', defaultMinutes: 45, goalId: 'g-1' },
+  { id: 'inu-3', title: 'Đọc 1 chương sách về Hệ thống năng suất công việc', defaultMinutes: 30, goalId: 'g-3' },
+  { id: 'inu-4', title: 'Lên danh sách khảo sát ý kiến 5 người dùng thử nghiệm', defaultMinutes: 40, goalId: 'g-1' },
+];
+
+// B14: Action Nudges (PRD v0.9 & v0.11)
+export const INITIAL_ACTION_NUDGES: ActionNudge[] = [
+  {
+    id: 'nudge-1',
+    type: 'sleep',
+    context: 'Hiện là 23:15, đã qua mốc nghỉ ngơi (22:30). Mốc kế tiếp: Giấc ngủ phục hồi.',
+    ctaText: 'Đi ngủ ngay',
+    repeatCount: 1,
+    maxRepeats: 4,
+    isDismissed: false,
+    timeShown: '23:15',
+  },
+];
+
+// B15: Habit Cards (PRD v0.10 & v0.11)
+export const INITIAL_HABIT_CARDS: HabitCard[] = [
+  {
+    id: 'hc-1',
+    type: 'keep',
+    title: 'Thói quen tốt cần duy trì',
+    example: 'Khởi đầu ngày sớm trước 08:45',
+    evidence: 'Khi bạn bắt đầu trước 08:45, bạn hoàn thành khối việc sâu số 1 trong 4 trên 5 ngày.',
+    confidence: 90,
+    suggestedStep: 'Tiếp tục duy trì bắt đầu lúc 08:30 để giữ vững phong độ buổi sáng.',
+    status: 'active',
+  },
+  {
+    id: 'hc-2',
+    type: 'change',
+    title: 'Thói quen cần điều chỉnh',
+    example: 'Giao lưu quá nửa đêm làm trễ giờ sáng hôm sau',
+    evidence: 'Sau những đêm đi ngủ sau 00:00, khối việc sâu 1 bắt đầu trễ trung bình 50 phút (3 lần tuần này).',
+    confidence: 85,
+    suggestedStep: 'Tuần này, hãy thử chọn "Đi, có giờ về 22:30" khi nhận lời rủ của bạn bè buổi tối.',
+    status: 'active',
+  },
+  {
+    id: 'hc-3',
+    type: 'suggestion',
+    title: 'Thử nghiệm tuần này (Experiment)',
+    example: 'Dành 90 phút cho Góc phần tư số 2 (Quan trọng, không khẩn cấp)',
+    evidence: 'Những tuần bạn đầu tư từ 5 giờ trở lên cho Q2, bạn hoàn thành thêm 30% nhiệm vụ mục tiêu.',
+    confidence: 88,
+    suggestedStep: 'Đặt trước 1 khung giờ 45 phút vào sáng thứ Ba và thứ Năm cho việc chiến lược.',
+    status: 'active',
+  },
+];
+
+export const INITIAL_EXPERIMENTS: WeeklyExperiment[] = [
+  {
+    id: 'exp-1',
+    habit: 'Giới hạn giờ giao lưu buổi tối trước 22:30',
+    startDate: '26/10/2026',
+    baseline: 'Khối việc sâu sáng đúng giờ: 2/5 ngày',
+    result: 'Khối việc sâu sáng đúng giờ: 4/5 ngày trong tuần thử nghiệm',
+    status: 'running',
+  },
+];
+
+// C6: Super Admin AI Improvement Suggestions (PRD v0.9 & v0.11)
+export const INITIAL_AI_SUGGESTIONS: SuperAdminAISuggestion[] = [
+  {
+    id: 'ai-sug-1',
+    title: 'Đổi chu kỳ lặp nhắc nhở Giấc ngủ từ 15 phút thành 10 phút cho nhóm Chủ doanh nghiệp',
+    evidence: 'Dữ liệu cho thấy tỷ lệ chấp nhận sau lần nhắc thứ 2 cao gấp đôi (2x) khi nhắc nhở sau 10 phút.',
+    expectedEffect: 'Tăng tỷ lệ đi ngủ đúng giờ từ 62% lên 78% cho hồ sơ Business Owner.',
+    status: 'pending',
+    category: 'nudges',
+  },
+  {
+    id: 'ai-sug-2',
+    title: 'Đặt mặc định quyết định "Đi, có giờ về" cho các cuộc gọi bạn bè sau 19:30',
+    evidence: '40% gián đoạn buổi tối dẫn đến thức khuya quá mốc wind-down 22:30.',
+    expectedEffect: 'Giảm 70% các ca bắt đầu trễ khối tập trung sáng hôm sau.',
+    status: 'testing',
+    category: 'templates',
+  },
+  {
+    id: 'ai-sug-3',
+    title: 'Đề xuất mẫu hồ sơ mới: "Chuyên viên tư vấn & bán hàng đa kênh"',
+    evidence: 'Có 18% người dùng có tỷ lệ gián đoạn buổi tối vượt 40% mà không khớp hồ sơ Trade & Service.',
+    expectedEffect: 'Nâng tỷ lệ Onboarding hoàn hảo lên 95%.',
+    status: 'pending',
+    category: 'profiles',
+  },
+];
+
+// B17: Appearance & Color Palettes (PRD v0.12 - v0.16)
+import { ColorPalette, PaletteColors, InterruptionActivityCategory } from '../types';
+
+export const PALETTES: Record<ColorPalette, PaletteColors> = {
+  warm: {
+    name: 'warm',
+    brandAccent: '#E0401F',
+    deepWork: '#E0401F',
+    interruption: '#F59E0B',
+    meeting: '#8A6248',
+    personal: '#5E8C31',
+    planning: '#FCD34D',
+  },
+  cool: {
+    name: 'cool',
+    brandAccent: '#2457F5',
+    deepWork: '#2457F5',
+    interruption: '#0E9FB3',
+    meeting: '#6E56CF',
+    personal: '#0B7F52',
+    planning: '#8EC5FF',
+  },
+  neutral: {
+    name: 'neutral',
+    brandAccent: '#3E4C5E',
+    deepWork: '#3E4C5E',
+    interruption: '#A5691A',
+    meeting: '#6E6681',
+    personal: '#4F7A5E',
+    planning: '#D9CBA3',
+  },
+};
+
+// B5 v0.16: 12 Default Activity Categories
+export const DEFAULT_ACTIVITY_CATEGORIES: {
+  id: InterruptionActivityCategory;
+  nameVi: string;
+  nameEn: string;
+  iconName: string;
+}[] = [
+  { id: 'eating_drinks', nameVi: 'Ăn uống', nameEn: 'Eating & drinks', iconName: 'Utensils' },
+  { id: 'overslept', nameVi: 'Ngủ quên', nameEn: 'Overslept', iconName: 'AlarmClockOff' },
+  { id: 'chatting_gossip', nameVi: 'Tán gẫu / Buôn', nameEn: 'Chatting / gossip', iconName: 'MessagesSquare' },
+  { id: 'travel', nameVi: 'Di chuyển', nameEn: 'Travel', iconName: 'Car' },
+  { id: 'research_reading', nameVi: 'Đọc / Nghiên cứu', nameEn: 'Research / reading', iconName: 'BookOpen' },
+  { id: 'drank_too_much', nameVi: 'Uống quá chén', nameEn: 'Drank too much', iconName: 'Wine' },
+  { id: 'phone_scrolling', nameVi: 'Lướt điện thoại', nameEn: 'Phone scrolling', iconName: 'Smartphone' },
+  { id: 'calls_messages', nameVi: 'Gọi điện / Nhắn tin', nameEn: 'Calls & messages', iconName: 'PhoneCall' },
+  { id: 'family_matter', nameVi: 'Việc gia đình', nameEn: 'Family matter', iconName: 'HeartHandshake' },
+  { id: 'work_came_up', nameVi: 'Việc đột xuất', nameEn: 'Work came up', iconName: 'Briefcase' },
+  { id: 'break', nameVi: 'Nghỉ giải lao', nameEn: 'Break', iconName: 'Coffee' },
+  { id: 'other', nameVi: 'Khác', nameEn: 'Other', iconName: 'HelpCircle' },
+];

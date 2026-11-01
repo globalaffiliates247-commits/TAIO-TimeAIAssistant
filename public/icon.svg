@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0401F"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#E0401F" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#grad)" filter="url(#shadow)"/>
+  <rect x="24" y="24" width="464" height="464" rx="95" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"/>
+  <!-- Elegant T Symbol with time pulse notch -->
+  <path d="M140 160 C140 148.954 148.954 140 160 140 L352 140 C363.046 140 372 148.954 372 160 L372 188 C372 199.046 363.046 208 352 208 L284 208 L284 352 C284 363.046 275.046 372 264 372 L248 372 C236.954 372 228 363.046 228 352 L228 208 L160 208 C148.954 208 140 199.046 140 188 Z" fill="#ffffff"/>
+  <!-- Circular dot symbol of focus -->
+  <circle cx="340" cy="340" r="28" fill="#F59E0B"/>
+</svg>

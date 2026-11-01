@@ -1,0 +1,18 @@
+{
+  "name": "TAIO Time App",
+  "short_name": "TAIO Time",
+  "description": "Biết ngay bạn đang làm gì, vì mục tiêu nào, và còn bao nhiêu phút. Tối ưu cho người bận rộn và hay bị gián đoạn.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090b10",
+  "theme_color": "#E0401F",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

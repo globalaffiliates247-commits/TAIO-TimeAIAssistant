@@ -1,0 +1,26 @@
+{
+  "name": "taio-time-app",
+  "version": "0.16.0",
+  "private": true,
+  "scripts": {
+    "build:css": "node scripts/build-css.js",
+    "dev": "npm run build:css && next dev --webpack -p 3000",
+    "build": "npm run build:css && next build --webpack",
+    "start": "node scripts/serve-static.js",
+    "package:infinity": "cd out && zip -r ../taio-web-infinity.zip . && cd .."
+  },
+  "dependencies": {
+    "lucide-react": "^1.60.0",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
