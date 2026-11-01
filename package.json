@@ -7,7 +7,7 @@
     "dev": "npm run build:css && next dev --webpack -p 3000",
     "build": "npm run build:css && next build --webpack",
     "start": "node scripts/serve-static.js",
-    "package:infinity": "cd out && zip -r ../taio-web-infinity.zip . && cd .."
+    "deploy:render": "node scripts/trigger-deploy.js"
   },
   "dependencies": {
     "lucide-react": "^1.60.0",
