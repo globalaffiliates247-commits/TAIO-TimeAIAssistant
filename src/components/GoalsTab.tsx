@@ -97,10 +97,10 @@ export const GoalsTab: React.FC = () => {
         {(['Product', 'Business', 'Operations', 'Personal'] as const).map(area => {
           const areaGoals = goals.filter(g => g.workArea === area);
           return (
-            <div key={area} className="p-3.5 rounded-xl bg-[#121620] border border-gray-800">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{area}</span>
+            <div key={area} className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-lg">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{area}</span>
               <p className="text-lg font-bold text-white mt-1">{areaGoals.length} mục tiêu</p>
-              <div className="flex items-center gap-1 mt-1 text-[11px] text-[#E0401F]">
+              <div className="flex items-center gap-1 mt-1 text-[11px] text-orange-400">
                 <TrendingUp className="w-3 h-3" />
                 <span>Đang duy trì nhịp</span>
               </div>
@@ -116,28 +116,28 @@ export const GoalsTab: React.FC = () => {
           const nextMilestone = pendingMilestones[0];
 
           return (
-            <div key={goal.id} className="bg-[#121620] border border-gray-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div key={goal.id} className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
               
               {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-800/80 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-red-950/40 text-red-300 border border-red-800/40">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-orange-950/40 text-orange-400 border border-orange-800/40">
                     {goal.workArea}
                   </span>
                   <h3 className="text-base sm:text-lg font-bold text-white">{goal.name}</h3>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-400">
-                  <span>Hạn chót: <strong className="text-gray-200">{goal.deadline}</strong></span>
-                  <span>Thời gian: <strong className="text-[#E0401F]">{goal.dailyBudgetMins}p/ngày</strong></span>
+                <div className="flex items-center gap-3 text-xs text-slate-400">
+                  <span>Hạn chót: <strong className="text-slate-200">{goal.deadline}</strong></span>
+                  <span>Thời gian: <strong className="text-orange-400">{goal.dailyBudgetMins}p/ngày</strong></span>
                 </div>
               </div>
 
               {/* Measurable Target */}
-              <div className="bg-gray-900/80 p-3.5 rounded-xl border border-gray-800/80">
-                <span className="text-[11px] font-bold text-[#E0401F] uppercase tracking-wide">
+              <div className="bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/60">
+                <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wide">
                   Kết quả có thể đo lường (Measurable Result):
                 </span>
-                <p className="text-xs sm:text-sm text-gray-200 mt-0.5 font-medium">
+                <p className="text-xs sm:text-sm text-slate-200 mt-0.5 font-medium">
                   {goal.measurableResult}
                 </p>
               </div>
@@ -145,12 +145,12 @@ export const GoalsTab: React.FC = () => {
               {/* Progress Bar (PRD D3: Red Accent only on summary screens) */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-400">Tiến độ mục tiêu (Closeness to done)</span>
-                  <span className="text-[#E0401F] font-bold">{goal.progressPercent}%</span>
+                  <span className="text-slate-400">Tiến độ mục tiêu (Closeness to done)</span>
+                  <span className="text-orange-400 font-bold">{goal.progressPercent}%</span>
                 </div>
-                <div className="w-full bg-gray-950 h-2.5 rounded-full overflow-hidden border border-gray-800">
+                <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
                   <div 
-                    className="h-full bg-[#E0401F] rounded-full transition-all duration-500" 
+                    className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full transition-all duration-500" 
                     style={{ width: `${goal.progressPercent}%` }} 
                   />
                 </div>
@@ -158,7 +158,7 @@ export const GoalsTab: React.FC = () => {
 
               {/* Milestones Hierarchy (Depth) */}
               <div className="space-y-2 pt-2">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   Cột mốc thực thi (Milestones - Chiều sâu):
                 </span>
                 <div className="space-y-1.5">
@@ -168,19 +168,19 @@ export const GoalsTab: React.FC = () => {
                       <div
                         key={m.id}
                         onClick={() => toggleMilestone(goal.id, m.id)}
-                        className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                        className={`p-3 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
                           isDone 
-                            ? 'bg-gray-900/40 border-gray-800/60 opacity-60' 
-                            : 'bg-gray-900 border-gray-800 hover:border-[#E0401F]/50'
+                            ? 'bg-slate-950/40 border-slate-800/60 opacity-60' 
+                            : 'bg-slate-800/60 border-slate-700/60 hover:border-orange-500/50 hover:bg-slate-800/90'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <CheckCircle2 className={`w-4 h-4 ${isDone ? 'text-[#E0401F]' : 'text-gray-600'}`} />
-                          <span className={`text-xs sm:text-sm font-medium ${isDone ? 'text-gray-400 line-through' : 'text-gray-200'}`}>
+                          <CheckCircle2 className={`w-4 h-4 ${isDone ? 'text-orange-400' : 'text-slate-600'}`} />
+                          <span className={`text-xs sm:text-sm font-medium ${isDone ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
                             {m.name}
                           </span>
                         </div>
-                        <span className="text-[11px] text-gray-400 whitespace-nowrap">
+                        <span className="text-[11px] text-slate-400 whitespace-nowrap">
                           {m.dueDate}
                         </span>
                       </div>
@@ -196,8 +196,8 @@ export const GoalsTab: React.FC = () => {
 
       {/* Back-planning Modal (PRD B7) */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121620] border border-gray-800 rounded-2xl p-6 sm:p-7 w-full max-w-lg shadow-2xl text-white">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 w-full max-w-lg shadow-2xl text-white">
             <div className="mb-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/60 text-[#E0401F] text-xs font-semibold mb-2 border border-red-800/40">
                 <Sparkles className="w-3.5 h-3.5" />

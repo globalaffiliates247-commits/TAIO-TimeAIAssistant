@@ -39,8 +39,8 @@ export const CloseDayModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#121620] border border-gray-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 sm:p-7 text-white">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-3xl w-full max-w-lg shadow-2xl p-6 sm:p-7 text-white">
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-5">

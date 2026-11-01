@@ -48,8 +48,8 @@ export const CheckInModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-[#121620] border border-gray-800 rounded-t-3xl sm:rounded-2xl w-full max-w-lg shadow-2xl p-6 text-white border-t border-indigo-500/30 sm:border">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-white border-t border-orange-500/30 sm:border">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">

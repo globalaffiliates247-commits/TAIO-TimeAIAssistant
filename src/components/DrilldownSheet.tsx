@@ -442,13 +442,13 @@ export const DrilldownSheet: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
       
       {/* Click outside backdrop to close */}
       <div className="absolute inset-0" onClick={closeDrilldown} />
 
       {/* Slide-up Bottom Sheet on Mobile, Centered Card on Desktop */}
-      <div className="relative bg-[#121620] border border-gray-800 rounded-t-3xl sm:rounded-2xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl p-5 sm:p-6 text-white border-t border-indigo-500/40 sm:border animate-in slide-in-from-bottom-6 duration-300">
+      <div className="relative bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl p-5 sm:p-6 text-white border-t border-orange-500/40 sm:border animate-in slide-in-from-bottom-6 duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-gray-800 mb-4 shrink-0">

@@ -133,7 +133,7 @@ export const AchievementsTab: React.FC = () => {
             title: `Vòng ${completedBlocks.length} / ${blocks.length} việc đã xong`,
             subtitle: `${completedBlocks.length} đã xong • ${blocks.filter(b => b.status === 'in_progress').length} chờ xác nhận/đang chạy • ${blocks.filter(b => b.status === 'planned').length} chưa đến giờ`,
           })}
-          className="bg-[#121620] border border-gray-800 hover:border-indigo-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-indigo-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
           title="Bấm để mở danh sách toàn bộ các việc hôm nay kèm trạng thái và 1 chạm: Xong, Dời, Bỏ"
         >
           <div className="flex items-center justify-between">
@@ -145,7 +145,7 @@ export const AchievementsTab: React.FC = () => {
           <p className="text-2xl font-bold text-white mt-1 group-hover:text-indigo-400 transition-colors">
             {completedBlocks.length} / {blocks.length}
           </p>
-          <span className="text-[11px] text-gray-500">Bấm xem cả {blocks.length} việc</span>
+          <span className="text-[11px] text-gray-400">Bấm xem cả {blocks.length} việc</span>
         </div>
 
         {/* Card 2: Deep work minutes */}
@@ -155,7 +155,7 @@ export const AchievementsTab: React.FC = () => {
             title: 'Các khối việc sâu (Deep Work)',
             subtitle: `Tổng cộng ${deepWorkDoneMins} phút tập trung chất lượng cao`,
           })}
-          className="bg-[#121620] border border-gray-800 hover:border-indigo-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-indigo-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
           title="Bấm để mở danh sách các khối việc sâu và số phút của từng khối"
         >
           <div className="flex items-center justify-between">
@@ -167,7 +167,7 @@ export const AchievementsTab: React.FC = () => {
           <p className="text-2xl font-bold text-indigo-400 mt-1">
             {deepWorkDoneMins}p
           </p>
-          <span className="text-[11px] text-gray-500">Bấm xem số phút từng khối</span>
+          <span className="text-[11px] text-gray-400">Bấm xem số phút từng khối</span>
         </div>
 
         {/* Card 3: Interruption reserve */}
@@ -177,7 +177,7 @@ export const AchievementsTab: React.FC = () => {
             title: 'Nhật ký việc chen ngang & Quỹ dự phòng',
             subtitle: `Đã dùng ${intUsedMins}p / ${profile.interruptionReserveMins}p • Còn lại ${Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút`,
           })}
-          className="bg-[#121620] border border-gray-800 hover:border-amber-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-amber-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
           title="Bấm để mở nhật ký chen ngang, loại việc và người kéo bạn vào"
         >
           <div className="flex items-center justify-between">
@@ -189,7 +189,7 @@ export const AchievementsTab: React.FC = () => {
           <p className="text-2xl font-bold text-amber-400 mt-1">
             {intUsedMins} / {profile.interruptionReserveMins}p
           </p>
-          <span className="text-[11px] text-gray-500">Bấm xem người kéo vào</span>
+          <span className="text-[11px] text-gray-400">Bấm xem người kéo vào</span>
         </div>
 
         {/* Card 4: Protected minutes */}
@@ -199,7 +199,7 @@ export const AchievementsTab: React.FC = () => {
             title: 'Thời gian tập trung đã bảo vệ (+45p)',
             subtitle: 'Đạt được nhờ từ chối hoặc ủy quyền việc chen ngang',
           })}
-          className="bg-[#121620] border border-gray-800 hover:border-emerald-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-emerald-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
           title="Bấm để xem danh sách việc đã từ chối/ủy quyền"
         >
           <div className="flex items-center justify-between">
@@ -211,14 +211,14 @@ export const AchievementsTab: React.FC = () => {
           <p className="text-2xl font-bold text-emerald-400 mt-1">
             +{protectedMins}p
           </p>
-          <span className="text-[11px] text-gray-500">từ chối / ủy quyền</span>
+          <span className="text-[11px] text-gray-400">từ chối / ủy quyền</span>
         </div>
       </div>
 
       {/* 2. Done by Goal with WYSIWYG Drilldown */}
-      <div className="bg-[#121620] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
+      <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
             <Target className="w-4 h-4 text-[#E0401F]" />
             <span>Thời gian hoàn thành theo từng mục tiêu (Done by goal)</span>
           </h3>
@@ -239,7 +239,7 @@ export const AchievementsTab: React.FC = () => {
                   subtitle: `Có ${goalBlocks.length} việc hôm nay (${goalCompletedBlocks.length} đã xong) • ${g.progressPercent}% tiến độ`,
                   goalId: g.id,
                 })}
-                className="p-3.5 rounded-xl bg-gray-900 border border-gray-800 hover:border-indigo-500/60 hover:bg-gray-800/70 transition-all cursor-pointer flex items-center justify-between group"
+                className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 hover:border-indigo-500/60 hover:bg-slate-700/60 transition-all cursor-pointer flex items-center justify-between group"
                 title="Bấm để mở danh sách các việc hôm nay phục vụ mục tiêu này (WYSIWYG)"
               >
                 <div>
@@ -281,14 +281,14 @@ export const AchievementsTab: React.FC = () => {
       </div>
 
       {/* 3. Interruptions Accepted Breakdown */}
-      <div className="bg-[#121620] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3">
-        <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+      <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-3">
+        <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
           <Clock className="w-4 h-4 text-amber-400" />
           <span>Các gián đoạn đã ghi nhận hôm nay</span>
         </h3>
 
         {interruptions.length === 0 ? (
-          <p className="text-xs text-gray-400">Chưa ghi nhận việc gián đoạn nào.</p>
+          <p className="text-xs text-slate-400">Chưa ghi nhận việc gián đoạn nào.</p>
         ) : (
           <div className="space-y-2">
             {interruptions.map((item) => (
@@ -299,11 +299,11 @@ export const AchievementsTab: React.FC = () => {
                   title: 'Nhật ký việc chen ngang & Quỹ dự phòng',
                   subtitle: `Chi tiết việc: "${item.title}" • Kéo vào bởi: ${item.sourcePerson || 'Đối tác ngoài'}`,
                 })}
-                className="p-3 rounded-xl bg-gray-900 border border-gray-800 hover:border-amber-500/50 hover:bg-gray-800/80 transition-all cursor-pointer flex items-center justify-between gap-3 text-xs"
+                className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 hover:border-amber-500/50 hover:bg-slate-700/60 transition-all cursor-pointer flex items-center justify-between gap-3 text-xs"
                 title="Bấm để xem chi tiết người kéo bạn vào và trạng thái quỹ"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-300 font-semibold">
+                  <span className="px-2 py-0.5 rounded bg-slate-700/70 text-slate-300 font-semibold">
                     {item.timestamp}
                   </span>
                   <div>
@@ -324,7 +324,7 @@ export const AchievementsTab: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-gray-400 font-bold">{item.minutes}p</span>
+                  <span className="text-slate-400 font-bold">{item.minutes}p</span>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
                     item.decision === 'do_now'
                       ? 'bg-amber-500/20 text-amber-300'
@@ -344,26 +344,26 @@ export const AchievementsTab: React.FC = () => {
       </div>
 
       {/* 4. Undeclared Time Gaps (PRD B10) */}
-      <div className="bg-[#121620] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3">
+      <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-3">
         <div>
-          <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
             <Tag className="w-4 h-4 text-sky-400" />
             <span>Khoảng thời gian chưa khai báo (Undeclared Time - 15p+)</span>
           </h3>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Gắn nhãn 1 chạm không phán xét để giúp hệ thống học thích ứng theo thói quen của bạn.
           </p>
         </div>
 
         {gaps.length === 0 ? (
-          <p className="text-xs text-gray-400">Không có khoảng trống thời gian nào.</p>
+          <p className="text-xs text-slate-400">Không có khoảng trống thời gian nào.</p>
         ) : (
           <div className="space-y-3">
             {gaps.map((gap) => (
-              <div key={gap.id} className="p-3.5 rounded-xl bg-gray-900 border border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div key={gap.id} className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-gray-200">
+                    <span className="text-xs font-semibold text-slate-200">
                       {gap.start} - {gap.end} ({gap.durationMins} phút)
                     </span>
                     {gap.label && (
@@ -372,7 +372,7 @@ export const AchievementsTab: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Khoảng trống không có lịch cố định</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Khoảng trống không có lịch cố định</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -383,7 +383,7 @@ export const AchievementsTab: React.FC = () => {
                       className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                         gap.label === item.key
                           ? 'bg-sky-600 text-white font-bold'
-                          : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                          : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
                       }`}
                     >
                       {item.label}
@@ -398,7 +398,7 @@ export const AchievementsTab: React.FC = () => {
 
       {/* 5. Waiting for you (PRD B10) */}
       {waitingBlocks.length > 0 && (
-        <div className="bg-[#121620] border border-amber-500/30 rounded-2xl p-5 shadow-lg space-y-3">
+        <div className="bg-slate-900/80 border border-amber-500/30 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-3">
           <h3 className="text-sm font-bold text-amber-300 uppercase tracking-wider flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-amber-400" />
             <span>Đang chờ bạn xác nhận (Waiting for you)</span>
@@ -406,10 +406,10 @@ export const AchievementsTab: React.FC = () => {
 
           <div className="space-y-2">
             {waitingBlocks.map((b) => (
-              <div key={b.id} className="p-3 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-between gap-3 text-xs">
+              <div key={b.id} className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between gap-3 text-xs">
                 <div>
                   <h5 className="font-semibold text-white">{b.title}</h5>
-                  {b.returnPoint && <p className="text-gray-400 text-[11px]">Điểm về: {b.returnPoint}</p>}
+                  {b.returnPoint && <p className="text-slate-400 text-[11px]">Điểm về: {b.returnPoint}</p>}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -420,7 +420,7 @@ export const AchievementsTab: React.FC = () => {
                   </button>
                   <button
                     onClick={() => setBlocks(prev => prev.map(item => item.id === b.id ? { ...item, status: 'dropped' } : item))}
-                    className="px-2.5 py-1 rounded bg-gray-800 text-gray-300 hover:text-white"
+                    className="px-2.5 py-1 rounded bg-slate-700 text-slate-300 hover:text-white"
                   >
                     Bỏ qua
                   </button>

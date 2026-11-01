@@ -63,16 +63,38 @@ async function build() {
 
   const customCss = `
 :root {
-  --background: #090b10;
-  --foreground: #f3f4f6;
+  --background: #0f172a;
+  --foreground: #f8fafc;
 }
 
 body {
-  background-color: #090b10;
-  color: #f3f4f6;
+  background-color: #0f172a;
+  color: #f8fafc;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism utility classes matching Shotcipdownload */
+.glass {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dropdown {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Custom scrollbars */
@@ -82,16 +104,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d1117;
+  background: #0b0f19;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #232838;
+  background: #334155;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #475569;
 }
 
 @keyframes pulse-slow {

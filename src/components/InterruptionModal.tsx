@@ -96,23 +96,23 @@ export const InterruptionModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#121620] border border-gray-800 rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl p-5 sm:p-6 text-white animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl p-5 sm:p-6 text-white animate-in fade-in zoom-in-95 duration-200">
         
         {/* 1. Title and Cancel */}
-        <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <span>Có việc phát sinh</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-950/80 text-[#E0401F] border border-red-800/40">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-950/80 text-orange-400 border border-orange-800/40">
                 PRD v0.16 B5
               </span>
             </h3>
-            <p className="text-xs text-gray-400 mt-0.5">Chọn 1 danh mục • Chi tiết tùy chọn • Thao tác 1 chạm</p>
+            <p className="text-xs text-slate-400 mt-0.5">Chọn 1 danh mục • Chi tiết tùy chọn • Thao tác 1 chạm</p>
           </div>
           <button 
             onClick={() => setInterruptionModalOpen(false)}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -121,7 +121,7 @@ export const InterruptionModal: React.FC = () => {
         <div className="space-y-4">
           
           {/* 2. Return point of the task being interrupted */}
-          <div className="bg-gray-900/90 border border-gray-800 rounded-xl p-3">
+          <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-3">
             <div className="flex items-center gap-1.5 text-xs text-amber-400 font-semibold mb-1">
               <Bookmark className="w-3.5 h-3.5" />
               <span>Điểm quay lại của việc đang làm (Return point):</span>
@@ -131,7 +131,7 @@ export const InterruptionModal: React.FC = () => {
               value={returnPoint}
               onChange={e => setReturnPoint(e.target.value)}
               placeholder="VD: Đang viết dở bảng báo giá, đã xong mục 3..."
-              className="w-full bg-black/40 border border-gray-700/80 rounded-lg px-2.5 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-[#E0401F]"
+              className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-500"
             />
           </div>
 

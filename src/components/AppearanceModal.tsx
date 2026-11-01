@@ -84,18 +84,18 @@ export const AppearanceModal: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#121620] border border-gray-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-red-950/80 border border-red-500/30 flex items-center justify-center text-[#E0401F]">
+            <div className="w-8 h-8 rounded-xl bg-orange-950/80 border border-orange-500/30 flex items-center justify-center text-orange-400">
               <Palette className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Cài đặt Giao diện & Nền tảng (B17)</h3>
-              <p className="text-[11px] text-gray-400">Áp dụng tức thì, tự động lưu vào tài khoản</p>
+              <p className="text-[11px] text-slate-400">Áp dụng tức thì, tự động lưu vào tài khoản</p>
             </div>
           </div>
           <button
