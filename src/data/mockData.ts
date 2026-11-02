@@ -586,6 +586,7 @@ export const DEFAULT_ACTIVITY_CATEGORIES: {
   { id: 'family_matter', nameVi: 'Việc gia đình', nameEn: 'Family matter', iconName: 'HeartHandshake' },
   { id: 'work_came_up', nameVi: 'Việc đột xuất', nameEn: 'Work came up', iconName: 'Briefcase' },
   { id: 'break', nameVi: 'Nghỉ giải lao', nameEn: 'Break', iconName: 'Coffee' },
+  { id: 'exercise', nameVi: 'Tập thể dục', nameEn: 'Exercise', iconName: 'Dumbbell' },
   { id: 'other', nameVi: 'Khác', nameEn: 'Other', iconName: 'HelpCircle' },
 ];
 
@@ -813,4 +814,77 @@ export const INITIAL_COACH_CARDS: import('../types').CoachCard[] = [
     encourageVi: 'Thử xếp lịch một việc Ô 2 hôm nay để tạo bước đột phá.',
   },
 ];
+
+// B25: Daily Card, Carry-over & Work Diary Initial Seed Data
+export const INITIAL_DAILY_CARD_ITEMS: import('../types').DailyCardItem[] = [
+  {
+    id: 'dc-1',
+    text: 'Thiết kế luồng "Có việc đột xuất" (Interruption Card) & Check-in',
+    date: '2026-11-02',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP',
+    start: '09:00',
+    end: '10:30',
+    status: 'done',
+    carryCount: 0,
+    origin: 'planned',
+  },
+  {
+    id: 'dc-2',
+    text: 'Họp rà soát tiến độ tuần cùng Tech Lead & UI Designer',
+    date: '2026-11-02',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP',
+    start: '10:45',
+    end: '11:45',
+    status: 'done',
+    carryCount: 0,
+    origin: 'planned',
+  },
+  {
+    id: 'dc-3',
+    text: 'Xây dựng màn hình Now & Cơ chế đếm ngược thời gian còn lại',
+    date: '2026-11-02',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP',
+    start: '14:00',
+    end: '15:30',
+    status: 'open',
+    carryCount: 0,
+    origin: 'planned',
+  },
+  {
+    id: 'dc-4',
+    text: 'Quay video chia sẻ #TAIOCLUB: Làm sao quản lý thời gian khi bị gián đoạn?',
+    date: '2026-11-02',
+    goalId: 'g-2',
+    goalName: 'Xây kênh nội dung TAIO Club',
+    start: '16:30',
+    end: '17:30',
+    status: 'open',
+    carryCount: 1,
+    origin: 'planned',
+  },
+  {
+    id: 'dc-5',
+    text: 'Gửi phản hồi cho nhóm bạn học về ý tưởng meetup',
+    date: '2026-11-02',
+    status: 'open',
+    carryCount: 2,
+    origin: 'planned',
+  },
+  {
+    id: 'dc-6',
+    text: 'Xử lý báo giá gấp cho đối tác mới (Phát sinh)',
+    date: '2026-11-02',
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP',
+    status: 'done',
+    carryCount: 0,
+    origin: 'unplanned_goal',
+    displacedItemTitle: 'Quay video chia sẻ',
+    displacedMinutes: 45,
+  },
+];
+
 

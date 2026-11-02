@@ -20,7 +20,8 @@ import {
   X as CloseIcon,
   Inbox,
   HelpCircle,
-  Activity
+  Activity,
+  UploadCloud
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -39,7 +40,8 @@ export const Navbar: React.FC = () => {
     setSettingsModalOpen,
     inbox,
     setInboxModalOpen,
-    setMethodLibraryOpen
+    setMethodLibraryOpen,
+    setExportModalOpen
   } = useApp();
 
   return (
@@ -83,7 +85,7 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold tracking-tight text-white text-base">TAIO</span>
                 <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  v0.22.0 Approved
+                  v0.3.1 Approved
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 -mt-0.5">TAIO.CLUB Time App</p>
@@ -94,6 +96,16 @@ export const Navbar: React.FC = () => {
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-2.5 text-xs">
           
+          {/* Data Export for AI Assistant Button (PRD B24) */}
+          <button
+            onClick={() => setExportModalOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-950/60 hover:bg-orange-900/60 text-orange-400 border border-orange-500/30 transition-all font-semibold"
+            title="Xuất dữ liệu Markdown cho AI Assistant (B24)"
+          >
+            <UploadCloud className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Xuất AI</span>
+          </button>
+
           {/* Inbox Mini App Button (PRD B20) */}
           <button
             onClick={() => setInboxModalOpen(true)}

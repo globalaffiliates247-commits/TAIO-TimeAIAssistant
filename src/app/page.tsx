@@ -20,6 +20,7 @@ import { AmbientProgressEdge } from '../components/AmbientProgressEdge';
 import { InboxModal } from '../components/InboxModal';
 import { MethodLibraryModal } from '../components/MethodLibraryModal';
 import { CoachCardOverlay } from '../components/CoachCardOverlay';
+import { ExportDataModal } from '../components/ExportDataModal';
 import { Sparkles, X } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
@@ -62,7 +63,7 @@ const MainAppContent: React.FC = () => {
 
       {/* Bottom Footer info */}
       <footer className="border-t border-slate-800/80 py-5 text-center text-xs text-slate-500">
-        TAIO Time App v0.22.0 Approved • Thương hiệu TAIO (TAIO.CLUB)
+        TAIO Time App v0.3.1 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
       </footer>
 
       {/* Modals & Overlays */}
@@ -76,6 +77,7 @@ const MainAppContent: React.FC = () => {
       <InboxModal />
       <MethodLibraryModal />
       <CoachCardOverlay />
+      <ExportDataModal />
     </div>
   );
 };

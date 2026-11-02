@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { TimeBlock, BlockType } from '../types';
 import { IMPORTANT_NOT_URGENT_BACKLOG } from '../data/mockData';
 import { PriorityMatrix } from './PriorityMatrix';
+import { DailyCardView } from './DailyCardView';
 import { 
   Calendar, 
   Clock, 
@@ -13,7 +14,8 @@ import {
   Sparkles, 
   Target, 
   Layers, 
-  LayoutGrid
+  LayoutGrid,
+  FileText
 } from 'lucide-react';
 
 const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; border: string }> = {
@@ -26,7 +28,8 @@ const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; 
 
 export const PlanTab: React.FC = () => {
   const { blocks, goals, profile, addNewBlock, openDrilldown } = useApp();
-  const [activeView, setActiveView] = useState<'timeline' | 'matrix'>('timeline');
+  // B25: Daily Card is the first view
+  const [activeView, setActiveView] = useState<'card' | 'timeline' | 'matrix'>('card');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [newTitle, setNewTitle] = useState<string>('');
   const [newType, setNewType] = useState<BlockType>('deep');
@@ -82,30 +85,41 @@ export const PlanTab: React.FC = () => {
           </p>
         </div>
 
-        {/* View Switcher: Timeline vs Priority Matrix */}
+        {/* View Switcher: Daily Card vs Timeline vs Priority Matrix (B25) */}
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center bg-slate-900/90 p-1 rounded-2xl border border-slate-800 shadow-md">
             <button
+              onClick={() => setActiveView('card')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeView === 'card' 
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-red-500/25' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>1. Thẻ ngày (B25)</span>
+            </button>
+            <button
               onClick={() => setActiveView('timeline')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'timeline' 
                   ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-red-500/25' 
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Dòng thời gian</span>
+              <span>2. Dòng thời gian</span>
             </button>
             <button
               onClick={() => setActiveView('matrix')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'matrix' 
                   ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-red-500/25' 
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Ma trận ưu tiên (B16)</span>
+              <span>3. Ma trận ưu tiên</span>
             </button>
           </div>
 
@@ -119,9 +133,9 @@ export const PlanTab: React.FC = () => {
         </div>
       </div>
 
-      {activeView === 'matrix' ? (
-        <PriorityMatrix />
-      ) : (
+      {activeView === 'card' && <DailyCardView />}
+      {activeView === 'matrix' && <PriorityMatrix />}
+      {activeView === 'timeline' && (
         <>
           {/* Weekly Budget Progress (PRD B6) */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-4">

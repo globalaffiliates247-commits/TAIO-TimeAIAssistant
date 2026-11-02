@@ -27,7 +27,10 @@ import {
   InboxItem,
   TimeLedgerSegment,
   MethodConcept,
-  CoachCard
+  CoachCard,
+  DailyCardItem,
+  ItemOrigin,
+  ItemStatus
 } from '../types';
 import { 
   PROFILES, 
@@ -44,7 +47,8 @@ import {
   INITIAL_INBOX,
   INITIAL_TIME_LEDGER,
   METHOD_CONCEPTS,
-  INITIAL_COACH_CARDS
+  INITIAL_COACH_CARDS,
+  INITIAL_DAILY_CARD_ITEMS
 } from '../data/mockData';
 
 export type AppTab = 'now' | 'plan' | 'efficiency' | 'achievements' | 'goals' | 'admin';
@@ -108,6 +112,30 @@ interface AppContextType {
   activeCoachCard: CoachCard | null;
   dismissCoachCard: () => void;
   triggerCoachCard: (moment: 'first_interruption' | 'first_timebox' | 'first_dod_done' | 'first_inbox' | 'first_matrix') => void;
+
+  // v0.3.1 B25: Daily Card & Work Diary
+  dailyCardItems: DailyCardItem[];
+  selectedCardDate: string;
+  setSelectedCardDate: (d: string) => void;
+  addDailyCardItem: (item: { 
+    text: string; 
+    goalId?: string; 
+    origin?: ItemOrigin; 
+    start?: string; 
+    end?: string;
+    displacedItemId?: string;
+    displacedItemTitle?: string;
+    displacedMinutes?: number;
+  }) => void;
+  toggleDailyCardItem: (id: string) => void;
+  carryOverItem: (id: string, action: 'tomorrow' | 'leave' | 'drop', reason?: string) => void;
+
+  // v0.3.0 / v0.23.0 B24: Data Export for AI Assistant
+  exportModalOpen: boolean;
+  setExportModalOpen: (val: boolean) => void;
+  shareToken: string;
+  rotateShareToken: () => void;
+  generateMarkdownSnapshot: () => string;
   
   // Active state
   currentBlock: TimeBlock | undefined;
@@ -270,6 +298,174 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [dayClosed, setDayClosed] = useState<boolean>(false);
   const [celebrationMsg, setCelebrationMsg] = useState<string | null>(null);
+
+  // v0.3.1 B25: Daily Card & Work Diary State
+  const todayDateStr = new Date().toISOString().split('T')[0];
+  const [selectedCardDate, setSelectedCardDate] = useState<string>(todayDateStr);
+  const [dailyCardItems, setDailyCardItems] = useState<DailyCardItem[]>(INITIAL_DAILY_CARD_ITEMS);
+
+  // v0.3.0 / v0.23.0 B24: Data Export for AI Assistant State
+  const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
+  const [shareToken, setShareToken] = useState<string>('taio_sec_tok_9f8a7e6d5c4b3a210987654321fedcba');
+
+  const rotateShareToken = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let newToken = 'taio_sec_tok_';
+    for (let i = 0; i < 32; i++) {
+      newToken += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setShareToken(newToken);
+    setCelebrationMsg('Đã tạo mã token bảo mật mới. Các link cũ đã được vô hiệu hóa an toàn!');
+  };
+
+  const addDailyCardItem = (item: {
+    text: string;
+    goalId?: string;
+    origin?: ItemOrigin;
+    start?: string;
+    end?: string;
+    displacedItemId?: string;
+    displacedItemTitle?: string;
+    displacedMinutes?: number;
+  }) => {
+    const goal = goals.find(g => g.id === item.goalId);
+    const newItem: DailyCardItem = {
+      id: `dc-${Date.now()}`,
+      text: item.text,
+      date: selectedCardDate,
+      goalId: item.goalId,
+      goalName: goal?.name,
+      start: item.start,
+      end: item.end,
+      status: 'open',
+      carryCount: 0,
+      origin: item.origin || 'planned',
+      displacedItemId: item.displacedItemId,
+      displacedItemTitle: item.displacedItemTitle,
+      displacedMinutes: item.displacedMinutes,
+    };
+    setDailyCardItems(prev => [newItem, ...prev]);
+  };
+
+  const toggleDailyCardItem = (id: string) => {
+    setDailyCardItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const nextStatus: ItemStatus = item.status === 'done' ? 'open' : 'done';
+        return { ...item, status: nextStatus };
+      }
+      return item;
+    }));
+  };
+
+  const carryOverItem = (id: string, action: 'tomorrow' | 'leave' | 'drop', reason?: string) => {
+    setDailyCardItems(prev => prev.map(item => {
+      if (item.id === id) {
+        if (action === 'tomorrow') {
+          const d = new Date(item.date);
+          d.setDate(d.getDate() + 1);
+          const tomorrowStr = d.toISOString().split('T')[0];
+          return {
+            ...item,
+            date: tomorrowStr,
+            status: 'open',
+            carryCount: item.carryCount + 1,
+          };
+        } else if (action === 'leave') {
+          return { ...item, status: 'left' };
+        } else if (action === 'drop') {
+          return { ...item, status: 'dropped', dropReason: reason || 'Bỏ qua cuối ngày' };
+        }
+      }
+      return item;
+    }));
+  };
+
+  const generateMarkdownSnapshot = (): string => {
+    const today = new Date().toISOString().split('T')[0];
+    const exportTime = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+    
+    // 1. Header
+    let md = `# TAIO Time App · Daily log ${today}\n`;
+    md += `- Xuất lúc: ${exportTime} (GMT+7)\n`;
+    md += `- Phiên bản ứng dụng: TAIO Time App v0.3.1 Approved\n`;
+    md += `- Hồ sơ người dùng: ${profile.title} (${profile.workStyle || 'mixed'})\n`;
+    md += `- Mã xuất dữ liệu: exp_${Date.now()}\n\n`;
+
+    // 2. Schedule and results
+    md += `## 1. Lịch trình và kết quả thực hiện (Schedule and results)\n`;
+    md += `| Khung giờ | Nhiệm vụ | Loại | Cách kết thúc | Mục tiêu | Kết quả |\n`;
+    md += `| --- | --- | --- | --- | --- | --- |\n`;
+    blocks.forEach(b => {
+      const outcome = b.status === 'done' ? 'Đã xong đúng hẹn' : b.status === 'in_progress' ? 'Đang thực hiện' : 'Chưa đến giờ';
+      md += `| ${b.startTime} - ${b.endTime} | ${b.title} | ${b.type} | ${b.taskEndType || 'timebox'} | ${b.goalName || 'Ngoài mục tiêu'} | ${outcome} |\n`;
+    });
+    md += `\n`;
+
+    // 3. Time ledger (24h continuous)
+    md += `## 2. Sổ cái thời gian 24 giờ (Time ledger)\n`;
+    timeLedger.forEach(s => {
+      md += `- ${s.start} - ${s.end} (${s.durationMins}p): **${s.label}** [${s.category}]\n`;
+    });
+    md += `\n`;
+
+    // 4. Interruptions
+    md += `## 3. Việc phát sinh & Quỹ gián đoạn (Interruptions)\n`;
+    md += `- Quỹ dự phòng: ${profile.interruptionReserveMins} phút\n`;
+    if (interruptions.length === 0) {
+      md += `- Chưa ghi nhận việc gián đoạn nào.\n`;
+    } else {
+      md += `| Thời điểm | Danh mục | Nội dung | Số phút | Quyết định |\n`;
+      md += `| --- | --- | --- | --- | --- |\n`;
+      interruptions.forEach(i => {
+        md += `| ${i.timestamp} | ${i.category || 'Khác'} | ${i.title} | ${i.minutes}p | ${i.decision} |\n`;
+      });
+    }
+    md += `\n`;
+
+    // 5. Undeclared time & distraction
+    md += `## 4. Khoảng thời gian chưa khai báo & Xao nhãng\n`;
+    md += `- Khoảng trống: ${gaps.length} khoảng trống\n`;
+    gaps.forEach(g => {
+      md += `  + ${g.start} - ${g.end} (${g.durationMins}p): Nhãn "${g.label || 'Chưa gắn'}"\n`;
+    });
+    md += `\n`;
+
+    // 6. Goals and projects
+    md += `## 5. Mục tiêu lớn & Lộ trình (Goals and projects)\n`;
+    goals.forEach(g => {
+      md += `- **${g.name}** (${g.workArea}): Tiến độ ${g.progressPercent}%, Hạn chót ${g.deadline}, Ngân sách ${g.dailyBudgetMins}p/ngày\n`;
+    });
+    md += `\n`;
+
+    // 7. Priority matrix
+    md += `## 6. Ma trận ưu tiên Eisenhower\n`;
+    md += `- Ô 1 (Làm ngay): ${blocks.filter(b => b.quadrant === 1).length} việc\n`;
+    md += `- Ô 2 (Lên lịch - Trọng tâm): ${blocks.filter(b => b.quadrant === 2).length} việc\n`;
+    md += `- Ô 3 (Ủy quyền): ${blocks.filter(b => b.quadrant === 3).length} việc\n`;
+    md += `- Ô 4 (Bỏ qua): ${blocks.filter(b => b.quadrant === 4).length} việc\n\n`;
+
+    // 8. Inbox (GTD)
+    md += `## 7. Rổ công việc Inbox (GTD)\n`;
+    md += `- Việc đang chờ xử lý: ${inbox.filter(i => i.status === 'inbox').length} việc\n`;
+    md += `- Việc đã xử lý hôm nay: ${inbox.filter(i => i.status !== 'inbox').length} việc\n\n`;
+
+    // 9. Daily card & carry-over (B25)
+    md += `## 8. Thẻ ngày & Dời việc (Daily card & carry-over - B25)\n`;
+    dailyCardItems.forEach(dc => {
+      const strike = dc.status === 'done' ? '✓ [Đã xong]' : dc.status === 'dropped' ? '✗ [Đã bỏ]' : '[ ]';
+      const carry = dc.carryCount > 0 ? ` (Dời ↻${dc.carryCount})` : '';
+      const orig = dc.origin === 'unplanned_goal' ? ' [Ngoài KH có MT]' : '';
+      md += `- ${strike} ${dc.text}${carry}${orig}\n`;
+    });
+    md += `\n`;
+
+    // 10. Day close
+    md += `## 9. Đóng ngày (Day close)\n`;
+    md += `- Trạng thái: ${dayClosed ? 'Đã đóng ngày an toàn' : 'Chưa đóng ngày'}\n`;
+    md += `- Nhiệm vụ số 1 ngày mai: Sẵn sàng thực thi\n`;
+
+    return md;
+  };
 
   // Drilldown state (WYSIWYG)
   const [drilldown, setDrilldown] = useState<{
@@ -784,7 +980,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       methodConcepts,
       activeCoachCard,
       dismissCoachCard,
-      triggerCoachCard
+      triggerCoachCard,
+      dailyCardItems,
+      selectedCardDate,
+      setSelectedCardDate,
+      addDailyCardItem,
+      toggleDailyCardItem,
+      carryOverItem,
+      exportModalOpen,
+      setExportModalOpen,
+      shareToken,
+      rotateShareToken,
+      generateMarkdownSnapshot
     }}>
       {children}
     </AppContext.Provider>

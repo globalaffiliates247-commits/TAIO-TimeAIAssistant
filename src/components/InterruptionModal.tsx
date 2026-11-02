@@ -23,7 +23,8 @@ import {
   Calendar,
   Users,
   ShieldX,
-  Check
+  Check,
+  Dumbbell
 } from 'lucide-react';
 
 const DURATION_OPTIONS: { mins: number; label: string }[] = [
@@ -74,6 +75,7 @@ export const InterruptionModal: React.FC = () => {
       case 'family_matter': return <HeartHandshake className="w-5 h-5 text-rose-400" />;
       case 'work_came_up': return <Briefcase className="w-5 h-5 text-[#E0401F]" />;
       case 'break': return <Coffee className="w-5 h-5 text-amber-300" />;
+      case 'exercise': return <Dumbbell className="w-5 h-5 text-emerald-400" />;
       default: return <HelpCircle className="w-5 h-5 text-gray-400" />;
     }
   };

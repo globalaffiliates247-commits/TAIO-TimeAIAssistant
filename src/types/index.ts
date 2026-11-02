@@ -132,7 +132,7 @@ export type InterruptionDecision =
   | 'decline' 
   | 'go_social';
 
-// B5 v0.16: 12 Default Activity Categories
+// B5 v0.16 & v0.3.1: 13 Default Activity Categories (Added Exercise)
 export type InterruptionActivityCategory =
   | 'eating_drinks'      // Ăn uống
   | 'overslept'          // Ngủ quên / nướng
@@ -145,6 +145,7 @@ export type InterruptionActivityCategory =
   | 'family_matter'      // Việc gia đình
   | 'work_came_up'       // Việc công ty phát sinh
   | 'break'              // Nghỉ giải lao
+  | 'exercise'           // Tập thể dục / Gym / Thể thao (v0.3.1)
   | 'other';             // Khác
 
 // Backwards compatibility for v0.8
@@ -325,4 +326,39 @@ export interface CoachCard {
   actionDoneVi: string;
   encourageVi: string;
 }
+
+// B25 (PRD v0.3.1): Daily Card, Carry-over & Work Diary
+export type ItemOrigin = 'planned' | 'unplanned_goal' | 'interruption';
+export type ItemStatus = 'open' | 'done' | 'carried' | 'left' | 'dropped';
+
+export interface DailyCardItem {
+  id: string;
+  text: string;
+  date: string; // "YYYY-MM-DD"
+  goalId?: string;
+  goalName?: string;
+  start?: string;
+  end?: string;
+  status: ItemStatus;
+  carriedFromId?: string;
+  carryCount: number; // e.g. 0, 1, 2, 3
+  origin: ItemOrigin;
+  displacedItemId?: string;
+  displacedItemTitle?: string;
+  displacedMinutes?: number;
+  dropReason?: string;
+  dodChecklist?: DodItem[];
+}
+
+// B24 (PRD v0.3.0 / v0.23.0): Data Export for AI Assistant
+export interface ExportSnapshot {
+  id: string;
+  createdAt: string;
+  date: string;
+  token: string;
+  markdownContent: string;
+  shareUrlLatest: string;
+  shareUrlExact: string;
+}
+
 
