@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { UserRole } from '../types';
+import { UserRole, TaskEndType } from '../types';
 import { 
   Clock, 
   Target, 
@@ -20,7 +20,11 @@ import {
   ChevronRight, 
   AlertTriangle,
   Flame,
-  ShieldCheck
+  ShieldCheck,
+  Calendar,
+  Lock,
+  Layers,
+  Inbox
 } from 'lucide-react';
 
 const ROLE_LABELS: Record<UserRole, { label: string; type: 'work' | 'personal' }> = {
@@ -35,6 +39,7 @@ const ROLE_LABELS: Record<UserRole, { label: string; type: 'work' | 'personal' }
 export const NowTab: React.FC = () => {
   const { 
     currentBlock, 
+    setBlocks,
     blocks,
     goals, 
     deadlines, 
@@ -56,18 +61,41 @@ export const NowTab: React.FC = () => {
     isOffPlan,
     offPlanMinutes,
     toggleOffPlan,
-    backToPlan
+    backToPlan,
+    setInboxModalOpen,
+    addInboxItem
   } = useApp();
 
   const linkedGoal = goals.find(g => g.id === currentBlock?.goalId);
   const nextDeadline = deadlines[0];
+
+  // B23 Task End Type: 'timebox' | 'until_done_pausable' | 'until_done_atomic'
+  const currentEndType: TaskEndType = currentBlock?.taskEndType || 'timebox';
+  const userTimeLimit: number = currentBlock?.timeLimitMins || currentBlock?.estimatedMinutes || 90;
+
+  // Elapsed minutes for until-done tasks (counts up)
+  const [elapsedMinutes, setElapsedMinutes] = useState<number>(35);
+  const [showOverrunNotice, setShowOverrunNotice] = useState<boolean>(false);
+
+  // Check overrun for until-done tasks
+  const isOverTimeLimit = (currentEndType !== 'timebox') && (elapsedMinutes > userTimeLimit);
+
+  // Quick switch of end type for current block
+  const handleSetEndType = (endType: TaskEndType) => {
+    if (!currentBlock) return;
+    setBlocks(prev => prev.map(b => b.id === currentBlock.id ? { ...b, taskEndType: endType } : b));
+  };
 
   const handleTimerToggle = () => {
     setIsTimerRunning(!isTimerRunning);
   };
 
   const handleAddExtraTime = (mins: number) => {
-    setTimerMinutesRemaining(prev => prev + mins);
+    if (currentEndType === 'timebox') {
+      setTimerMinutesRemaining(prev => prev + mins);
+    } else {
+      setBlocks(prev => prev.map(b => b.id === currentBlock?.id ? { ...b, timeLimitMins: userTimeLimit + mins } : b));
+    }
   };
 
   const handleFinishEarly = () => {
@@ -77,10 +105,18 @@ export const NowTab: React.FC = () => {
     }
   };
 
-  const getPromptToneText = () => {
-    if (toneLevel === 1) return 'Khối tập trung đang diễn ra êm đềm. Hãy duy trì dòng chảy.';
-    if (toneLevel === 2) return 'Đang tập trung. Giữ đúng tiến độ đến khi kết thúc khối.';
-    return 'Khối việc có hạn chót quan trọng. Tập trung tuyệt đối, hạn chế xao nhãng.';
+  // Schedule for later (atomic task interruption protection)
+  const handleScheduleForLater = () => {
+    const itemTitle = prompt('Nhập nhanh việc phát sinh cần xếp lịch sau (không phá vỡ khối nguyên tử):');
+    if (itemTitle && itemTitle.trim()) {
+      addInboxItem({
+        title: itemTitle.trim(),
+        nextAction: itemTitle.trim(),
+        estimatedMinutes: 30,
+        source: 'quick',
+      });
+      alert('✓ Đã đưa việc phát sinh vào Rổ việc (Inbox) để xử lý sau. Khối nguyên tử được bảo vệ an toàn!');
+    }
   };
 
   // Stats calculation
@@ -132,36 +168,6 @@ export const NowTab: React.FC = () => {
         </div>
       )}
 
-      {/* Soft Nudge Proactive Banner (PRD B8) */}
-      {nextDeadline && !isOffPlan && (
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between text-xs sm:text-sm shadow-xl backdrop-blur-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-            <Bell className="w-4 h-4 text-amber-400 shrink-0" />
-            <div>
-              <span className="font-bold text-amber-300">Nhắc nhở nhẹ (Soft nudge): </span>
-              <span className="text-slate-200">
-                Sắp đến hạn "{nextDeadline.title}" lúc {nextDeadline.time}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => alert('Đã hoãn nhắc nhở thêm 5 phút')}
-              className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700"
-            >
-              Hoãn 5p
-            </button>
-            <button 
-              onClick={() => alert('Sẵn sàng cho mốc kế tiếp!')}
-              className="px-3.5 py-1 rounded-xl bg-[#E0401F] text-white hover:bg-[#d03515] text-xs font-bold shadow-md shadow-red-500/20"
-            >
-              Chuẩn bị
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Return Point Prompt if returning from interruption (PRD B5) */}
       {activeReturnPoint && !isOffPlan && (
         <div className="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3 shadow-xl backdrop-blur-xl">
@@ -180,7 +186,7 @@ export const NowTab: React.FC = () => {
         </div>
       )}
 
-      {/* Master Card: Who am I? Where am I? What am I doing? (PRD v0.8 B5) */}
+      {/* Master Card: Who am I? Where am I? What am I doing? (PRD v0.8 B5 & v0.22 B19/B23) */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
         {/* Glow effect */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -211,7 +217,11 @@ export const NowTab: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* B23 Work Style & Off-Plan Toggle */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] text-slate-400">
+              Nhịp làm: <strong className="text-orange-400 capitalize">{profile.workStyle || 'mixed'}</strong>
+            </span>
             <button
               onClick={toggleOffPlan}
               className={`text-xs px-3 py-1.5 rounded-xl border transition-all font-medium ${
@@ -222,6 +232,26 @@ export const NowTab: React.FC = () => {
             >
               {isOffPlan ? '● Đang Lệch kế hoạch' : 'Giả lập Lệch kế hoạch'}
             </button>
+          </div>
+        </div>
+
+        {/* B19: Always visible 4-Number Time Ledger Glance */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 p-3 rounded-2xl bg-slate-800/50 border border-slate-700/50 text-xs">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-slate-400 uppercase">1. Việc mục tiêu</span>
+            <span className="text-sm font-bold text-orange-400">285 phút</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] text-slate-400 uppercase">2. Chen ngang</span>
+            <span className="text-sm font-bold text-amber-400">{intUsedMins} / {profile.interruptionReserveMins}p</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] text-slate-400 uppercase">3. Xao nhãng</span>
+            <span className="text-sm font-bold text-rose-400">45 phút</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] text-slate-400 uppercase">4. Thời gian ngày còn</span>
+            <span className="text-sm font-bold text-emerald-400">3 giờ 30 phút</span>
           </div>
         </div>
 
@@ -243,19 +273,66 @@ export const NowTab: React.FC = () => {
 
         {/* Question 1: What am I doing right now? */}
         <div className="mb-6">
-          <div className="text-xs font-bold text-slate-400 flex items-center gap-2 mb-2">
-            <span className="w-5 h-5 rounded-full bg-red-500/15 text-red-400 text-xs flex items-center justify-center font-bold">1</span>
-            <span>BẠN ĐANG LÀM GÌ NGAY LÚC NÀY?</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+            <div className="text-xs font-bold text-slate-400 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-red-500/15 text-red-400 text-xs flex items-center justify-center font-bold">1</span>
+              <span>BẠN ĐANG LÀM GÌ NGAY LÚC NÀY?</span>
+            </div>
+
+            {/* B23: Task End Type Segmented Selector */}
+            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-700/70 self-start sm:self-auto">
+              <span className="text-[10px] text-slate-400 font-bold px-1.5">Cách kết thúc:</span>
+              <button
+                onClick={() => handleSetEndType('timebox')}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                  currentEndType === 'timebox'
+                    ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="Hết giờ chuyển việc, bất kể xong 80% hay 100% (Đếm ngược)"
+              >
+                Timebox (Đếm ngược)
+              </button>
+              <button
+                onClick={() => handleSetEndType('until_done_pausable')}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                  currentEndType === 'until_done_pausable'
+                    ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="Chạy đến khi đánh dấu xong, có thể tạm dừng (Đếm tiến)"
+              >
+                Đến khi xong (Pausable)
+              </button>
+              <button
+                onClick={() => handleSetEndType('until_done_atomic')}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                  currentEndType === 'until_done_atomic'
+                    ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="Khối nguyên tử: Không thể ngắt quãng, chỉ xếp lịch việc phát sinh sau"
+              >
+                Nguyên tử (Atomic)
+              </button>
+            </div>
           </div>
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-md">
             <div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-500/15 text-red-300 border border-red-500/30">
                   TẬP TRUNG SÂU (DEEP WORK)
                 </span>
                 <span className="text-xs text-slate-400 font-mono">
                   {currentBlock?.startTime || '14:00'} - {currentBlock?.endTime || '15:30'}
                 </span>
+                {currentEndType === 'until_done_atomic' && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-950/80 text-purple-300 border border-purple-800/50">
+                    <Lock className="w-3 h-3" />
+                    Không làm phiền (Atomic block)
+                  </span>
+                )}
               </div>
               <h1 className="text-lg sm:text-xl font-extrabold text-white">
                 {currentBlock?.title || 'Phát triển màn hình Now & cơ chế Interruption Card'}
@@ -270,7 +347,7 @@ export const NowTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Question 2: Which big goal does it serve? (Clickable WYSIWYG) */}
+        {/* Question 2: Which big goal does it serve? */}
         <div className="mb-6">
           <div className="text-xs font-bold text-slate-400 flex items-center gap-2 mb-2">
             <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs flex items-center justify-center font-bold">2</span>
@@ -312,12 +389,8 @@ export const NowTab: React.FC = () => {
                 <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
                   <div 
                     className="bg-gradient-to-r from-[#E0401F] to-orange-500 h-full rounded-full transition-all duration-500" 
-                    style={{ width: `${linkedGoal.progressPercent}%` }}
+                    style={{ width: `${linkedGoal.progressPercent}%` }} 
                   />
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 font-mono">
-                  <span>Hạn chót: {linkedGoal.deadline}</span>
-                  <span className="text-red-400 font-medium">Bấm xem danh sách việc ↗</span>
                 </div>
               </div>
             ) : (
@@ -328,25 +401,88 @@ export const NowTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Question 3: Countdown Timer & Next Hard Deadline */}
+        {/* Question 3: Clock direction follows B19 / B23 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {/* Remaining minutes */}
+          {/* Timer Display */}
           <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-md flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                3. THỜI GIAN CÒN LẠI CỦA KHỐI NÀY:
+                {currentEndType === 'timebox' ? '3. THỜI GIAN CÒN LẠI (TIMEBOX):' : '3. THỜI GIAN ĐÃ CHẠY (UNTIL DONE):'}
               </span>
               <span className="text-[11px] font-mono text-slate-400">
-                Mục tiêu: {profile.focusBlockDurationMins}p
+                {currentEndType === 'timebox' ? `Hộp: ${profile.focusBlockDurationMins}p` : `Giới hạn: ${userTimeLimit}p`}
               </span>
             </div>
 
-            <div className="py-2 flex items-baseline gap-3">
-              <span className="text-5xl font-mono font-extrabold text-white tracking-tight">
-                {timerMinutesRemaining}
-              </span>
-              <span className="text-lg text-slate-400 font-bold">phút còn lại</span>
-            </div>
+            {/* Timer Output */}
+            {currentEndType === 'timebox' ? (
+              // Case A: Timebox counts down
+              <div className="py-2 flex items-baseline gap-3">
+                <span className="text-5xl font-mono font-extrabold text-white tracking-tight">
+                  {timerMinutesRemaining}
+                </span>
+                <span className="text-lg text-slate-400 font-bold">phút đếm ngược</span>
+              </div>
+            ) : (
+              // Case B: Until done counts UP (elapsed) with faint marker at user limit
+              <div className="py-2 space-y-2">
+                <div className="flex items-baseline gap-3">
+                  <span className={`text-5xl font-mono font-extrabold tracking-tight ${isOverTimeLimit ? 'text-amber-400' : 'text-white'}`}>
+                    +{elapsedMinutes}
+                  </span>
+                  <span className="text-lg text-slate-400 font-bold">phút trôi qua</span>
+                </div>
+                {/* Visual marker at user appetite limit */}
+                <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800 relative">
+                  <div 
+                    className={`h-full rounded-full transition-all ${isOverTimeLimit ? 'bg-amber-400' : 'bg-gradient-to-r from-emerald-500 to-teal-500'}`}
+                    style={{ width: `${Math.min(100, (elapsedMinutes / userTimeLimit) * 100)}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Mốc giới hạn khẩu vị: <strong>{userTimeLimit} phút</strong></span>
+                  <span className={isOverTimeLimit ? 'text-amber-400 font-bold' : 'text-emerald-400'}>
+                    {isOverTimeLimit ? `Đã quá ${elapsedMinutes - userTimeLimit}p` : `Còn ${userTimeLimit - elapsedMinutes}p trong hạn`}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Overrun Notice for Until-Done Tasks (PRD v0.22 B19 / B23) */}
+            {isOverTimeLimit && (
+              <div className="my-2 p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs space-y-2 animate-in fade-in">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  <span>Quá giới hạn {userTimeLimit} phút của bạn; việc kế tiếp sẽ dời 20 phút.</span>
+                </div>
+                <p className="text-[11px] text-slate-300">
+                  Bạn có toàn quyền quyết định: hoàn thành ngay, tiếp tục chạy, hoặc để lại làm tiếp sau.
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={handleFinishEarly}
+                    className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs"
+                  >
+                    Hoàn thành
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleAddExtraTime(30);
+                      setShowOverrunNotice(false);
+                    }}
+                    className="flex-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700"
+                  >
+                    Tiếp tục (+30p)
+                  </button>
+                  <button
+                    onClick={handleFinishEarly}
+                    className="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs"
+                  >
+                    Để lại làm sau
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Quick Timer Controls */}
             <div className="flex items-center gap-2 pt-3 border-t border-slate-700/60">
@@ -373,9 +509,9 @@ export const NowTab: React.FC = () => {
               <button
                 onClick={handleFinishEarly}
                 className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-emerald-950 text-emerald-400 text-xs font-bold border border-emerald-500/30"
-                title="Xong sớm và check-in ngay"
+                title="Check-in đạt tiêu chí (DoD)"
               >
-                Xong sớm
+                Hoàn thành
               </button>
             </div>
           </div>
@@ -411,18 +547,37 @@ export const NowTab: React.FC = () => {
           </div>
         </div>
 
-        {/* BIG Prominent Action Button: SOMETHING CAME UP (PRD B5) */}
+        {/* PROMINENT ACTION BUTTON: Conditional by Atomic vs Standard (B19/B23) */}
         <div className="pt-2">
-          <button
-            onClick={() => setInterruptionModalOpen(true)}
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#d03515] hover:to-orange-600 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-red-500/25 flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
-          >
-            <Zap className="w-6 h-6 fill-white" />
-            <span>CÓ VIỆC ĐỘT XUẤT! (SOMETHING CAME UP)</span>
-          </button>
-          <p className="text-center text-xs text-slate-400 mt-2.5">
-            Lưới 12 danh mục 1 chạm • Lưu điểm quay lại • Quyết định tức thì
-          </p>
+          {currentEndType === 'until_done_atomic' ? (
+            // For Atomic Tasks: Replaces "Something came up" with "Schedule it for later"!
+            <div>
+              <button
+                onClick={handleScheduleForLater}
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-purple-900/30 flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
+              >
+                <Calendar className="w-6 h-6" />
+                <span>XẾP LỊCH VIỆC PHÁT SINH SAU (SCHEDULE FOR LATER)</span>
+              </button>
+              <p className="text-center text-xs text-purple-300 mt-2.5">
+                Khối nguyên tử (Atomic) không thể ngắt quãng • Mọi việc phát sinh đều được xếp lịch làm sau
+              </p>
+            </div>
+          ) : (
+            // Standard: SOMETHING CAME UP
+            <div>
+              <button
+                onClick={() => setInterruptionModalOpen(true)}
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#d03515] hover:to-orange-600 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-red-500/25 flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
+              >
+                <Zap className="w-6 h-6 fill-white" />
+                <span>CÓ VIỆC ĐỘT XUẤT! (SOMETHING CAME UP)</span>
+              </button>
+              <p className="text-center text-xs text-slate-400 mt-2.5">
+                Lưới 12 danh mục 1 chạm • Lưu điểm quay lại • Quyết định tức thì
+              </p>
+            </div>
+          )}
         </div>
 
       </div>

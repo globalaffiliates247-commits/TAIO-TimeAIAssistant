@@ -5,156 +5,288 @@ import { useApp } from '../context/AppContext';
 import { 
   CheckCircle2, 
   Clock, 
-  PauseCircle, 
+  Bookmark, 
   Sparkles, 
-  Volume2, 
-  Compass, 
+  CalendarCheck,
+  ArrowRight,
+  Inbox,
   X 
 } from 'lucide-react';
+import { DodItem } from '../types';
 
 export const CheckInModal: React.FC = () => {
   const { 
     checkInModalOpen, 
     setCheckInModalOpen, 
     checkInBlock, 
-    handleCheckInAnswer, 
-    toneLevel 
+    handleCheckInAnswer,
+    blocks,
+    setCurrentTab,
+    setCloseDayModalOpen,
+    setInboxModalOpen
   } = useApp();
 
-  const [returnPointInput, setReturnPointInput] = useState<string>('');
-  const [selectedExtraMins, setSelectedExtraMins] = useState<number>(15);
-  const [showStopSubsheet, setShowStopSubsheet] = useState<boolean>(false);
+  const [nextStepInput, setNextStepInput] = useState<string>('');
+  const [showNextStepForm, setShowNextStepForm] = useState<boolean>(false);
+
+  // Local DoD checklist state
+  const defaultDod: DodItem[] = checkInBlock?.dodChecklist && checkInBlock.dodChecklist.length > 0
+    ? checkInBlock.dodChecklist
+    : [
+        { id: 'd-1', text: 'Hoàn thành các nội dung chính của nhiệm vụ', completed: false },
+        { id: 'd-2', text: 'Kiểm tra kết quả không còn lỗi tồn đọng', completed: false },
+        { id: 'd-3', text: 'Sẵn sàng bàn giao hoặc lưu trữ an toàn', completed: false },
+      ];
+
+  const [checklist, setChecklist] = useState<DodItem[]>(defaultDod);
 
   if (!checkInModalOpen || !checkInBlock) return null;
 
-  // Question wording based on Tone Level (PRD B13)
-  const getQuestionText = () => {
-    const timeNow = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-    const blockTitle = checkInBlock.title;
-    const goalName = checkInBlock.goalName ? `, Mục tiêu: ${checkInBlock.goalName}` : '';
-
-    if (toneLevel === 1) {
-      // Gentle
-      return `Đã đến ${timeNow}. Khối làm việc "${blockTitle}" vừa kết thúc, tiến độ diễn ra êm đẹp chứ?`;
-    } else if (toneLevel === 2) {
-      // Clear
-      return `Hiện là ${timeNow}. Bạn đã hoàn thành nhiệm vụ "${blockTitle}" (60 phút${goalName}) chưa?`;
-    } else if (toneLevel === 3) {
-      // Firm
-      return `Đã qua ${timeNow}. Khối "${blockTitle}" cần xác nhận ngay để không ảnh hưởng mốc tiếp theo.`;
-    }
-    // Auto
-    return `Hiện là ${timeNow}. Bạn đã hoàn thành nhiệm vụ "${blockTitle}" chưa?`;
+  const toggleCheckItem = (id: string) => {
+    setChecklist(prev => prev.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
   };
 
+  const allCriteriaMet = checklist.every(i => i.completed);
+  const waitingCount = blocks.filter(b => b.id !== checkInBlock.id && b.status === 'planned').length;
+
+  // Case 1: Ritual Block (PRD v0.20 B9 - Ritual card: e.g. Close the Day)
+  if (checkInBlock.blockKind === 'ritual') {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+        <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-white border-t border-orange-500/30 sm:border">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+              <CalendarCheck className="w-4 h-4" />
+              <span>Nghi thức cuối ngày (Daily Ritual)</span>
+            </span>
+            <button onClick={() => setCheckInModalOpen(false)} className="text-slate-400 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            <h3 className="text-xl font-bold text-white">Đến giờ Đóng ngày (2 phút)</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Khóa tổng kết hôm nay, xác nhận các việc chờ, và chọn một nhiệm vụ quan trọng số 1 cho ngày mai để thảnh thơi nghỉ ngơi.
+            </p>
+            <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-xs text-slate-300 flex items-center justify-between">
+              <span>Đã hoàn thành: <strong>{blocks.filter(b => b.status === 'done').length} việc</strong></span>
+              <span>Việc còn chờ: <strong>{waitingCount} việc</strong></span>
+            </div>
+          </div>
+
+          <div className="flex gap-2.5">
+            <button
+              onClick={() => {
+                setCheckInModalOpen(false);
+                setCloseDayModalOpen(true);
+              }}
+              className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c93517] hover:to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2"
+            >
+              <span>Mở Đóng ngày (2 phút)</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleCheckInAnswer('remind_10m')}
+              className="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+            >
+              Nhắc lại sau 10 phút
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Case 2: Meeting Block (PRD v0.20 B9 - Ends silently with Inbox prompt)
+  if (checkInBlock.blockKind === 'meeting') {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+        <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-white border-t border-purple-500/30 sm:border">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-purple-400">
+              Khung giờ họp kết thúc
+            </span>
+            <button onClick={() => setCheckInModalOpen(false)} className="text-slate-400 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <h3 className="text-lg font-bold text-white mb-1">{checkInBlock.title}</h3>
+          <p className="text-xs text-slate-300 mb-5">
+            Cuộc họp đã kết thúc. Bạn có cần ghi nhanh hành động tiếp theo (Action Item) vào Rổ việc không?
+          </p>
+
+          <div className="space-y-2.5">
+            <button
+              onClick={() => {
+                setCheckInModalOpen(false);
+                setInboxModalOpen(true);
+              }}
+              className="w-full py-3 px-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg"
+            >
+              <Inbox className="w-4 h-4" />
+              <span>Ghi nhận hành động kế tiếp vào Rổ việc (Inbox)</span>
+            </button>
+            <button
+              onClick={() => handleCheckInAnswer('done')}
+              className="w-full py-2.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+            >
+              Không có gì phát sinh, đánh dấu xong
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Case 3: Standard Task Timebox with Definition of Done (B9 Anatomy)
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
       <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-white border-t border-orange-500/30 sm:border">
         
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-300">
-              Điểm kiểm tra tự động (Automatic Check-in)
-            </h3>
-          </div>
+        {/* 1. Kicker (small, grey): what happened and when */}
+        <div className="flex items-center justify-between pb-2 border-b border-slate-800/80 mb-3">
+          <span className="text-xs text-slate-400">
+            Khung giờ đã kết thúc {checkInBlock.startTime} - {checkInBlock.endTime} · Còn {waitingCount} việc chờ
+          </span>
           <button 
             onClick={() => setCheckInModalOpen(false)}
-            className="text-gray-400 hover:text-white"
+            className="text-slate-400 hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Prompt Question */}
-        <div className="mb-6">
-          <p className="text-base sm:text-lg font-bold text-gray-100 leading-snug">
-            {getQuestionText()}
-          </p>
-          {checkInBlock.goalName && (
-            <span className="inline-block mt-2 text-xs px-2.5 py-1 rounded-md bg-indigo-950/60 text-indigo-300 border border-indigo-800/50">
-              Thuộc: {checkInBlock.goalName}
-            </span>
-          )}
+        {/* 2. Title (bold): task name only */}
+        <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">
+          {checkInBlock.title}
+        </h3>
+
+        {/* 3. Context line: goal it serves */}
+        <p className="text-xs text-orange-400 font-semibold mt-1 mb-4 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Mục tiêu phục vụ: {checkInBlock.goalName || 'Ngoài mục tiêu chính'}</span>
+        </p>
+
+        {/* 4. Question with Definition of Done checklist shown */}
+        <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-5 space-y-3">
+          <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
+            Đạt tiêu chí hoàn thành chưa? Tích chọn tiêu chí đã đạt:
+          </label>
+
+          <div className="space-y-2">
+            {checklist.map((item) => (
+              <div 
+                key={item.id}
+                onClick={() => toggleCheckItem(item.id)}
+                className={`p-2.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                  item.completed 
+                    ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200' 
+                    : 'bg-slate-900/80 border-slate-700/80 hover:border-slate-500 text-slate-300'
+                }`}
+              >
+                <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+                  item.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-500'
+                }`}>
+                  {item.completed && <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+                <span className={`text-xs font-medium ${item.completed ? 'line-through text-slate-400' : ''}`}>
+                  {item.text}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+            <span>Theo chuẩn <strong>Definition of Done (Scrum)</strong></span>
+            <button 
+              onClick={() => setChecklist(prev => prev.map(i => ({ ...i, completed: true })))}
+              className="text-orange-400 hover:underline font-semibold"
+            >
+              Chọn tất cả
+            </button>
+          </div>
         </div>
 
-        {!showStopSubsheet ? (
-          <div className="space-y-3">
-            {/* Answer 1: Done */}
+        {/* 5. Actions */}
+        {!showNextStepForm ? (
+          <div className="space-y-2.5">
+            {/* Primary: Meets criteria: Done */}
             <button
               onClick={() => handleCheckInAnswer('done')}
-              className="w-full p-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base flex items-center justify-between shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+              className={`w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-between transition-all ${
+                allCriteriaMet
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-600/20'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80'
+              }`}
             >
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-5 h-5" />
-                <span>Đã xong! (Done)</span>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Đạt tiêu chí: Hoàn thành (Done)</span>
               </div>
-              <span className="text-xs bg-emerald-700/60 px-2.5 py-1 rounded-md font-medium">
-                Ghi nhận tiến độ + chúc mừng
+              <span className="text-[11px] opacity-80">
+                {allCriteriaMet ? 'Đạt toàn bộ tiêu chí ✓' : 'Tích chọn để hoàn tất'}
               </span>
             </button>
 
-            {/* Answer 2: Need more time */}
-            <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-gray-300">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-amber-400" />
-                  <span>Cần thêm thời gian:</span>
-                </span>
-                <span className="text-gray-400">Gia hạn và tiếp tục</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[15, 30, 60].map(mins => (
-                  <button
-                    key={mins}
-                    onClick={() => handleCheckInAnswer('more_time', mins)}
-                    className="py-2 rounded-lg bg-gray-800 hover:bg-amber-500/20 hover:border-amber-500/50 hover:text-amber-300 border border-gray-700 text-xs font-bold transition-all text-gray-200"
-                  >
-                    +{mins} phút
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Answer 3: Stop here */}
+            {/* Secondary: Not done: continue later */}
             <button
-              onClick={() => setShowStopSubsheet(true)}
-              className="w-full py-3 px-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 text-xs font-semibold flex items-center justify-center gap-2 transition-all"
+              onClick={() => setShowNextStepForm(true)}
+              className="w-full py-3 px-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 text-xs font-semibold flex items-center justify-between transition-all"
             >
-              <PauseCircle className="w-4 h-4 text-gray-400" />
-              <span>Dừng tại đây (Chưa xong hết / Lưu điểm quay lại)</span>
+              <span>Chưa xong: Làm tiếp sau (Continue later)</span>
+              <span className="text-[11px] text-orange-400">Ghi bước kế tiếp ↗</span>
             </button>
+
+            {/* Tertiary: +15 minutes */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleCheckInAnswer('more_time', 15)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center justify-center gap-1.5"
+              >
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span>Cần thêm +15 phút</span>
+              </button>
+
+              {/* Text link: Remind me in 10 minutes */}
+              <button
+                onClick={() => handleCheckInAnswer('remind_10m')}
+                className="px-3 py-2.5 text-xs text-slate-400 hover:text-white hover:underline transition-all"
+              >
+                Nhắc lại sau 10 phút
+              </button>
+            </div>
           </div>
         ) : (
-          /* Subsheet for Stopping */
-          <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-800/40">
-              <label className="block text-xs font-semibold text-indigo-300 mb-1 flex items-center gap-1.5">
-                <Compass className="w-4 h-4" />
-                <span>Lưu điểm quay lại (để khi tiếp tục biết ngay làm gì):</span>
+          /* Form for "Continue later" (Zeigarnik Effect Reduction) */
+          <div className="space-y-3 p-4 rounded-2xl bg-orange-950/30 border border-orange-500/30 animate-in fade-in duration-200">
+            <div>
+              <label className="text-xs font-bold text-orange-300 block mb-1 flex items-center gap-1.5">
+                <Bookmark className="w-4 h-4 text-orange-400" />
+                <span>Bước kế tiếp cụ thể là gì? (Giảm căng thẳng việc dở dang):</span>
               </label>
               <input
                 type="text"
-                value={returnPointInput}
-                onChange={e => setReturnPointInput(e.target.value)}
-                placeholder="Ví dụ: Đã viết xong mục 1, 2; còn mục 3..."
-                className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-xs text-white focus:outline-none"
+                value={nextStepInput}
+                onChange={e => setNextStepInput(e.target.value)}
+                placeholder="VD: Cần chỉnh xong bảng phân tích số liệu mục 2..."
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
               />
             </div>
 
             <div className="flex gap-2">
               <button
-                onClick={() => setShowStopSubsheet(false)}
-                className="px-4 py-2 rounded-xl text-gray-400 hover:text-white text-xs"
+                onClick={() => setShowNextStepForm(false)}
+                className="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs"
               >
-                Quay lại
+                Hủy
               </button>
               <button
-                onClick={() => handleCheckInAnswer('stop_here')}
-                className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-md"
+                onClick={() => handleCheckInAnswer('continue_later', 0, nextStepInput || 'Làm tiếp việc dang dở')}
+                className="flex-1 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md"
               >
-                Xác nhận dừng & lưu
+                Lưu bước kế tiếp & Dừng an toàn
               </button>
             </div>
           </div>

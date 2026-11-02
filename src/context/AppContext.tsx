@@ -23,7 +23,11 @@ import {
   DeviceLook,
   ThemeMode,
   ColorPalette,
-  PaletteColors
+  PaletteColors,
+  InboxItem,
+  TimeLedgerSegment,
+  MethodConcept,
+  CoachCard
 } from '../types';
 import { 
   PROFILES, 
@@ -36,16 +40,22 @@ import {
   INITIAL_HABIT_CARDS,
   INITIAL_EXPERIMENTS,
   INITIAL_AI_SUGGESTIONS,
-  PALETTES
+  PALETTES,
+  INITIAL_INBOX,
+  INITIAL_TIME_LEDGER,
+  METHOD_CONCEPTS,
+  INITIAL_COACH_CARDS
 } from '../data/mockData';
+
+export type AppTab = 'now' | 'plan' | 'efficiency' | 'achievements' | 'goals' | 'admin';
 
 interface AppContextType {
   profile: UserProfile;
   setProfile: (p: UserProfile) => void;
   isOnboarded: boolean;
   setIsOnboarded: (val: boolean) => void;
-  currentTab: 'now' | 'plan' | 'achievements' | 'goals' | 'admin';
-  setCurrentTab: (tab: 'now' | 'plan' | 'achievements' | 'goals' | 'admin') => void;
+  currentTab: AppTab;
+  setCurrentTab: (tab: AppTab) => void;
   language: 'vi' | 'en';
   setLanguage: (lang: 'vi' | 'en') => void;
   toneLevel: ToneLevel;
@@ -55,7 +65,7 @@ interface AppContextType {
   currentUserRole: UserRole;
   setCurrentUserRole: (r: UserRole) => void;
 
-  // v0.12 - v0.16: Appearance & Device Settings (B17)
+  // v0.12 - v0.20: Appearance & Device Settings (B17)
   deviceLook: DeviceLook;
   setDeviceLook: (d: DeviceLook) => void;
   themeMode: ThemeMode;
@@ -80,6 +90,24 @@ interface AppContextType {
   deadlines: HardDeadline[];
   interruptions: InterruptionRecord[];
   gaps: UndeclaredGap[];
+
+  // v0.18 - v0.20: Inbox Mini App ("Rổ công việc")
+  inbox: InboxItem[];
+  inboxModalOpen: boolean;
+  setInboxModalOpen: (val: boolean) => void;
+  addInboxItem: (item: { title: string; source?: 'quick' | 'telegram' | 'voice' | 'meeting_followup'; nextAction?: string; estimatedMinutes?: number; linkedGoalId?: string }) => void;
+  processInboxItem: (id: string, action: 'schedule' | 'done_2min' | 'delegate' | 'drop', details?: { quadrant?: 1 | 2 | 3 | 4 }) => void;
+
+  // v0.18 - v0.21: 24-Hour Time Ledger
+  timeLedger: TimeLedgerSegment[];
+
+  // v0.19 - v0.22: Method Library & Contextual Coach Cards
+  methodLibraryOpen: boolean;
+  setMethodLibraryOpen: (val: boolean) => void;
+  methodConcepts: MethodConcept[];
+  activeCoachCard: CoachCard | null;
+  dismissCoachCard: () => void;
+  triggerCoachCard: (moment: 'first_interruption' | 'first_timebox' | 'first_dod_done' | 'first_inbox' | 'first_matrix') => void;
   
   // Active state
   currentBlock: TimeBlock | undefined;
@@ -165,7 +193,7 @@ interface AppContextType {
     category?: InterruptionActivityCategory;
     note?: string;
   }) => void;
-  handleCheckInAnswer: (answer: 'done' | 'more_time' | 'stop_here', extraMins?: number) => void;
+  handleCheckInAnswer: (answer: 'done' | 'continue_later' | 'more_time' | 'remind_10m' | 'stop_here', extraMins?: number, nextStep?: string) => void;
   handleLabelGap: (gapId: string, label: GapLabel) => void;
   handleCloseDay: (tomorrowTask: string) => void;
   addNewBlock: (block: Omit<TimeBlock, 'id'>) => void;
@@ -180,15 +208,27 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<UserProfile>(PROFILES.owner);
   const [isOnboarded, setIsOnboarded] = useState<boolean>(true);
-  const [currentTab, setCurrentTab] = useState<'now' | 'plan' | 'achievements' | 'goals' | 'admin'>('now');
+  const [currentTab, setCurrentTab] = useState<AppTab>('now');
   const [language, setLanguage] = useState<'vi' | 'en'>('vi');
   const [toneLevel, setToneLevel] = useState<ToneLevel>(1);
 
-  // v0.12 - v0.16: Appearance & Device Settings (B17)
+  // v0.12 - v0.20: Appearance & Device Settings (B17)
   const [deviceLook, setDeviceLook] = useState<DeviceLook>('auto');
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
   const [palette, setPalette] = useState<ColorPalette>('warm');
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
+
+  // v0.20: Inbox Mini App State
+  const [inbox, setInbox] = useState<InboxItem[]>(INITIAL_INBOX);
+  const [inboxModalOpen, setInboxModalOpen] = useState<boolean>(false);
+
+  // v0.20: 24-Hour Time Ledger
+  const [timeLedger, setTimeLedger] = useState<TimeLedgerSegment[]>(INITIAL_TIME_LEDGER);
+
+  // v0.20: Method Library & Contextual Coach Cards
+  const [methodLibraryOpen, setMethodLibraryOpen] = useState<boolean>(false);
+  const [methodConcepts] = useState<MethodConcept[]>(METHOD_CONCEPTS);
+  const [activeCoachCard, setActiveCoachCard] = useState<CoachCard | null>(null);
 
   const currentPaletteColors = PALETTES[palette] || PALETTES.warm;
 
@@ -486,25 +526,127 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setInterruptionModalOpen(false);
   };
 
-  // Check-in answers
-  const handleCheckInAnswer = (answer: 'done' | 'more_time' | 'stop_here', extraMins = 15) => {
+  // Contextual Coach Card triggers
+  const triggerCoachCard = (moment: 'first_interruption' | 'first_timebox' | 'first_dod_done' | 'first_inbox' | 'first_matrix') => {
+    const card = INITIAL_COACH_CARDS.find(c => c.triggerMoment === moment);
+    if (card) {
+      setActiveCoachCard(card);
+    }
+  };
+
+  const dismissCoachCard = () => {
+    setActiveCoachCard(null);
+  };
+
+  // Inbox operations (B20)
+  const addInboxItem = (itemData: { 
+    title: string; 
+    source?: 'quick' | 'telegram' | 'voice' | 'meeting_followup'; 
+    nextAction?: string; 
+    estimatedMinutes?: number; 
+    linkedGoalId?: string 
+  }) => {
+    const goal = goals.find(g => g.id === itemData.linkedGoalId);
+    const newItem: InboxItem = {
+      id: `inbox-${Date.now()}`,
+      title: itemData.title,
+      source: itemData.source || 'quick',
+      createdAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      nextAction: itemData.nextAction || itemData.title,
+      estimatedMinutes: itemData.estimatedMinutes || 15,
+      linkedGoalId: itemData.linkedGoalId,
+      linkedGoalName: goal?.name,
+      suggestedQuadrant: itemData.linkedGoalId ? 2 : 3,
+      status: 'inbox',
+    };
+    setInbox(prev => [newItem, ...prev]);
+    setCelebrationMsg(language === 'vi' ? 'Đã thêm việc vào Rổ công việc (Inbox)!' : 'Added to Inbox!');
+    triggerCoachCard('first_inbox');
+  };
+
+  const processInboxItem = (
+    id: string, 
+    action: 'schedule' | 'done_2min' | 'delegate' | 'drop', 
+    details?: { quadrant?: 1 | 2 | 3 | 4 }
+  ) => {
+    const target = inbox.find(i => i.id === id);
+    if (!target) return;
+
+    if (action === 'done_2min') {
+      setInbox(prev => prev.map(i => i.id === id ? { ...i, status: 'done_2min' } : i));
+      setCelebrationMsg(language === 'vi' ? 'Đã hoàn thành ngay theo Quy tắc 2 phút (GTD)!' : 'Completed via 2-minute rule!');
+    } else if (action === 'schedule') {
+      setInbox(prev => prev.map(i => i.id === id ? { ...i, status: 'scheduled' } : i));
+      // Add to blocks
+      addNewBlock({
+        title: target.title,
+        startTime: '16:00',
+        endTime: '16:30',
+        type: 'deep',
+        status: 'planned',
+        goalId: target.linkedGoalId,
+        goalName: target.linkedGoalName,
+        quadrant: details?.quadrant || target.suggestedQuadrant || 2,
+        estimatedMinutes: target.estimatedMinutes || 30,
+        notes: `Từ Inbox: ${target.nextAction || ''}`,
+      });
+      setCelebrationMsg(language === 'vi' ? 'Đã lên lịch thành công từ Rổ việc vào Kế hoạch!' : 'Scheduled to Plan tab!');
+    } else if (action === 'delegate') {
+      setInbox(prev => prev.map(i => i.id === id ? { ...i, status: 'delegated' } : i));
+      setCelebrationMsg(language === 'vi' ? 'Đã đánh dấu ủy quyền việc này.' : 'Delegated!');
+    } else if (action === 'drop') {
+      setInbox(prev => prev.map(i => i.id === id ? { ...i, status: 'dropped' } : i));
+      setCelebrationMsg(language === 'vi' ? 'Đã loại bỏ / lưu tham khảo khỏi rổ việc.' : 'Archived!');
+    }
+  };
+
+  // Check-in answers (v0.20 B9 Anatomy)
+  const handleCheckInAnswer = (
+    answer: 'done' | 'continue_later' | 'more_time' | 'remind_10m' | 'stop_here', 
+    extraMins = 15,
+    nextStep?: string
+  ) => {
     if (!checkInBlock) return;
 
     if (answer === 'done') {
-      setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { ...b, status: 'done' } : b));
-      setCelebrationMsg(language === 'vi' ? '🎉 Xuất sắc! Khối công việc đã hoàn thành và ghi nhận vào tiến độ mục tiêu.' : '🎉 Great job! Block completed.');
+      setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { 
+        ...b, 
+        status: 'done', 
+        timeboxEndOutcome: 'done_on_time',
+        touchTimeMinutes: b.estimatedMinutes || 60,
+        cycleTimeMinutes: b.estimatedMinutes || 60,
+        flowEfficiency: 1.0,
+      } : b));
+      setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành đúng tiêu chí (Definition of Done)! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed per Definition of Done!');
+      triggerCoachCard('first_dod_done');
       const nextBlock = blocks.find(b => b.id !== checkInBlock.id && b.status === 'planned');
       if (nextBlock) {
         setBlocks(prev => prev.map(b => b.id === nextBlock.id ? { ...b, status: 'in_progress' } : b));
         setTimerMinutesRemaining(profile.focusBlockDurationMins);
       }
+    } else if (answer === 'continue_later' || answer === 'stop_here') {
+      setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { 
+        ...b, 
+        status: 'partly_done',
+        timeboxEndOutcome: 'continue_later',
+        nextStep: nextStep || b.nextStep || 'Làm tiếp bước kế tiếp',
+      } : b));
+      // Auto add residual step to Inbox so mind is clear (Zeigarnik effect reduction)
+      if (nextStep) {
+        addInboxItem({
+          title: `Làm tiếp: ${checkInBlock.title}`,
+          nextAction: nextStep,
+          estimatedMinutes: 30,
+          linkedGoalId: checkInBlock.goalId,
+        });
+      }
+      setCelebrationMsg(language === 'vi' ? 'Đã lưu bước kế tiếp và đưa vào Rổ việc để tâm trí hoàn toàn thanh thản (Zeigarnik)!' : 'Saved next step cleanly!');
     } else if (answer === 'more_time') {
       setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { ...b, status: 'extended' } : b));
       setTimerMinutesRemaining(prev => prev + extraMins);
       setCelebrationMsg(language === 'vi' ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại.` : `Added +${extraMins} minutes.`);
-    } else if (answer === 'stop_here') {
-      setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { ...b, status: 'partly_done' } : b));
-      setCelebrationMsg(language === 'vi' ? 'Đã lưu điểm quay lại và tạm dừng công việc an toàn.' : 'Saved return point and paused cleanly.');
+    } else if (answer === 'remind_10m') {
+      setCelebrationMsg(language === 'vi' ? 'Sẽ nhắc lại điểm kiểm tra sau 10 phút.' : 'Will remind you in 10 minutes.');
     }
 
     setCheckInModalOpen(false);
@@ -630,7 +772,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setPalette,
       currentPaletteColors,
       settingsModalOpen,
-      setSettingsModalOpen
+      setSettingsModalOpen,
+      inbox,
+      inboxModalOpen,
+      setInboxModalOpen,
+      addInboxItem,
+      processInboxItem,
+      timeLedger,
+      methodLibraryOpen,
+      setMethodLibraryOpen,
+      methodConcepts,
+      activeCoachCard,
+      dismissCoachCard,
+      triggerCoachCard
     }}>
       {children}
     </AppContext.Provider>

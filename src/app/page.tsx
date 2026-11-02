@@ -17,6 +17,9 @@ import { DrilldownSheet } from '../components/DrilldownSheet';
 import { ActionNudgeBanner } from '../components/ActionNudgeBanner';
 import { AppearanceModal } from '../components/AppearanceModal';
 import { AmbientProgressEdge } from '../components/AmbientProgressEdge';
+import { InboxModal } from '../components/InboxModal';
+import { MethodLibraryModal } from '../components/MethodLibraryModal';
+import { CoachCardOverlay } from '../components/CoachCardOverlay';
 import { Sparkles, X } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
@@ -52,14 +55,14 @@ const MainAppContent: React.FC = () => {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {currentTab === 'now' && <NowTab />}
         {currentTab === 'plan' && <PlanTab />}
-        {currentTab === 'achievements' && <AchievementsTab />}
+        {(currentTab === 'achievements' || (currentTab as any) === 'efficiency') && <AchievementsTab />}
         {currentTab === 'goals' && <GoalsTab />}
         {currentTab === 'admin' && <AdminPortal />}
       </main>
 
       {/* Bottom Footer info */}
       <footer className="border-t border-slate-800/80 py-5 text-center text-xs text-slate-500">
-        TAIO Time App • Thương hiệu TAIO (TAIO.CLUB) • Thiết kế chuẩn Glassmorphism
+        TAIO Time App v0.22.0 Approved • Thương hiệu TAIO (TAIO.CLUB)
       </footer>
 
       {/* Modals & Overlays */}
@@ -70,6 +73,9 @@ const MainAppContent: React.FC = () => {
       <CloseDayModal />
       <SocialAuditModal />
       <DrilldownSheet />
+      <InboxModal />
+      <MethodLibraryModal />
+      <CoachCardOverlay />
     </div>
   );
 };

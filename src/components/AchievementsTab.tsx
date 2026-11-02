@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { GapLabel } from '../types';
+import { GapLabel, TimeLedgerCategory } from '../types';
 import { HabitInsights } from './HabitInsights';
 import { 
   Trophy, 
@@ -13,11 +13,17 @@ import {
   Moon, 
   AlertCircle, 
   Sparkles, 
-  Tag,
-  ArrowRight,
-  Target,
-  Compass,
-  BarChart3
+  Tag, 
+  ArrowRight, 
+  Target, 
+  Compass, 
+  BarChart3,
+  TrendingUp,
+  Activity,
+  Layers,
+  HelpCircle,
+  FolderKanban,
+  CheckSquare
 } from 'lucide-react';
 
 const GAP_LABELS: { key: GapLabel; label: string }[] = [
@@ -28,6 +34,16 @@ const GAP_LABELS: { key: GapLabel; label: string }[] = [
   { key: 'distraction', label: 'Xao nhãng' },
   { key: 'other', label: 'Khác' },
 ];
+
+const CATEGORY_COLORS: Record<TimeLedgerCategory, { bg: string; text: string; labelVi: string }> = {
+  goal_work: { bg: 'bg-[#E0401F]', text: 'text-orange-400', labelVi: 'Việc mục tiêu' },
+  meeting: { bg: 'bg-purple-500', text: 'text-purple-400', labelVi: 'Hội họp' },
+  interruption: { bg: 'bg-amber-500', text: 'text-amber-400', labelVi: 'Việc chen ngang' },
+  distraction: { bg: 'bg-rose-500', text: 'text-rose-400', labelVi: 'Xao nhãng' },
+  personal: { bg: 'bg-emerald-500', text: 'text-emerald-400', labelVi: 'Cá nhân & Nghỉ ngơi' },
+  sleep: { bg: 'bg-blue-600', text: 'text-blue-400', labelVi: 'Giấc ngủ' },
+  other: { bg: 'bg-slate-500', text: 'text-slate-400', labelVi: 'Khác' },
+};
 
 export const AchievementsTab: React.FC = () => {
   const { 
@@ -40,15 +56,18 @@ export const AchievementsTab: React.FC = () => {
     setCloseDayModalOpen,
     dayClosed,
     setBlocks,
-    openDrilldown
+    openDrilldown,
+    timeLedger,
+    setMethodLibraryOpen
   } = useApp();
 
-  const [viewMode, setViewMode] = useState<'today' | 'habits'>('today');
+  // B21: Three views in segmented control: 'time' | 'tasks' | 'projects' + 'habits'
+  const [viewMode, setViewMode] = useState<'time' | 'tasks' | 'projects' | 'habits'>('time');
 
   const completedBlocks = blocks.filter(b => b.status === 'done');
   const waitingBlocks = blocks.filter(b => b.status === 'unconfirmed' || b.status === 'partly_done');
 
-  // Calculate stats
+  // Stats calculation
   const totalPlannedMins = blocks.length * 60;
   const doneMins = completedBlocks.length * 60;
   const deepWorkDoneMins = completedBlocks.filter(b => b.type === 'deep').length * profile.focusBlockDurationMins || 150;
@@ -61,376 +80,468 @@ export const AchievementsTab: React.FC = () => {
     .filter(i => i.decision === 'decline' || i.decision === 'delegate')
     .reduce((acc, curr) => acc + curr.minutes, 0);
 
+  // Time Ledger Calculations (24-Hour Peter Drucker model B1b & B21)
+  const ledgerSegments = timeLedger || [];
+  const totalLedgerMins = ledgerSegments.reduce((acc, s) => acc + s.durationMins, 0) || 1440;
+  
+  const categoryTotals: Record<TimeLedgerCategory, number> = {
+    goal_work: 0,
+    meeting: 0,
+    interruption: 0,
+    distraction: 0,
+    personal: 0,
+    sleep: 0,
+    other: 0,
+  };
+
+  ledgerSegments.forEach(s => {
+    categoryTotals[s.category] = (categoryTotals[s.category] || 0) + s.durationMins;
+  });
+
+  const wakingMinutes = 1440 - (categoryTotals.sleep || 420);
+  const goalWorkRatio = wakingMinutes > 0 ? Math.round(((categoryTotals.goal_work || 285) / wakingMinutes) * 100) : 0;
+  const distractionMins = categoryTotals.distraction || 45;
+
+  // Task Efficiency metrics (Lean / Kanban: Flow Efficiency = Touch Time / Cycle Time)
+  const totalTouchTime = completedBlocks.reduce((acc, b) => acc + (b.touchTimeMinutes || 60), 0);
+  const totalCycleTime = completedBlocks.reduce((acc, b) => acc + (b.cycleTimeMinutes || 75), 0);
+  const avgFlowEfficiency = totalCycleTime > 0 ? Math.round((totalTouchTime / totalCycleTime) * 100) : 85;
+
+  const doneOnTimeCount = completedBlocks.filter(b => b.timeboxEndOutcome === 'done_on_time' || (!b.timeboxEndOutcome && b.status === 'done')).length;
+  const doneOverTimeCount = completedBlocks.filter(b => b.timeboxEndOutcome === 'done_over_time').length;
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <span>Thành tựu & Dấu vết (Achievements)</span>
-          </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Cập nhật trực tiếp theo check-in • Cuối ngày chuyển sang chế độ "Đóng ngày trong 2 phút"
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-orange-400" />
+              <span>Hiệu quả & Dấu vết (Efficiency - PRD v0.22 B21)</span>
+            </h2>
+            <button
+              onClick={() => setMethodLibraryOpen(true)}
+              className="p-1 rounded-full text-slate-400 hover:text-orange-400 hover:bg-slate-800 transition-colors"
+              title="Mở Thư viện phương pháp khoa học (B22)"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Thời gian đã đi đâu • Việc đã xong • Tiến độ dự án • Cuối ngày đóng ngày trong 2 phút
           </p>
         </div>
 
-        {/* View mode buttons & Close day */}
+        {/* View mode segmented switcher & Close day button */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center bg-gray-900 p-1 rounded-xl border border-gray-800">
+          <div className="flex items-center bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
             <button
-              onClick={() => setViewMode('today')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'today' 
-                  ? 'bg-[#E0401F] text-white shadow-sm' 
-                  : 'text-gray-400 hover:text-white'
+              onClick={() => setViewMode('time')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'time' 
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Hôm nay</span>
+              <Clock className="w-3.5 h-3.5" />
+              <span>1. Thời gian (24h)</span>
+            </button>
+            <button
+              onClick={() => setViewMode('tasks')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'tasks' 
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <CheckSquare className="w-3.5 h-3.5" />
+              <span>2. Công việc</span>
+            </button>
+            <button
+              onClick={() => setViewMode('projects')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'projects' 
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FolderKanban className="w-3.5 h-3.5" />
+              <span>3. Dự án</span>
             </button>
             <button
               onClick={() => setViewMode('habits')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'habits' 
-                  ? 'bg-[#E0401F] text-white shadow-sm' 
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               <Compass className="w-3.5 h-3.5" />
-              <span>Dấu vết thói quen (B15)</span>
+              <span>Thói quen</span>
             </button>
           </div>
 
           {!dayClosed ? (
             <button
               onClick={() => setCloseDayModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white font-semibold text-xs shadow-lg shadow-red-950/40 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c83516] hover:to-orange-600 text-white font-bold text-xs shadow-lg shadow-orange-500/20 transition-all"
             >
               <Moon className="w-4 h-4" />
               <span>Đóng ngày</span>
             </button>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/40 border border-red-800/40 text-red-300 text-xs font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-[#E0401F]" />
-              <span>Đã khóa</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-950/40 border border-orange-800/40 text-orange-300 text-xs font-bold">
+              <CheckCircle2 className="w-4 h-4 text-orange-400" />
+              <span>Đã khóa ngày</span>
             </div>
           )}
         </div>
       </div>
 
-      {viewMode === 'habits' ? (
-        <HabitInsights />
-      ) : (
-        <>
-      {/* 1. Day Progress Overview with WYSIWYG Drilldown */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {/* Card 1: Completed / Total tasks */}
-        <div 
-          onClick={() => openDrilldown({
-            type: 'tasks',
-            title: `Vòng ${completedBlocks.length} / ${blocks.length} việc đã xong`,
-            subtitle: `${completedBlocks.length} đã xong • ${blocks.filter(b => b.status === 'in_progress').length} chờ xác nhận/đang chạy • ${blocks.filter(b => b.status === 'planned').length} chưa đến giờ`,
-          })}
-          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-indigo-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
-          title="Bấm để mở danh sách toàn bộ các việc hôm nay kèm trạng thái và 1 chạm: Xong, Dời, Bỏ"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-gray-400 group-hover:text-indigo-300 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" /> Hoàn thành
-            </span>
-            <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
-          </div>
-          <p className="text-2xl font-bold text-white mt-1 group-hover:text-indigo-400 transition-colors">
-            {completedBlocks.length} / {blocks.length}
-          </p>
-          <span className="text-[11px] text-gray-400">Bấm xem cả {blocks.length} việc</span>
-        </div>
-
-        {/* Card 2: Deep work minutes */}
-        <div 
-          onClick={() => openDrilldown({
-            type: 'deep_work',
-            title: 'Các khối việc sâu (Deep Work)',
-            subtitle: `Tổng cộng ${deepWorkDoneMins} phút tập trung chất lượng cao`,
-          })}
-          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-indigo-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
-          title="Bấm để mở danh sách các khối việc sâu và số phút của từng khối"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-gray-400 group-hover:text-indigo-300 flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 text-indigo-400" /> Tập trung sâu
-            </span>
-            <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
-          </div>
-          <p className="text-2xl font-bold text-indigo-400 mt-1">
-            {deepWorkDoneMins}p
-          </p>
-          <span className="text-[11px] text-gray-400">Bấm xem số phút từng khối</span>
-        </div>
-
-        {/* Card 3: Interruption reserve */}
-        <div 
-          onClick={() => openDrilldown({
-            type: 'interruptions',
-            title: 'Nhật ký việc chen ngang & Quỹ dự phòng',
-            subtitle: `Đã dùng ${intUsedMins}p / ${profile.interruptionReserveMins}p • Còn lại ${Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút`,
-          })}
-          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-amber-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
-          title="Bấm để mở nhật ký chen ngang, loại việc và người kéo bạn vào"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-gray-400 group-hover:text-amber-300 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-amber-400" /> Quỹ gián đoạn
-            </span>
-            <span className="text-[10px] text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
-          </div>
-          <p className="text-2xl font-bold text-amber-400 mt-1">
-            {intUsedMins} / {profile.interruptionReserveMins}p
-          </p>
-          <span className="text-[11px] text-gray-400">Bấm xem người kéo vào</span>
-        </div>
-
-        {/* Card 4: Protected minutes */}
-        <div 
-          onClick={() => openDrilldown({
-            type: 'protected_focus',
-            title: 'Thời gian tập trung đã bảo vệ (+45p)',
-            subtitle: 'Đạt được nhờ từ chối hoặc ủy quyền việc chen ngang',
-          })}
-          className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-emerald-500/60 hover:bg-slate-800/80 rounded-2xl p-4 transition-all cursor-pointer group shadow-lg"
-          title="Bấm để xem danh sách việc đã từ chối/ủy quyền"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-gray-400 group-hover:text-emerald-300 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Đã bảo vệ
-            </span>
-            <span className="text-[10px] text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
-          </div>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">
-            +{protectedMins}p
-          </p>
-          <span className="text-[11px] text-gray-400">từ chối / ủy quyền</span>
-        </div>
-      </div>
-
-      {/* 2. Done by Goal with WYSIWYG Drilldown */}
-      <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-            <Target className="w-4 h-4 text-[#E0401F]" />
-            <span>Thời gian hoàn thành theo từng mục tiêu (Done by goal)</span>
-          </h3>
-          <span className="text-xs text-[#E0401F]">Bấm mục tiêu để xem các việc ↗</span>
-        </div>
-
-        <div className="space-y-3">
-          {goals.map((g) => {
-            const goalBlocks = blocks.filter(b => b.goalId === g.id);
-            const goalCompletedBlocks = goalBlocks.filter(b => b.status === 'done');
-            const goalMinutes = goalCompletedBlocks.length * 60;
-            return (
-              <div 
-                key={g.id} 
-                onClick={() => openDrilldown({
-                  type: 'goal_tasks',
-                  title: `Nhiệm vụ phục vụ: ${g.name}`,
-                  subtitle: `Có ${goalBlocks.length} việc hôm nay (${goalCompletedBlocks.length} đã xong) • ${g.progressPercent}% tiến độ`,
-                  goalId: g.id,
-                })}
-                className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 hover:border-indigo-500/60 hover:bg-slate-700/60 transition-all cursor-pointer flex items-center justify-between group"
-                title="Bấm để mở danh sách các việc hôm nay phục vụ mục tiêu này (WYSIWYG)"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-semibold text-white group-hover:text-indigo-300 transition-colors">{g.name}</h4>
-                    <span className="text-[10px] text-indigo-400 bg-indigo-950/60 border border-indigo-800/40 px-1.5 py-0.5 rounded font-bold">
-                      {goalBlocks.length} việc
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-400">Kết quả: {g.measurableResult}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-indigo-400">{goalMinutes} phút</span>
-                  <p className="text-[11px] text-gray-500">Mục tiêu: {g.dailyBudgetMins}p/ngày</p>
-                </div>
+      {/* VIEW 1: TIME (The 24-Hour Ledger - Peter Drucker Model B1b & B21) */}
+      {viewMode === 'time' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          
+          {/* 1. 24-Hour Continuous Visual Ledger Bar */}
+          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-orange-400" />
+                  <span>Sổ cái thời gian 24 giờ liên tục (The 24-Hour Time Ledger)</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Theo Peter Drucker (1967): Mọi phút trong ngày đều thuộc chính xác 1 danh mục, không thể xóa bỏ hay vay mượn.
+                </p>
               </div>
-            );
-          })}
-
-          <div 
-            onClick={() => openDrilldown({
-              type: 'tasks',
-              title: 'Các việc ngoài mục tiêu chính (Outside my goals)',
-              subtitle: 'Bao gồm việc vặt, phát sinh hành chính hoặc cá nhân',
-            })}
-            className="p-3.5 rounded-xl bg-gray-900/60 border border-gray-800 hover:border-gray-700 hover:bg-gray-800/50 transition-all cursor-pointer flex items-center justify-between group"
-            title="Bấm để xem danh sách các việc ngoài mục tiêu chính"
-          >
-            <div>
-              <h4 className="text-sm font-semibold text-gray-300 group-hover:text-white">Ngoài mục tiêu chính (Outside my goals)</h4>
-              <span className="text-xs text-gray-400">Các việc vặt, phát sinh hành chính hoặc cá nhân</span>
+              <span className="text-xs font-mono text-slate-400">Tổng 1.440 phút (24h)</span>
             </div>
-            <div className="text-right">
-              <span className="text-sm font-bold text-gray-400">45 phút</span>
-              <p className="text-[10px] text-gray-500">Bấm xem ↗</p>
+
+            {/* Visual 24-Hour Colored Segment Bar */}
+            <div className="w-full h-8 rounded-2xl overflow-hidden flex bg-slate-950 border border-slate-800 shadow-inner">
+              {ledgerSegments.map((segment) => {
+                const widthPercent = (segment.durationMins / 1440) * 100;
+                const col = CATEGORY_COLORS[segment.category] || CATEGORY_COLORS.other;
+                return (
+                  <div
+                    key={segment.id}
+                    className={`${col.bg} h-full relative group transition-all hover:opacity-90`}
+                    style={{ width: `${Math.max(0.5, widthPercent)}%` }}
+                    title={`${segment.label} (${segment.start} - ${segment.end}): ${segment.durationMins} phút`}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Category Legend & Minutes Breakdown */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 pt-2">
+              {Object.entries(CATEGORY_COLORS).map(([catKey, col]) => {
+                const mins = categoryTotals[catKey as TimeLedgerCategory] || 0;
+                const hrs = (mins / 60).toFixed(1);
+                return (
+                  <div key={catKey} className="p-2.5 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-2.5 h-2.5 rounded-full ${col.bg} shrink-0`} />
+                      <span className="text-[11px] font-semibold text-slate-300 truncate">{col.labelVi}</span>
+                    </div>
+                    <p className="text-sm font-bold text-white mt-1">
+                      {mins}p <span className="text-[10px] text-slate-400 font-normal">({hrs}h)</span>
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* 3. Interruptions Accepted Breakdown */}
-      <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-3">
-        <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-          <Clock className="w-4 h-4 text-amber-400" />
-          <span>Các gián đoạn đã ghi nhận hôm nay</span>
-        </h3>
+          {/* 2. Key Ledger Figures: Waking Goal Share & Distraction Tracker */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            
+            <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Tỷ lệ giờ thức cho mục tiêu
+              </span>
+              <div className="py-2 flex items-baseline gap-2">
+                <span className="text-4xl font-mono font-extrabold text-orange-400">
+                  {goalWorkRatio}%
+                </span>
+                <span className="text-xs text-slate-400 font-medium">của giờ thức</span>
+              </div>
+              <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full" style={{ width: `${goalWorkRatio}%` }} />
+              </div>
+              <p className="text-[11px] text-slate-400 mt-2">
+                Đã dùng {categoryTotals.goal_work || 285}p trên tổng {wakingMinutes}p thức.
+              </p>
+            </div>
 
-        {interruptions.length === 0 ? (
-          <p className="text-xs text-slate-400">Chưa ghi nhận việc gián đoạn nào.</p>
-        ) : (
-          <div className="space-y-2">
-            {interruptions.map((item) => (
-              <div 
-                key={item.id} 
-                onClick={() => openDrilldown({
-                  type: 'interruptions',
-                  title: 'Nhật ký việc chen ngang & Quỹ dự phòng',
-                  subtitle: `Chi tiết việc: "${item.title}" • Kéo vào bởi: ${item.sourcePerson || 'Đối tác ngoài'}`,
-                })}
-                className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 hover:border-amber-500/50 hover:bg-slate-700/60 transition-all cursor-pointer flex items-center justify-between gap-3 text-xs"
-                title="Bấm để xem chi tiết người kéo bạn vào và trạng thái quỹ"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="px-2 py-0.5 rounded bg-slate-700/70 text-slate-300 font-semibold">
-                    {item.timestamp}
-                  </span>
-                  <div>
-                    <h5 className="font-semibold text-white">{item.title}</h5>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {item.sourcePerson && (
-                        <span className="text-[10px] text-amber-300 bg-amber-950/40 px-1.5 py-0.2 rounded border border-amber-800/30">
-                          Từ: {item.sourcePerson}
+            <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Xao nhãng sau timebox (Distraction)
+              </span>
+              <div className="py-2 flex items-baseline gap-2">
+                <span className="text-4xl font-mono font-extrabold text-rose-400">
+                  {distractionMins}
+                </span>
+                <span className="text-xs text-slate-400 font-medium">phút chưa khai báo</span>
+              </div>
+              <p className="text-xs text-slate-300">
+                Phát sinh khi timebox kết thúc quá vùng đệm 5 phút mà chưa tuyên bố việc tiếp theo.
+              </p>
+              <span className="text-[11px] text-orange-400 mt-2 cursor-pointer hover:underline" onClick={() => setViewMode('tasks')}>
+                Có thể gán nhãn lại trong Đóng ngày ↗
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Xu hướng so với 7 ngày trước
+              </span>
+              <div className="py-2 flex items-center gap-2">
+                <TrendingUp className="w-6 h-6 text-emerald-400" />
+                <span className="text-2xl font-bold text-emerald-400">+18%</span>
+                <span className="text-xs text-slate-400">thời gian việc sâu</span>
+              </div>
+              <p className="text-xs text-slate-300">
+                Trung bình việc sâu tuần này đạt 165p/ngày (so với 140p tuần trước).
+              </p>
+              <span className="text-[11px] text-slate-400 mt-2">
+                Quỹ gián đoạn sử dụng ở mức lành mạnh (68%).
+              </span>
+            </div>
+
+          </div>
+
+          {/* 3. Undeclared Time Gaps (PRD B10 & B1b) */}
+          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl space-y-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                <Tag className="w-4 h-4 text-sky-400" />
+                <span>Khoảng thời gian chưa khai báo (Undeclared Gaps - 15p+)</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Gắn nhãn 1 chạm không phán xét để giúp hệ thống học thích ứng theo thói quen của bạn.
+              </p>
+            </div>
+
+            {gaps.length === 0 ? (
+              <p className="text-xs text-slate-400">Không có khoảng trống thời gian nào.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {gaps.map((gap) => (
+                  <div key={gap.id} className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-200">
+                          {gap.start} - {gap.end} ({gap.durationMins} phút)
                         </span>
-                      )}
-                      {item.returnPoint && (
-                        <span className="text-indigo-300 text-[10px] truncate max-w-xs">
-                          Điểm về: {item.returnPoint}
-                        </span>
-                      )}
+                        {gap.label && (
+                          <span className="px-2 py-0.5 rounded text-[10px] bg-sky-500/20 text-sky-300 font-semibold">
+                            Đã gắn: {GAP_LABELS.find(l => l.key === gap.label)?.label}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">Khoảng trống không có lịch cố định</p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {GAP_LABELS.map((item) => (
+                        <button
+                          key={item.key}
+                          onClick={() => handleLabelGap(gap.id, item.key)}
+                          className={`px-2.5 py-1 rounded-xl text-xs font-medium transition-colors ${
+                            gap.label === item.key
+                              ? 'bg-sky-600 text-white font-bold'
+                              : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-slate-400 font-bold">{item.minutes}p</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                    item.decision === 'do_now'
-                      ? 'bg-amber-500/20 text-amber-300'
-                      : item.decision === 'decline'
-                      ? 'bg-rose-500/20 text-rose-300'
-                      : item.decision === 'delegate'
-                      ? 'bg-purple-500/20 text-purple-300'
-                      : 'bg-indigo-500/20 text-indigo-300'
-                  }`}>
-                    {item.decision === 'do_now' ? 'Làm ngay' : item.decision === 'decline' ? 'Từ chối' : item.decision === 'delegate' ? 'Ủy quyền' : item.decision === 'go_social' ? 'Giao lưu' : 'Lên lịch'}
-                  </span>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
 
-      {/* 4. Undeclared Time Gaps (PRD B10) */}
-      <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-3">
-        <div>
-          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-            <Tag className="w-4 h-4 text-sky-400" />
-            <span>Khoảng thời gian chưa khai báo (Undeclared Time - 15p+)</span>
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Gắn nhãn 1 chạm không phán xét để giúp hệ thống học thích ứng theo thói quen của bạn.
-          </p>
-        </div>
-
-        {gaps.length === 0 ? (
-          <p className="text-xs text-slate-400">Không có khoảng trống thời gian nào.</p>
-        ) : (
-          <div className="space-y-3">
-            {gaps.map((gap) => (
-              <div key={gap.id} className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-200">
-                      {gap.start} - {gap.end} ({gap.durationMins} phút)
-                    </span>
-                    {gap.label && (
-                      <span className="px-2 py-0.5 rounded text-[10px] bg-sky-500/20 text-sky-300 font-semibold">
-                        Đã gắn: {GAP_LABELS.find(l => l.key === gap.label)?.label}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Khoảng trống không có lịch cố định</p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {GAP_LABELS.map((item) => (
-                    <button
-                      key={item.key}
-                      onClick={() => handleLabelGap(gap.id, item.key)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                        gap.label === item.key
-                          ? 'bg-sky-600 text-white font-bold'
-                          : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* 5. Waiting for you (PRD B10) */}
-      {waitingBlocks.length > 0 && (
-        <div className="bg-slate-900/80 border border-amber-500/30 backdrop-blur-xl rounded-2xl p-5 shadow-xl space-y-3">
-          <h3 className="text-sm font-bold text-amber-300 uppercase tracking-wider flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-400" />
-            <span>Đang chờ bạn xác nhận (Waiting for you)</span>
-          </h3>
-
-          <div className="space-y-2">
-            {waitingBlocks.map((b) => (
-              <div key={b.id} className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between gap-3 text-xs">
-                <div>
-                  <h5 className="font-semibold text-white">{b.title}</h5>
-                  {b.returnPoint && <p className="text-slate-400 text-[11px]">Điểm về: {b.returnPoint}</p>}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setBlocks(prev => prev.map(item => item.id === b.id ? { ...item, status: 'done' } : item))}
-                    className="px-2.5 py-1 rounded bg-emerald-600 text-white font-medium"
-                  >
-                    Đã xong
-                  </button>
-                  <button
-                    onClick={() => setBlocks(prev => prev.map(item => item.id === b.id ? { ...item, status: 'dropped' } : item))}
-                    className="px-2.5 py-1 rounded bg-slate-700 text-slate-300 hover:text-white"
-                  >
-                    Bỏ qua
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
-      </>
+
+      {/* VIEW 2: TASKS (Daily Task Efficiency & Lean / Kanban Flow Metrics) */}
+      {viewMode === 'tasks' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          
+          {/* Summary Cards: Done on time vs Done over time & Flow efficiency */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Xong đúng hẹn
+              </span>
+              <p className="text-2xl font-bold text-emerald-400 mt-1">{doneOnTimeCount} việc</p>
+              <span className="text-[11px] text-slate-400">Khớp chuẩn DoD & Timebox</span>
+            </div>
+
+            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-amber-400" /> Xong quá giờ
+              </span>
+              <p className="text-2xl font-bold text-amber-400 mt-1">{doneOverTimeCount} việc</p>
+              <span className="text-[11px] text-slate-400">+15p bù giờ ghi nhận</span>
+            </div>
+
+            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                <Activity className="w-3.5 h-3.5 text-orange-400" /> Flow Efficiency
+              </span>
+              <p className="text-2xl font-bold text-orange-400 mt-1">{avgFlowEfficiency}%</p>
+              <span className="text-[11px] text-slate-400">Touch time / Cycle time (Lean)</span>
+            </div>
+
+            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                <Target className="w-3.5 h-3.5 text-sky-400" /> Độ chuẩn ước lượng
+              </span>
+              <p className="text-2xl font-bold text-sky-400 mt-1">88%</p>
+              <span className="text-[11px] text-slate-400">Giảm thiểu Planning Fallacy</span>
+            </div>
+          </div>
+
+          {/* Detailed Task Execution Breakdown */}
+          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                <CheckSquare className="w-4 h-4 text-orange-400" />
+                <span>Chi tiết hiệu suất từng nhiệm vụ (Touch Time & Cycle Time)</span>
+              </h3>
+              <span className="text-xs text-slate-400">Chuẩn Kanban Flow Metrics</span>
+            </div>
+
+            <div className="space-y-3">
+              {blocks.map((b) => {
+                const touch = b.touchTimeMinutes || (b.estimatedMinutes ? Math.round(b.estimatedMinutes * 0.9) : 45);
+                const cycle = b.cycleTimeMinutes || (b.estimatedMinutes || 60);
+                const flow = Math.round((touch / cycle) * 100);
+                const isDone = b.status === 'done';
+
+                return (
+                  <div key={b.id} className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-400' : b.status === 'in_progress' ? 'bg-orange-400 animate-pulse' : 'bg-slate-500'}`} />
+                        <h4 className="text-sm font-bold text-white">{b.title}</h4>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                        <span>Mục tiêu: <strong className="text-slate-300">{b.goalName || 'Ngoài mục tiêu'}</strong></span>
+                        <span>•</span>
+                        <span>Loại: <strong className="text-orange-400 uppercase text-[10px]">{b.taskEndType || 'timebox'}</strong></span>
+                        <span>•</span>
+                        <span>Ước lượng: <strong className="text-slate-300">{b.estimatedMinutes || 60}p</strong></span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="text-right">
+                        <div className="text-xs font-semibold text-slate-200">
+                          Touch: <strong className="text-orange-400">{touch}p</strong> / Cycle: <strong className="text-slate-400">{cycle}p</strong>
+                        </div>
+                        <div className="text-[11px] text-slate-400">
+                          Hiệu suất dòng chảy: <strong className="text-emerald-400">{flow}%</strong>
+                        </div>
+                      </div>
+
+                      <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${
+                        isDone ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/40' : 'bg-slate-800 text-slate-400'
+                      }`}>
+                        {isDone ? 'Đã hoàn thành ✓' : b.status === 'in_progress' ? 'Đang chạy' : 'Đã lên lịch'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* VIEW 3: PROJECTS & LONG-TERM GOALS (PMBOK Schedule Control & Variance) */}
+      {viewMode === 'projects' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          
+          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                <FolderKanban className="w-4 h-4 text-orange-400" />
+                <span>Tiến độ dự án & Kiểm soát sai lệch (Variance Analysis - PMBOK)</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Kế hoạch giờ vs Thực tế đã dùng • Dự báo khi hoàn thành (Forecast at Completion)
+              </p>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              {goals.map((g) => {
+                const plannedHours = Math.round(g.dailyBudgetMins * (g.horizonDays / 7) / 60);
+                const actualHours = Math.round(plannedHours * (g.progressPercent / 100) * 0.9);
+                const varianceHours = actualHours - Math.round(plannedHours * (g.progressPercent / 100));
+                const forecastHours = Math.round(actualHours + (plannedHours * (1 - g.progressPercent / 100)));
+
+                return (
+                  <div key={g.id} className="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-orange-950/50 text-orange-400 border border-orange-800/40">
+                          {g.workArea}
+                        </span>
+                        <h4 className="text-base font-bold text-white">{g.name}</h4>
+                      </div>
+                      <div className="text-xs font-mono text-slate-400">
+                        Hạn chót: <strong className="text-slate-200">{g.deadline}</strong> ({g.horizonDays} ngày)
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-300 font-medium">
+                      Kết quả đo lường: {g.measurableResult}
+                    </p>
+
+                    {/* Progress & Variance Bar */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400">
+                          Đã dùng: <strong className="text-white">{actualHours}h</strong> / Kế hoạch: <strong className="text-slate-300">{plannedHours}h</strong>
+                          {varianceHours <= 0 ? (
+                            <span className="text-emerald-400 ml-1.5 font-semibold">({varianceHours}h tiết kiệm)</span>
+                          ) : (
+                            <span className="text-amber-400 ml-1.5 font-semibold">(+{varianceHours}h vượt)</span>
+                          )}
+                        </span>
+                        <span className="text-orange-400 font-bold">{g.progressPercent}% hoàn thành</span>
+                      </div>
+                      <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                        <div 
+                          className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full" 
+                          style={{ width: `${g.progressPercent}%` }} 
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 font-mono">
+                        <span>Dự báo khi hoàn thành: <strong>{forecastHours}h</strong></span>
+                        <span>Cột mốc: {g.milestones.filter(m => m.status === 'completed').length}/{g.milestones.length} xong</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* VIEW 4: HABITS (B15 Habit Insights) */}
+      {viewMode === 'habits' && (
+        <HabitInsights />
       )}
 
     </div>

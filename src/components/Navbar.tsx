@@ -17,7 +17,10 @@ import {
   Settings,
   Minus,
   Square,
-  X as CloseIcon
+  X as CloseIcon,
+  Inbox,
+  HelpCircle,
+  Activity
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -33,7 +36,10 @@ export const Navbar: React.FC = () => {
     setIsOnboarded,
     setSocialAuditModalOpen,
     deviceLook,
-    setSettingsModalOpen
+    setSettingsModalOpen,
+    inbox,
+    setInboxModalOpen,
+    setMethodLibraryOpen
   } = useApp();
 
   return (
@@ -76,8 +82,8 @@ export const Navbar: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold tracking-tight text-white text-base">TAIO</span>
-                <span className="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/25">
-                  MVP v0.16
+                <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  v0.22.0 Approved
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 -mt-0.5">TAIO.CLUB Time App</p>
@@ -88,6 +94,31 @@ export const Navbar: React.FC = () => {
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-2.5 text-xs">
           
+          {/* Inbox Mini App Button (PRD B20) */}
+          <button
+            onClick={() => setInboxModalOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 transition-all font-semibold relative"
+            title="Rổ công việc (Inbox - GTD B20)"
+          >
+            <Inbox className="w-3.5 h-3.5 text-orange-400" />
+            <span className="hidden sm:inline">Rổ việc</span>
+            {inbox.filter(i => i.status === 'inbox').length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#E0401F] text-white">
+                {inbox.filter(i => i.status === 'inbox').length}
+              </span>
+            )}
+          </button>
+
+          {/* Method Library Button (PRD B22) */}
+          <button
+            onClick={() => setMethodLibraryOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 transition-all font-medium"
+            title="Thư viện phương pháp khoa học (B22)"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden md:inline">Phương pháp</span>
+          </button>
+
           {/* Social Outing Cost Audit Button (PRD B12) */}
           <button
             onClick={() => setSocialAuditModalOpen(true)}
@@ -95,7 +126,7 @@ export const Navbar: React.FC = () => {
             title="Kiểm toán chi phí giao lưu & ảnh hưởng ngày hôm sau"
           >
             <Wine className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden md:inline">Chi phí giao lưu</span>
+            <span className="hidden lg:inline">Giao lưu</span>
           </button>
 
           {/* Tone of Voice Selector (PRD B13) */}
@@ -200,18 +231,18 @@ export const Navbar: React.FC = () => {
           <span>{language === 'vi' ? 'Kế hoạch (Plan)' : 'Plan'}</span>
         </button>
 
-        {/* Tab 3: Achievements */}
+        {/* Tab 3: Efficiency */}
         <button
           onClick={() => setCurrentTab('achievements')}
-          title={language === 'vi' ? 'Việc đã xong hôm nay và thói quen của bạn' : 'What you finished today and your habits'}
+          title={language === 'vi' ? 'Thời gian đã đi đâu, việc đã xong, tiến độ dự án' : 'Where your time went, what you finished, project progress'}
           className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-semibold text-xs sm:text-sm transition-all group ${
-            currentTab === 'achievements'
+            currentTab === 'achievements' || (currentTab as any) === 'efficiency'
               ? 'border-[#E0401F] text-[#E0401F] bg-red-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
           }`}
         >
-          <Trophy className="w-4 h-4" />
-          <span>{language === 'vi' ? 'Thành tựu (Achievements)' : 'Achievements'}</span>
+          <Activity className="w-4 h-4" />
+          <span>{language === 'vi' ? 'Hiệu quả (Efficiency)' : 'Efficiency'}</span>
         </button>
 
         {/* Tab 4: Goals / Roadmap */}

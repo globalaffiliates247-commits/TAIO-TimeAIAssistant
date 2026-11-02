@@ -14,6 +14,8 @@ export type UserRole =
   | 'family' 
   | 'friend';
 
+export type WorkStyle = 'multitasking' | 'sequential' | 'mixed';
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -35,9 +37,13 @@ export interface UserProfile {
     windDownTime: string;
   };
   ageBand?: '<45' | '>=45';
+  // v0.22.0 B23:
+  workStyle?: WorkStyle;
 }
 
 export type BlockType = 'deep' | 'meeting' | 'interruption' | 'personal' | 'planning';
+
+export type TaskEndType = 'timebox' | 'until_done_pausable' | 'until_done_atomic';
 
 export type BlockStatus = 
   | 'planned' 
@@ -47,6 +53,15 @@ export type BlockStatus =
   | 'partly_done' 
   | 'dropped' 
   | 'unconfirmed';
+
+// v0.20: Definition of Done (DoD) Item
+export interface DodItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export type BlockKind = 'task' | 'ritual' | 'meeting' | 'personal';
 
 export interface TimeBlock {
   id: string;
@@ -68,6 +83,17 @@ export interface TimeBlock {
   isUrgent?: boolean;
   estimatedMinutes?: number;
   ageDays?: number;
+  // v0.18 - v0.20 additions:
+  blockKind?: BlockKind;
+  dodChecklist?: DodItem[];
+  timeboxEndOutcome?: 'done_on_time' | 'done_over_time' | 'continue_later' | 'extended';
+  nextStep?: string;
+  touchTimeMinutes?: number;
+  cycleTimeMinutes?: number;
+  flowEfficiency?: number;
+  // v0.22.0 B23 additions:
+  taskEndType?: TaskEndType;
+  timeLimitMins?: number; // User-set appetite / time limit when planning (default = estimate)
 }
 
 export interface HardDeadline {
@@ -239,3 +265,64 @@ export interface PaletteColors {
   personal: string;
   planning: string;
 }
+
+// B20: Inbox Mini App ("Rổ công việc")
+export interface InboxItem {
+  id: string;
+  title: string;
+  source: 'quick' | 'telegram' | 'voice' | 'meeting_followup';
+  createdAt: string;
+  nextAction?: string;
+  estimatedMinutes?: number;
+  linkedGoalId?: string;
+  linkedGoalName?: string;
+  suggestedQuadrant?: 1 | 2 | 3 | 4;
+  status: 'inbox' | 'scheduled' | 'done_2min' | 'delegated' | 'dropped';
+}
+
+// B1b & B21: 24-Hour Time Ledger
+export type TimeLedgerCategory = 
+  | 'sleep' 
+  | 'personal' 
+  | 'goal_work' 
+  | 'meeting' 
+  | 'interruption' 
+  | 'distraction' 
+  | 'other';
+
+export interface TimeLedgerSegment {
+  id: string;
+  start: string;
+  end: string;
+  durationMins: number;
+  category: TimeLedgerCategory;
+  label: string;
+  linkedTaskTitle?: string;
+  isTransitionGrace?: boolean;
+}
+
+// B22: Method Library & Contextual Coach Cards
+export interface MethodConcept {
+  id: string;
+  name: string;
+  nameVi: string;
+  oneSentenceVi: string;
+  sourceAuthor: string;
+  year: number | string;
+  bookOrStudy: string;
+  appApplicationVi: string;
+  tryTodayVi: string;
+  category: 'plan' | 'do' | 'recover' | 'review';
+}
+
+export interface CoachCard {
+  id: string;
+  conceptId: string;
+  triggerMoment: 'first_interruption' | 'first_timebox' | 'first_dod_done' | 'first_inbox' | 'first_matrix';
+  titleVi: string;
+  conceptLineVi: string;
+  meaningVi: string;
+  actionDoneVi: string;
+  encourageVi: string;
+}
+
