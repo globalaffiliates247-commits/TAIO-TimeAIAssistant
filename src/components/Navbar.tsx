@@ -21,7 +21,8 @@ import {
   Inbox,
   HelpCircle,
   Activity,
-  UploadCloud
+  UploadCloud,
+  FolderKanban
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -41,7 +42,10 @@ export const Navbar: React.FC = () => {
     inbox,
     setInboxModalOpen,
     setMethodLibraryOpen,
-    setExportModalOpen
+    setExportModalOpen,
+    setIsListsModalOpen,
+    setIsProfileModalOpen,
+    userProfileDetail
   } = useApp();
 
   return (
@@ -85,7 +89,7 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold tracking-tight text-white text-base">TAIO</span>
                 <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  v0.3.1 Approved
+                  v0.3.4 Approved
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 -mt-0.5">TAIO.CLUB Time App</p>
@@ -119,6 +123,16 @@ export const Navbar: React.FC = () => {
                 {inbox.filter(i => i.status === 'inbox').length}
               </span>
             )}
+          </button>
+
+          {/* Lists Mini App Button (PRD B26) */}
+          <button
+            onClick={() => setIsListsModalOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 transition-all font-semibold"
+            title="Danh sách Ý tưởng, Dự án, Checklist (B26)"
+          >
+            <FolderKanban className="w-3.5 h-3.5 text-sky-400" />
+            <span className="hidden sm:inline">Danh sách</span>
           </button>
 
           {/* Method Library Button (PRD B22) */}
@@ -197,18 +211,16 @@ export const Navbar: React.FC = () => {
             <span>{language.toUpperCase()}</span>
           </button>
 
-          {/* Admin Back-end Switcher */}
+          {/* Profile & Community Button (PRD B27 "Cá nhân / Me") */}
           <button
-            onClick={() => setCurrentTab(currentTab === 'admin' ? 'now' : 'admin')}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-semibold transition-all ${
-              currentTab === 'admin'
-                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md shadow-red-500/25'
-                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
-            }`}
-            title="Trang quản trị dành cho Founder / Quản trị viên"
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white font-semibold transition-all border border-slate-700/80 shadow-sm"
+            title="Hồ sơ, Cá nhân hóa & Kết nối TAIO (B27)"
           >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Admin</span>
+            <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-[#E0401F] to-amber-500 text-white flex items-center justify-center text-[9px] font-extrabold shadow-sm">
+              {userProfileDetail.displayName.charAt(0) || 'U'}
+            </div>
+            <span>Cá nhân</span>
           </button>
         </div>
       </div>

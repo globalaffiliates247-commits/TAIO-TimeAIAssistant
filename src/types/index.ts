@@ -361,4 +361,105 @@ export interface ExportSnapshot {
   shareUrlExact: string;
 }
 
+// B26 (PRD v0.3.2): Mini app Lists ("Danh sách")
+export type ListType = 'idea' | 'project' | 'checklist';
+export type IdeaState = 'new' | 'considering' | 'used' | 'dropped';
+export type ProjectStatus = 'planned' | 'active' | 'paused' | 'done' | 'cancelled';
+
+export interface AppList {
+  id: string;
+  name: string;
+  type: ListType;
+  tag?: string; // e.g. "#ytuong"
+  pinned: boolean;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListItemLink {
+  kind: 'goal' | 'task' | 'timeBlock' | 'dayCard' | 'item';
+  id: string;
+}
+
+export interface ListItem {
+  id: string;
+  listId: string;
+  text: string;
+  note?: string;
+  order: number;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+  source: 'typed' | 'voice' | 'widget' | 'telegram' | 'inbox';
+  links?: ListItemLink[];
+  // Idea list fields
+  ideaState?: IdeaState;
+  usedIn?: string;
+  // Project list fields (same entity as projects in Goals & Efficiency B21)
+  goalId?: string;
+  goalName?: string;
+  startDate?: string;
+  deadline?: string;
+  projectStatus?: ProjectStatus;
+  progressMode?: 'auto' | 'manual';
+  progress?: number; // 0-100%
+  nextAction?: string; // GTD next action
+  timeSpentMinutes?: number;
+  // Simple checklist field
+  checked?: boolean;
+}
+
+// B27 (PRD v0.3.4): Profile, Personalization and Community links ("Cá nhân / Me")
+export interface UserProfileDetail {
+  displayName: string;
+  salutation: string; // "Anh", "Chị", "Bạn"
+  avatarType: 'initials' | 'image' | 'preset';
+  avatarPreset?: string;
+  avatarUrl?: string;
+  defaultHomeScreen: 'daycard' | 'now';
+  quietHoursStart: string; // "22:00"
+  quietHoursEnd: string;   // "07:00"
+  analyticsOptOut: boolean;
+}
+
+export interface CommunityRemoteConfig {
+  advisor: {
+    name: string;
+    title: string;
+    description: string;
+    avatarUrl?: string;
+    zaloUrl: string;
+    telegramUrl: string;
+    visible: boolean;
+  };
+  communityGroups: Array<{
+    id: string;
+    name: string;
+    channel: 'zalo' | 'telegram';
+    description: string;
+    membersCount?: string;
+    url: string;
+    visible: boolean;
+  }>;
+  freeTools: Array<{
+    id: string;
+    name: string;
+    oneLineUse: string;
+    iconName: string;
+    url: string;
+    visible: boolean;
+  }>;
+}
+
+// C6.1 (PRD v0.3.3): Screen Dwell Statistics
+export interface ScreenDwellEvent {
+  screenId: string;
+  dwellSeconds: number;
+  enteredAt: string;
+  source: string;
+  deviceClass: 'phone' | 'tablet' | 'desktop';
+}
+
+
 

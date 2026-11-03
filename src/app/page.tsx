@@ -21,7 +21,28 @@ import { InboxModal } from '../components/InboxModal';
 import { MethodLibraryModal } from '../components/MethodLibraryModal';
 import { CoachCardOverlay } from '../components/CoachCardOverlay';
 import { ExportDataModal } from '../components/ExportDataModal';
-import { Sparkles, X } from 'lucide-react';
+import { ListsModal } from '../components/ListsModal';
+import { ProfileModal } from '../components/ProfileModal';
+import { Sparkles, X, Smartphone } from 'lucide-react';
+
+const OrientationHint: React.FC = () => {
+  const [dismissed, setDismissed] = React.useState(false);
+  if (dismissed) return null;
+  return (
+    <div className="md:hidden mb-4 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between gap-2 shadow-sm">
+      <div className="flex items-center gap-1.5">
+        <Smartphone className="w-3.5 h-3.5 text-[#ff7556] shrink-0 rotate-90" />
+        <span>Xoay ngang hoặc mở trên máy tính để xem đầy đủ hơn.</span>
+      </div>
+      <button 
+        onClick={() => setDismissed(true)}
+        className="text-slate-500 hover:text-white p-1"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </div>
+  );
+};
 
 const MainAppContent: React.FC = () => {
   const { currentTab, celebrationMsg, setCelebrationMsg, deviceLook } = useApp();
@@ -52,8 +73,17 @@ const MainAppContent: React.FC = () => {
         </div>
       )}
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      {/* Main Container - D5 Mobile First: Everyday tabs constrained to mobile-width column; Management tabs responsive */}
+      <main className={`flex-1 w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 transition-all duration-300 ${
+        currentTab === 'now' || currentTab === 'plan' 
+          ? 'max-w-xl' 
+          : 'max-w-6xl'
+      }`}>
+        {/* Orientation Hint on portrait mobile for management screens (PRD D5) */}
+        {(currentTab === 'achievements' || (currentTab as any) === 'efficiency' || currentTab === 'goals') && (
+          <OrientationHint />
+        )}
+
         {currentTab === 'now' && <NowTab />}
         {currentTab === 'plan' && <PlanTab />}
         {(currentTab === 'achievements' || (currentTab as any) === 'efficiency') && <AchievementsTab />}
@@ -63,7 +93,7 @@ const MainAppContent: React.FC = () => {
 
       {/* Bottom Footer info */}
       <footer className="border-t border-slate-800/80 py-5 text-center text-xs text-slate-500">
-        TAIO Time App v0.3.1 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
+        TAIO Time App v0.3.4 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
       </footer>
 
       {/* Modals & Overlays */}
@@ -78,6 +108,8 @@ const MainAppContent: React.FC = () => {
       <MethodLibraryModal />
       <CoachCardOverlay />
       <ExportDataModal />
+      <ListsModal />
+      <ProfileModal />
     </div>
   );
 };

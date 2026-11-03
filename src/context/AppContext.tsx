@@ -30,7 +30,13 @@ import {
   CoachCard,
   DailyCardItem,
   ItemOrigin,
-  ItemStatus
+  ItemStatus,
+  AppList,
+  ListItem,
+  ListType,
+  UserProfileDetail,
+  CommunityRemoteConfig,
+  ScreenDwellEvent
 } from '../types';
 import { 
   PROFILES, 
@@ -48,7 +54,11 @@ import {
   INITIAL_TIME_LEDGER,
   METHOD_CONCEPTS,
   INITIAL_COACH_CARDS,
-  INITIAL_DAILY_CARD_ITEMS
+  INITIAL_DAILY_CARD_ITEMS,
+  INITIAL_LISTS,
+  INITIAL_LIST_ITEMS,
+  INITIAL_USER_PROFILE_DETAIL,
+  INITIAL_COMMUNITY_CONFIG
 } from '../data/mockData';
 
 export type AppTab = 'now' | 'plan' | 'efficiency' | 'achievements' | 'goals' | 'admin';
@@ -136,6 +146,33 @@ interface AppContextType {
   shareToken: string;
   rotateShareToken: () => void;
   generateMarkdownSnapshot: () => string;
+
+  // v0.3.2 B26: Mini app Lists ("Danh sách")
+  lists: AppList[];
+  listItems: ListItem[];
+  activeListId: string | null;
+  setActiveListId: (id: string | null) => void;
+  isListsModalOpen: boolean;
+  setIsListsModalOpen: (val: boolean) => void;
+  createList: (name: string, type: ListType, tag?: string) => string;
+  archiveList: (id: string) => void;
+  togglePinList: (id: string) => void;
+  addListItem: (listId: string, text: string, extra?: Partial<ListItem>) => void;
+  toggleListItemCheck: (itemId: string) => void;
+  updateListItem: (itemId: string, patch: Partial<ListItem>) => void;
+  archiveListItem: (itemId: string) => void;
+
+  // v0.3.4 B27: Profile, Personalization and Community links
+  userProfileDetail: UserProfileDetail;
+  setUserProfileDetail: React.Dispatch<React.SetStateAction<UserProfileDetail>>;
+  updateUserProfileDetail: (patch: Partial<UserProfileDetail>) => void;
+  communityConfig: CommunityRemoteConfig;
+  isProfileModalOpen: boolean;
+  setIsProfileModalOpen: (val: boolean) => void;
+
+  // v0.3.3 C6.1: Screen Dwell Statistics
+  screenDwells: ScreenDwellEvent[];
+  recordScreenDwell: (screenId: string, dwellSeconds: number, source?: string) => void;
   
   // Active state
   currentBlock: TimeBlock | undefined;
@@ -304,6 +341,106 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedCardDate, setSelectedCardDate] = useState<string>(todayDateStr);
   const [dailyCardItems, setDailyCardItems] = useState<DailyCardItem[]>(INITIAL_DAILY_CARD_ITEMS);
 
+  // v0.3.2 B26: Mini app Lists ("Danh sách")
+  const [lists, setLists] = useState<AppList[]>(INITIAL_LISTS);
+  const [listItems, setListItems] = useState<ListItem[]>(INITIAL_LIST_ITEMS);
+  const [activeListId, setActiveListId] = useState<string | null>(INITIAL_LISTS[0]?.id || null);
+  const [isListsModalOpen, setIsListsModalOpen] = useState<boolean>(false);
+
+  const createList = (name: string, type: ListType, tag?: string): string => {
+    const newList: AppList = {
+      id: `lst-${Date.now()}`,
+      name,
+      type,
+      tag: tag ? (tag.startsWith('#') ? tag : `#${tag}`) : undefined,
+      pinned: false,
+      archived: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setLists(prev => [newList, ...prev]);
+    setActiveListId(newList.id);
+    setCelebrationMsg(`Đã tạo danh sách mới: "${name}"!`);
+    return newList.id;
+  };
+
+  const archiveList = (id: string) => {
+    setLists(prev => prev.map(l => l.id === id ? { ...l, archived: !l.archived } : l));
+  };
+
+  const togglePinList = (id: string) => {
+    setLists(prev => prev.map(l => l.id === id ? { ...l, pinned: !l.pinned } : l));
+  };
+
+  const addListItem = (listId: string, text: string, extra?: Partial<ListItem>) => {
+    const targetList = lists.find(l => l.id === listId);
+    const nowStr = new Date().toISOString();
+    const newItem: ListItem = {
+      id: `li-${Date.now()}`,
+      listId,
+      text,
+      note: extra?.note,
+      order: 1,
+      archived: false,
+      createdAt: nowStr,
+      updatedAt: nowStr,
+      source: extra?.source || 'typed',
+      links: extra?.links || (extra?.goalId ? [{ kind: 'goal', id: extra.goalId }] : []),
+      ideaState: targetList?.type === 'idea' ? (extra?.ideaState || 'new') : undefined,
+      usedIn: extra?.usedIn,
+      goalId: extra?.goalId,
+      goalName: goals.find(g => g.id === extra?.goalId)?.name,
+      startDate: extra?.startDate,
+      deadline: extra?.deadline,
+      projectStatus: targetList?.type === 'project' ? (extra?.projectStatus || 'active') : undefined,
+      progressMode: extra?.progressMode || 'manual',
+      progress: extra?.progress ?? 0,
+      nextAction: extra?.nextAction,
+      timeSpentMinutes: extra?.timeSpentMinutes ?? 0,
+      checked: targetList?.type === 'checklist' ? false : undefined,
+    };
+    setListItems(prev => [newItem, ...prev]);
+    setLists(prev => prev.map(l => l.id === listId ? { ...l, updatedAt: nowStr } : l));
+    setCelebrationMsg(`Đã thêm mục vào danh sách!`);
+  };
+
+  const toggleListItemCheck = (itemId: string) => {
+    setListItems(prev => prev.map(i => i.id === itemId ? { ...i, checked: !i.checked, updatedAt: new Date().toISOString() } : i));
+  };
+
+  const updateListItem = (itemId: string, patch: Partial<ListItem>) => {
+    setListItems(prev => prev.map(i => i.id === itemId ? { ...i, ...patch, updatedAt: new Date().toISOString() } : i));
+  };
+
+  const archiveListItem = (itemId: string) => {
+    setListItems(prev => prev.map(i => i.id === itemId ? { ...i, archived: true, updatedAt: new Date().toISOString() } : i));
+  };
+
+  // v0.3.4 B27: Profile, Personalization and Community links
+  const [userProfileDetail, setUserProfileDetail] = useState<UserProfileDetail>(INITIAL_USER_PROFILE_DETAIL);
+  const [communityConfig] = useState<CommunityRemoteConfig>(INITIAL_COMMUNITY_CONFIG);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+
+  const updateUserProfileDetail = (patch: Partial<UserProfileDetail>) => {
+    setUserProfileDetail(prev => ({ ...prev, ...patch }));
+    setCelebrationMsg('Đã cập nhật thông tin cá nhân & cài đặt!');
+  };
+
+  // v0.3.3 C6.1: Screen Dwell Statistics
+  const [screenDwells, setScreenDwells] = useState<ScreenDwellEvent[]>([]);
+  const recordScreenDwell = (screenId: string, dwellSeconds: number, source: string = 'tab_tap') => {
+    if (userProfileDetail.analyticsOptOut) return;
+    const device = typeof window !== 'undefined' && window.innerWidth < 600 ? 'phone' : typeof window !== 'undefined' && window.innerWidth < 1024 ? 'tablet' : 'desktop';
+    const ev: ScreenDwellEvent = {
+      screenId,
+      dwellSeconds,
+      enteredAt: new Date().toISOString(),
+      source,
+      deviceClass: device,
+    };
+    setScreenDwells(prev => [ev, ...prev.slice(0, 49)]);
+  };
+
   // v0.3.0 / v0.23.0 B24: Data Export for AI Assistant State
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
   const [shareToken, setShareToken] = useState<string>('taio_sec_tok_9f8a7e6d5c4b3a210987654321fedcba');
@@ -386,8 +523,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     // 1. Header
     let md = `# TAIO Time App · Daily log ${today}\n`;
+    md += `- Người dùng: ${userProfileDetail.displayName} (${userProfileDetail.salutation})\n`;
     md += `- Xuất lúc: ${exportTime} (GMT+7)\n`;
-    md += `- Phiên bản ứng dụng: TAIO Time App v0.3.1 Approved\n`;
+    md += `- Phiên bản ứng dụng: TAIO Time App v0.3.4 Approved\n`;
     md += `- Hồ sơ người dùng: ${profile.title} (${profile.workStyle || 'mixed'})\n`;
     md += `- Mã xuất dữ liệu: exp_${Date.now()}\n\n`;
 
@@ -462,7 +600,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 10. Day close
     md += `## 9. Đóng ngày (Day close)\n`;
     md += `- Trạng thái: ${dayClosed ? 'Đã đóng ngày an toàn' : 'Chưa đóng ngày'}\n`;
-    md += `- Nhiệm vụ số 1 ngày mai: Sẵn sàng thực thi\n`;
+    md += `- Nhiệm vụ số 1 ngày mai: Sẵn sàng thực thi\n\n`;
+
+    // 11. Lists & Projects (B26)
+    md += `## 10. Danh sách & Dự án (Lists & Projects - B26)\n`;
+    lists.filter(l => !l.archived).forEach(l => {
+      const items = listItems.filter(i => i.listId === l.id && !i.archived);
+      md += `### ${l.name} [${l.type.toUpperCase()}]\n`;
+      items.forEach(it => {
+        if (l.type === 'checklist') {
+          md += `- [${it.checked ? 'X' : ' '}] ${it.text}\n`;
+        } else if (l.type === 'idea') {
+          md += `- [${it.ideaState || 'new'}] ${it.text}${it.usedIn ? ` (Đã dùng: ${it.usedIn})` : ''}\n`;
+        } else {
+          md += `- **${it.text}** (${it.projectStatus || 'active'} - Tiến độ ${it.progress || 0}%) | Kế tiếp: ${it.nextAction || 'Chưa định'}\n`;
+        }
+      });
+      md += `\n`;
+    });
 
     return md;
   };
@@ -991,7 +1146,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setExportModalOpen,
       shareToken,
       rotateShareToken,
-      generateMarkdownSnapshot
+      generateMarkdownSnapshot,
+      lists,
+      listItems,
+      activeListId,
+      setActiveListId,
+      isListsModalOpen,
+      setIsListsModalOpen,
+      createList,
+      archiveList,
+      togglePinList,
+      addListItem,
+      toggleListItemCheck,
+      updateListItem,
+      archiveListItem,
+      userProfileDetail,
+      setUserProfileDetail,
+      updateUserProfileDetail,
+      communityConfig,
+      isProfileModalOpen,
+      setIsProfileModalOpen,
+      screenDwells,
+      recordScreenDwell
     }}>
       {children}
     </AppContext.Provider>
