@@ -7,9 +7,14 @@
     "dev": "npm run build:css && next dev --webpack -p 3000",
     "build": "npm run build:css && next build --webpack",
     "start": "node scripts/serve-static.js",
-    "deploy:render": "node scripts/trigger-deploy.js"
+    "deploy:render": "node scripts/trigger-deploy.js",
+    "sync:ios": "npm run build && npx cap sync ios",
+    "open:ios": "npx cap open ios"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
     "lucide-react": "^1.60.0",
     "next": "16.4.2",
     "react": "19.3.0",
