@@ -33,7 +33,11 @@ export const DailyCardView: React.FC = () => {
     setSelectedCardDate,
     goals,
     blocks,
-    setMethodLibraryOpen
+    setMethodLibraryOpen,
+    setIsSwipeModalOpen,
+    setIsQuestionsModalOpen,
+    setIsActiveCaptureOpen,
+    activeQuestion
   } = useApp();
 
   const [newText, setNewText] = useState<string>('');
@@ -137,6 +141,37 @@ export const DailyCardView: React.FC = () => {
               title="Ngày sau"
             >
               <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* PRD v0.3.6 B29: Question Chip on Daily Card + Quick Actions for B28 & B30 */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/30">
+          <button
+            onClick={() => setIsQuestionsModalOpen(true)}
+            className="flex items-center gap-2 text-left group"
+          >
+            <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-xs font-bold">
+              ?
+            </span>
+            <span className="text-xs text-amber-300 font-semibold group-hover:underline">
+              {activeQuestion ? activeQuestion.text : '3 việc quan trọng nhất bạn cần làm hôm nay là gì?'}
+            </span>
+          </button>
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button
+              onClick={() => setIsSwipeModalOpen(true)}
+              className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold border border-slate-700/80 flex items-center gap-1 transition-all"
+              title="Mở Thẻ nhắc việc (Lướt rổ backlog - B28)"
+            >
+              <span>Lướt rổ (B28)</span>
+            </button>
+            <button
+              onClick={() => setIsActiveCaptureOpen(true)}
+              className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-[#ff7556] text-[11px] font-semibold border border-slate-700/80 flex items-center gap-1 transition-all"
+              title="Thu thập chủ động & Ghi bù (B30)"
+            >
+              <span>Ghi bù (B30)</span>
             </button>
           </div>
         </div>

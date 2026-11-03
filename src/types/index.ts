@@ -461,5 +461,78 @@ export interface ScreenDwellEvent {
   deviceClass: 'phone' | 'tablet' | 'desktop';
 }
 
+// B28 (PRD v0.3.6): Thẻ nhắc việc (Swipe review of the backlog)
+export interface BacklogCard {
+  id: string;
+  text: string;
+  note?: string;
+  type: 'inbox' | 'idea' | 'task';
+  sourceId?: string;
+  ageDays: number;
+  snoozesCount: number;
+  goalId?: string;
+  goalName?: string;
+  whyThisCard: string; // "Tồn đọng 7 ngày", "Thuộc mục tiêu chậm tiến độ", "Khám phá ngẫu nhiên (1/5)"
+  estimatedMinutes?: number;
+  deadline?: string;
+}
+
+// B29 (PRD v0.3.6): Câu hỏi nhắc việc (Reminder questions)
+export interface ReminderQuestion {
+  id: string;
+  text: string;
+  category: 'today' | 'week' | 'goals';
+  triggerType: 'day_start' | 'drift' | 'day_end' | 'free_gaps' | 'backlog_untouched' | 'random_tip';
+  answerSummary: string; // Dữ liệu trả lời nhanh từ số liệu của người dùng
+  targetScreen: 'plan' | 'now' | 'daycard' | 'goals' | 'swipe_review' | 'close_day';
+  actionLabel: string;
+}
+
+// B30 (PRD v0.3.7): Active capture (Ghi bù & Địa điểm Geofence)
+export interface BackfillEntry {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  durationMins: number;
+  category: InterruptionActivityCategory;
+  goalId?: string;
+  goalName?: string;
+  origin: ItemOrigin;
+  displacedBlockTitle?: string;
+  note?: string;
+}
+
+export interface PassiveTimeSuggestion {
+  id: string;
+  startTime: string;
+  endTime: string;
+  durationMins: number;
+  suggestedActivity: string;
+  category: InterruptionActivityCategory;
+  goalId?: string;
+  goalName?: string;
+  source: 'ai_tool_timestamp' | 'geofence' | 'calendar' | 'motion';
+  status: 'pending' | 'accepted' | 'ignored';
+}
+
+export interface PlaceRule {
+  id: string;
+  trigger: 'arrive' | 'leave';
+  actionType: 'remind_task' | 'auto_done' | 'time_segment';
+  taskTitle: string;
+  autoAccept?: boolean;
+}
+
+export interface SavedPlace {
+  id: string;
+  name: string;
+  address?: string;
+  radiusMeters: number; // min 100, default 150
+  isCurrentLocation?: boolean;
+  rules: PlaceRule[];
+}
+
+
 
 

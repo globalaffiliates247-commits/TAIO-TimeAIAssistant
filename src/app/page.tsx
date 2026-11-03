@@ -23,6 +23,9 @@ import { CoachCardOverlay } from '../components/CoachCardOverlay';
 import { ExportDataModal } from '../components/ExportDataModal';
 import { ListsModal } from '../components/ListsModal';
 import { ProfileModal } from '../components/ProfileModal';
+import { SwipeReviewModal } from '../components/SwipeReviewModal';
+import { ReminderQuestionsModal } from '../components/ReminderQuestionsModal';
+import { ActiveCaptureModal } from '../components/ActiveCaptureModal';
 import { Sparkles, X, Smartphone } from 'lucide-react';
 
 const OrientationHint: React.FC = () => {
@@ -93,7 +96,7 @@ const MainAppContent: React.FC = () => {
 
       {/* Bottom Footer info */}
       <footer className="border-t border-slate-800/80 py-5 text-center text-xs text-slate-500">
-        TAIO Time App v0.3.4 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
+        TAIO Time App v0.3.7 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
       </footer>
 
       {/* Modals & Overlays */}
@@ -110,6 +113,9 @@ const MainAppContent: React.FC = () => {
       <ExportDataModal />
       <ListsModal />
       <ProfileModal />
+      <SwipeReviewModal />
+      <ReminderQuestionsModal />
+      <ActiveCaptureModal />
     </div>
   );
 };

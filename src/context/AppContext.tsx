@@ -36,7 +36,12 @@ import {
   ListType,
   UserProfileDetail,
   CommunityRemoteConfig,
-  ScreenDwellEvent
+  ScreenDwellEvent,
+  BacklogCard,
+  ReminderQuestion,
+  BackfillEntry,
+  PassiveTimeSuggestion,
+  SavedPlace
 } from '../types';
 import { 
   PROFILES, 
@@ -58,7 +63,11 @@ import {
   INITIAL_LISTS,
   INITIAL_LIST_ITEMS,
   INITIAL_USER_PROFILE_DETAIL,
-  INITIAL_COMMUNITY_CONFIG
+  INITIAL_COMMUNITY_CONFIG,
+  INITIAL_BACKLOG_CARDS,
+  INITIAL_REMINDER_QUESTIONS,
+  INITIAL_SAVED_PLACES,
+  INITIAL_PASSIVE_SUGGESTIONS
 } from '../data/mockData';
 
 export type AppTab = 'now' | 'plan' | 'efficiency' | 'achievements' | 'goals' | 'admin';
@@ -173,6 +182,31 @@ interface AppContextType {
   // v0.3.3 C6.1: Screen Dwell Statistics
   screenDwells: ScreenDwellEvent[];
   recordScreenDwell: (screenId: string, dwellSeconds: number, source?: string) => void;
+
+  // v0.3.6 B28: Thẻ nhắc việc (Backlog Swipe Review)
+  backlogCards: BacklogCard[];
+  isSwipeModalOpen: boolean;
+  setIsSwipeModalOpen: (v: boolean) => void;
+  handleSwipeAction: (cardId: string, action: 'plan' | 'later' | 'done_now' | 'drop', planDetails?: { durationMins: number; deadline?: string; goalId?: string }) => void;
+
+  // v0.3.6 B29: Câu hỏi nhắc việc (Reminder Questions)
+  reminderQuestions: ReminderQuestion[];
+  isQuestionsModalOpen: boolean;
+  setIsQuestionsModalOpen: (v: boolean) => void;
+  activeQuestion: ReminderQuestion | null;
+  setActiveQuestion: (q: ReminderQuestion | null) => void;
+  triggerReminderQuestion: (triggerType: string) => void;
+
+  // v0.3.7 B30: Active Capture (Ghi bù & Địa điểm Geofence)
+  isActiveCaptureOpen: boolean;
+  setIsActiveCaptureOpen: (v: boolean) => void;
+  savedPlaces: SavedPlace[];
+  passiveSuggestions: PassiveTimeSuggestion[];
+  acceptPassiveSuggestion: (id: string) => void;
+  ignorePassiveSuggestion: (id: string) => void;
+  backfillTime: (entry: Omit<BackfillEntry, 'id'>) => void;
+  savePlace: (place: SavedPlace) => void;
+  togglePlaceLocation: (placeId: string) => void;
   
   // Active state
   currentBlock: TimeBlock | undefined;
@@ -441,6 +475,163 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setScreenDwells(prev => [ev, ...prev.slice(0, 49)]);
   };
 
+  // v0.3.6 B28: Thẻ nhắc việc (Backlog Swipe Review)
+  const [backlogCards, setBacklogCards] = useState<BacklogCard[]>(INITIAL_BACKLOG_CARDS);
+  const [isSwipeModalOpen, setIsSwipeModalOpen] = useState<boolean>(false);
+
+  const handleSwipeAction = (
+    cardId: string, 
+    action: 'plan' | 'later' | 'done_now' | 'drop', 
+    planDetails?: { durationMins: number; deadline?: string; goalId?: string }
+  ) => {
+    const card = backlogCards.find(c => c.id === cardId);
+    if (!card) return;
+
+    if (action === 'plan') {
+      const duration = planDetails?.durationMins || card.estimatedMinutes || 30;
+      const goal = goals.find(g => g.id === planDetails?.goalId);
+      // Add to plan / timeblocks
+      addNewBlock({
+        title: card.text,
+        startTime: '15:00',
+        endTime: `15:${duration < 60 ? duration : 45}`,
+        type: 'deep',
+        status: 'planned',
+        goalId: planDetails?.goalId || card.goalId,
+        goalName: goal?.name || card.goalName,
+        quadrant: 2,
+        estimatedMinutes: duration,
+        notes: `Xếp lịch từ Thẻ nhắc việc: ${card.note || ''}`,
+      });
+      // Also add to today's daily card
+      addDailyCardItem({
+        text: card.text,
+        goalId: planDetails?.goalId || card.goalId,
+        origin: 'planned',
+      });
+      setBacklogCards(prev => prev.filter(c => c.id !== cardId));
+      setCelebrationMsg(`Đã lên lịch thành công cho: "${card.text}"!`);
+    } else if (action === 'done_now') {
+      setTimerMinutesRemaining(2);
+      setIsTimerRunning(true);
+      setCurrentTab('now');
+      setIsSwipeModalOpen(false);
+      setCelebrationMsg(`Bắt đầu làm ngay 2 phút: "${card.text}" (GTD Two-Minute Rule)!`);
+      setBacklogCards(prev => prev.filter(c => c.id !== cardId));
+    } else if (action === 'later') {
+      setBacklogCards(prev => {
+        const remaining = prev.filter(c => c.id !== cardId);
+        return [...remaining, { ...card, snoozesCount: card.snoozesCount + 1 }];
+      });
+      setCelebrationMsg(`Đã dời thẻ "${card.text}" xem lại sau.`);
+    } else if (action === 'drop') {
+      setBacklogCards(prev => prev.filter(c => c.id !== cardId));
+      setCelebrationMsg(`Đã loại bỏ thẻ khỏi rổ tồn đọng.`);
+    }
+  };
+
+  // v0.3.6 B29: Câu hỏi nhắc việc (Reminder Questions)
+  const [reminderQuestions] = useState<ReminderQuestion[]>(INITIAL_REMINDER_QUESTIONS);
+  const [isQuestionsModalOpen, setIsQuestionsModalOpen] = useState<boolean>(false);
+  const [activeQuestion, setActiveQuestion] = useState<ReminderQuestion | null>(INITIAL_REMINDER_QUESTIONS[0] || null);
+
+  const triggerReminderQuestion = (triggerType: string) => {
+    const q = reminderQuestions.find(item => item.triggerType === triggerType) || reminderQuestions[0];
+    if (q) {
+      setActiveQuestion(q);
+      setIsQuestionsModalOpen(true);
+    }
+  };
+
+  // v0.3.7 B30: Active Capture (Ghi bù & Địa điểm Geofence)
+  const [isActiveCaptureOpen, setIsActiveCaptureOpen] = useState<boolean>(false);
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(INITIAL_SAVED_PLACES);
+  const [passiveSuggestions, setPassiveSuggestions] = useState<PassiveTimeSuggestion[]>(INITIAL_PASSIVE_SUGGESTIONS);
+
+  const acceptPassiveSuggestion = (id: string) => {
+    const suggestion = passiveSuggestions.find(s => s.id === id);
+    if (!suggestion) return;
+
+    // Add to daily card as unplanned on goal / interruption
+    addDailyCardItem({
+      text: suggestion.suggestedActivity,
+      goalId: suggestion.goalId,
+      origin: suggestion.category === 'travel' ? 'interruption' : 'unplanned_goal',
+      start: suggestion.startTime,
+      end: suggestion.endTime,
+    });
+
+    // Add segment to time ledger
+    setTimeLedger(prev => [
+      ...prev,
+      {
+        id: `tls-${Date.now()}`,
+        start: suggestion.startTime,
+        end: suggestion.endTime,
+        durationMins: suggestion.durationMins,
+        category: suggestion.category === 'travel' ? 'interruption' : 'goal_work',
+        label: suggestion.suggestedActivity,
+      }
+    ]);
+
+    setPassiveSuggestions(prev => prev.map(s => s.id === id ? { ...s, status: 'accepted' } : s));
+    setCelebrationMsg(`Đã xác nhận ghi nhận: "${suggestion.suggestedActivity}" (${suggestion.durationMins} phút)!`);
+  };
+
+  const ignorePassiveSuggestion = (id: string) => {
+    setPassiveSuggestions(prev => prev.map(s => s.id === id ? { ...s, status: 'ignored' } : s));
+  };
+
+  const backfillTime = (entry: Omit<BackfillEntry, 'id'>) => {
+    const goal = goals.find(g => g.id === entry.goalId);
+    // Add to daily card
+    addDailyCardItem({
+      text: entry.note || `Ghi bù: ${entry.category}`,
+      goalId: entry.goalId,
+      origin: entry.origin,
+      start: entry.startTime,
+      end: entry.endTime,
+      displacedItemTitle: entry.displacedBlockTitle,
+    });
+
+    // Add to time ledger
+    setTimeLedger(prev => [
+      ...prev,
+      {
+        id: `tls-${Date.now()}`,
+        start: entry.startTime,
+        end: entry.endTime,
+        durationMins: entry.durationMins,
+        category: entry.origin === 'interruption' ? 'interruption' : 'goal_work',
+        label: entry.note || `Ghi bù ${entry.category}`,
+      }
+    ]);
+
+    setCelebrationMsg(`Đã ghi bù thành công ${entry.durationMins} phút (${entry.startTime} - ${entry.endTime})!`);
+  };
+
+  const savePlace = (newPlace: SavedPlace) => {
+    setSavedPlaces(prev => {
+      const idx = prev.findIndex(p => p.id === newPlace.id);
+      if (idx >= 0) {
+        return prev.map(p => p.id === newPlace.id ? newPlace : p);
+      }
+      return [...prev, newPlace];
+    });
+    setCelebrationMsg(`Đã lưu thiết lập địa điểm "${newPlace.name}"!`);
+  };
+
+  const togglePlaceLocation = (placeId: string) => {
+    setSavedPlaces(prev => prev.map(p => {
+      const isTarget = p.id === placeId;
+      return { ...p, isCurrentLocation: isTarget ? !p.isCurrentLocation : false };
+    }));
+    const target = savedPlaces.find(p => p.id === placeId);
+    if (target) {
+      setCelebrationMsg(`Đã kích hoạt vị trí mô phỏng: Đang ở "${target.name}"! Các quy tắc If-Then tự động sẵn sàng.`);
+    }
+  };
+
   // v0.3.0 / v0.23.0 B24: Data Export for AI Assistant State
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
   const [shareToken, setShareToken] = useState<string>('taio_sec_tok_9f8a7e6d5c4b3a210987654321fedcba');
@@ -525,7 +716,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let md = `# TAIO Time App · Daily log ${today}\n`;
     md += `- Người dùng: ${userProfileDetail.displayName} (${userProfileDetail.salutation})\n`;
     md += `- Xuất lúc: ${exportTime} (GMT+7)\n`;
-    md += `- Phiên bản ứng dụng: TAIO Time App v0.3.4 Approved\n`;
+    md += `- Phiên bản ứng dụng: TAIO Time App v0.3.7 Approved\n`;
     md += `- Hồ sơ người dùng: ${profile.title} (${profile.workStyle || 'mixed'})\n`;
     md += `- Mã xuất dữ liệu: exp_${Date.now()}\n\n`;
 
@@ -617,6 +808,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       });
       md += `\n`;
+    });
+
+    // 12. Active Capture & Địa điểm (B30)
+    md += `## 11. Thu thập chủ động & Địa điểm (Active Capture & Geofence - B30)\n`;
+    savedPlaces.forEach(p => {
+      md += `- **${p.name}** (Bán kính ${p.radiusMeters}m${p.isCurrentLocation ? ' - Đang ở đây' : ''})\n`;
     });
 
     return md;
@@ -1167,7 +1364,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isProfileModalOpen,
       setIsProfileModalOpen,
       screenDwells,
-      recordScreenDwell
+      recordScreenDwell,
+      backlogCards,
+      isSwipeModalOpen,
+      setIsSwipeModalOpen,
+      handleSwipeAction,
+      reminderQuestions,
+      isQuestionsModalOpen,
+      setIsQuestionsModalOpen,
+      activeQuestion,
+      setActiveQuestion,
+      triggerReminderQuestion,
+      isActiveCaptureOpen,
+      setIsActiveCaptureOpen,
+      savedPlaces,
+      passiveSuggestions,
+      acceptPassiveSuggestion,
+      ignorePassiveSuggestion,
+      backfillTime,
+      savePlace,
+      togglePlaceLocation
     }}>
       {children}
     </AppContext.Provider>

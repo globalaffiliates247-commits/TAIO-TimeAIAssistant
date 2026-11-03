@@ -138,7 +138,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`TAIO Time App v0.3.4 Static & API Server running:`);
+  console.log(`TAIO Time App v0.3.7 Static & API Server running:`);
   console.log(`- Local:   http://localhost:${PORT}`);
   console.log(`- Local:   http://127.0.0.1:${PORT}`);
   console.log(`Serving static files from: ${OUT_DIR}`);

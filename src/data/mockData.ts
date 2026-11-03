@@ -13,7 +13,12 @@ import {
   AppList,
   ListItem,
   UserProfileDetail,
-  CommunityRemoteConfig
+  CommunityRemoteConfig,
+  BacklogCard,
+  ReminderQuestion,
+  BackfillEntry,
+  PassiveTimeSuggestion,
+  SavedPlace
 } from '../types';
 
 export const PROFILES: Record<string, UserProfile> = {
@@ -1106,5 +1111,188 @@ export const INITIAL_LIST_ITEMS: ListItem[] = [
     source: 'typed',
   },
 ];
+
+// B28 (PRD v0.3.6): Thẻ nhắc việc (Backlog Swipe Cards)
+export const INITIAL_BACKLOG_CARDS: BacklogCard[] = [
+  {
+    id: 'bc-1',
+    text: 'Soạn dàn ý bài viết: Quản trị thời gian bằng sổ cái Drucker',
+    note: 'Nêu bật khái niệm 24h là tài nguyên cố định không thể mở rộng.',
+    type: 'idea',
+    ageDays: 8,
+    snoozesCount: 2,
+    goalId: 'g-2',
+    goalName: 'Xây kênh nội dung TAIO Club',
+    whyThisCard: 'Tồn đọng 8 ngày • Thuộc mục tiêu ưu tiên Q2',
+    estimatedMinutes: 30,
+    deadline: '2026-11-05',
+  },
+  {
+    id: 'bc-2',
+    text: 'Gửi email xác nhận lịch demo với đối tác EdTech',
+    note: 'Kiểm tra phòng họp Zoom và chuẩn bị link slides trước',
+    type: 'inbox',
+    ageDays: 1,
+    snoozesCount: 0,
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP',
+    whyThisCard: 'Việc nhanh dưới 2 phút (GTD)',
+    estimatedMinutes: 2,
+    deadline: 'Hôm nay',
+  },
+  {
+    id: 'bc-3',
+    text: 'Nghiên cứu tính năng Geofencing tự động nhận diện về nhà / tới công ty',
+    note: 'B30 Active capture - khảo sát khả năng pin khi đặt bán kính 150m',
+    type: 'task',
+    ageDays: 3,
+    snoozesCount: 1,
+    goalId: 'g-1',
+    goalName: 'Ra mắt TAIO Time App MVP',
+    whyThisCard: 'Tính năng mới theo PRD v0.3.7',
+    estimatedMinutes: 45,
+  },
+  {
+    id: 'bc-4',
+    text: 'Dọn dẹp hòm thư và hủy đăng ký các newsletter cũ không đọc',
+    note: 'Giảm tải xao nhãng buổi sáng',
+    type: 'inbox',
+    ageDays: 12,
+    snoozesCount: 3,
+    whyThisCard: 'Khám phá ngẫu nhiên (1/5) • Tồn đọng 12 ngày',
+    estimatedMinutes: 15,
+  },
+  {
+    id: 'bc-5',
+    text: 'Thu âm audio 60s giới thiệu phương pháp Zeigarnik Effect',
+    note: 'Nội dung: vì sao việc dang dở làm não bộ căng thẳng',
+    type: 'idea',
+    ageDays: 5,
+    snoozesCount: 0,
+    goalId: 'g-2',
+    goalName: 'Xây kênh nội dung TAIO Club',
+    whyThisCard: 'Ý tưởng chưa lên lịch',
+    estimatedMinutes: 15,
+    deadline: '2026-11-06',
+  },
+];
+
+// B29 (PRD v0.3.6): Câu hỏi nhắc việc (Reminder Questions)
+export const INITIAL_REMINDER_QUESTIONS: ReminderQuestion[] = [
+  {
+    id: 'rq-1',
+    text: '3 việc quan trọng nhất bạn cần làm hôm nay là gì?',
+    category: 'today',
+    triggerType: 'day_start',
+    answerSummary: 'Hôm nay bạn có 2 việc thuộc Mục tiêu Q2 đã lên lịch: Làm giao diện B28/B29/B30 và Quay video #TAIOCLUB.',
+    targetScreen: 'plan',
+    actionLabel: 'Mở Kế hoạch chọn Top việc',
+  },
+  {
+    id: 'rq-2',
+    text: 'Việc mình đang làm có phục vụ mục tiêu nào không?',
+    category: 'today',
+    triggerType: 'drift',
+    answerSummary: 'Bạn đang ở trạng thái làm việc ngoài kế hoạch (Off-plan) 1h19p. Nhiệm vụ theo lịch gần nhất là: Viết thông số mặc định.',
+    targetScreen: 'now',
+    actionLabel: 'Xem màn hình Bây giờ (Now)',
+  },
+  {
+    id: 'rq-3',
+    text: 'Hôm nay mình đã làm được gì?',
+    category: 'today',
+    triggerType: 'day_end',
+    answerSummary: 'Hôm nay bạn đã hoàn thành 5/6 việc, đạt 83% Throughput, bảo vệ được 90 phút tập trung sâu.',
+    targetScreen: 'daycard',
+    actionLabel: 'Xem Thẻ ngày & Đóng ngày',
+  },
+  {
+    id: 'rq-4',
+    text: 'Còn 2 giờ trống chiều nay, xếp vài việc ngắn vào không?',
+    category: 'today',
+    triggerType: 'free_gaps',
+    answerSummary: 'Phát hiện khung trống 14:00 - 16:00. Bạn có 3 việc dưới 30 phút trong Rổ việc đang chờ xếp lịch.',
+    targetScreen: 'plan',
+    actionLabel: 'Xếp lịch khung giờ trống',
+  },
+  {
+    id: 'rq-5',
+    text: 'Liệu mình có đang bỏ sót ý tưởng nào không?',
+    category: 'week',
+    triggerType: 'backlog_untouched',
+    answerSummary: 'Có 5 ý tưởng trong Rổ việc chưa được rà soát trong 7 ngày qua.',
+    targetScreen: 'swipe_review',
+    actionLabel: 'Mở Thẻ nhắc việc (Lướt rổ)',
+  },
+  {
+    id: 'rq-6',
+    text: 'Mục tiêu lớn năm nay của mình là gì?',
+    category: 'goals',
+    triggerType: 'random_tip',
+    answerSummary: 'Mục tiêu trọng tâm: Ra mắt TAIO Time App MVP (Tiến độ 68%, còn 67 ngày tới hạn chót 09/01/2027).',
+    targetScreen: 'goals',
+    actionLabel: 'Xem Lộ trình Mục tiêu',
+  },
+];
+
+// B30 (PRD v0.3.7): Active capture & Geofence Places
+export const INITIAL_SAVED_PLACES: SavedPlace[] = [
+  {
+    id: 'place-1',
+    name: 'Nhà riêng',
+    address: 'Khu dân cư An Khánh, TP. Thủ Đức',
+    radiusMeters: 150,
+    isCurrentLocation: true,
+    rules: [
+      { id: 'r-1', trigger: 'arrive', actionType: 'remind_task', taskTitle: 'Rửa chén & Thư giãn 30 phút' },
+      { id: 'r-2', trigger: 'arrive', actionType: 'auto_done', taskTitle: 'Di chuyển về nhà', autoAccept: true },
+      { id: 'r-3', trigger: 'leave', actionType: 'time_segment', taskTitle: 'Bắt đầu di chuyển đi làm' },
+    ],
+  },
+  {
+    id: 'place-2',
+    name: 'Văn phòng TAIO',
+    address: 'Toà nhà Innovation, Quận 1',
+    radiusMeters: 150,
+    rules: [
+      { id: 'r-4', trigger: 'arrive', actionType: 'remind_task', taskTitle: 'Rà soát 3 việc quan trọng nhất trong ngày' },
+      { id: 'r-5', trigger: 'leave', actionType: 'remind_task', taskTitle: 'Đóng ngày làm việc & dọn sạch rổ việc' },
+    ],
+  },
+  {
+    id: 'place-3',
+    name: 'Phòng Gym / Thể thao',
+    address: 'Trung tâm Fitness & Yoga',
+    radiusMeters: 120,
+    rules: [
+      { id: 'r-6', trigger: 'arrive', actionType: 'time_segment', taskTitle: 'Tập thể dục / Gym (Exercise)' },
+    ],
+  },
+];
+
+export const INITIAL_PASSIVE_SUGGESTIONS: PassiveTimeSuggestion[] = [
+  {
+    id: 'pts-1',
+    startTime: '13:00',
+    endTime: '16:30',
+    durationMins: 210,
+    suggestedActivity: 'Phát triển mã nguồn với AI Assistant (Claude / Antigravity)',
+    category: 'work_came_up',
+    goalName: 'Ra mắt TAIO Time App MVP',
+    source: 'ai_tool_timestamp',
+    status: 'pending',
+  },
+  {
+    id: 'pts-2',
+    startTime: '17:30',
+    endTime: '18:15',
+    durationMins: 45,
+    suggestedActivity: 'Di chuyển từ Văn phòng về Nhà riêng (Bán kính 150m)',
+    category: 'travel',
+    source: 'geofence',
+    status: 'pending',
+  },
+];
+
 
 

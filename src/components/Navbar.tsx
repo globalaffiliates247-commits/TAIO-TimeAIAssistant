@@ -45,7 +45,9 @@ export const Navbar: React.FC = () => {
     setExportModalOpen,
     setIsListsModalOpen,
     setIsProfileModalOpen,
-    userProfileDetail
+    userProfileDetail,
+    setIsSwipeModalOpen,
+    setIsActiveCaptureOpen
   } = useApp();
 
   return (
@@ -89,7 +91,7 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold tracking-tight text-white text-base">TAIO</span>
                 <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  v0.3.4 Approved
+                  v0.3.7 Approved
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 -mt-0.5">TAIO.CLUB Time App</p>
@@ -133,6 +135,26 @@ export const Navbar: React.FC = () => {
           >
             <FolderKanban className="w-3.5 h-3.5 text-sky-400" />
             <span className="hidden sm:inline">Danh sách</span>
+          </button>
+
+          {/* Swipe Review Backlog Button (PRD B28 Thẻ nhắc việc) */}
+          <button
+            onClick={() => setIsSwipeModalOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition-all font-semibold"
+            title="Thẻ nhắc việc: Lướt rổ tồn đọng (B28)"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Lướt rổ</span>
+          </button>
+
+          {/* Active Capture & Backfill (PRD B30) */}
+          <button
+            onClick={() => setIsActiveCaptureOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-[#ff7556] border border-[#E0401F]/30 transition-all font-semibold"
+            title="Thu thập chủ động & Ghi bù (B30)"
+          >
+            <Clock className="w-3.5 h-3.5 text-[#ff7556]" />
+            <span className="hidden sm:inline">Ghi bù</span>
           </button>
 
           {/* Method Library Button (PRD B22) */}
