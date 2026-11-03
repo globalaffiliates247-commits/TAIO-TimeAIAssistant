@@ -1,6 +1,7 @@
 // swift-tools-version: 5.7
 import PackageDescription
 
+// DO NOT MODIFY THIS FILE - managed by Capacitor CLI commands
 let package = Package(
     name: "CapApp-SPM",
     platforms: [.iOS(.v15)],
@@ -9,20 +10,15 @@ let package = Package(
             name: "CapApp-SPM",
             targets: ["CapApp-SPM"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.6.0")
+    ],
     targets: [
-        .binaryTarget(
-            name: "Capacitor",
-            path: "../Frameworks/Capacitor.xcframework"
-        ),
-        .binaryTarget(
-            name: "Cordova",
-            path: "../Frameworks/Cordova.xcframework"
-        ),
         .target(
             name: "CapApp-SPM",
             dependencies: [
-                .target(name: "Capacitor"),
-                .target(name: "Cordova")
+                .product(name: "Capacitor", package: "capacitor-swift-pm"),
+                .product(name: "Cordova", package: "capacitor-swift-pm")
             ]
         )
     ]

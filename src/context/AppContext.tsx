@@ -11,6 +11,7 @@ import {
   UndeclaredGap, 
   ToneLevel,
   InterruptionDecision,
+  InterruptionSituation,
   InterruptionWhatType,
   InterruptionSourceType,
   InterruptionActivityCategory,
@@ -291,6 +292,8 @@ interface AppContextType {
     sourceType?: InterruptionSourceType;
     category?: InterruptionActivityCategory;
     note?: string;
+    situation?: InterruptionSituation;
+    isDistraction?: boolean;
   }) => void;
   handleCheckInAnswer: (answer: 'done' | 'continue_later' | 'more_time' | 'remind_10m' | 'stop_here', extraMins?: number, nextStep?: string) => void;
   handleLabelGap: (gapId: string, label: GapLabel) => void;
@@ -300,6 +303,9 @@ interface AppContextType {
   dayClosed: boolean;
   celebrationMsg: string | null;
   setCelebrationMsg: (msg: string | null) => void;
+  // v0.3.9 B5: Toast notifications
+  toastMsg: string | null;
+  showToast: (msg: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -369,6 +375,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [dayClosed, setDayClosed] = useState<boolean>(false);
   const [celebrationMsg, setCelebrationMsg] = useState<string | null>(null);
+  // v0.3.9 B5: Toast notifications
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => {
+      setToastMsg(prev => prev === msg ? null : prev);
+    }, 3000);
+  };
 
   // v0.3.1 B25: Daily Card & Work Diary State
   const todayDateStr = new Date().toISOString().split('T')[0];
@@ -1006,6 +1020,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     sourceType,
     category,
     note,
+    situation,
+    isDistraction,
   }: {
     title: string;
     decision: InterruptionDecision;
@@ -1018,6 +1034,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     sourceType?: InterruptionSourceType;
     category?: InterruptionActivityCategory;
     note?: string;
+    situation?: InterruptionSituation;
+    isDistraction?: boolean;
   }) => {
     const goal = goals.find(g => g.id === goalId);
     const newInt: InterruptionRecord = {
@@ -1036,6 +1054,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sourceType,
       category,
       note,
+      situation,
+      isDistraction: isDistraction ?? (situation === 'review'),
     };
 
     setInterruptions(prev => [newInt, ...prev]);
@@ -1047,24 +1067,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    if (decision === 'do_now') {
-      setTimerMinutesRemaining(minutes);
+    if (decision === 'postpone') {
+      const isBodyNeed = category === 'eating_drinks' || category === 'travel' || category === 'break';
+      if (!isBodyNeed) {
+        // v0.3.9 B5: Việc yêu cầu (cuộc gọi, việc mới, gia đình) -> Cho vào Inbox
+        const newInboxItem: InboxItem = {
+          id: `inbox-${Date.now()}`,
+          title: title,
+          source: 'quick',
+          createdAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+          nextAction: 'Xử lý sau',
+          estimatedMinutes: minutes || 15,
+          linkedGoalId: goalId,
+          linkedGoalName: goal?.name,
+          suggestedQuadrant: 2,
+          status: 'inbox',
+        };
+        setInbox(prev => [newInboxItem, ...prev]);
+        showToast('Đã cho vào Rổ công việc. Bạn có thể sắp xếp làm sau.');
+      } else {
+        // Nhu cầu cơ thể -> Nhắc khi hết block hiện tại
+        showToast('Sẽ nhắc bạn khi hết khung giờ hiện tại.');
+      }
+    } else if (decision === 'do_now') {
+      setTimerMinutesRemaining(minutes || 15);
       setIsTimerRunning(true);
-      setCelebrationMsg(language === 'vi' ? 'Đang chạy đồng hồ việc phát sinh. Giảm trừ vào quỹ dự phòng hôm nay!' : 'Interruption timer active. Deducted from today\'s reserve.');
-    } else if (decision === 'delegate' || decision === 'decline') {
-      setCelebrationMsg(
+      showToast(language === 'vi' ? 'Đang chạy đồng hồ việc phát sinh. Giảm trừ vào quỹ dự phòng hôm nay!' : 'Interruption timer active. Deducted from today\'s reserve.');
+    } else if (decision === 'delegate') {
+      const newInboxItem: InboxItem = {
+        id: `inbox-${Date.now()}`,
+        title: title,
+        source: 'quick',
+        createdAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        nextAction: 'Chờ người khác xử lý (Waiting for)',
+        estimatedMinutes: minutes || 15,
+        linkedGoalId: goalId,
+        linkedGoalName: goal?.name,
+        suggestedQuadrant: 3,
+        status: 'delegated',
+      };
+      setInbox(prev => [newInboxItem, ...prev]);
+      showToast('Đã chuyển vào Rổ việc chờ người khác xử lý.');
+    } else if (decision === 'decline') {
+      showToast(
         language === 'vi' 
-          ? `Tuyệt vời! Bạn vừa bảo vệ được ${minutes} phút tập trung quý giá.` 
-          : `Protected ${minutes} focus minutes!`
+          ? `Tuyệt vời! Bạn vừa bảo vệ được ${minutes || 15} phút tập trung quý giá.` 
+          : `Protected ${minutes || 15} focus minutes!`
       );
     } else if (decision === 'schedule') {
-      setCelebrationMsg(
+      showToast(
         language === 'vi' 
           ? `Đã xếp việc "${title}" vào khung giờ trống kế tiếp.` 
           : `Scheduled "${title}" to next free slot.`
       );
     } else if (decision === 'go_social') {
-      setCelebrationMsg(
+      showToast(
         language === 'vi' 
           ? `Đã ghi nhận giao lưu kèm 30 phút đệm di chuyển. App sẽ nhắc nhẹ giờ về lúc ${socialEndTime}!` 
           : `Social outing logged with 30m travel buffer. Gentle nudge set for ${socialEndTime}!`
@@ -1296,6 +1353,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       dayClosed,
       celebrationMsg,
       setCelebrationMsg,
+      toastMsg,
+      showToast,
       drilldown,
       openDrilldown,
       closeDrilldown,

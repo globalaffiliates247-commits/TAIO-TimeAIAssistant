@@ -48,28 +48,43 @@ const OrientationHint: React.FC = () => {
 };
 
 const MainAppContent: React.FC = () => {
-  const { currentTab, celebrationMsg, setCelebrationMsg, deviceLook } = useApp();
+  const { currentTab, celebrationMsg, setCelebrationMsg, deviceLook, palette, toastMsg } = useApp();
+  const isCool = palette === 'cool';
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#0f172a] text-[#f8fafc] ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
+    <div className={`min-h-screen flex flex-col transition-colors duration-200 ${
+      isCool 
+        ? 'bg-[#f1f5f9] text-[#0f172a]' 
+        : 'bg-[#FBEFEC] text-[#1f1a18]'
+    } ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
       {/* Ambient Progress Edge (4px peripheral awareness line) */}
       <AmbientProgressEdge />
 
       <Navbar />
       <ActionNudgeBanner />
 
+      {/* Floating Toast Notification (PRD v0.3.9 B5: "Đã cho vào Rổ công việc" 3s Toast) */}
+      {toastMsg && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[90%] bg-slate-900/90 text-white backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-300 border border-slate-700/60">
+          <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="text-center">{toastMsg}</span>
+        </div>
+      )}
+
       {/* Floating Celebration Toast */}
       {celebrationMsg && (
-        <div className="fixed top-20 right-4 z-50 max-w-md bg-slate-900/95 border border-[#E0401F]/60 backdrop-blur-xl rounded-2xl p-4 shadow-2xl shadow-red-950/50 flex items-center justify-between gap-3 text-white animate-in slide-in-from-top-4 duration-300">
+        <div className="fixed top-20 right-4 z-50 max-w-md bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-slate-800 animate-in slide-in-from-top-4 duration-300">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center shrink-0 shadow-md shadow-red-500/30">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-white shadow-sm ${
+              isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+            }`}>
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-100">{celebrationMsg}</p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-800">{celebrationMsg}</p>
           </div>
           <button 
             onClick={() => setCelebrationMsg(null)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -95,8 +110,8 @@ const MainAppContent: React.FC = () => {
       </main>
 
       {/* Bottom Footer info */}
-      <footer className="border-t border-slate-800/80 py-5 text-center text-xs text-slate-500">
-        TAIO Time App v0.3.7 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
+      <footer className="border-t border-slate-200/80 py-5 text-center text-xs text-slate-500">
+        TAIO Time App v0.3.9 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
       </footer>
 
       {/* Modals & Overlays */}

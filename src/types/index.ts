@@ -126,11 +126,15 @@ export interface Goal {
 }
 
 export type InterruptionDecision = 
-  | 'do_now' 
-  | 'schedule' 
-  | 'delegate' 
-  | 'decline' 
-  | 'go_social';
+  | 'postpone'    // v0.3.9 B5: Để sau (Mặc định)
+  | 'do_now'      // Làm luôn
+  | 'delegate'    // Nhờ người khác
+  | 'decline'     // Không làm
+  | 'schedule'    // Lên lịch
+  | 'go_social';  // Giao lưu xã hội
+
+// B5 v0.3.9: Two situations for categories
+export type InterruptionSituation = 'moment' | 'review';
 
 // B5 v0.16 & v0.3.1: 13 Default Activity Categories (Added Exercise)
 export type InterruptionActivityCategory =
@@ -138,14 +142,15 @@ export type InterruptionActivityCategory =
   | 'overslept'          // Ngủ quên / nướng
   | 'chatting_gossip'    // Tán gẫu / Buôn chuyện
   | 'travel'             // Di chuyển
-  | 'research_reading'   // Đọc / Nghiên cứu
-  | 'drank_too_much'     // Uống quá chén
+  | 'research_reading'   // Đọc / Nghiên cứu lan man
+  | 'drank_too_much'     // Uống quá chén / Nhậu
   | 'phone_scrolling'    // Lướt điện thoại
-  | 'calls_messages'     // Gọi điện / Nhắn tin
+  | 'calls_messages'     // Cuộc gọi / Nhắn tin
   | 'family_matter'      // Việc gia đình
-  | 'work_came_up'       // Việc công ty phát sinh
+  | 'work_came_up'       // Việc mới phát sinh
   | 'break'              // Nghỉ giải lao
-  | 'exercise'           // Tập thể dục / Gym / Thể thao (v0.3.1)
+  | 'exercise'           // Tập thể dục / Gym / Thể thao
+  | 'prev_task_over'     // Việc trước đó (chạy quá giờ)
   | 'other';             // Khác
 
 // Backwards compatibility for v0.8
@@ -166,9 +171,11 @@ export interface InterruptionRecord {
   sourcePerson?: string;
   whatType?: InterruptionWhatType;
   sourceType?: InterruptionSourceType;
-  // v0.16 additions:
+  // v0.16 & v0.3.9 additions:
   category?: InterruptionActivityCategory;
   note?: string;
+  situation?: InterruptionSituation;
+  isDistraction?: boolean; // v0.3.9: tách riêng Xao nhãng và Chen ngang
 }
 
 export type GapLabel = 

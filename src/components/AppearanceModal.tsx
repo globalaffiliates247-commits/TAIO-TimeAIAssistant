@@ -65,21 +65,18 @@ export const AppearanceModal: React.FC = () => {
     { id: 'light', label: 'Giao diện Sáng (Light)', icon: <Sun className="w-4 h-4" /> },
   ];
 
-  const palettesList: { id: ColorPalette; label: string; desc: string }[] = [
-    { 
-      id: 'warm', 
-      label: 'Warm (Mặc định)', 
-      desc: 'Năng động, ấm áp với sắc đỏ cam thương hiệu #E0401F' 
-    },
+  const palettesList: { id: ColorPalette; label: string; desc: string; icon: string }[] = [
     { 
       id: 'cool', 
-      label: 'Cool', 
-      desc: 'Điềm tĩnh, tập trung sâu với xanh dương #2457F5 & mòng két #0E9FB3' 
+      label: '❄️ Tông màu Lạnh (Cool - Xanh & Trắng)', 
+      desc: 'Nền không gian làm việc sáng #f1f5f9, thẻ trắng #ffffff, điểm nhấn xanh Apple #007aff chuẩn phong cách Native iOS.',
+      icon: '❄️'
     },
     { 
-      id: 'neutral', 
-      label: 'Neutral', 
-      desc: 'Tĩnh lặng, chuyên nghiệp với tông slate #3E4C5E & xô thơm' 
+      id: 'warm', 
+      label: '🔥 Tông màu Nóng (Warm - Đỏ tươi & Trắng)', 
+      desc: 'Nền ấm #FBEFEC, thẻ trắng #ffffff, điểm nhấn đỏ cam thương hiệu #E0401F nổi bật và giàu năng lượng.',
+      icon: '🔥'
     },
   ];
 

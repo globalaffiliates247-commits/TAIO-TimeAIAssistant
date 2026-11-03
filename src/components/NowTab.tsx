@@ -63,8 +63,12 @@ export const NowTab: React.FC = () => {
     toggleOffPlan,
     backToPlan,
     setInboxModalOpen,
-    addInboxItem
+    addInboxItem,
+    palette,
+    currentPaletteColors
   } = useApp();
+
+  const isCool = palette === 'cool';
 
   const linkedGoal = goals.find(g => g.id === currentBlock?.goalId);
   const nextDeadline = deadlines[0];
@@ -187,29 +191,35 @@ export const NowTab: React.FC = () => {
       )}
 
       {/* Master Card: Who am I? Where am I? What am I doing? (PRD v0.8 B5 & v0.22 B19/B23) */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className={`rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden transition-all border ${
+        isCool ? 'bg-white border-slate-200 text-slate-800' : 'bg-white border-stone-200 text-stone-900'
+      }`}>
+        {/* Subtle accent glow */}
+        <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none opacity-10 ${
+          isCool ? 'bg-blue-500' : 'bg-red-500'
+        }`} />
 
         {/* Top Header & Role Selector (Who am I?) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-6">
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 mb-6 ${
+          isCool ? 'border-slate-100' : 'border-stone-100'
+        }`}>
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm" />
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">
               Trọng tâm hiện tại (Bây giờ - Now)
             </h2>
             
             {/* Role Chip (PRD B5: Who am I right now?) */}
-            <div className="flex items-center gap-1.5 ml-1 bg-slate-800/80 border border-slate-700/60 rounded-full px-3 py-1">
-              <UserCheck className="w-3.5 h-3.5 text-red-400" />
-              <span className="text-[11px] text-slate-400">Vai trò:</span>
+            <div className="flex items-center gap-1.5 ml-1 bg-slate-100 border border-slate-200/80 rounded-full px-3 py-1">
+              <UserCheck className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+              <span className="text-[11px] text-slate-500">Vai trò:</span>
               <select
                 value={currentUserRole}
                 onChange={e => setCurrentUserRole(e.target.value as UserRole)}
-                className="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer pr-1"
               >
                 {Object.entries(ROLE_LABELS).map(([k, v]) => (
-                  <option key={k} value={k} className="bg-slate-900 text-slate-200">
+                  <option key={k} value={k} className="bg-white text-slate-800">
                     {v.label}
                   </option>
                 ))}
@@ -219,15 +229,15 @@ export const NowTab: React.FC = () => {
 
           {/* B23 Work Style & Off-Plan Toggle */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] text-slate-400">
-              Nhịp làm: <strong className="text-orange-400 capitalize">{profile.workStyle || 'mixed'}</strong>
+            <span className="text-[11px] text-slate-500">
+              Nhịp làm: <strong className={`capitalize ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>{profile.workStyle || 'mixed'}</strong>
             </span>
             <button
               onClick={toggleOffPlan}
-              className={`text-xs px-3 py-1.5 rounded-xl border transition-all font-medium ${
+              className={`text-xs px-3 py-1.5 rounded-xl border transition-all font-semibold ${
                 isOffPlan 
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-bold' 
-                  : 'bg-slate-800/80 text-slate-400 hover:text-white border-slate-700'
+                  ? 'bg-rose-50 text-rose-600 border-rose-200 font-bold' 
+                  : 'bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200'
               }`}
             >
               {isOffPlan ? '● Đang Lệch kế hoạch' : 'Giả lập Lệch kế hoạch'}
@@ -236,36 +246,40 @@ export const NowTab: React.FC = () => {
         </div>
 
         {/* B19: Always visible 4-Number Time Ledger Glance */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 p-3 rounded-2xl bg-slate-800/50 border border-slate-700/50 text-xs">
+        <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 p-3.5 rounded-2xl border text-xs ${
+          isCool ? 'bg-slate-50/80 border-slate-200/80' : 'bg-stone-50/80 border-stone-200/80'
+        }`}>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-400 uppercase">1. Việc mục tiêu</span>
-            <span className="text-sm font-bold text-orange-400">285 phút</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">1. Việc mục tiêu</span>
+            <span className={`text-sm font-black ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>285 phút</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-400 uppercase">2. Chen ngang</span>
-            <span className="text-sm font-bold text-amber-400">{intUsedMins} / {profile.interruptionReserveMins}p</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">2. Chen ngang</span>
+            <span className="text-sm font-black text-amber-600">{intUsedMins} / {profile.interruptionReserveMins}p</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-400 uppercase">3. Xao nhãng</span>
-            <span className="text-sm font-bold text-rose-400">45 phút</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">3. Xao nhãng (v0.3.9)</span>
+            <span className="text-sm font-black text-rose-600">45 phút</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-400 uppercase">4. Thời gian ngày còn</span>
-            <span className="text-sm font-bold text-emerald-400">3 giờ 30 phút</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">4. Thời gian ngày còn</span>
+            <span className="text-sm font-black text-emerald-600">3 giờ 30 phút</span>
           </div>
         </div>
 
         {/* B5: Where am I? (Breadcrumb Chain in Goal) */}
-        <div className="mb-6 p-3.5 rounded-2xl bg-slate-800/70 border border-slate-700/60 flex items-center gap-2 text-xs overflow-x-auto shadow-sm">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+        <div className={`mb-6 p-3.5 rounded-2xl border flex items-center gap-2 text-xs overflow-x-auto ${
+          isCool ? 'bg-blue-50/40 border-blue-100 text-slate-700' : 'bg-amber-50/40 border-amber-100 text-stone-700'
+        }`}>
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">
             Bạn đang ở đâu:
           </span>
-          <div className="flex items-center gap-1.5 text-slate-300 font-medium whitespace-nowrap">
-            <span className="text-red-400 font-bold">{linkedGoal?.name || 'Mục tiêu chính'}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-            <span className="text-slate-200">{currentBlock?.milestoneName || 'Cột mốc thực thi'}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-            <span className="text-white font-bold bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700">
+          <div className="flex items-center gap-1.5 font-medium whitespace-nowrap">
+            <span className={`font-bold ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>{linkedGoal?.name || 'Mục tiêu chính'}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="text-slate-600">{currentBlock?.milestoneName || 'Cột mốc thực thi'}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="text-slate-900 font-bold bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs">
               {currentBlock?.title || 'Công việc hiện tại'} (Bước {currentBlock?.stepNumber || 3}/{currentBlock?.totalSteps || 5})
             </span>
           </div>
@@ -554,12 +568,12 @@ export const NowTab: React.FC = () => {
             <div>
               <button
                 onClick={handleScheduleForLater}
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-purple-900/30 flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 text-white font-black text-base sm:text-lg shadow-lg shadow-purple-900/20 flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
               >
                 <Calendar className="w-6 h-6" />
                 <span>XẾP LỊCH VIỆC PHÁT SINH SAU (SCHEDULE FOR LATER)</span>
               </button>
-              <p className="text-center text-xs text-purple-300 mt-2.5">
+              <p className="text-center text-xs text-purple-600 mt-2.5">
                 Khối nguyên tử (Atomic) không thể ngắt quãng • Mọi việc phát sinh đều được xếp lịch làm sau
               </p>
             </div>
@@ -568,13 +582,17 @@ export const NowTab: React.FC = () => {
             <div>
               <button
                 onClick={() => setInterruptionModalOpen(true)}
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#d03515] hover:to-orange-600 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-red-500/25 flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
+                className={`w-full py-4 px-6 rounded-2xl text-white font-black text-base sm:text-lg shadow-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer ${
+                  isCool
+                    ? 'bg-[#007AFF] hover:bg-[#0066d6] shadow-blue-500/25'
+                    : 'bg-[#E0401F] hover:bg-[#d03515] shadow-red-500/25'
+                }`}
               >
                 <Zap className="w-6 h-6 fill-white" />
-                <span>CÓ VIỆC ĐỘT XUẤT! (SOMETHING CAME UP)</span>
+                <span>CÓ VIỆC PHÁT SINH! (SOMETHING CAME UP)</span>
               </button>
-              <p className="text-center text-xs text-slate-400 mt-2.5">
-                Lưới 12 danh mục 1 chạm • Lưu điểm quay lại • Quyết định tức thì
+              <p className="text-center text-xs text-slate-500 mt-2.5">
+                PRD v0.3.9: 2 tình huống (Tức thì vs Xem lại) • Mặc định "Để sau" vào Rổ việc • 1 chạm
               </p>
             </div>
           )}
@@ -591,17 +609,23 @@ export const NowTab: React.FC = () => {
             title: `${totalCount} việc hôm nay (Khớp 100% với con số)`,
             subtitle: `${completedCount} đã xong • ${blocks.filter(b => b.status === 'in_progress').length} đang chạy • ${blocks.filter(b => b.status === 'planned').length} chưa đến giờ`,
           })}
-          className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-red-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-xl backdrop-blur-xl"
+          className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
+            isCool 
+              ? 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-md' 
+              : 'bg-white border-stone-200 hover:border-red-400 hover:shadow-md'
+          }`}
           title="Bấm để mở danh sách toàn bộ việc hôm nay kèm trạng thái và 1 chạm: Xong, Dời, Bỏ"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-slate-400 group-hover:text-red-300">Việc đã xong</p>
-            <span className="text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
+            <p className="text-xs font-semibold text-slate-500">Việc đã xong</p>
+            <span className={`text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity ${
+              isCool ? 'text-blue-600' : 'text-[#E0401F]'
+            }`}>Xem ↗</span>
           </div>
-          <p className="text-xl font-extrabold text-white mt-1 group-hover:text-red-400 transition-colors">
+          <p className="text-xl font-black text-slate-900 mt-1">
             {completedCount} / {totalCount} việc
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">Bấm xem cả {totalCount} việc</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">Bấm xem cả {totalCount} việc</p>
         </div>
 
         {/* Metric 2: Deep work minutes */}
@@ -611,17 +635,23 @@ export const NowTab: React.FC = () => {
             title: 'Các khối việc sâu hôm nay (Deep Work)',
             subtitle: `Tổng cộng ${deepWorkMinutes} phút tập trung chất lượng cao`,
           })}
-          className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-red-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-xl backdrop-blur-xl"
+          className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
+            isCool 
+              ? 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-md' 
+              : 'bg-white border-stone-200 hover:border-red-400 hover:shadow-md'
+          }`}
           title="Bấm để mở danh sách các khối việc sâu và số phút của từng khối"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-slate-400 group-hover:text-red-300">Phút việc sâu</p>
-            <span className="text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
+            <p className="text-xs font-semibold text-slate-500">Phút việc sâu</p>
+            <span className={`text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity ${
+              isCool ? 'text-blue-600' : 'text-[#E0401F]'
+            }`}>Xem ↗</span>
           </div>
-          <p className="text-xl font-extrabold text-[#E0401F] mt-1">
+          <p className={`text-xl font-black mt-1 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>
             {deepWorkMinutes} phút
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">Bấm xem số phút từng khối</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">Bấm xem số phút từng khối</p>
         </div>
 
         {/* Metric 3: Interruption reserve */}
@@ -631,17 +661,21 @@ export const NowTab: React.FC = () => {
             title: 'Nhật ký việc chen ngang & Quỹ dự phòng',
             subtitle: `Đã dùng ${intUsedMins}p / ${profile.interruptionReserveMins}p • Còn lại ${Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút`,
           })}
-          className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-xl backdrop-blur-xl"
+          className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
+            isCool 
+              ? 'bg-white border-slate-200 hover:border-amber-400 hover:shadow-md' 
+              : 'bg-white border-stone-200 hover:border-amber-400 hover:shadow-md'
+          }`}
           title="Bấm để xem nhật ký chen ngang"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-slate-400 group-hover:text-amber-300">Quỹ chen ngang</p>
-            <span className="text-[10px] text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
+            <p className="text-xs font-semibold text-slate-500">Quỹ chen ngang</p>
+            <span className="text-[10px] font-bold text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
           </div>
-          <p className="text-xl font-extrabold text-amber-400 mt-1">
+          <p className="text-xl font-black text-amber-600 mt-1">
             {intUsedMins} / {profile.interruptionReserveMins}p
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">Còn {Math.max(0, profile.interruptionReserveMins - intUsedMins)}p • Xem chi tiết</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">Còn {Math.max(0, profile.interruptionReserveMins - intUsedMins)}p • Xem chi tiết</p>
         </div>
 
         {/* Metric 4: Protected minutes */}
@@ -651,7 +685,11 @@ export const NowTab: React.FC = () => {
             title: 'Thời gian tập trung đã bảo vệ (+45p)',
             subtitle: 'Đạt được từ các việc từ chối hoặc ủy quyền đúng lúc',
           })}
-          className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-xl backdrop-blur-xl"
+          className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
+            isCool 
+              ? 'bg-white border-slate-200 hover:border-emerald-400 hover:shadow-md' 
+              : 'bg-white border-stone-200 hover:border-emerald-400 hover:shadow-md'
+          }`}
           title="Bấm để xem danh sách các việc đã từ chối/ủy quyền"
         >
           <div className="flex items-center justify-between">

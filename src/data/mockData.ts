@@ -560,12 +560,12 @@ export const PALETTES: Record<ColorPalette, PaletteColors> = {
   },
   cool: {
     name: 'cool',
-    brandAccent: '#2457F5',
-    deepWork: '#2457F5',
+    brandAccent: '#007AFF', // PRD v0.3.9 D4: Apple System Blue
+    deepWork: '#007AFF',
     interruption: '#0E9FB3',
-    meeting: '#6E56CF',
-    personal: '#0B7F52',
-    planning: '#8EC5FF',
+    meeting: '#5856D6',
+    personal: '#2E8B57',
+    planning: '#7DB8F5',
   },
   neutral: {
     name: 'neutral',
@@ -578,25 +578,58 @@ export const PALETTES: Record<ColorPalette, PaletteColors> = {
   },
 };
 
-// B5 v0.16: 12 Default Activity Categories
+// B5 v0.3.9: Hai danh sách danh mục theo tình huống (Situation 1 vs Situation 2)
+// Tình huống 1: Khai báo tức thì khi bấm "Có việc chen ngang" (Hick's Law - 6 ô chính)
+export const SITUATION_1_CATEGORIES: {
+  id: InterruptionActivityCategory;
+  nameVi: string;
+  nameEn: string;
+  iconName: string;
+  isRequest?: boolean; // Việc người khác yêu cầu vs Nhu cầu cơ thể
+}[] = [
+  { id: 'calls_messages', nameVi: 'Cuộc gọi, tin nhắn', nameEn: 'Calls & messages', iconName: 'PhoneCall', isRequest: true },
+  { id: 'work_came_up', nameVi: 'Việc mới phát sinh', nameEn: 'Work came up', iconName: 'Briefcase', isRequest: true },
+  { id: 'family_matter', nameVi: 'Việc gia đình', nameEn: 'Family matter', iconName: 'HeartHandshake', isRequest: true },
+  { id: 'eating_drinks', nameVi: 'Ăn uống', nameEn: 'Eating & drinks', iconName: 'Utensils', isRequest: false },
+  { id: 'travel', nameVi: 'Di chuyển', nameEn: 'Travel', iconName: 'Car', isRequest: false },
+  { id: 'break', nameVi: 'Nghỉ giải lao', nameEn: 'Break', iconName: 'Coffee', isRequest: false },
+];
+
+// Tình huống 2: Hồi tưởng khi xem lại ("Chưa làm" ở Check-in, Ghi bù B30, Đóng ngày)
+export const SITUATION_2_CATEGORIES: {
+  id: InterruptionActivityCategory;
+  nameVi: string;
+  nameEn: string;
+  iconName: string;
+}[] = [
+  { id: 'prev_task_over', nameVi: 'Việc trước đó / Việc phát sinh', nameEn: 'Previous task / unplanned', iconName: 'Briefcase' },
+  { id: 'chatting_gossip', nameVi: 'Tám chuyện, tán gẫu', nameEn: 'Chatting / gossip', iconName: 'MessagesSquare' },
+  { id: 'phone_scrolling', nameVi: 'Lướt điện thoại', nameEn: 'Phone scrolling', iconName: 'Smartphone' },
+  { id: 'research_reading', nameVi: 'Nghiên cứu, đọc lan man', nameEn: 'Research / reading', iconName: 'BookOpen' },
+  { id: 'overslept', nameVi: 'Ngủ quên, ngủ nướng', nameEn: 'Overslept', iconName: 'AlarmClockOff' },
+  { id: 'drank_too_much', nameVi: 'Nhậu quá chén', nameEn: 'Drank too much', iconName: 'Wine' },
+];
+
+// B5 v0.16 & v0.3.9: Tất cả danh mục
 export const DEFAULT_ACTIVITY_CATEGORIES: {
   id: InterruptionActivityCategory;
   nameVi: string;
   nameEn: string;
   iconName: string;
 }[] = [
-  { id: 'eating_drinks', nameVi: 'Ăn uống', nameEn: 'Eating & drinks', iconName: 'Utensils' },
-  { id: 'overslept', nameVi: 'Ngủ quên', nameEn: 'Overslept', iconName: 'AlarmClockOff' },
-  { id: 'chatting_gossip', nameVi: 'Tán gẫu / Buôn', nameEn: 'Chatting / gossip', iconName: 'MessagesSquare' },
-  { id: 'travel', nameVi: 'Di chuyển', nameEn: 'Travel', iconName: 'Car' },
-  { id: 'research_reading', nameVi: 'Đọc / Nghiên cứu', nameEn: 'Research / reading', iconName: 'BookOpen' },
-  { id: 'drank_too_much', nameVi: 'Uống quá chén', nameEn: 'Drank too much', iconName: 'Wine' },
-  { id: 'phone_scrolling', nameVi: 'Lướt điện thoại', nameEn: 'Phone scrolling', iconName: 'Smartphone' },
-  { id: 'calls_messages', nameVi: 'Gọi điện / Nhắn tin', nameEn: 'Calls & messages', iconName: 'PhoneCall' },
+  { id: 'calls_messages', nameVi: 'Cuộc gọi, tin nhắn', nameEn: 'Calls & messages', iconName: 'PhoneCall' },
+  { id: 'work_came_up', nameVi: 'Việc mới phát sinh', nameEn: 'Work came up', iconName: 'Briefcase' },
   { id: 'family_matter', nameVi: 'Việc gia đình', nameEn: 'Family matter', iconName: 'HeartHandshake' },
-  { id: 'work_came_up', nameVi: 'Việc đột xuất', nameEn: 'Work came up', iconName: 'Briefcase' },
+  { id: 'eating_drinks', nameVi: 'Ăn uống', nameEn: 'Eating & drinks', iconName: 'Utensils' },
+  { id: 'travel', nameVi: 'Di chuyển', nameEn: 'Travel', iconName: 'Car' },
   { id: 'break', nameVi: 'Nghỉ giải lao', nameEn: 'Break', iconName: 'Coffee' },
+  { id: 'chatting_gossip', nameVi: 'Tán gẫu / Buôn', nameEn: 'Chatting / gossip', iconName: 'MessagesSquare' },
+  { id: 'phone_scrolling', nameVi: 'Lướt điện thoại', nameEn: 'Phone scrolling', iconName: 'Smartphone' },
+  { id: 'research_reading', nameVi: 'Đọc / Nghiên cứu lan man', nameEn: 'Research / reading', iconName: 'BookOpen' },
+  { id: 'overslept', nameVi: 'Ngủ quên', nameEn: 'Overslept', iconName: 'AlarmClockOff' },
+  { id: 'drank_too_much', nameVi: 'Nhậu quá chén', nameEn: 'Drank too much', iconName: 'Wine' },
   { id: 'exercise', nameVi: 'Tập thể dục', nameEn: 'Exercise', iconName: 'Dumbbell' },
+  { id: 'prev_task_over', nameVi: 'Việc trước đó chạy quá giờ', nameEn: 'Previous task ran over', iconName: 'Briefcase' },
   { id: 'other', nameVi: 'Khác', nameEn: 'Other', iconName: 'HelpCircle' },
 ];
 

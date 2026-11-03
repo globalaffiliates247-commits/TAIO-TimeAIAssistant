@@ -10,10 +10,7 @@ import {
   Volume2, 
   Globe, 
   Calendar, 
-  Trophy, 
   Target,
-  BarChart3,
-  Wine,
   Settings,
   Minus,
   Square,
@@ -22,7 +19,10 @@ import {
   HelpCircle,
   Activity,
   UploadCloud,
-  FolderKanban
+  FolderKanban,
+  Wine,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -35,8 +35,6 @@ export const Navbar: React.FC = () => {
     setLanguage, 
     toneLevel, 
     setToneLevel,
-    setIsOnboarded,
-    setSocialAuditModalOpen,
     deviceLook,
     setSettingsModalOpen,
     inbox,
@@ -47,81 +45,123 @@ export const Navbar: React.FC = () => {
     setIsProfileModalOpen,
     userProfileDetail,
     setIsSwipeModalOpen,
-    setIsActiveCaptureOpen
+    setIsActiveCaptureOpen,
+    palette,
+    setPalette,
+    currentPaletteColors
   } = useApp();
 
+  const isCool = palette === 'cool';
+
+  const togglePalette = () => {
+    setPalette(isCool ? 'warm' : 'cool');
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 shadow-lg">
+    <header className={`sticky top-0 z-40 transition-colors duration-200 border-b backdrop-blur-xl ${
+      isCool 
+        ? 'bg-white/95 border-slate-200 shadow-sm' 
+        : 'bg-white/95 border-stone-200 shadow-sm'
+    }`}>
       
       {/* Platform Window Controls (PRD D3: macOS Traffic lights / Windows Titlebar) */}
       {deviceLook === 'macos' && (
-        <div className="bg-slate-950/90 px-4 py-1.5 flex items-center justify-between border-b border-slate-800 text-[11px] text-slate-400 select-none">
+        <div className={`px-4 py-1.5 flex items-center justify-between border-b text-[11px] select-none ${
+          isCool ? 'bg-slate-50 border-slate-200 text-slate-500' : 'bg-stone-50 border-stone-200 text-stone-500'
+        }`}>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-[#ff5f56] inline-block shadow-sm" />
             <span className="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block shadow-sm" />
             <span className="w-3 h-3 rounded-full bg-[#27c93f] inline-block shadow-sm" />
           </div>
-          <span className="font-semibold text-slate-300 tracking-wide">TAIO Time App — macOS</span>
+          <span className="font-semibold tracking-wide">TAIO Time App — macOS</span>
           <div className="w-12" />
         </div>
       )}
 
       {deviceLook === 'windows' && (
-        <div className="bg-slate-950/90 px-3 py-1 flex items-center justify-between border-b border-slate-800 text-[11px] text-slate-400 select-none">
+        <div className={`px-3 py-1 flex items-center justify-between border-b text-[11px] select-none ${
+          isCool ? 'bg-slate-50 border-slate-200 text-slate-500' : 'bg-stone-50 border-stone-200 text-stone-500'
+        }`}>
           <div className="flex items-center gap-2">
-            <div className="w-3.5 h-3.5 rounded bg-[#E0401F] text-[9px] font-bold text-white flex items-center justify-center">T</div>
-            <span className="font-medium text-slate-300">TAIO Time App (Windows)</span>
+            <div className={`w-3.5 h-3.5 rounded text-[9px] font-bold text-white flex items-center justify-center ${
+              isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+            }`}>T</div>
+            <span className="font-medium">TAIO Time App (Windows)</span>
           </div>
           <div className="flex items-center gap-2">
-            <Minus className="w-3 h-3 hover:text-white cursor-pointer" />
-            <Square className="w-2.5 h-2.5 hover:text-white cursor-pointer" />
-            <CloseIcon className="w-3 h-3 hover:text-red-400 cursor-pointer" />
+            <Minus className="w-3 h-3 hover:text-slate-800 cursor-pointer" />
+            <Square className="w-2.5 h-2.5 hover:text-slate-800 cursor-pointer" />
+            <CloseIcon className="w-3 h-3 hover:text-red-500 cursor-pointer" />
           </div>
         </div>
       )}
 
       {/* Top Banner / Brand & Tools */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setCurrentTab('now')}>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E0401F] to-orange-500 flex items-center justify-center font-extrabold text-white shadow-md shadow-red-500/30">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-white shadow-sm transition-all ${
+              isCool 
+                ? 'bg-blue-600 shadow-blue-500/20' 
+                : 'bg-[#E0401F] shadow-red-500/20'
+            }`}>
               T
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold tracking-tight text-white text-base">TAIO</span>
-                <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  v0.3.7 Approved
+                <span className="font-black tracking-tight text-slate-900 text-base">TAIO</span>
+                <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border ${
+                  isCool 
+                    ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                    : 'bg-red-50 text-[#E0401F] border-red-200'
+                }`}>
+                  v0.3.9 Approved
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 -mt-0.5">TAIO.CLUB Time App</p>
+              <p className="text-[11px] text-slate-500 -mt-0.5">TAIO.CLUB Time App</p>
             </div>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2 sm:gap-2.5 text-xs">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs">
           
+          {/* Quick Palette Toggle Button (Tông Lạnh Cool vs Tông Nóng Warm) */}
+          <button
+            onClick={togglePalette}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold transition-all border shadow-xs ${
+              isCool
+                ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                : 'bg-red-50 hover:bg-red-100 text-[#E0401F] border-red-200'
+            }`}
+            title="Bấm để chuyển nhanh giữa Tông màu Lạnh (Xanh) và Tông màu Nóng (Đỏ)"
+          >
+            <span>{isCool ? '❄️ Tông Lạnh' : '🔥 Tông Nóng'}</span>
+          </button>
+
           {/* Data Export for AI Assistant Button (PRD B24) */}
           <button
             onClick={() => setExportModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-950/60 hover:bg-orange-900/60 text-orange-400 border border-orange-500/30 transition-all font-semibold"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold"
             title="Xuất dữ liệu Markdown cho AI Assistant (B24)"
           >
-            <UploadCloud className="w-3.5 h-3.5" />
+            <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
             <span className="hidden sm:inline">Xuất AI</span>
           </button>
 
           {/* Inbox Mini App Button (PRD B20) */}
           <button
             onClick={() => setInboxModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 transition-all font-semibold relative"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold relative"
             title="Rổ công việc (Inbox - GTD B20)"
           >
-            <Inbox className="w-3.5 h-3.5 text-orange-400" />
+            <Inbox className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
             <span className="hidden sm:inline">Rổ việc</span>
             {inbox.filter(i => i.status === 'inbox').length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#E0401F] text-white">
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold text-white ${
+                isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+              }`}>
                 {inbox.filter(i => i.status === 'inbox').length}
               </span>
             )}
@@ -130,71 +170,51 @@ export const Navbar: React.FC = () => {
           {/* Lists Mini App Button (PRD B26) */}
           <button
             onClick={() => setIsListsModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 transition-all font-semibold"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold"
             title="Danh sách Ý tưởng, Dự án, Checklist (B26)"
           >
-            <FolderKanban className="w-3.5 h-3.5 text-sky-400" />
+            <FolderKanban className="w-3.5 h-3.5 text-sky-600" />
             <span className="hidden sm:inline">Danh sách</span>
           </button>
 
           {/* Swipe Review Backlog Button (PRD B28 Thẻ nhắc việc) */}
           <button
             onClick={() => setIsSwipeModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition-all font-semibold"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-amber-700 border border-slate-200 transition-all font-semibold"
             title="Thẻ nhắc việc: Lướt rổ tồn đọng (B28)"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span className="hidden sm:inline">Lướt rổ</span>
           </button>
 
           {/* Active Capture & Backfill (PRD B30) */}
           <button
             onClick={() => setIsActiveCaptureOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-[#ff7556] border border-[#E0401F]/30 transition-all font-semibold"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold"
             title="Thu thập chủ động & Ghi bù (B30)"
           >
-            <Clock className="w-3.5 h-3.5 text-[#ff7556]" />
+            <Clock className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
             <span className="hidden sm:inline">Ghi bù</span>
           </button>
 
-          {/* Method Library Button (PRD B22) */}
-          <button
-            onClick={() => setMethodLibraryOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 transition-all font-medium"
-            title="Thư viện phương pháp khoa học (B22)"
-          >
-            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden md:inline">Phương pháp</span>
-          </button>
-
-          {/* Social Outing Cost Audit Button (PRD B12) */}
-          <button
-            onClick={() => setSocialAuditModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-500/20 transition-all font-medium"
-            title="Kiểm toán chi phí giao lưu & ảnh hưởng ngày hôm sau"
-          >
-            <Wine className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden lg:inline">Giao lưu</span>
-          </button>
-
           {/* Tone of Voice Selector (PRD B13) */}
-          <div className="flex items-center gap-1 bg-slate-800/80 border border-slate-700/60 rounded-xl px-2 py-1">
-            <Volume2 className="w-3.5 h-3.5 text-slate-400" />
+          <div className="hidden lg:flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl px-2 py-1">
+            <Volume2 className="w-3.5 h-3.5 text-slate-500" />
             <select
               value={toneLevel}
               onChange={(e) => setToneLevel(e.target.value === 'auto' ? 'auto' : Number(e.target.value) as any)}
-              className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer pr-1"
+              className="bg-transparent text-slate-700 text-xs focus:outline-none cursor-pointer pr-1"
             >
-              <option value={1} className="bg-slate-900 text-slate-200">Giọng: Nhẹ nhàng (Lv1)</option>
-              <option value={2} className="bg-slate-900 text-slate-200">Giọng: Rõ ràng (Lv2)</option>
-              <option value={3} className="bg-slate-900 text-slate-200">Giọng: Dứt khoát (Lv3)</option>
-              <option value="auto" className="bg-slate-900 text-slate-200">Giọng: Tự thích ứng (AI)</option>
+              <option value={1}>Giọng: Nhẹ nhàng (Lv1)</option>
+              <option value={2}>Giọng: Rõ ràng (Lv2)</option>
+              <option value={3}>Giọng: Dứt khoát (Lv3)</option>
+              <option value="auto">Giọng: Tự thích ứng (AI)</option>
             </select>
           </div>
 
           {/* Profile Switcher */}
-          <div className="flex items-center gap-1 bg-slate-800/80 border border-slate-700/60 rounded-xl px-2 py-1">
-            <User className="w-3.5 h-3.5 text-red-400" />
+          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl px-2 py-1">
+            <User className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
             <select
               value={profile.type}
               onChange={(e) => {
@@ -203,10 +223,10 @@ export const Navbar: React.FC = () => {
                   setProfile(PROFILES[targetKey]);
                 }
               }}
-              className="bg-transparent text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer max-w-[130px] truncate"
+              className="bg-transparent text-slate-700 text-xs font-semibold focus:outline-none cursor-pointer max-w-[110px] truncate"
             >
               {Object.values(PROFILES).map((p) => (
-                <option key={p.type} value={p.type} className="bg-slate-900 text-slate-200">
+                <option key={p.type} value={p.type}>
                   {p.title}
                 </option>
               ))}
@@ -216,30 +236,22 @@ export const Navbar: React.FC = () => {
           {/* Appearance Settings Gear Icon (PRD B17) */}
           <button
             onClick={() => setSettingsModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all border border-slate-200"
             title="Cài đặt giao diện & nền tảng (macOS, Windows, Phone, Bảng màu)"
           >
-            <Settings className="w-3.5 h-3.5 text-slate-300" />
+            <Settings className="w-3.5 h-3.5 text-slate-600" />
             <span className="hidden sm:inline font-medium">Giao diện</span>
-          </button>
-
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLanguage(language === 'vi' ? 'en' : 'vi')}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-bold border border-slate-700/60"
-            title="Đổi ngôn ngữ (VI / EN)"
-          >
-            <Globe className="w-3.5 h-3.5 text-sky-400" />
-            <span>{language.toUpperCase()}</span>
           </button>
 
           {/* Profile & Community Button (PRD B27 "Cá nhân / Me") */}
           <button
             onClick={() => setIsProfileModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white font-semibold transition-all border border-slate-700/80 shadow-sm"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-white font-semibold transition-all shadow-xs ${
+              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+            }`}
             title="Hồ sơ, Cá nhân hóa & Kết nối TAIO (B27)"
           >
-            <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-[#E0401F] to-amber-500 text-white flex items-center justify-center text-[9px] font-extrabold shadow-sm">
+            <div className="w-4 h-4 rounded-full bg-white/25 text-white flex items-center justify-center text-[9px] font-black">
               {userProfileDetail.displayName.charAt(0) || 'U'}
             </div>
             <span>Cá nhân</span>
@@ -247,16 +259,20 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* 4 Core Tabs Bar with Bilingual Tooltips */}
-      <nav className={`max-w-6xl mx-auto px-4 sm:px-6 flex border-t border-slate-800/80 ${deviceLook === 'phone' ? 'fixed bottom-0 left-0 right-0 z-50 bg-slate-950 border-t border-slate-800 shadow-2xl py-1.5' : 'bg-slate-950/60'}`}>
+      {/* 4 Core Tabs Bar with Native App Store Style */}
+      <nav className={`max-w-6xl mx-auto px-4 sm:px-6 flex border-t ${
+        isCool ? 'border-slate-200 bg-slate-50/70' : 'border-stone-200 bg-stone-50/70'
+      } ${deviceLook === 'phone' ? 'fixed bottom-0 left-0 right-0 z-50 shadow-2xl py-1' : ''}`}>
         {/* Tab 1: Now */}
         <button
           onClick={() => setCurrentTab('now')}
           title={language === 'vi' ? 'Đang làm gì, vì mục tiêu nào, việc kế tiếp' : "What I'm doing, for which goal, what's next"}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-semibold text-xs sm:text-sm transition-all group ${
+          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
             currentTab === 'now'
-              ? 'border-[#E0401F] text-[#E0401F] bg-red-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
+              ? isCool 
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
           }`}
         >
           <Clock className="w-4 h-4" />
@@ -267,10 +283,12 @@ export const Navbar: React.FC = () => {
         <button
           onClick={() => setCurrentTab('plan')}
           title={language === 'vi' ? 'Lịch ngày và ma trận ưu tiên' : 'Day timeline and priority matrix'}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-semibold text-xs sm:text-sm transition-all group ${
+          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
             currentTab === 'plan'
-              ? 'border-[#E0401F] text-[#E0401F] bg-red-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
+              ? isCool 
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
           }`}
         >
           <Calendar className="w-4 h-4" />
@@ -281,10 +299,12 @@ export const Navbar: React.FC = () => {
         <button
           onClick={() => setCurrentTab('achievements')}
           title={language === 'vi' ? 'Thời gian đã đi đâu, việc đã xong, tiến độ dự án' : 'Where your time went, what you finished, project progress'}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-semibold text-xs sm:text-sm transition-all group ${
+          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
             currentTab === 'achievements' || (currentTab as any) === 'efficiency'
-              ? 'border-[#E0401F] text-[#E0401F] bg-red-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
+              ? isCool 
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -295,14 +315,16 @@ export const Navbar: React.FC = () => {
         <button
           onClick={() => setCurrentTab('goals')}
           title={language === 'vi' ? 'Mục tiêu lớn và lộ trình đến đích' : 'Big goals and the roadmap to reach them'}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-semibold text-xs sm:text-sm transition-all group ${
+          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
             currentTab === 'goals'
-              ? 'border-[#E0401F] text-[#E0401F] bg-red-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
+              ? isCool 
+                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
           }`}
         >
           <Target className="w-4 h-4" />
-          <span>{language === 'vi' ? 'Mục tiêu (Goals / Lộ trình)' : 'Goals / Roadmap'}</span>
+          <span>{language === 'vi' ? 'Mục tiêu (Goals)' : 'Goals'}</span>
         </button>
       </nav>
     </header>
