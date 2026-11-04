@@ -42,7 +42,7 @@ const CATEGORY_COLORS: Record<TimeLedgerCategory, { bg: string; text: string; la
   distraction: { bg: 'bg-rose-500', text: 'text-rose-400', labelVi: 'Xao nhãng' },
   personal: { bg: 'bg-emerald-500', text: 'text-emerald-400', labelVi: 'Cá nhân & Nghỉ ngơi' },
   sleep: { bg: 'bg-blue-600', text: 'text-blue-400', labelVi: 'Giấc ngủ' },
-  other: { bg: 'bg-slate-500', text: 'text-slate-400', labelVi: 'Khác' },
+  other: { bg: 'bg-slate-500', text: 'text-slate-500', labelVi: 'Khác' },
 };
 
 export const AchievementsTab: React.FC = () => {
@@ -123,7 +123,7 @@ export const AchievementsTab: React.FC = () => {
             </h2>
             <button
               onClick={() => setMethodLibraryOpen(true)}
-              className="p-1 rounded-full text-slate-400 hover:text-orange-400 hover:bg-slate-800 transition-colors"
+              className="p-1 rounded-full text-slate-500 hover:text-orange-400 hover:bg-slate-100 transition-colors"
               title="Mở Thư viện phương pháp khoa học (B22)"
             >
               <HelpCircle className="w-4 h-4" />
@@ -216,7 +216,7 @@ export const AchievementsTab: React.FC = () => {
                   Theo Peter Drucker (1967): Mọi phút trong ngày đều thuộc chính xác 1 danh mục, không thể xóa bỏ hay vay mượn.
                 </p>
               </div>
-              <span className="text-xs font-mono text-slate-400">Tổng 1.440 phút (24h)</span>
+              <span className="text-xs font-mono text-slate-500">Tổng 1.440 phút (24h)</span>
             </div>
 
             {/* Visual 24-Hour Colored Segment Bar */}
@@ -247,7 +247,7 @@ export const AchievementsTab: React.FC = () => {
                       <span className="text-[11px] font-semibold text-slate-700 truncate">{col.labelVi}</span>
                     </div>
                     <p className="text-sm font-bold text-slate-900 mt-1">
-                      {mins}p <span className="text-[10px] text-slate-400 font-normal">({hrs}h)</span>
+                      {mins}p <span className="text-[10px] text-slate-500 font-normal">({hrs}h)</span>
                     </p>
                   </div>
                 );
@@ -259,32 +259,32 @@ export const AchievementsTab: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             
             <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Tỷ lệ giờ thức cho mục tiêu
               </span>
               <div className="py-2 flex items-baseline gap-2">
                 <span className="text-4xl font-mono font-extrabold text-orange-400">
                   {goalWorkRatio}%
                 </span>
-                <span className="text-xs text-slate-400 font-medium">của giờ thức</span>
+                <span className="text-xs text-slate-500 font-medium">của giờ thức</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
                 <div className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full" style={{ width: `${goalWorkRatio}%` }} />
               </div>
-              <p className="text-[11px] text-slate-400 mt-2">
+              <p className="text-[11px] text-slate-500 mt-2">
                 Đã dùng {categoryTotals.goal_work || 285}p trên tổng {wakingMinutes}p thức.
               </p>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Xao nhãng sau timebox (Distraction)
               </span>
               <div className="py-2 flex items-baseline gap-2">
                 <span className="text-4xl font-mono font-extrabold text-rose-400">
                   {distractionMins}
                 </span>
-                <span className="text-xs text-slate-400 font-medium">phút chưa khai báo</span>
+                <span className="text-xs text-slate-500 font-medium">phút chưa khai báo</span>
               </div>
               <p className="text-xs text-slate-600">
                 Phát sinh khi timebox kết thúc quá vùng đệm 5 phút mà chưa tuyên bố việc tiếp theo.
@@ -295,18 +295,18 @@ export const AchievementsTab: React.FC = () => {
             </div>
 
             <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Xu hướng so với 7 ngày trước
               </span>
               <div className="py-2 flex items-center gap-2">
                 <TrendingUp className="w-6 h-6 text-emerald-400" />
                 <span className="text-2xl font-bold text-emerald-400">+18%</span>
-                <span className="text-xs text-slate-400">thời gian việc sâu</span>
+                <span className="text-xs text-slate-500">thời gian việc sâu</span>
               </div>
               <p className="text-xs text-slate-600">
                 Trung bình việc sâu tuần này đạt 165p/ngày (so với 140p tuần trước).
               </p>
-              <span className="text-[11px] text-slate-400 mt-2">
+              <span className="text-[11px] text-slate-500 mt-2">
                 Quỹ gián đoạn sử dụng ở mức lành mạnh (68%).
               </span>
             </div>
@@ -326,7 +326,7 @@ export const AchievementsTab: React.FC = () => {
             </div>
 
             {gaps.length === 0 ? (
-              <p className="text-xs text-slate-400">Không có khoảng trống thời gian nào.</p>
+              <p className="text-xs text-slate-500">Không có khoảng trống thời gian nào.</p>
             ) : (
               <div className="space-y-2.5">
                 {gaps.map((gap) => (
@@ -342,7 +342,7 @@ export const AchievementsTab: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Khoảng trống không có lịch cố định</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Khoảng trống không có lịch cố định</p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -376,35 +376,35 @@ export const AchievementsTab: React.FC = () => {
           {/* Summary Cards: Done on time vs Done over time & Flow efficiency */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+              <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Xong đúng hẹn
               </span>
               <p className="text-2xl font-bold text-emerald-400 mt-1">{doneOnTimeCount} việc</p>
-              <span className="text-[11px] text-slate-400">Khớp chuẩn DoD & Timebox</span>
+              <span className="text-[11px] text-slate-500">Khớp chuẩn DoD & Timebox</span>
             </div>
 
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+              <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-amber-400" /> Xong quá giờ
               </span>
               <p className="text-2xl font-bold text-amber-400 mt-1">{doneOverTimeCount} việc</p>
-              <span className="text-[11px] text-slate-400">+15p bù giờ ghi nhận</span>
+              <span className="text-[11px] text-slate-500">+15p bù giờ ghi nhận</span>
             </div>
 
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+              <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                 <Activity className="w-3.5 h-3.5 text-orange-400" /> Flow Efficiency
               </span>
               <p className="text-2xl font-bold text-orange-400 mt-1">{avgFlowEfficiency}%</p>
-              <span className="text-[11px] text-slate-400">Touch time / Cycle time (Lean)</span>
+              <span className="text-[11px] text-slate-500">Touch time / Cycle time (Lean)</span>
             </div>
 
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+              <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                 <Target className="w-3.5 h-3.5 text-sky-400" /> Độ chuẩn ước lượng
               </span>
               <p className="text-2xl font-bold text-sky-400 mt-1">88%</p>
-              <span className="text-[11px] text-slate-400">Giảm thiểu Planning Fallacy</span>
+              <span className="text-[11px] text-slate-500">Giảm thiểu Planning Fallacy</span>
             </div>
           </div>
 
@@ -415,7 +415,7 @@ export const AchievementsTab: React.FC = () => {
                 <CheckSquare className="w-4 h-4 text-orange-400" />
                 <span>Chi tiết hiệu suất từng nhiệm vụ (Touch Time & Cycle Time)</span>
               </h3>
-              <span className="text-xs text-slate-400">Chuẩn Kanban Flow Metrics</span>
+              <span className="text-xs text-slate-500">Chuẩn Kanban Flow Metrics</span>
             </div>
 
             <div className="space-y-3">
@@ -432,7 +432,7 @@ export const AchievementsTab: React.FC = () => {
                         <span className={`w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-400' : b.status === 'in_progress' ? 'bg-orange-400 animate-pulse' : 'bg-slate-500'}`} />
                         <h4 className="text-sm font-bold text-slate-900">{b.title}</h4>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
                         <span>Mục tiêu: <strong className="text-slate-300">{b.goalName || 'Ngoài mục tiêu'}</strong></span>
                         <span>•</span>
                         <span>Loại: <strong className="text-orange-400 uppercase text-[10px]">{b.taskEndType || 'timebox'}</strong></span>
@@ -444,15 +444,15 @@ export const AchievementsTab: React.FC = () => {
                     <div className="flex items-center gap-4 shrink-0">
                       <div className="text-right">
                         <div className="text-xs font-semibold text-slate-800">
-                          Touch: <strong className="text-orange-400">{touch}p</strong> / Cycle: <strong className="text-slate-400">{cycle}p</strong>
+                          Touch: <strong className="text-orange-400">{touch}p</strong> / Cycle: <strong className="text-slate-500">{cycle}p</strong>
                         </div>
-                        <div className="text-[11px] text-slate-400">
+                        <div className="text-[11px] text-slate-500">
                           Hiệu suất dòng chảy: <strong className="text-emerald-400">{flow}%</strong>
                         </div>
                       </div>
 
                       <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${
-                        isDone ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/40' : 'bg-slate-800 text-slate-400'
+                        isDone ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
                       }`}>
                         {isDone ? 'Đã hoàn thành ✓' : b.status === 'in_progress' ? 'Đang chạy' : 'Đã lên lịch'}
                       </span>
@@ -497,8 +497,8 @@ export const AchievementsTab: React.FC = () => {
                         </span>
                         <h4 className="text-base font-bold text-slate-900">{g.name}</h4>
                       </div>
-                      <div className="text-xs font-mono text-slate-400">
-                        Hạn chót: <strong className="text-slate-200">{g.deadline}</strong> ({g.horizonDays} ngày)
+                      <div className="text-xs font-mono text-slate-500">
+                        Hạn chót: <strong className="text-slate-700">{g.deadline}</strong> ({g.horizonDays} ngày)
                       </div>
                     </div>
 
@@ -509,7 +509,7 @@ export const AchievementsTab: React.FC = () => {
                     {/* Progress & Variance Bar */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">
+                        <span className="text-slate-500">
                           Đã dùng: <strong className="text-slate-900">{actualHours}h</strong> / Kế hoạch: <strong className="text-slate-300">{plannedHours}h</strong>
                           {varianceHours <= 0 ? (
                             <span className="text-emerald-400 ml-1.5 font-semibold">({varianceHours}h tiết kiệm)</span>
@@ -525,7 +525,7 @@ export const AchievementsTab: React.FC = () => {
                           style={{ width: `${g.progressPercent}%` }} 
                         />
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 font-mono">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5 font-mono">
                         <span>Dự báo khi hoàn thành: <strong>{forecastHours}h</strong></span>
                         <span>Cột mốc: {g.milestones.filter(m => m.status === 'completed').length}/{g.milestones.length} xong</span>
                       </div>

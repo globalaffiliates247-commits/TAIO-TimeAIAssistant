@@ -74,11 +74,11 @@ export const AdminPortal: React.FC = () => {
     <div className="space-y-6 max-w-6xl mx-auto pb-16">
       
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setCurrentTab('now')}
-            className="p-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600"
             title="Quay lại ứng dụng người dùng"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -90,18 +90,18 @@ export const AdminPortal: React.FC = () => {
                 Founder Portal v1.0
               </span>
             </div>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Quản trị người dùng, thống kê hành vi ẩn danh và cấu hình giọng điệu thích ứng
             </p>
           </div>
         </div>
 
         {/* Sub-nav */}
-        <div className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 self-start sm:self-center">
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 self-start sm:self-center">
           <button
             onClick={() => setActiveSubTab('analytics')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeSubTab === 'analytics' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
+              activeSubTab === 'analytics' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
@@ -110,7 +110,7 @@ export const AdminPortal: React.FC = () => {
           <button
             onClick={() => setActiveSubTab('users')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeSubTab === 'users' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
+              activeSubTab === 'users' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -119,7 +119,7 @@ export const AdminPortal: React.FC = () => {
           <button
             onClick={() => setActiveSubTab('c6_ai')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeSubTab === 'c6_ai' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
+              activeSubTab === 'c6_ai' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <Bot className="w-3.5 h-3.5 text-indigo-300" />
@@ -128,7 +128,7 @@ export const AdminPortal: React.FC = () => {
           <button
             onClick={() => setActiveSubTab('tone')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeSubTab === 'tone' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
+              activeSubTab === 'tone' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <Volume2 className="w-3.5 h-3.5" />
@@ -162,11 +162,11 @@ export const AdminPortal: React.FC = () => {
                   ]
                 }
               })}
-              className="bg-[#121620] border border-gray-800 hover:border-indigo-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+              className="bg-white border border-slate-200 hover:border-indigo-400 hover:bg-slate-50 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400 group-hover:text-indigo-300">Onboarding &lt; 60 giây</span>
+                <span className="text-xs text-slate-500 group-hover:text-indigo-300">Onboarding &lt; 60 giây</span>
                 <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-emerald-400 mt-1">92.4%</p>
@@ -191,11 +191,11 @@ export const AdminPortal: React.FC = () => {
                   ]
                 }
               })}
-              className="bg-[#121620] border border-gray-800 hover:border-indigo-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+              className="bg-white border border-slate-200 hover:border-indigo-400 hover:bg-slate-50 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400 group-hover:text-indigo-300">Tỷ lệ phản hồi Check-in</span>
+                <span className="text-xs text-slate-500 group-hover:text-indigo-300">Tỷ lệ phản hồi Check-in</span>
                 <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-indigo-400 mt-1">86.7%</p>
@@ -219,11 +219,11 @@ export const AdminPortal: React.FC = () => {
                   ]
                 }
               })}
-              className="bg-[#121620] border border-gray-800 hover:border-purple-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+              className="bg-white border border-slate-200 hover:border-purple-400 hover:bg-slate-50 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400 group-hover:text-purple-300">Tỷ lệ Đóng ngày</span>
+                <span className="text-xs text-slate-500 group-hover:text-purple-300">Tỷ lệ Đóng ngày</span>
                 <span className="text-[10px] text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-purple-400 mt-1">78.1%</p>
@@ -247,11 +247,11 @@ export const AdminPortal: React.FC = () => {
                   ]
                 }
               })}
-              className="bg-[#121620] border border-gray-800 hover:border-amber-500/60 hover:bg-gray-800/80 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
+              className="bg-white border border-slate-200 hover:border-amber-400 hover:bg-slate-50 rounded-xl p-4 transition-all cursor-pointer group shadow-sm"
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400 group-hover:text-amber-300">Gắn với Mục tiêu</span>
+                <span className="text-xs text-slate-500 group-hover:text-amber-300">Gắn với Mục tiêu</span>
                 <span className="text-[10px] text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-amber-400 mt-1">91.0%</p>
@@ -260,15 +260,15 @@ export const AdminPortal: React.FC = () => {
           </div>
 
           {/* Profile Breakdown Chart with Clickable Bars */}
-          <div className="bg-[#121620] border border-gray-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider">
                   Phân bổ người dùng theo 6 hồ sơ khởi đầu (Onboarding Profile Distribution)
                 </h3>
                 <p className="text-xs text-indigo-400 mt-0.5">Bấm vào bất kỳ hồ sơ nào để xem danh sách tài khoản tương ứng ↗</p>
               </div>
-              <span className="text-xs text-gray-400 font-semibold">154 tài khoản thử nghiệm</span>
+              <span className="text-xs text-slate-500 font-semibold">154 tài khoản thử nghiệm</span>
             </div>
 
             <div className="space-y-3">
@@ -298,14 +298,14 @@ export const AdminPortal: React.FC = () => {
                       ]
                     }
                   })}
-                  className="space-y-1 p-2 rounded-xl hover:bg-gray-900/60 transition-colors cursor-pointer group"
+                  className="space-y-1 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
                   title={`Bấm để xem danh sách ${item.count} người dùng của hồ sơ này`}
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-200 font-medium group-hover:text-indigo-300 transition-colors">{item.name}</span>
-                    <span className="text-gray-400">{item.count} người ({item.pct}%) ↗</span>
+                    <span className="text-slate-700 font-medium group-hover:text-indigo-300 transition-colors">{item.name}</span>
+                    <span className="text-slate-500">{item.count} người ({item.pct}%) ↗</span>
                   </div>
-                  <div className="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
                     <div className={`${item.color} h-full rounded-full group-hover:opacity-90 transition-opacity`} style={{ width: `${item.pct}%` }} />
                   </div>
                 </div>
@@ -314,29 +314,29 @@ export const AdminPortal: React.FC = () => {
           </div>
 
           {/* Tone Response Rates (PRD B13 & C3) */}
-          <div className="bg-[#121620] border border-gray-800 rounded-2xl p-6 shadow-xl space-y-3">
-            <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl space-y-3">
+            <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider">
               Tỷ lệ phản hồi check-in theo mức độ giọng điệu (Tone Response Rates)
             </h3>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-slate-500">
               Dữ liệu tổng hợp ẩn danh giúp điều chỉnh bản mẫu hằng tuần.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <span className="text-xs font-bold text-emerald-400 uppercase">Mức 1: Nhẹ nhàng (Gentle)</span>
                 <p className="text-2xl font-bold text-white mt-1">89%</p>
-                <p className="text-[11px] text-gray-400 mt-1">Phản hồi tốt nhất ở 3 ngày đầu tiên</p>
+                <p className="text-[11px] text-slate-500 mt-1">Phản hồi tốt nhất ở 3 ngày đầu tiên</p>
               </div>
-              <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <span className="text-xs font-bold text-indigo-400 uppercase">Mức 2: Rõ ràng (Clear)</span>
                 <p className="text-2xl font-bold text-white mt-1">84%</p>
-                <p className="text-[11px] text-gray-400 mt-1">Ổn định nhất cho người dùng tuần 2 trở đi</p>
+                <p className="text-[11px] text-slate-500 mt-1">Ổn định nhất cho người dùng tuần 2 trở đi</p>
               </div>
-              <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <span className="text-xs font-bold text-amber-400 uppercase">Mức 3: Dứt khoát (Firm)</span>
                 <p className="text-2xl font-bold text-white mt-1">72%</p>
-                <p className="text-[11px] text-gray-400 mt-1">Hiệu quả khi có hard deadline cận kề</p>
+                <p className="text-[11px] text-slate-500 mt-1">Hiệu quả khi có hard deadline cận kề</p>
               </div>
             </div>
           </div>
@@ -348,9 +348,9 @@ export const AdminPortal: React.FC = () => {
       {activeSubTab === 'users' && (
         <div className="space-y-4">
           {/* Search & Filter Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#121620] border border-gray-800 p-4 rounded-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200 p-4 rounded-2xl">
             <div className="flex items-center gap-2 flex-1">
-              <Search className="w-4 h-4 text-gray-400 ml-1" />
+              <Search className="w-4 h-4 text-slate-500 ml-1" />
               <input
                 type="text"
                 value={searchQuery}
@@ -364,7 +364,7 @@ export const AdminPortal: React.FC = () => {
               <select
                 value={profileFilter}
                 onChange={e => setProfileFilter(e.target.value)}
-                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200 focus:outline-none"
+                className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 focus:outline-none"
               >
                 <option value="all">Tất cả hồ sơ</option>
                 {Object.values(PROFILES).map(p => (
@@ -374,7 +374,7 @@ export const AdminPortal: React.FC = () => {
 
               <button 
                 onClick={() => alert('Xuất báo cáo CSV thành công (PRD C3)!')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Xuất CSV</span>
@@ -383,10 +383,10 @@ export const AdminPortal: React.FC = () => {
           </div>
 
           {/* User Table */}
-          <div className="bg-[#121620] border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase tracking-wider">
+                <thead className="bg-white border-b border-slate-200 text-slate-500 uppercase tracking-wider">
                   <tr>
                     <th className="py-3 px-4">Người dùng</th>
                     <th className="py-3 px-4">Hồ sơ</th>
@@ -398,15 +398,15 @@ export const AdminPortal: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-800/80">
                   {filteredUsers.map(u => (
-                    <tr key={u.id} className="hover:bg-gray-900/40">
+                    <tr key={u.id} className="hover:bg-slate-50/40">
                       <td className="py-3 px-4">
                         <div className="font-semibold text-white">{u.name}</div>
-                        <div className="text-[11px] text-gray-400">{u.email}</div>
+                        <div className="text-[11px] text-slate-500">{u.email}</div>
                       </td>
-                      <td className="py-3 px-4 capitalize text-gray-300">
+                      <td className="py-3 px-4 capitalize text-slate-600">
                         {PROFILES[u.profile]?.title || u.profile}
                       </td>
-                      <td className="py-3 px-4 text-gray-300">
+                      <td className="py-3 px-4 text-slate-600">
                         {u.onboardingTimeSec}s
                       </td>
                       <td className="py-3 px-4 text-indigo-400 font-bold">
@@ -422,7 +422,7 @@ export const AdminPortal: React.FC = () => {
                       <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => toggleStatus(u.id)}
-                          className="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-[11px] font-medium"
+                          className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-medium"
                         >
                           {u.status === 'active' ? 'Tạm ngưng' : 'Kích hoạt'}
                         </button>
@@ -454,105 +454,105 @@ export const AdminPortal: React.FC = () => {
                     PRD C6
                   </span>
                 </h3>
-                <p className="text-xs text-gray-300 mt-0.5">
+                <p className="text-xs text-slate-600 mt-0.5">
                   Phát hiện điểm rơi hành vi toàn hệ thống • Đề xuất điều chỉnh mẫu câu và tham số mặc định • Có người duyệt trước khi áp dụng
                 </p>
               </div>
             </div>
 
-            <div className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-gray-300">
+            <div className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-slate-600">
               Chế độ: <strong className="text-emerald-400">Human-in-the-loop</strong>
             </div>
           </div>
 
           {/* 1. Action Nudge Effectiveness Dashboard */}
-          <div className="bg-[#121620] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-lg space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
                 <span>Hiệu quả Nhắc nhở Hành động (Action Nudge Acceptance Rate)</span>
               </h4>
-              <span className="text-xs text-gray-400 font-mono">1 CTA • Tự biến mất • Lặp lại sau 10-15p</span>
+              <span className="text-xs text-slate-500 font-mono">1 CTA • Tự biến mất • Lặp lại sau 10-15p</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="font-semibold text-purple-300">Ngủ đúng giờ (Sleep Nudge)</span>
                   <span className="font-mono font-bold text-white">78%</span>
                 </div>
-                <div className="w-full bg-gray-950 h-2 rounded-full overflow-hidden mb-2">
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-purple-500 h-full rounded-full" style={{ width: '78%' }} />
                 </div>
-                <p className="text-[11px] text-gray-400">154 chấp thuận / 197 lần hiển thị. Tỷ lệ đóng app ngủ tăng 22%.</p>
+                <p className="text-[11px] text-slate-500">154 chấp thuận / 197 lần hiển thị. Tỷ lệ đóng app ngủ tăng 22%.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
-                  <span className="font-semibold text-emerald-300">Xuất phát ngay (Leave Now)</span>
+                  <span className="font-semibold text-emerald-700">Xuất phát ngay (Leave Now)</span>
                   <span className="font-mono font-bold text-white">82%</span>
                 </div>
-                <div className="w-full bg-gray-950 h-2 rounded-full overflow-hidden mb-2">
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-emerald-500 h-full rounded-full" style={{ width: '82%' }} />
                 </div>
-                <p className="text-[11px] text-gray-400">89 chấp thuận / 108 cuộc hẹn có di chuyển. Giảm 85% trễ hẹn.</p>
+                <p className="text-[11px] text-slate-500">89 chấp thuận / 108 cuộc hẹn có di chuyển. Giảm 85% trễ hẹn.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="font-semibold text-indigo-300">Bắt đầu việc sâu (Start Deep)</span>
                   <span className="font-mono font-bold text-white">89%</span>
                 </div>
-                <div className="w-full bg-gray-950 h-2 rounded-full overflow-hidden mb-2">
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-indigo-500 h-full rounded-full" style={{ width: '89%' }} />
                 </div>
-                <p className="text-[11px] text-gray-400">214 vào chế độ tập trung ngay trong 2 phút đầu giờ.</p>
+                <p className="text-[11px] text-slate-500">214 vào chế độ tập trung ngay trong 2 phút đầu giờ.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="font-semibold text-amber-300">Đóng ngày (Close Day)</span>
                   <span className="font-mono font-bold text-white">91%</span>
                 </div>
-                <div className="w-full bg-gray-950 h-2 rounded-full overflow-hidden mb-2">
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-amber-500 h-full rounded-full" style={{ width: '91%' }} />
                 </div>
-                <p className="text-[11px] text-gray-400">310 khóa ngày & chọn việc số 1 cho ngày mai trước 22:30.</p>
+                <p className="text-[11px] text-slate-500">310 khóa ngày & chọn việc số 1 cho ngày mai trước 22:30.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="font-semibold text-cyan-300">Quay lại kế hoạch (Back to Plan)</span>
                   <span className="font-mono font-bold text-white">74%</span>
                 </div>
-                <div className="w-full bg-gray-950 h-2 rounded-full overflow-hidden mb-2">
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-cyan-500 h-full rounded-full" style={{ width: '74%' }} />
                 </div>
-                <p className="text-[11px] text-gray-400">112 người dùng quay lại kế hoạch sau khi bị chệch hướng &gt;30p.</p>
+                <p className="text-[11px] text-slate-500">112 người dùng quay lại kế hoạch sau khi bị chệch hướng &gt;30p.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="font-semibold text-rose-300">Nhắc nhở bữa ăn (Meal Nudge)</span>
                   <span className="font-mono font-bold text-white">86%</span>
                 </div>
-                <div className="w-full bg-gray-950 h-2 rounded-full overflow-hidden mb-2">
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-rose-500 h-full rounded-full" style={{ width: '86%' }} />
                 </div>
-                <p className="text-[11px] text-gray-400">Giúp người dùng không bỏ bữa trưa và ăn tối đúng neo cá nhân.</p>
+                <p className="text-[11px] text-slate-500">Giúp người dùng không bỏ bữa trưa và ăn tối đúng neo cá nhân.</p>
               </div>
             </div>
           </div>
 
           {/* 2. AI Improvement Suggestions List */}
-          <div className="bg-[#121620] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-lg space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-indigo-400" />
                   <span>Danh sách Đề xuất Cải tiến từ AI ({aiSuggestions.length})</span>
                 </h4>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   AI quét dữ liệu sử dụng ẩn danh của các nhóm hồ sơ để đưa ra đề xuất tối ưu tỷ lệ hoàn thành.
                 </p>
               </div>
@@ -567,7 +567,7 @@ export const AdminPortal: React.FC = () => {
                 return (
                   <div
                     key={sug.id}
-                    className="p-4 rounded-xl bg-gray-900 border border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
+                    className="p-4 rounded-xl bg-white border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
                   >
                     <div className="space-y-1.5 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -576,7 +576,7 @@ export const AdminPortal: React.FC = () => {
                           {sug.category}
                         </span>
                         {isAccepted && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/40 flex items-center gap-1">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                             <Check className="w-3 h-3" /> Đã áp dụng
                           </span>
                         )}
@@ -592,8 +592,8 @@ export const AdminPortal: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="text-xs text-gray-300 space-y-0.5">
-                        <p><strong className="text-gray-400 font-normal">Bằng chứng dữ liệu:</strong> {sug.evidence}</p>
+                      <div className="text-xs text-slate-600 space-y-0.5">
+                        <p><strong className="text-slate-500 font-normal">Bằng chứng dữ liệu:</strong> {sug.evidence}</p>
                         <p><strong className="text-indigo-400 font-normal">Hiệu quả kỳ vọng:</strong> {sug.expectedEffect}</p>
                       </div>
                     </div>
@@ -604,7 +604,7 @@ export const AdminPortal: React.FC = () => {
                         <>
                           <button
                             onClick={() => handleSuggestionAction(sug.id, 'reject')}
-                            className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium transition-colors"
+                            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition-colors"
                           >
                             Từ chối
                           </button>
@@ -624,7 +624,7 @@ export const AdminPortal: React.FC = () => {
                       ) : (
                         <button
                           onClick={() => handleSuggestionAction(sug.id, 'accept')}
-                          className="px-2.5 py-1 rounded-lg bg-gray-800 text-gray-400 hover:text-white text-xs"
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 text-xs"
                         >
                           Đặt lại
                         </button>
@@ -641,35 +641,35 @@ export const AdminPortal: React.FC = () => {
 
       {/* 3. Tone of Voice Manager (PRD B13) */}
       {activeSubTab === 'tone' && (
-        <div className="bg-[#121620] border border-gray-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="border-b border-gray-800 pb-3">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl space-y-4">
+          <div className="border-b border-slate-200 pb-3">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Sliders className="w-5 h-5 text-indigo-400" />
               <span>Quản lý mẫu câu giọng điệu thích ứng (Adaptive Tone Templates)</span>
             </h3>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Admin cấu hình mẫu câu mặc định (Constants) theo hồ sơ; AI trên máy chủ tối ưu trọng số (Variables) cho từng người.
             </p>
           </div>
 
           <div className="space-y-4 pt-2">
-            <div className="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
               <span className="text-xs font-bold text-emerald-400 uppercase">Mẫu câu Mức 1: Nhẹ nhàng (Gentle)</span>
-              <p className="text-xs text-gray-300 bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <p className="text-xs text-slate-600 bg-slate-100 p-3 rounded-lg border border-slate-200">
                 "Khối công việc vừa kết thúc êm đềm. Tiến độ của bạn diễn ra thế nào?"
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
               <span className="text-xs font-bold text-indigo-400 uppercase">Mẫu câu Mức 2: Rõ ràng (Clear)</span>
-              <p className="text-xs text-gray-300 bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <p className="text-xs text-slate-600 bg-slate-100 p-3 rounded-lg border border-slate-200">
                 "Hiện là [Giờ]. Bạn đã hoàn thành [Tên việc] ([Thời gian], [Mục tiêu]) chưa? Chọn: Đã xong, Cần thêm giờ, hoặc Dừng."
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
               <span className="text-xs font-bold text-amber-400 uppercase">Mẫu câu Mức 3: Dứt khoát (Firm)</span>
-              <p className="text-xs text-gray-300 bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <p className="text-xs text-slate-600 bg-slate-100 p-3 rounded-lg border border-slate-200">
                 "[Tên việc] chưa xác nhận. Hạn chót kế tiếp [Tên hạn chót] sắp tới lúc [Giờ]. Xác nhận ngay để giữ cam kết."
               </p>
             </div>

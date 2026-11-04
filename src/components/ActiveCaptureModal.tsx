@@ -35,8 +35,11 @@ export const ActiveCaptureModal: React.FC = () => {
     savePlace,
     togglePlaceLocation,
     goals,
-    blocks
+    blocks,
+    palette
   } = useApp();
+
+  const isCool = palette === 'cool';
 
   const [activeTab, setActiveTab] = useState<'backfill' | 'suggestions' | 'places'>('backfill');
 
@@ -81,19 +84,23 @@ export const ActiveCaptureModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl max-h-[92vh] bg-[#0f172a] border border-slate-100 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl max-h-[92vh] bg-white border border-slate-200 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100/80 bg-slate-50/60">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center shadow-md shadow-red-500/20">
-              <Clock className="w-4 h-4 text-slate-900" />
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs border ${
+              isCool 
+                ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                : 'bg-red-50 border-red-200 text-[#E0401F]'
+            }`}>
+              <Clock className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Thu thập chủ động & Ghi bù</h2>
-                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                   B30
                 </span>
               </div>
@@ -104,20 +111,20 @@ export const ActiveCaptureModal: React.FC = () => {
           </div>
           <button 
             onClick={() => setIsActiveCaptureOpen(false)}
-            className="text-slate-500 hover:text-slate-900 p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher: Ghi bù | AI đoán sẵn | Địa điểm Geofence */}
-        <div className="flex items-center border-b border-slate-100/80 bg-slate-50/40 px-5 pt-2 gap-2 text-xs">
+        <div className="flex items-center border-b border-slate-200 bg-slate-50/70 px-5 pt-2 gap-2 text-xs">
           <button
             onClick={() => setActiveTab('backfill')}
-            className={`pb-2.5 px-3 font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`pb-2.5 px-3 font-bold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'backfill'
-                ? 'border-[#E0401F] text-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-200'
+                ? isCool ? 'border-blue-600 text-blue-600' : 'border-[#E0401F] text-[#E0401F]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -125,24 +132,24 @@ export const ActiveCaptureModal: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('suggestions')}
-            className={`pb-2.5 px-3 font-semibold border-b-2 flex items-center gap-1.5 transition-all relative ${
+            className={`pb-2.5 px-3 font-bold border-b-2 flex items-center gap-1.5 transition-all relative ${
               activeTab === 'suggestions'
-                ? 'border-[#E0401F] text-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-200'
+                ? isCool ? 'border-blue-600 text-blue-600' : 'border-[#E0401F] text-[#E0401F]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             <Bot className="w-3.5 h-3.5" />
             <span>2. AI đoán sẵn</span>
             {passiveSuggestions.filter(s => s.status === 'pending').length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-[#E0401F] inline-block" />
+              <span className={`w-2 h-2 rounded-full inline-block ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`} />
             )}
           </button>
           <button
             onClick={() => setActiveTab('places')}
-            className={`pb-2.5 px-3 font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`pb-2.5 px-3 font-bold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'places'
-                ? 'border-[#E0401F] text-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-200'
+                ? isCool ? 'border-blue-600 text-blue-600' : 'border-[#E0401F] text-[#E0401F]'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             <MapPin className="w-3.5 h-3.5" />
@@ -151,15 +158,15 @@ export const ActiveCaptureModal: React.FC = () => {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 bg-white">
           
           {/* TAB 1: GHI BÙ (BACKFILL) */}
           {activeTab === 'backfill' && (
             <form onSubmit={handleBackfillSubmit} className="space-y-4">
-              <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-100 text-xs text-slate-700 leading-relaxed flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Nguyên tắc:</strong> Bạn đã làm việc nhưng quên bật app? Hãy ghi bù lại khoảng thời gian thực tế đã qua để giữ trọn vẹn số liệu Sổ cái 24 giờ.
+                  <strong className="font-bold">Nguyên tắc:</strong> Bạn đã làm việc nhưng quên bật app? Hãy ghi bù lại khoảng thời gian thực tế đã qua để giữ trọn vẹn số liệu Sổ cái 24 giờ.
                 </span>
               </div>
 
@@ -171,7 +178,7 @@ export const ActiveCaptureModal: React.FC = () => {
                     type="time"
                     value={bfStartTime}
                     onChange={(e) => setBfStartTime(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-xs"
                     required
                   />
                 </div>
@@ -181,14 +188,14 @@ export const ActiveCaptureModal: React.FC = () => {
                     type="time"
                     value={bfEndTime}
                     onChange={(e) => setBfEndTime(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-xs"
                     required
                   />
                 </div>
               </div>
 
-              <div className="text-right text-xs text-slate-500">
-                Tổng thời lượng ghi bù: <strong className="text-slate-900">{calculateDuration(bfStartTime, bfEndTime)} phút</strong>
+              <div className="text-right text-xs text-slate-500 font-medium">
+                Tổng thời lượng ghi bù: <strong className="text-slate-900 font-bold">{calculateDuration(bfStartTime, bfEndTime)} phút</strong>
               </div>
 
               {/* Category */}
@@ -197,7 +204,7 @@ export const ActiveCaptureModal: React.FC = () => {
                 <select
                   value={bfCategory}
                   onChange={(e) => setBfCategory(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-xs cursor-pointer"
                 >
                   <option value="work_came_up">Công việc phát sinh (Work came up)</option>
                   <option value="research">Nghiên cứu / Đọc tài liệu (Research)</option>
@@ -217,22 +224,26 @@ export const ActiveCaptureModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setBfOrigin('unplanned_goal')}
-                    className={`p-2.5 rounded-xl border text-left font-medium transition-all ${
-                      bfOrigin === 'unplanned_goal' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50 border-slate-100 text-slate-500'
+                    className={`p-3 rounded-xl border text-left font-medium transition-all ${
+                      bfOrigin === 'unplanned_goal' 
+                        ? isCool ? 'bg-blue-50 border-blue-300 text-blue-900' : 'bg-red-50 border-red-300 text-red-900'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    <p className="font-bold text-slate-200">Phát sinh vì mục tiêu</p>
-                    <p className="text-[10px] text-slate-500">Không có trong KH nhưng phục vụ mục tiêu lớn</p>
+                    <p className="font-bold text-slate-900">Phát sinh vì mục tiêu</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Không có trong KH nhưng phục vụ mục tiêu lớn</p>
                   </button>
                   <button
                     type="button"
                     onClick={() => setBfOrigin('interruption')}
-                    className={`p-2.5 rounded-xl border text-left font-medium transition-all ${
-                      bfOrigin === 'interruption' ? 'bg-amber-500/20 border-amber-500 text-slate-900' : 'bg-slate-50 border-slate-100 text-slate-500'
+                    className={`p-3 rounded-xl border text-left font-medium transition-all ${
+                      bfOrigin === 'interruption' 
+                        ? 'bg-amber-50 border-amber-300 text-amber-900' 
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    <p className="font-bold text-slate-200">Việc gián đoạn ngoài MT</p>
-                    <p className="text-[10px] text-slate-500">Trừ vào quỹ dự phòng gián đoạn</p>
+                    <p className="font-bold text-slate-900">Việc gián đoạn ngoài MT</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Trừ vào quỹ dự phòng gián đoạn</p>
                   </button>
                 </div>
               </div>
@@ -243,7 +254,7 @@ export const ActiveCaptureModal: React.FC = () => {
                 <select
                   value={bfGoalId}
                   onChange={(e) => setBfGoalId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-xs cursor-pointer"
                 >
                   <option value="">Ngoài các mục tiêu chính</option>
                   {goals.map(g => (
@@ -260,7 +271,7 @@ export const ActiveCaptureModal: React.FC = () => {
                   placeholder="Ví dụ: Quay video chia sẻ, Họp tuần..."
                   value={bfDisplacedBlock}
                   onChange={(e) => setBfDisplacedBlock(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-xs placeholder:text-slate-400"
                 />
               </div>
 
@@ -271,7 +282,7 @@ export const ActiveCaptureModal: React.FC = () => {
                   rows={2}
                   value={bfNote}
                   onChange={(e) => setBfNote(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-xs"
                   required
                 />
               </div>
@@ -279,7 +290,11 @@ export const ActiveCaptureModal: React.FC = () => {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-[#E0401F] hover:bg-[#c83515] text-slate-900 font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-red-500/25"
+                  className={`w-full py-3 rounded-xl text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
+                    isCool 
+                      ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20' 
+                      : 'bg-[#E0401F] hover:bg-[#c83515] shadow-red-500/20'
+                  }`}
                 >
                   Xác nhận Ghi bù vào Sổ cái & Thẻ ngày
                 </button>
@@ -290,10 +305,10 @@ export const ActiveCaptureModal: React.FC = () => {
           {/* TAB 2: AI ĐOÁN SẴN (PASSIVE SUGGESTIONS) */}
           {activeTab === 'suggestions' && (
             <div className="space-y-4">
-              <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-100 text-xs text-slate-700 leading-relaxed flex items-start gap-2.5">
-                <Bot className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed flex items-start gap-2.5">
+                <Bot className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Nguyên tắc:</strong> App tự động tổng hợp các đoạn thời gian từ công cụ AI, Geofence địa điểm và lịch trình. Bạn chỉ cần bấm 1 chạm để xác nhận hoặc bỏ qua.
+                  <strong className="font-bold">Nguyên tắc:</strong> App tự động tổng hợp các đoạn thời gian từ công cụ AI, Geofence địa điểm và lịch trình. Bạn chỉ cần bấm 1 chạm để xác nhận hoặc bỏ qua.
                 </span>
               </div>
 
@@ -305,8 +320,8 @@ export const ActiveCaptureModal: React.FC = () => {
                       key={s.id}
                       className={`p-4 rounded-2xl border transition-all space-y-3 ${
                         isPending 
-                          ? 'bg-slate-50 border-slate-200' 
-                          : 'bg-slate-50/40 border-slate-100 opacity-60'
+                          ? 'bg-white border-slate-200 shadow-xs' 
+                          : 'bg-slate-50 border-slate-200 opacity-60'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -315,15 +330,15 @@ export const ActiveCaptureModal: React.FC = () => {
                             <span className="text-xs font-bold text-slate-900">
                               {s.startTime} - {s.endTime} ({s.durationMins} phút)
                             </span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-sky-500/15 text-sky-400 border border-sky-500/30">
+                            <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                               Nguồn: {s.source === 'ai_tool_timestamp' ? 'AI Assistant Timestamp' : 'Geofence Vị trí'}
                             </span>
                           </div>
-                          <h4 className="text-sm font-semibold text-slate-200 mt-1">
+                          <h4 className="text-sm font-bold text-slate-900 mt-1">
                             {s.suggestedActivity}
                           </h4>
                           {s.goalName && (
-                            <p className="text-xs text-[#ff7556] mt-0.5 font-medium">
+                            <p className="text-xs text-[#E0401F] mt-0.5 font-medium">
                               → Gắn với: {s.goalName}
                             </p>
                           )}
@@ -331,18 +346,20 @@ export const ActiveCaptureModal: React.FC = () => {
                       </div>
 
                       {isPending ? (
-                        <div className="flex items-center justify-end gap-2 pt-1">
+                        <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
                           <button
                             type="button"
                             onClick={() => ignorePassiveSuggestion(s.id)}
-                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-700 text-slate-500 hover:text-slate-900 text-xs font-medium"
+                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition-colors"
                           >
                             Bỏ qua
                           </button>
                           <button
                             type="button"
                             onClick={() => acceptPassiveSuggestion(s.id)}
-                            className="px-4 py-1.5 rounded-xl bg-[#E0401F] hover:bg-[#c83515] text-slate-900 text-xs font-bold shadow-md shadow-red-500/20 flex items-center gap-1.5"
+                            className={`px-4 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors ${
+                              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
+                            }`}
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>Xác nhận ghi nhận</span>
@@ -363,10 +380,10 @@ export const ActiveCaptureModal: React.FC = () => {
           {/* TAB 3: ĐỊA ĐIỂM GEOFENCE (PLACES & IF-THEN RULES) */}
           {activeTab === 'places' && (
             <div className="space-y-4">
-              <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-100 text-xs text-slate-700 leading-relaxed flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 leading-relaxed flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong>Bảo mật tuyệt đối:</strong> Vị trí chỉ được xử lý cục bộ trên thiết bị (Local on-device). Bán kính tối thiểu 100m – 150m để tiết kiệm pin tối đa.
+                  <strong className="font-bold">Bảo mật tuyệt đối:</strong> Vị trí chỉ được xử lý cục bộ trên thiết bị (Local on-device). Bán kính tối thiểu 100m – 150m để tiết kiệm pin tối đa.
                 </div>
               </div>
 
@@ -374,15 +391,15 @@ export const ActiveCaptureModal: React.FC = () => {
                 {savedPlaces.map(p => (
                   <div
                     key={p.id}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3"
+                    className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3"
                   >
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-bold text-slate-900">{p.name}</h4>
                           {p.isCurrentLocation && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-semibold flex items-center gap-1">
-                              <Radio className="w-2.5 h-2.5 animate-pulse" />
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold flex items-center gap-1">
+                              <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-600" />
                               Đang ở đây
                             </span>
                           )}
@@ -393,10 +410,10 @@ export const ActiveCaptureModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => togglePlaceLocation(p.id)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
                           p.isCurrentLocation
-                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                            : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                         }`}
                       >
                         {p.isCurrentLocation ? 'Rời vị trí' : 'Mô phỏng đến đây'}
@@ -409,12 +426,12 @@ export const ActiveCaptureModal: React.FC = () => {
                       {p.rules.map(r => (
                         <div
                           key={r.id}
-                          className="flex items-center gap-2 p-2 rounded-lg bg-slate-950/50 border border-slate-100/80 text-xs text-slate-700"
+                          className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700"
                         >
-                          <span className="text-[#ff7556] font-bold shrink-0">
+                          <span className={`font-bold shrink-0 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>
                             Khi {r.trigger === 'arrive' ? 'ĐẾN' : 'RỜI'}:
                           </span>
-                          <span className="flex-1 truncate">
+                          <span className="flex-1 truncate font-medium">
                             {r.actionType === 'remind_task' ? `Nhắc việc "${r.taskTitle}"` :
                              r.actionType === 'auto_done' ? `Tự động xong "${r.taskTitle}"` :
                              `Mở đoạn thời gian "${r.taskTitle}"`}

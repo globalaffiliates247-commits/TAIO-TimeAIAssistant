@@ -112,8 +112,8 @@ export const ListsModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#0f172a] border border-slate-100 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-slate-900">
         
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100/80 bg-slate-50/60">
@@ -201,7 +201,7 @@ export const ListsModal: React.FC = () => {
           </div>
 
           {/* Right Column: Active List View */}
-          <div className="flex-1 flex flex-col overflow-hidden bg-slate-950/40">
+          <div className="flex-1 flex flex-col overflow-hidden bg-white">
             
             {isCreatingList ? (
               /* Create New List Form */
@@ -240,7 +240,7 @@ export const ListsModal: React.FC = () => {
                       >
                         <div className="flex items-center gap-2 mb-1.5">
                           <Lightbulb className="w-4 h-4 text-amber-400" />
-                          <span className="text-xs font-bold text-slate-200">Ý tưởng</span>
+                          <span className="text-xs font-bold text-slate-800">Ý tưởng</span>
                         </div>
                         <p className="text-[11px] leading-relaxed text-slate-500">
                           Sticky-note, ghi chú, trạng thái New / Considering / Used
@@ -258,7 +258,7 @@ export const ListsModal: React.FC = () => {
                       >
                         <div className="flex items-center gap-2 mb-1.5">
                           <FolderKanban className="w-4 h-4 text-sky-400" />
-                          <span className="text-xs font-bold text-slate-200">Dự án</span>
+                          <span className="text-xs font-bold text-slate-800">Dự án</span>
                         </div>
                         <p className="text-[11px] leading-relaxed text-slate-500">
                           Gắn Goal, hạn chót, % tiến độ & Next Action (GTD)
@@ -276,7 +276,7 @@ export const ListsModal: React.FC = () => {
                       >
                         <div className="flex items-center gap-2 mb-1.5">
                           <CheckSquare className="w-4 h-4 text-emerald-400" />
-                          <span className="text-xs font-bold text-slate-200">Checklist</span>
+                          <span className="text-xs font-bold text-slate-800">Checklist</span>
                         </div>
                         <p className="text-[11px] leading-relaxed text-slate-500">
                           Mua sắm, chuẩn bị đồ, 1 chạm gạch ngang xong
@@ -399,7 +399,7 @@ export const ListsModal: React.FC = () => {
                             className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                               item.checked 
                                 ? 'bg-slate-50/30 border-slate-100/60 text-slate-500' 
-                                : 'bg-slate-50/80 border-slate-100 text-slate-200 hover:border-slate-200'
+                                : 'bg-slate-50/80 border-slate-100 text-slate-800 hover:border-slate-200'
                             }`}
                           >
                             <div 
@@ -413,7 +413,7 @@ export const ListsModal: React.FC = () => {
                               }`}>
                                 {item.checked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                               </div>
-                              <span className={`text-xs sm:text-sm font-medium ${item.checked ? 'line-through text-slate-500' : 'text-slate-200'}`}>
+                              <span className={`text-xs sm:text-sm font-medium ${item.checked ? 'line-through text-slate-500' : 'text-slate-800'}`}>
                                 {item.text}
                               </span>
                             </div>
@@ -434,7 +434,7 @@ export const ListsModal: React.FC = () => {
                             className="p-3 sm:p-3.5 rounded-xl border bg-slate-50/80 border-slate-100/90 hover:border-slate-200 transition-all space-y-1.5"
                           >
                             <div className="flex items-start justify-between gap-3">
-                              <p className="text-xs sm:text-sm font-semibold text-slate-100 flex-1 leading-snug">
+                              <p className="text-xs sm:text-sm font-semibold text-slate-900 flex-1 leading-snug">
                                 {item.text}
                               </p>
                               {/* Dates small on right (PRD: 'ghi 03/11 · sửa 05/11') */}
@@ -445,7 +445,7 @@ export const ListsModal: React.FC = () => {
                             </div>
 
                             {item.note && (
-                              <p className="text-xs text-slate-500 bg-slate-950/40 p-2 rounded-lg border border-slate-100/50">
+                              <p className="text-xs text-slate-500 bg-white p-2 rounded-lg border border-slate-100/50">
                                 {item.note}
                               </p>
                             )}
@@ -541,7 +541,7 @@ export const ListsModal: React.FC = () => {
 
                             {/* Next action (GTD) */}
                             {item.nextAction && (
-                              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-950/60 border border-slate-100/80 text-xs">
+                              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100/80 text-xs">
                                 <ArrowRight className="w-3.5 h-3.5 text-[#ff7556] shrink-0" />
                                 <span className="text-slate-700 truncate">
                                   <strong>Kế tiếp (GTD):</strong> {item.nextAction}

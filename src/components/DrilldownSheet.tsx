@@ -58,16 +58,16 @@ export const DrilldownSheet: React.FC = () => {
 
               if (isDone) {
                 statusLabel = 'Đã xong';
-                statusClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                statusClass = 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30';
               } else if (isInProgress) {
                 statusLabel = 'Đang chạy';
-                statusClass = 'bg-amber-500/20 text-amber-300 border-amber-500/30 animate-pulse';
+                statusClass = 'bg-amber-500/20 text-amber-800 border-amber-500/30 animate-pulse';
               } else if (isExtended) {
                 statusLabel = 'Đã dời giờ';
-                statusClass = 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+                statusClass = 'bg-sky-500/20 text-blue-700 border-sky-500/30';
               } else if (isDropped) {
                 statusLabel = 'Đã bỏ';
-                statusClass = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+                statusClass = 'bg-rose-500/20 text-rose-700 border-rose-500/30';
               }
 
               return (
@@ -75,9 +75,9 @@ export const DrilldownSheet: React.FC = () => {
                   key={block.id}
                   className={`p-3.5 rounded-xl border transition-all ${
                     isDone 
-                      ? 'bg-slate-50/40 border-slate-100 opacity-75' 
+                      ? 'bg-slate-50 border-slate-200 opacity-75' 
                       : isInProgress
-                      ? 'bg-indigo-950/30 border-indigo-500/50 shadow-md shadow-indigo-500/10'
+                      ? 'bg-blue-50/50 border-blue-200 shadow-md shadow-indigo-500/10'
                       : 'bg-slate-50 border-slate-100'
                   }`}
                 >
@@ -114,7 +114,7 @@ export const DrilldownSheet: React.FC = () => {
                       className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                         isDone
                           ? 'bg-emerald-950/30 text-emerald-500/50 cursor-not-allowed'
-                          : 'bg-emerald-600 hover:bg-emerald-500 text-slate-900 shadow-sm'
+                          : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
                       }`}
                       title="Đánh dấu hoàn thành ngay (1 chạm)"
                     >
@@ -124,7 +124,7 @@ export const DrilldownSheet: React.FC = () => {
 
                     <button
                       onClick={() => shiftTaskTime(block.id, 30)}
-                      className="flex-1 py-1.5 px-2.5 rounded-lg bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800/50 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                      className="flex-1 py-1.5 px-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
                       title="Dời lịch thêm 30 phút (1 chạm)"
                     >
                       <Clock className="w-3.5 h-3.5" />
@@ -137,7 +137,7 @@ export const DrilldownSheet: React.FC = () => {
                       className={`py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${
                         isDropped
                           ? 'text-gray-600 bg-slate-50 cursor-not-allowed'
-                          : 'text-slate-500 hover:text-rose-300 bg-slate-100 hover:bg-rose-950/40 border border-slate-200 hover:border-rose-800/50'
+                          : 'text-slate-500 hover:text-rose-700 bg-slate-100 hover:bg-rose-950/40 border border-slate-200 hover:border-rose-800/50'
                       }`}
                       title="Bỏ qua nhiệm vụ này (1 chạm)"
                     >
@@ -164,15 +164,15 @@ export const DrilldownSheet: React.FC = () => {
             {deepBlocks.map(block => {
               const isDone = block.status === 'done';
               return (
-                <div key={block.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                <div key={block.id} className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-900/60 text-blue-600 font-medium border border-indigo-700/50">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 font-bold border border-blue-200">
                         {profile.focusBlockDurationMins} PHÚT
                       </span>
                       <span className="text-xs text-slate-700">{block.startTime} - {block.endTime}</span>
                     </div>
-                    <span className={`text-[11px] font-bold ${isDone ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    <span className={`text-[11px] font-bold ${isDone ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {isDone ? '✓ Đã hoàn thành' : 'Đang triển khai'}
                     </span>
                   </div>
@@ -194,14 +194,14 @@ export const DrilldownSheet: React.FC = () => {
                     </button>
                     <button
                       onClick={() => shiftTaskTime(block.id, 30)}
-                      className="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-sky-300 text-xs font-medium flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-blue-700 text-xs font-medium flex items-center justify-center gap-1"
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>Dời</span>
                     </button>
                     <button
                       onClick={() => dropTask(block.id)}
-                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-300 text-xs flex items-center justify-center gap-1"
+                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-700 text-xs flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Bỏ</span>
@@ -222,16 +222,16 @@ export const DrilldownSheet: React.FC = () => {
         return (
           <div className="space-y-3">
             {/* Header breakdown */}
-            <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/40 flex items-center justify-between text-xs">
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs">
               <div>
                 <span className="text-slate-500">Quỹ dự phòng:</span>
-                <p className="font-bold text-amber-300 text-sm mt-0.5">
+                <p className="font-bold text-amber-800 text-sm mt-0.5">
                   Đã dùng {intUsedMins} / {profile.interruptionReserveMins} phút
                 </p>
               </div>
               <div className="text-right">
                 <span className="text-slate-500">Còn lại an toàn:</span>
-                <p className="font-bold text-emerald-400 text-sm mt-0.5">
+                <p className="font-bold text-emerald-600 text-sm mt-0.5">
                   {Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút
                 </p>
               </div>
@@ -242,20 +242,20 @@ export const DrilldownSheet: React.FC = () => {
             </div>
 
             {interruptions.map((item) => (
-              <div key={item.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+              <div key={item.id} className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
                       {item.timestamp}
                     </span>
-                    <span className="text-xs font-bold text-amber-400">{item.minutes} phút</span>
+                    <span className="text-xs font-bold text-amber-600">{item.minutes} phút</span>
                   </div>
 
                   <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
                     item.decision === 'do_now'
-                      ? 'bg-amber-500/20 text-amber-300'
+                      ? 'bg-amber-500/20 text-amber-800'
                       : item.decision === 'decline'
-                      ? 'bg-rose-500/20 text-rose-300'
+                      ? 'bg-rose-500/20 text-rose-700'
                       : item.decision === 'delegate'
                       ? 'bg-purple-500/20 text-purple-300'
                       : 'bg-indigo-500/20 text-blue-600 font-medium'
@@ -267,9 +267,9 @@ export const DrilldownSheet: React.FC = () => {
                 <h4 className="text-sm font-bold text-slate-900">{item.title}</h4>
 
                 {/* Source Person */}
-                <div className="p-2 rounded-lg bg-gray-950 border border-slate-100/80 flex items-center justify-between text-xs">
+                <div className="p-2 rounded-lg bg-white border border-slate-100/80 flex items-center justify-between text-xs">
                   <span className="text-slate-500 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-amber-400" />
+                    <User className="w-3.5 h-3.5 text-amber-600" />
                     <span>Người kéo vào:</span>
                   </span>
                   <span className="text-slate-900 font-medium">{item.sourcePerson || 'Đối tác bên ngoài'}</span>
@@ -314,10 +314,10 @@ export const DrilldownSheet: React.FC = () => {
               <p className="text-xs text-gray-500 italic py-2">Chưa có nhiệm vụ nào được lên lịch hôm nay cho mục tiêu này.</p>
             ) : (
               goalTasks.map(block => (
-                <div key={block.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                <div key={block.id} className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-slate-700">{block.startTime} - {block.endTime}</span>
-                    <span className={`text-[11px] font-bold ${block.status === 'done' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    <span className={`text-[11px] font-bold ${block.status === 'done' ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {block.status === 'done' ? '✓ Đã xong' : 'Đang lên lịch'}
                     </span>
                   </div>
@@ -335,14 +335,14 @@ export const DrilldownSheet: React.FC = () => {
                     </button>
                     <button
                       onClick={() => shiftTaskTime(block.id, 30)}
-                      className="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-sky-300 text-xs font-medium flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-blue-700 text-xs font-medium flex items-center justify-center gap-1"
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>Dời</span>
                     </button>
                     <button
                       onClick={() => dropTask(block.id)}
-                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-300 text-xs flex items-center justify-center gap-1"
+                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-700 text-xs flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Bỏ</span>
@@ -363,10 +363,10 @@ export const DrilldownSheet: React.FC = () => {
           <div className="space-y-3">
             <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800/40 flex items-center justify-between text-xs">
               <div>
-                <span className="text-emerald-400 font-bold">Tổng thời gian bảo vệ:</span>
+                <span className="text-emerald-600 font-bold">Tổng thời gian bảo vệ:</span>
                 <p className="text-xl font-black text-slate-900 mt-0.5">+{totalProtected} phút</p>
               </div>
-              <span className="text-emerald-300 text-[11px] bg-emerald-900/50 px-2.5 py-1 rounded-full">
+              <span className="text-emerald-700 text-[11px] bg-emerald-900/50 px-2.5 py-1 rounded-full">
                 Từ chối / Ủy quyền thành công
               </span>
             </div>
@@ -376,13 +376,13 @@ export const DrilldownSheet: React.FC = () => {
             </div>
 
             {protectedItems.map(item => (
-              <div key={item.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+              <div key={item.id} className="p-3 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-between text-xs">
                 <div>
                   <h5 className="font-bold text-slate-900">{item.title}</h5>
                   <p className="text-slate-500 mt-0.5">Từ: {item.sourcePerson || 'Liên hệ ngoài'}</p>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-emerald-400">+{item.minutes}p bảo vệ</span>
+                  <span className="font-bold text-emerald-600">+{item.minutes}p bảo vệ</span>
                   <p className="text-[10px] text-gray-500 uppercase">{item.decision === 'decline' ? 'Đã từ chối' : 'Đã ủy quyền'}</p>
                 </div>
               </div>
@@ -406,7 +406,7 @@ export const DrilldownSheet: React.FC = () => {
                 onClick={() => setIsAnonymous(!isAnonymous)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 border border-slate-200"
               >
-                {isAnonymous ? <EyeOff className="w-3.5 h-3.5 text-amber-400" /> : <Eye className="w-3.5 h-3.5 text-sky-400" />}
+                {isAnonymous ? <EyeOff className="w-3.5 h-3.5 text-amber-600" /> : <Eye className="w-3.5 h-3.5 text-sky-400" />}
                 <span>{isAnonymous ? 'Chế độ ẩn danh (Bật)' : 'Hiện thông tin đầy đủ'}</span>
               </button>
             </div>
@@ -417,7 +417,7 @@ export const DrilldownSheet: React.FC = () => {
 
             <div className="space-y-2">
               {adminData.items.map((item, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                <div key={idx} className="p-3 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900">
                       {isAnonymous ? `User #${idx + 101} (Ẩn danh)` : item.label}
@@ -425,7 +425,7 @@ export const DrilldownSheet: React.FC = () => {
                     <div className="text-[11px] text-slate-500 mt-0.5">{item.detail}</div>
                   </div>
                   {item.badge && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-900/60 text-blue-600 font-medium border border-indigo-700/50">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 font-bold border border-blue-200">
                       {item.badge}
                     </span>
                   )}

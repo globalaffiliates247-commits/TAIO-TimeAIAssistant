@@ -57,7 +57,7 @@ export const OnboardingModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-[#121620] border border-gray-800 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-8 text-white">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-8 text-white">
         
         {/* Header */}
         <div className="text-center mb-6">
@@ -68,7 +68,7 @@ export const OnboardingModal: React.FC = () => {
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
             {step === 1 ? 'Mô tả nào giống bạn nhất?' : 'Xác nhận thông số mặc định'}
           </h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             {step === 1 
               ? 'Chọn 1 trong 6 hồ sơ khởi đầu. TAIO sẽ tự động cấu hình lịch & khối tập trung.'
               : 'Mọi thông số đều được tính toán tự động từ hồ sơ của bạn. Có thể điều chỉnh bất kỳ lúc nào.'
@@ -89,23 +89,23 @@ export const OnboardingModal: React.FC = () => {
                     className={`cursor-pointer p-4 rounded-xl border transition-all text-left flex flex-col justify-between ${
                       isSelected
                         ? 'border-indigo-500 bg-indigo-950/40 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500'
-                        : 'border-gray-800 bg-gray-900/60 hover:border-gray-700 hover:bg-gray-800/40'
+                        : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <div className={`p-2 rounded-lg ${isSelected ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300'}`}>
+                        <div className={`p-2 rounded-lg ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
                           <Icon className="w-5 h-5" />
                         </div>
                         {isSelected && <CheckCircle2 className="w-5 h-5 text-indigo-400" />}
                       </div>
                       <h4 className="font-semibold text-sm text-white">{p.title}</h4>
-                      <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
                         {p.description}
                       </p>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-gray-800/60 flex items-center justify-between text-[11px] text-gray-400">
+                    <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-500">
                       <span>Tập trung sâu: {p.split.deepWork}%</span>
                       <span>Dự phòng gián đoạn: {p.interruptionReserveMins}p</span>
                     </div>
@@ -129,7 +129,7 @@ export const OnboardingModal: React.FC = () => {
         {step === 2 && (
           <div className="space-y-5">
             {/* Profile Overview Card */}
-            <div className="p-4 rounded-xl bg-gray-900 border border-gray-800 flex items-start gap-3">
+            <div className="p-4 rounded-xl bg-white border border-slate-200 flex items-start gap-3">
               <div className="p-2.5 rounded-lg bg-indigo-600 text-white">
                 <IconComponent className="w-6 h-6" />
               </div>
@@ -143,18 +143,18 @@ export const OnboardingModal: React.FC = () => {
                     Đổi hồ sơ
                   </button>
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">{currentSelectedProfile.description}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{currentSelectedProfile.description}</p>
               </div>
             </div>
 
             {/* Split Visualization */}
-            <div className="p-4 rounded-xl bg-gray-900/80 border border-gray-800 space-y-3">
-              <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <div className="p-4 rounded-xl bg-white/80 border border-slate-200 space-y-3">
+              <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Phân bổ thời gian mặc định mỗi ngày
               </h5>
               
               {/* Progress Bar Split */}
-              <div className="h-4 rounded-full overflow-hidden flex bg-gray-800">
+              <div className="h-4 rounded-full overflow-hidden flex bg-slate-100">
                 <div 
                   style={{ width: `${currentSelectedProfile.split.deepWork}%` }} 
                   className="bg-indigo-500 h-full" 
@@ -183,31 +183,31 @@ export const OnboardingModal: React.FC = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                  <span className="text-gray-300">Tập trung: {currentSelectedProfile.split.deepWork}%</span>
+                  <span className="text-slate-600">Tập trung: {currentSelectedProfile.split.deepWork}%</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  <span className="text-gray-300">Gián đoạn: {currentSelectedProfile.split.interruptions}%</span>
+                  <span className="text-slate-600">Gián đoạn: {currentSelectedProfile.split.interruptions}%</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-                  <span className="text-gray-300">Họp hành: {currentSelectedProfile.split.meetings}%</span>
+                  <span className="text-slate-600">Họp hành: {currentSelectedProfile.split.meetings}%</span>
                 </div>
               </div>
             </div>
 
             {/* Quick Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
-              <div className="p-3 rounded-xl bg-gray-900 border border-gray-800">
-                <p className="text-[11px] text-gray-400">Khối tập trung</p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                <p className="text-[11px] text-slate-500">Khối tập trung</p>
                 <p className="text-lg font-bold text-indigo-400 mt-0.5">{currentSelectedProfile.focusBlockDurationMins} phút</p>
               </div>
-              <div className="p-3 rounded-xl bg-gray-900 border border-gray-800">
-                <p className="text-[11px] text-gray-400">Quỹ gián đoạn</p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                <p className="text-[11px] text-slate-500">Quỹ gián đoạn</p>
                 <p className="text-lg font-bold text-amber-400 mt-0.5">{currentSelectedProfile.interruptionReserveMins} phút</p>
               </div>
-              <div className="p-3 rounded-xl bg-gray-900 border border-gray-800 col-span-2 sm:col-span-1">
-                <p className="text-[11px] text-gray-400">Cường độ nhắc</p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 col-span-2 sm:col-span-1">
+                <p className="text-[11px] text-slate-500">Cường độ nhắc</p>
                 <p className="text-lg font-bold text-emerald-400 mt-0.5 capitalize">{currentSelectedProfile.reminderIntensity}</p>
               </div>
             </div>
@@ -223,7 +223,7 @@ export const OnboardingModal: React.FC = () => {
                 value={weeklyTopFocus}
                 onChange={(e) => setWeeklyTopFocus(e.target.value)}
                 placeholder="Ví dụ: Hoàn tất tài liệu đặc tả, chốt hợp đồng lớn..."
-                className="w-full px-3.5 py-2.5 rounded-lg bg-gray-900 border border-gray-700 text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-800 text-sm focus:outline-none focus:border-indigo-500"
               />
             </div>
 
@@ -231,7 +231,7 @@ export const OnboardingModal: React.FC = () => {
             <div className="pt-2 flex items-center justify-between">
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-2 rounded-xl text-gray-400 hover:text-white text-sm"
+                className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-900 text-sm"
               >
                 Quay lại
               </button>

@@ -52,7 +52,7 @@ const MainAppContent: React.FC = () => {
   const isCool = palette === 'cool';
 
   return (
-    <div className={`min-h-screen flex flex-col bg-white text-slate-900 ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
+    <div className={`min-h-screen flex flex-col bg-white text-slate-900 overflow-x-hidden w-full max-w-full ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
       {/* Ambient Progress Edge (4px peripheral awareness line) */}
       <AmbientProgressEdge />
 
@@ -61,7 +61,7 @@ const MainAppContent: React.FC = () => {
 
       {/* Floating Toast Notification (PRD v0.3.9 B5: "Đã cho vào Rổ công việc" 3s Toast) */}
       {toastMsg && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[90%] bg-slate-900/90 text-white backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-300 border border-slate-700/60">
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[90%] bg-white/95 text-slate-800 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-300 border border-slate-200">
           <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
           <span className="text-center">{toastMsg}</span>
         </div>

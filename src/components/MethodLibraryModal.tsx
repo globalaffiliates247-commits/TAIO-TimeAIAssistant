@@ -55,10 +55,10 @@ export const MethodLibraryModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl p-5 sm:p-6 text-white border-t border-orange-500/30 sm:border">
+      <div className="bg-white/95 border border-slate-200 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl p-5 sm:p-6 text-white border-t border-orange-200 sm:border">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-orange-950/80 border border-orange-500/30 flex items-center justify-center text-orange-400">
               <BookOpen className="w-4 h-4" />
@@ -70,12 +70,12 @@ export const MethodLibraryModal: React.FC = () => {
                   B22 Scientific Basis
                 </span>
               </h3>
-              <p className="text-[11px] text-slate-400">Nền tảng khoa học & Nguyên lý quản lý thời gian đằng sau từng tính năng</p>
+              <p className="text-[11px] text-slate-500">Nền tảng khoa học & Nguyên lý quản lý thời gian đằng sau từng tính năng</p>
             </div>
           </div>
           <button 
             onClick={() => setMethodLibraryOpen(false)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg"
+            className="text-slate-500 hover:text-slate-900 p-1 rounded-lg"
           >
             <X className="w-5 h-5" />
           </button>
@@ -96,7 +96,7 @@ export const MethodLibraryModal: React.FC = () => {
               className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all border ${
                 activeCategory === cat.id
                   ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white border-transparent shadow-sm'
-                  : 'bg-slate-800/80 border-slate-700/60 text-slate-400 hover:text-white'
+                  : 'bg-slate-100/80 border-slate-200 text-slate-500 hover:text-slate-900'
               }`}
             >
               {cat.label}
@@ -109,7 +109,7 @@ export const MethodLibraryModal: React.FC = () => {
           {filtered.map((item) => (
             <div 
               key={item.id}
-              className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 hover:border-orange-500/40 transition-all space-y-2.5"
+              className="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-orange-400 transition-all space-y-2.5"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <h4 className="text-sm font-bold text-white flex items-center gap-2">
@@ -122,20 +122,20 @@ export const MethodLibraryModal: React.FC = () => {
               </div>
 
               {/* Core Idea */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-orange-200">
+              <div className="p-2.5 rounded-xl bg-white/80 border border-slate-200 text-xs text-orange-700">
                 <strong>Ý cốt lõi: </strong>
                 <span>{item.oneSentenceVi}</span>
               </div>
 
               {/* How TAIO applies it */}
               <p className="text-xs text-slate-300 leading-relaxed">
-                <strong className="text-slate-200">Ứng dụng trong TAIO: </strong>
+                <strong className="text-slate-700">Ứng dụng trong TAIO: </strong>
                 {item.appApplicationVi}
               </p>
 
               {/* Try Today Action */}
               <div className="flex items-center justify-between pt-1 text-xs">
-                <span className="text-[11px] text-slate-400 italic">
+                <span className="text-[11px] text-slate-500 italic">
                   💡 Thử hôm nay: {item.tryTodayVi}
                 </span>
                 <button

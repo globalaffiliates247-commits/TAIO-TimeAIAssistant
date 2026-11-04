@@ -67,38 +67,38 @@ export const ProfileModal: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl max-h-[92vh] bg-[#0f172a] border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl max-h-[92vh] bg-white border border-slate-200 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-slate-900/60">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-red-500/25">
               {initials}
             </div>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight">Cá nhân & Cài đặt</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">Cá nhân & Cài đặt</h2>
+              <p className="text-xs text-slate-500">
                 {userProfileDetail.salutation} {userProfileDetail.displayName} • {profile.title}
               </p>
             </div>
           </div>
           <button 
             onClick={() => setIsProfileModalOpen(false)}
-            className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800/70 transition-colors"
+            className="text-slate-500 hover:text-slate-900 p-2 rounded-xl hover:bg-slate-100/70 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Selector: Hồ sơ | Cá nhân hóa | Kết nối TAIO */}
-        <div className="flex items-center border-b border-slate-800/80 bg-slate-900/40 px-5 pt-2 gap-2">
+        <div className="flex items-center border-b border-slate-200 bg-slate-50/70 px-5 pt-2 gap-2">
           <button
             onClick={() => setActiveTab('profile')}
             className={`pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'profile'
-                ? 'border-[#E0401F] text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#E0401F] text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <User className="w-4 h-4" />
@@ -108,8 +108,8 @@ export const ProfileModal: React.FC = () => {
             onClick={() => setActiveTab('settings')}
             className={`pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'settings'
-                ? 'border-[#E0401F] text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#E0401F] text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Settings className="w-4 h-4" />
@@ -119,8 +119,8 @@ export const ProfileModal: React.FC = () => {
             onClick={() => setActiveTab('community')}
             className={`pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'community'
-                ? 'border-[#E0401F] text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#E0401F] text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -136,13 +136,13 @@ export const ProfileModal: React.FC = () => {
             <div className="space-y-5">
               {/* Avatar Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-2">Ảnh đại diện (Avatar)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Ảnh đại diện (Avatar)</label>
                 <div className="flex items-center gap-3">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-red-500/20 ring-4 ring-slate-800 shrink-0">
                     {initials}
                   </div>
                   <div className="space-y-1.5">
-                    <p className="text-xs text-slate-400">Chọn phong cách đại diện:</p>
+                    <p className="text-xs text-slate-500">Chọn phong cách đại diện:</p>
                     <div className="flex items-center gap-2">
                       {illustratedAvatars.map(av => (
                         <button
@@ -162,11 +162,11 @@ export const ProfileModal: React.FC = () => {
               {/* Name & Salutation */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-1">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Xưng hô</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">Xưng hô</label>
                   <select
                     value={userProfileDetail.salutation}
                     onChange={(e) => updateUserProfileDetail({ salutation: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E0401F]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
                   >
                     <option value="Anh">Anh</option>
                     <option value="Chị">Chị</option>
@@ -175,19 +175,19 @@ export const ProfileModal: React.FC = () => {
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Tên hiển thị</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">Tên hiển thị</label>
                   <input
                     type="text"
                     value={userProfileDetail.displayName}
                     onChange={(e) => updateUserProfileDetail({ displayName: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E0401F]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
                   />
                 </div>
               </div>
 
               {/* Profile Group Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-2">Nhóm hồ sơ năng suất (Onboarding Profile)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Nhóm hồ sơ năng suất (Onboarding Profile)</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {Object.values(PROFILES).map(p => {
                     const isSelected = profile.id === p.id;
@@ -197,15 +197,15 @@ export const ProfileModal: React.FC = () => {
                         onClick={() => setProfile(p)}
                         className={`p-3 rounded-xl border cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-[#E0401F]/15 border-[#E0401F] text-white shadow-sm'
-                            : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+                            ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900 shadow-sm'
+                            : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200 hover:text-slate-700'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <h4 className="text-xs font-bold text-slate-200">{p.title}</h4>
+                          <h4 className="text-xs font-bold text-slate-800">{p.title}</h4>
                           {isSelected && <Check className="w-3.5 h-3.5 text-[#ff7556]" />}
                         </div>
-                        <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
                           {p.description}
                         </p>
                       </div>
@@ -222,36 +222,36 @@ export const ProfileModal: React.FC = () => {
               
               {/* Default Home Screen */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-2">Màn hình mở đầu mặc định (Home Screen)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Màn hình mở đầu mặc định (Home Screen)</label>
                 <div className="grid grid-cols-2 gap-2.5">
                   <button
                     onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'daycard' })}
                     className={`p-3 rounded-xl border text-left transition-all ${
                       userProfileDetail.defaultHomeScreen === 'daycard'
-                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-white'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
+                        : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                     }`}
                   >
-                    <p className="text-xs font-bold text-slate-200">1. Thẻ ngày (Daily Card)</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Sticky-note danh sách việc cần làm hôm nay</p>
+                    <p className="text-xs font-bold text-slate-800">1. Thẻ ngày (Daily Card)</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Sticky-note danh sách việc cần làm hôm nay</p>
                   </button>
                   <button
                     onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'now' })}
                     className={`p-3 rounded-xl border text-left transition-all ${
                       userProfileDetail.defaultHomeScreen === 'now'
-                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-white'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
+                        : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                     }`}
                   >
-                    <p className="text-xs font-bold text-slate-200">2. Bây giờ (Now)</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Đồng hồ đếm ngược nhiệm vụ hiện tại</p>
+                    <p className="text-xs font-bold text-slate-800">2. Bây giờ (Now)</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Đồng hồ đếm ngược nhiệm vụ hiện tại</p>
                   </button>
                 </div>
               </div>
 
               {/* Appearance: Device & Theme & Palette */}
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-300">Giao diện thiết bị & Màu sắc (B17)</label>
+                <label className="block text-xs font-semibold text-slate-700">Giao diện thiết bị & Màu sắc (B17)</label>
                 
                 {/* Device style */}
                 <div className="grid grid-cols-4 gap-2">
@@ -261,8 +261,8 @@ export const ProfileModal: React.FC = () => {
                       onClick={() => setDeviceLook(d)}
                       className={`p-2 rounded-xl border text-center text-xs font-medium transition-all ${
                         deviceLook === d
-                          ? 'bg-[#E0401F]/20 border-[#E0401F] text-white'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                          ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900'
+                          : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                       }`}
                     >
                       {d === 'auto' ? 'Tự động' : d === 'macos' ? 'macOS' : d === 'windows' ? 'Windows' : 'Điện thoại'}
@@ -275,7 +275,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setThemeMode('light')}
                     className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'light' ? 'bg-[#E0401F]/20 border-[#E0401F] text-white' : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                      themeMode === 'light' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <Sun className="w-3.5 h-3.5" />
@@ -284,7 +284,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setThemeMode('dark')}
                     className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'dark' ? 'bg-[#E0401F]/20 border-[#E0401F] text-white' : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                      themeMode === 'dark' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <Moon className="w-3.5 h-3.5" />
@@ -293,7 +293,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setThemeMode('system')}
                     className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'system' ? 'bg-[#E0401F]/20 border-[#E0401F] text-white' : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                      themeMode === 'system' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <Monitor className="w-3.5 h-3.5" />
@@ -306,7 +306,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setPalette('warm')}
                     className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
-                      palette === 'warm' ? 'bg-[#E0401F]/20 border-[#E0401F] text-white' : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                      palette === 'warm' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <span>Gam màu Ấm (Warm Red #E0401F)</span>
@@ -315,7 +315,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setPalette('cool')}
                     className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
-                      palette === 'cool' ? 'bg-sky-500/20 border-sky-500 text-white' : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                      palette === 'cool' ? 'bg-sky-500/20 border-sky-500 text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <span>Gam màu Mát (Cool Blue #007aff)</span>
@@ -326,7 +326,7 @@ export const ProfileModal: React.FC = () => {
 
               {/* Tone of Voice */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-2">Tông giọng nhắc nhở (Adaptive Tone - B13)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Tông giọng nhắc nhở (Adaptive Tone - B13)</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { lvl: 1, label: 'Dịu dàng (Gentle)' },
@@ -338,8 +338,8 @@ export const ProfileModal: React.FC = () => {
                       onClick={() => setToneLevel(t.lvl as ToneLevel)}
                       className={`p-2 rounded-xl border text-center text-xs font-medium transition-all ${
                         toneLevel === t.lvl
-                          ? 'bg-[#E0401F]/20 border-[#E0401F] text-white'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                          ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900'
+                          : 'bg-slate-50/60 border-slate-200 text-slate-500'
                       }`}
                     >
                       {t.label}
@@ -349,24 +349,24 @@ export const ProfileModal: React.FC = () => {
               </div>
 
               {/* Data Export & Privacy */}
-              <div className="pt-2 border-t border-slate-800/80 space-y-3">
+              <div className="pt-2 border-t border-slate-200/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-white">Xuất dữ liệu cho Trợ lý AI (B24)</h4>
-                    <p className="text-[11px] text-slate-400">Tạo bản snapshot Markdown cho Claude, ChatGPT</p>
+                    <h4 className="text-xs font-bold text-slate-900">Xuất dữ liệu cho Trợ lý AI (B24)</h4>
+                    <p className="text-[11px] text-slate-500">Tạo bản snapshot Markdown cho Claude, ChatGPT</p>
                   </div>
                   <button
                     onClick={() => { setIsProfileModalOpen(false); setExportModalOpen(true); }}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-700 text-slate-900 text-xs font-semibold transition-colors"
                   >
                     Mở trung tâm Xuất AI
                   </button>
                 </div>
 
                 {/* Opt-out of analytics */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50/60 border border-slate-200">
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-300">Từ chối ghi nhận thống kê ẩn danh (C6.1)</h4>
+                    <h4 className="text-xs font-semibold text-slate-700">Từ chối ghi nhận thống kê ẩn danh (C6.1)</h4>
                     <p className="text-[11px] text-slate-500">Tắt theo dõi thời gian dừng màn hình (Screen Dwell)</p>
                   </div>
                   <input
@@ -388,13 +388,13 @@ export const ProfileModal: React.FC = () => {
               {communityConfig.advisor.visible && (
                 <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#E0401F]/15 via-slate-900/80 to-slate-900 border border-[#E0401F]/30 space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#E0401F] flex items-center justify-center text-white font-bold shrink-0 shadow-md shadow-red-500/30">
+                    <div className="w-10 h-10 rounded-xl bg-[#E0401F] flex items-center justify-center text-slate-900 font-bold shrink-0 shadow-md shadow-red-500/30">
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white">{communityConfig.advisor.name}</h4>
+                      <h4 className="text-sm font-bold text-slate-900">{communityConfig.advisor.name}</h4>
                       <p className="text-xs font-medium text-[#ff7556]">{communityConfig.advisor.title}</p>
-                      <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                      <p className="text-xs text-slate-700 mt-1 leading-relaxed">
                         {communityConfig.advisor.description}
                       </p>
                     </div>
@@ -405,7 +405,7 @@ export const ProfileModal: React.FC = () => {
                       href={communityConfig.advisor.zaloUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-blue-600/20"
+                      className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-slate-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-blue-600/20"
                     >
                       <span>Nhắn qua Zalo</span>
                       <ExternalLink className="w-3 h-3" />
@@ -414,7 +414,7 @@ export const ProfileModal: React.FC = () => {
                       href={communityConfig.advisor.telegramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-sky-600/20"
+                      className="flex-1 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-slate-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-sky-600/20"
                     >
                       <span>Nhắn qua Telegram</span>
                       <ExternalLink className="w-3 h-3" />
@@ -425,31 +425,31 @@ export const ProfileModal: React.FC = () => {
 
               {/* Join Community Groups */}
               <div>
-                <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5">
+                <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2.5">
                   Tham gia cộng đồng TAIO
                 </h4>
                 <div className="space-y-2">
                   {communityConfig.communityGroups.filter(g => g.visible).map(grp => (
                     <div
                       key={grp.id}
-                      className="p-3.5 rounded-xl border bg-slate-900/60 border-slate-800 flex items-center justify-between gap-3 hover:border-slate-700 transition-all"
+                      className="p-3.5 rounded-xl border bg-slate-50/60 border-slate-200 flex items-center justify-between gap-3 hover:border-slate-200 transition-all"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <h5 className="text-xs sm:text-sm font-bold text-white">{grp.name}</h5>
+                          <h5 className="text-xs sm:text-sm font-bold text-slate-900">{grp.name}</h5>
                           {grp.membersCount && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
                               {grp.membersCount}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{grp.description}</p>
+                        <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{grp.description}</p>
                       </div>
                       <a
                         href={grp.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[#ff7556] hover:text-white text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors"
+                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-700 text-[#ff7556] hover:text-slate-900 text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors"
                       >
                         <span>Tham gia</span>
                         <ExternalLink className="w-3 h-3" />
@@ -461,29 +461,29 @@ export const ProfileModal: React.FC = () => {
 
               {/* Free AI Tools */}
               <div>
-                <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5">
+                <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2.5">
                   Công cụ AI miễn phí của TAIO
                 </h4>
                 <div className="space-y-2">
                   {communityConfig.freeTools.filter(t => t.visible).map(tool => (
                     <div
                       key={tool.id}
-                      className="p-3 rounded-xl border bg-slate-900/40 border-slate-800/80 flex items-center justify-between gap-3 hover:border-slate-700 transition-all"
+                      className="p-3 rounded-xl border bg-slate-50/40 border-slate-200/80 flex items-center justify-between gap-3 hover:border-slate-200 transition-all"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-[#ff7556] shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[#ff7556] shrink-0">
                           <Wand2 className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
-                          <h5 className="text-xs font-bold text-white truncate">{tool.name}</h5>
-                          <p className="text-[11px] text-slate-400 truncate">{tool.oneLineUse}</p>
+                          <h5 className="text-xs font-bold text-slate-900 truncate">{tool.name}</h5>
+                          <p className="text-[11px] text-slate-500 truncate">{tool.oneLineUse}</p>
                         </div>
                       </div>
                       <a
                         href={tool.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors shrink-0"
+                        className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-700 transition-colors shrink-0"
                         title="Mở công cụ"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />

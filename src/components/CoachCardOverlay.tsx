@@ -20,7 +20,7 @@ export const CoachCardOverlay: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:max-w-md z-40 animate-in slide-in-from-bottom-5 duration-300">
-      <div className="bg-slate-900/95 border border-orange-500/40 backdrop-blur-xl rounded-2xl p-4 shadow-2xl text-white space-y-2.5">
+      <div className="bg-white/95 border border-orange-500/40 backdrop-blur-xl rounded-2xl p-4 shadow-2xl text-slate-800 space-y-2.5">
         
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -30,18 +30,18 @@ export const CoachCardOverlay: React.FC = () => {
           </div>
           <button 
             onClick={dismissCoachCard}
-            className="text-slate-400 hover:text-white p-0.5"
+            className="text-slate-500 hover:text-slate-900 p-0.5"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Content */}
-        <p className="text-xs text-slate-200 leading-snug">
+        <p className="text-xs text-slate-800 leading-snug">
           {activeCoachCard.meaningVi} <strong>{activeCoachCard.actionDoneVi}</strong>
         </p>
 
-        <p className="text-[11px] text-emerald-300 font-medium">
+        <p className="text-[11px] text-emerald-700 font-medium">
           👏 {activeCoachCard.encourageVi}
         </p>
 
@@ -49,7 +49,7 @@ export const CoachCardOverlay: React.FC = () => {
         <div className="flex items-center justify-end gap-2 pt-1">
           <button
             onClick={dismissCoachCard}
-            className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+            className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
           >
             Đã hiểu
           </button>

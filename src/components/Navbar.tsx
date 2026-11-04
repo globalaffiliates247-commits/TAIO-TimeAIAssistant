@@ -15,6 +15,7 @@ import {
   Minus,
   Square,
   X as CloseIcon,
+  Menu,
   Inbox,
   HelpCircle,
   Activity,
@@ -51,6 +52,7 @@ export const Navbar: React.FC = () => {
     currentPaletteColors
   } = useApp();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const isCool = palette === 'cool';
 
   const togglePalette = () => {
@@ -60,7 +62,7 @@ export const Navbar: React.FC = () => {
   return (
     <header 
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)' }}
-      className="sticky top-0 z-40 transition-colors duration-200 border-b border-slate-200 bg-white/95 backdrop-blur-xl shadow-xs"
+      className="sticky top-0 z-40 transition-colors duration-200 border-b border-slate-200 bg-white/95 backdrop-blur-xl shadow-xs w-full max-w-full overflow-x-hidden"
     >
       
       {/* Platform Window Controls (PRD D3: macOS Traffic lights / Windows Titlebar) */}
@@ -123,13 +125,38 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs">
-          
-          {/* Quick Palette Toggle Button (Tông Lạnh Cool vs Tông Nóng Warm) */}
+        {/* Mobile Action Controls (< md): Only Quick Palette + Clean Menu Hamburger */}
+        <div className="flex md:hidden items-center gap-1.5 shrink-0">
           <button
             onClick={togglePalette}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold transition-all border shadow-xs ${
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-xs border shadow-xs transition-all ${
+              isCool
+                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                : 'bg-red-50 text-[#E0401F] border-red-200'
+            }`}
+            title="Đổi tông màu Lạnh / Nóng"
+          >
+            <span>{isCool ? '❄️ Lạnh' : '🔥 Nóng'}</span>
+          </button>
+
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 relative transition-all"
+            aria-label="Mở công cụ"
+          >
+            {mobileMenuOpen ? <CloseIcon className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {inbox.filter(i => i.status === 'inbox').length > 0 && (
+              <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`} />
+            )}
+          </button>
+        </div>
+
+        {/* Desktop / Tablet Action Controls (>= md): Full Toolbar */}
+        <div className="hidden md:flex items-center gap-1.5 lg:gap-2 text-xs flex-wrap justify-end">
+          {/* Quick Palette Toggle Button */}
+          <button
+            onClick={togglePalette}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold transition-all border shadow-xs ${
               isCool
                 ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
                 : 'bg-red-50 hover:bg-red-100 text-[#E0401F] border-red-200'
@@ -146,7 +173,7 @@ export const Navbar: React.FC = () => {
             title="Xuất dữ liệu Markdown cho AI Assistant (B24)"
           >
             <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
-            <span className="hidden sm:inline">Xuất AI</span>
+            <span>Xuất AI</span>
           </button>
 
           {/* Inbox Mini App Button (PRD B20) */}
@@ -156,7 +183,7 @@ export const Navbar: React.FC = () => {
             title="Rổ công việc (Inbox - GTD B20)"
           >
             <Inbox className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
-            <span className="hidden sm:inline">Rổ việc</span>
+            <span>Rổ việc</span>
             {inbox.filter(i => i.status === 'inbox').length > 0 && (
               <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold text-white ${
                 isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
@@ -173,17 +200,17 @@ export const Navbar: React.FC = () => {
             title="Danh sách Ý tưởng, Dự án, Checklist (B26)"
           >
             <FolderKanban className="w-3.5 h-3.5 text-sky-600" />
-            <span className="hidden sm:inline">Danh sách</span>
+            <span>Danh sách</span>
           </button>
 
-          {/* Swipe Review Backlog Button (PRD B28 Thẻ nhắc việc) */}
+          {/* Swipe Review Backlog Button (PRD B28) */}
           <button
             onClick={() => setIsSwipeModalOpen(true)}
             className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-amber-700 border border-slate-200 transition-all font-semibold"
             title="Thẻ nhắc việc: Lướt rổ tồn đọng (B28)"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden sm:inline">Lướt rổ</span>
+            <span>Lướt rổ</span>
           </button>
 
           {/* Active Capture & Backfill (PRD B30) */}
@@ -193,10 +220,10 @@ export const Navbar: React.FC = () => {
             title="Thu thập chủ động & Ghi bù (B30)"
           >
             <Clock className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
-            <span className="hidden sm:inline">Ghi bù</span>
+            <span>Ghi bù</span>
           </button>
 
-          {/* Tone of Voice Selector (PRD B13) */}
+          {/* Tone of Voice Selector */}
           <div className="hidden lg:flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl px-2 py-1">
             <Volume2 className="w-3.5 h-3.5 text-slate-500" />
             <select
@@ -236,19 +263,19 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setSettingsModalOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all border border-slate-200"
-            title="Cài đặt giao diện & nền tảng (macOS, Windows, Phone, Bảng màu)"
+            title="Cài đặt giao diện & nền tảng"
           >
             <Settings className="w-3.5 h-3.5 text-slate-600" />
-            <span className="hidden sm:inline font-medium">Giao diện</span>
+            <span>Giao diện</span>
           </button>
 
-          {/* Profile & Community Button (PRD B27 "Cá nhân / Me") */}
+          {/* Profile & Community Button (PRD B27) */}
           <button
             onClick={() => setIsProfileModalOpen(true)}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-white font-semibold transition-all shadow-xs ${
               isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
             }`}
-            title="Hồ sơ, Cá nhân hóa & Kết nối TAIO (B27)"
+            title="Hồ sơ cá nhân (B27)"
           >
             <div className="w-4 h-4 rounded-full bg-white/25 text-white flex items-center justify-center text-[9px] font-black">
               {userProfileDetail.displayName.charAt(0) || 'U'}
@@ -257,6 +284,99 @@ export const Navbar: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Mobile Slide-down Tools Drawer (< md) */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-200 bg-white/98 backdrop-blur-2xl px-4 py-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
+          <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+            <button
+              onClick={() => { setInboxModalOpen(true); setMobileMenuOpen(false); }}
+              className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
+            >
+              <div className="flex items-center gap-2">
+                <Inbox className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <span>Rổ việc (Inbox)</span>
+              </div>
+              {inbox.filter(i => i.status === 'inbox').length > 0 && (
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold text-white ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`}>
+                  {inbox.filter(i => i.status === 'inbox').length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => { setIsActiveCaptureOpen(true); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
+            >
+              <Clock className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+              <span>Ghi bù thời gian</span>
+            </button>
+
+            <button
+              onClick={() => { setIsListsModalOpen(true); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
+            >
+              <FolderKanban className="w-4 h-4 text-sky-600" />
+              <span>Danh sách</span>
+            </button>
+
+            <button
+              onClick={() => { setIsSwipeModalOpen(true); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-amber-700"
+            >
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Lướt rổ việc</span>
+            </button>
+
+            <button
+              onClick={() => { setExportModalOpen(true); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
+            >
+              <UploadCloud className="w-4 h-4 text-blue-600" />
+              <span>Xuất AI Markdown</span>
+            </button>
+
+            <button
+              onClick={() => { setSettingsModalOpen(true); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
+            >
+              <Settings className="w-4 h-4 text-slate-600" />
+              <span>Giao diện & Nền tảng</span>
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+            {/* Profile Switcher */}
+            <div className="flex items-center gap-1.5 flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+              <User className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+              <select
+                value={profile.type}
+                onChange={(e) => {
+                  const targetKey = e.target.value;
+                  if (PROFILES[targetKey]) setProfile(PROFILES[targetKey]);
+                }}
+                className="bg-transparent text-slate-800 text-xs font-semibold focus:outline-none w-full"
+              >
+                {Object.values(PROFILES).map((p) => (
+                  <option key={p.type} value={p.type}>{p.title}</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={() => { setIsProfileModalOpen(true); setMobileMenuOpen(false); }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white font-semibold text-xs shadow-xs ${
+                isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+              }`}
+            >
+              <div className="w-4 h-4 rounded-full bg-white/25 text-white flex items-center justify-center text-[9px] font-black">
+                {userProfileDetail.displayName.charAt(0) || 'U'}
+              </div>
+              <span>Cá nhân</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 4 Core Tabs Bar with Native App Store Style */}
       <nav 

@@ -1,4 +1,4 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.8
 import PackageDescription
 
 // DO NOT MODIFY THIS FILE - managed by Capacitor CLI commands

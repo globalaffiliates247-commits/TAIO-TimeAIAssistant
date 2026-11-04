@@ -97,7 +97,7 @@ export const AppearanceModal: React.FC = () => {
           </div>
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className="p-1 rounded-lg text-gray-400 hover:text-slate-900 hover:bg-gray-800"
+            className="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100"
           >
             <X className="w-5 h-5" />
           </button>
@@ -106,7 +106,7 @@ export const AppearanceModal: React.FC = () => {
         <div className="p-5 space-y-5 max-h-[80vh] overflow-y-auto">
           {/* Setting 1: Device */}
           <div className="space-y-2.5">
-            <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               1. Nền tảng hiển thị (Device Look & Feel)
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -117,7 +117,7 @@ export const AppearanceModal: React.FC = () => {
                   className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                     deviceLook === d.id
                       ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
-                      : 'border-gray-800 bg-gray-900/60 text-gray-300 hover:border-gray-700'
+                      : 'border-slate-200 bg-white/60 text-slate-700 hover:border-slate-300'
                   }`}
                 >
                   <div className="mt-0.5">{d.icon}</div>
@@ -126,7 +126,7 @@ export const AppearanceModal: React.FC = () => {
                       <span className="text-xs font-bold">{d.label}</span>
                       {deviceLook === d.id && <Check className="w-3.5 h-3.5 text-[#E0401F]" />}
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-1">{d.desc}</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{d.desc}</p>
                   </div>
                 </button>
               ))}
@@ -135,7 +135,7 @@ export const AppearanceModal: React.FC = () => {
 
           {/* Setting 2: Theme Light / Dark */}
           <div className="space-y-2.5">
-            <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               2. Sáng / Tối (Theme Mode)
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -146,7 +146,7 @@ export const AppearanceModal: React.FC = () => {
                   className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                     themeMode === t.id
                       ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
-                      : 'border-gray-800 bg-gray-900/60 text-gray-400 hover:border-gray-700 hover:text-slate-900'
+                      : 'border-slate-200 bg-white/60 text-slate-500 hover:border-slate-300 hover:text-slate-900'
                   }`}
                 >
                   {t.icon}
@@ -158,7 +158,7 @@ export const AppearanceModal: React.FC = () => {
 
           {/* Setting 3: Color Palette */}
           <div className="space-y-2.5">
-            <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               3. Bảng màu hệ thống (Color Palette)
             </label>
             <div className="space-y-2">
@@ -172,7 +172,7 @@ export const AppearanceModal: React.FC = () => {
                     className={`w-full p-3 rounded-xl border text-left transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       isSelected
                         ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
-                        : 'border-gray-800 bg-gray-900/60 text-gray-300 hover:border-gray-700'
+                        : 'border-slate-200 bg-white/60 text-slate-700 hover:border-slate-300'
                     }`}
                   >
                     <div>
@@ -180,7 +180,7 @@ export const AppearanceModal: React.FC = () => {
                         <span className="text-xs font-bold">{p.label}</span>
                         {isSelected && <Check className="w-3.5 h-3.5 text-[#E0401F]" />}
                       </div>
-                      <p className="text-[11px] text-gray-400 mt-0.5">{p.desc}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{p.desc}</p>
                     </div>
 
                     {/* Color swatches preview */}
@@ -219,7 +219,7 @@ export const AppearanceModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-gray-800 bg-gray-900/50 flex justify-end">
+        <div className="px-5 py-3 border-t border-slate-200 bg-white/50 flex justify-end">
           <button
             onClick={() => setSettingsModalOpen(false)}
             className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-slate-900 text-xs font-bold shadow-md shadow-red-950/40 transition-all"

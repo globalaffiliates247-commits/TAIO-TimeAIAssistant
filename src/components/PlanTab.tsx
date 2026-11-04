@@ -22,7 +22,7 @@ const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; 
   deep: { label: 'Tập trung sâu', bg: 'bg-rose-500/15', text: 'text-rose-300', border: 'border-rose-500/30' },
   meeting: { label: 'Họp & Trao đổi', bg: 'bg-purple-500/15', text: 'text-purple-300', border: 'border-purple-500/30' },
   interruption: { label: 'Quỹ gián đoạn', bg: 'bg-amber-500/15', text: 'text-amber-300', border: 'border-amber-500/30' },
-  personal: { label: 'Cá nhân & Nghỉ', bg: 'bg-emerald-500/15', text: 'text-emerald-300', border: 'border-emerald-500/30' },
+  personal: { label: 'Cá nhân & Nghỉ', bg: 'bg-emerald-500/15', text: 'text-emerald-700', border: 'border-emerald-500/30' },
   planning: { label: 'Lập kế hoạch', bg: 'bg-cyan-500/15', text: 'text-cyan-300', border: 'border-cyan-500/30' },
 };
 
@@ -144,7 +144,7 @@ export const PlanTab: React.FC = () => {
                 <Layers className="w-4 h-4 text-[#E0401F]" />
                 <span>Ngân sách tuần (Weekly Budget)</span>
               </h3>
-              <span className="text-xs text-slate-400 font-mono">Đã dùng 18h / 40h kế hoạch</span>
+              <span className="text-xs text-slate-500 font-mono">Đã dùng 18h / 40h kế hoạch</span>
             </div>
 
             <div className="space-y-3.5">
@@ -162,7 +162,7 @@ export const PlanTab: React.FC = () => {
                 >
                   <div className="flex items-center justify-between text-xs sm:text-sm">
                     <span className="text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">{g.name}</span>
-                    <span className="text-slate-400 font-mono text-xs">{g.dailyBudgetMins * 5 / 60}h/tuần (~{g.dailyBudgetMins}p/ngày) ↗</span>
+                    <span className="text-slate-500 font-mono text-xs">{g.dailyBudgetMins * 5 / 60}h/tuần (~{g.dailyBudgetMins}p/ngày) ↗</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
                     <div 
@@ -201,7 +201,7 @@ export const PlanTab: React.FC = () => {
                 <Clock className="w-4 h-4 text-[#E0401F]" />
                 <span>Dòng thời gian hôm nay (Daily Timeline)</span>
               </h3>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 Hồ sơ: <strong className="text-slate-900">{profile.title}</strong>
               </span>
             </div>
@@ -246,11 +246,11 @@ export const PlanTab: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <h4 className={`text-sm sm:text-base font-bold mt-1 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
+                        <h4 className={`text-sm sm:text-base font-bold mt-1 ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
                           {block.title}
                         </h4>
                         {block.goalName && (
-                          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5">
+                          <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
                             <Target className="w-3.5 h-3.5 text-red-400" />
                             <span>{block.goalName}</span>
                           </p>
@@ -278,7 +278,7 @@ export const PlanTab: React.FC = () => {
                   <Sparkles className="w-4 h-4 text-amber-400" />
                   <span>Việc quan trọng, không khẩn cấp (Important, Not Urgent)</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Các đầu việc định kỳ giúp duy trì đà phát triển dài hạn. Bấm "Làm tuần này" để đưa vào lịch.
                 </p>
               </div>
@@ -289,7 +289,7 @@ export const PlanTab: React.FC = () => {
                 <div key={item.id} className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-xs hover:border-slate-300 transition-all">
                   <div>
                     <h4 className="text-xs sm:text-sm font-bold text-slate-900">{item.title}</h4>
-                    <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">Dự kiến: {item.defaultMinutes} phút</span>
+                    <span className="text-[11px] text-slate-500 font-mono mt-0.5 block">Dự kiến: {item.defaultMinutes} phút</span>
                   </div>
                   <button
                     onClick={() => handleAcceptBacklogItem(item)}
@@ -307,7 +307,7 @@ export const PlanTab: React.FC = () => {
       {/* Add Block Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-slate-900">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-slate-900">
             <h3 className="text-base font-bold mb-4">Thêm khối thời gian mới</h3>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
@@ -318,7 +318,7 @@ export const PlanTab: React.FC = () => {
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
                   placeholder="Ví dụ: Rà soát hợp đồng..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
                 />
               </div>
 
@@ -329,7 +329,7 @@ export const PlanTab: React.FC = () => {
                     type="time"
                     value={newStartTime}
                     onChange={e => setNewStartTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -338,7 +338,7 @@ export const PlanTab: React.FC = () => {
                     type="time"
                     value={newEndTime}
                     onChange={e => setNewEndTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
                   />
                 </div>
               </div>
@@ -348,7 +348,7 @@ export const PlanTab: React.FC = () => {
                 <select
                   value={newType}
                   onChange={e => setNewType(e.target.value as BlockType)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
                 >
                   <option value="deep">Tập trung sâu (Deep Work)</option>
                   <option value="meeting">Họp hành (Meeting)</option>
@@ -363,7 +363,7 @@ export const PlanTab: React.FC = () => {
                 <select
                   value={newGoalId}
                   onChange={e => setNewGoalId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
                 >
                   <option value="">Ngoài mục tiêu chính (Outside goals)</option>
                   {goals.map(g => (
@@ -376,7 +376,7 @@ export const PlanTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-400 hover:text-slate-900 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-900 text-xs font-semibold"
                 >
                   Hủy
                 </button>

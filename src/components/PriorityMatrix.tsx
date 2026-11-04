@@ -123,7 +123,7 @@ export const PriorityMatrix: React.FC = () => {
                   </span>
                   <h3 className={`text-base sm:text-lg font-bold tracking-tight ${styling.titleColor}`}>{title}</h3>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
               </div>
             </div>
 
@@ -140,7 +140,7 @@ export const PriorityMatrix: React.FC = () => {
               <div className="text-sm font-extrabold text-slate-900 group-hover:text-amber-400 transition-colors">
                 {tasks.length} việc
               </div>
-              <div className="text-[10px] text-slate-400 font-mono">
+              <div className="text-[10px] text-slate-500 font-mono">
                 {timeMins}p ({percentage}%)
               </div>
             </button>
@@ -148,7 +148,7 @@ export const PriorityMatrix: React.FC = () => {
 
           {/* Quick add trigger button */}
           <div className="flex items-center justify-between mb-3.5 mt-2 pt-2 border-t border-white/5">
-            <span className="text-[11px] text-slate-400 font-medium">
+            <span className="text-[11px] text-slate-500 font-medium">
               {quadrantNum === 1 && 'Khủng hoảng & Hạn chót gấp'}
               {quadrantNum === 2 && 'Trọng tâm phát triển dài hạn'}
               {quadrantNum === 3 && 'Việc của người khác / Họp vụn'}
@@ -156,7 +156,7 @@ export const PriorityMatrix: React.FC = () => {
             </span>
             <button
               onClick={() => setQuickAddQuadrant(quickAddQuadrant === quadrantNum ? null : quadrantNum)}
-              className="text-xs text-slate-200 hover:text-slate-900 flex items-center gap-1.5 font-semibold bg-white hover:bg-slate-50 px-3 py-1.5 rounded-xl transition-all border border-slate-200 shadow-xs text-slate-700"
+              className="text-xs text-slate-700 hover:text-slate-900 flex items-center gap-1.5 font-semibold bg-white hover:bg-slate-50 px-3 py-1.5 rounded-xl transition-all border border-slate-200 shadow-xs text-slate-700"
             >
               <Plus className="w-3.5 h-3.5 text-slate-900" /> Thêm nhanh
             </button>
@@ -229,7 +229,7 @@ export const PriorityMatrix: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2 mt-2 flex-wrap text-xs text-slate-400">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap text-xs text-slate-500">
                           {task.goalName ? (
                             <span className="text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 font-semibold truncate max-w-[170px] font-medium text-[11px]">
                               {task.goalName}
@@ -240,7 +240,7 @@ export const PriorityMatrix: React.FC = () => {
                             </span>
                           )}
                           <span className="flex items-center gap-1 text-slate-700 font-mono text-[11px]">
-                            <Clock className="w-3 h-3 text-slate-400" /> {task.estimatedMinutes || 60}p
+                            <Clock className="w-3 h-3 text-slate-500" /> {task.estimatedMinutes || 60}p
                           </span>
                         </div>
                       </div>
@@ -256,8 +256,8 @@ export const PriorityMatrix: React.FC = () => {
                     </div>
 
                     {/* Quick Move Quadrant Row */}
-                    <div className="mt-2.5 pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px]">
-                      <span className="text-slate-400 font-medium">Chuyển góc:</span>
+                    <div className="mt-2.5 pt-2 border-t border-slate-200/50 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500 font-medium">Chuyển góc:</span>
                       <div className="flex items-center gap-1">
                         {quadrantNum !== 1 && (
                           <button
@@ -297,7 +297,7 @@ export const PriorityMatrix: React.FC = () => {
                         )}
                         <button
                           onClick={() => dropTask(task.id)}
-                          className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 ml-1.5 transition-colors"
+                          className="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 ml-1.5 transition-colors"
                           title="Xóa bỏ việc này"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -339,7 +339,7 @@ export const PriorityMatrix: React.FC = () => {
 
           <button
             onClick={() => setShowEduCard(!showEduCard)}
-            className="p-2 text-slate-400 hover:text-slate-900 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+            className="p-2 text-slate-500 hover:text-slate-900 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
             title={showEduCard ? 'Thu gọn giải thích' : 'Mở rộng giải thích'}
           >
             {showEduCard ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -347,7 +347,7 @@ export const PriorityMatrix: React.FC = () => {
         </div>
 
         {showEduCard && (
-          <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs text-slate-700">
+          <div className="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs text-slate-700">
             <div className="p-3.5 bg-rose-500/10 border border-rose-500/25 rounded-2xl">
               <span className="font-bold text-rose-400 block mb-1">Q1: Làm ngay</span>
               Khẩn cấp + Quan trọng. Khủng hoảng, hạn chót sát nút. Cần giải quyết ngay lập tức.
@@ -376,14 +376,14 @@ export const PriorityMatrix: React.FC = () => {
               <TrendingUp className="w-4 h-4 text-[#E0401F]" />
               Tín hiệu Cân bằng Phân bổ Thời gian
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">{balanceMessage}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{balanceMessage}</p>
           </div>
 
           <div className="flex items-center gap-2.5 text-xs font-mono">
             <span className="text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20">Q1: {q1Pct}%</span>
             <span className="text-blue-400 font-extrabold bg-blue-500/15 px-2.5 py-0.5 rounded-md border border-blue-500/30">Q2: {q2Pct}%</span>
             <span className="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">Q3: {q3Pct}%</span>
-            <span className="text-slate-400 font-bold bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">Q4: {q4Pct}%</span>
+            <span className="text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">Q4: {q4Pct}%</span>
           </div>
         </div>
 
@@ -411,9 +411,9 @@ export const PriorityMatrix: React.FC = () => {
           />
         </div>
         
-        <div className="flex justify-between items-center text-[11px] text-slate-400 mt-2 font-mono">
+        <div className="flex justify-between items-center text-[11px] text-slate-500 mt-2 font-mono">
           <span>Khuyến nghị mục tiêu: Q2 &ge; 60%</span>
-          <span>Tổng số phút: <strong className="text-slate-200">{totalTime} phút</strong> ({blocks.length} việc)</span>
+          <span>Tổng số phút: <strong className="text-slate-700">{totalTime} phút</strong> ({blocks.length} việc)</span>
         </div>
       </div>
 
@@ -429,10 +429,10 @@ export const PriorityMatrix: React.FC = () => {
           q1Time,
           q1Pct,
           {
-            cardBg: 'bg-gradient-to-b from-rose-950/20 to-slate-900/80',
-            borderColor: 'border-rose-500/30',
-            titleColor: 'text-rose-400',
-            badgeColor: 'bg-rose-500/20 text-rose-300 border border-rose-500/30',
+            cardBg: 'bg-gradient-to-b from-rose-50 to-white',
+            borderColor: 'border-rose-200',
+            titleColor: 'text-rose-600',
+            badgeColor: 'bg-rose-50 text-rose-600 border border-rose-200',
             btnBg: 'bg-rose-600 hover:bg-rose-500'
           }
         )}
@@ -447,10 +447,10 @@ export const PriorityMatrix: React.FC = () => {
           q2Time,
           q2Pct,
           {
-            cardBg: 'bg-gradient-to-b from-blue-950/25 to-slate-900/80',
-            borderColor: 'border-blue-500/40 ring-1 ring-blue-500/30',
-            titleColor: 'text-blue-400',
-            badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+            cardBg: 'bg-gradient-to-b from-blue-50 to-white',
+            borderColor: 'border-blue-200 ring-1 ring-blue-100',
+            titleColor: 'text-blue-600',
+            badgeColor: 'bg-blue-50 text-blue-600 border border-blue-200',
             btnBg: 'bg-blue-600 hover:bg-blue-500'
           }
         )}
@@ -465,10 +465,10 @@ export const PriorityMatrix: React.FC = () => {
           q3Time,
           q3Pct,
           {
-            cardBg: 'bg-gradient-to-b from-amber-950/20 to-slate-900/80',
-            borderColor: 'border-amber-500/30',
-            titleColor: 'text-amber-400',
-            badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+            cardBg: 'bg-gradient-to-b from-amber-50 to-white',
+            borderColor: 'border-amber-200',
+            titleColor: 'text-amber-600',
+            badgeColor: 'bg-amber-50 text-amber-600 border border-amber-200',
             btnBg: 'bg-amber-600 hover:bg-amber-500'
           }
         )}
@@ -478,13 +478,13 @@ export const PriorityMatrix: React.FC = () => {
           4,
           'Bỏ qua / Loại trừ (Drop / Park)',
           'Không khẩn cấp & Không quan trọng',
-          <Trash2 className="w-5 h-5 text-slate-400" />,
+          <Trash2 className="w-5 h-5 text-slate-500" />,
           q4Tasks,
           q4Time,
           q4Pct,
           {
-            cardBg: 'bg-gradient-to-b from-slate-900/40 to-slate-900/80',
-            borderColor: 'border-slate-700/60',
+            cardBg: 'bg-gradient-to-b from-slate-50 to-white',
+            borderColor: 'border-slate-200',
             titleColor: 'text-slate-700',
             badgeColor: 'bg-slate-100 text-slate-600 border border-slate-200',
             btnBg: 'bg-slate-700 hover:bg-slate-600'
