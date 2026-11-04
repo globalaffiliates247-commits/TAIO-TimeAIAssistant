@@ -19,11 +19,11 @@ import {
 } from 'lucide-react';
 
 const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; border: string }> = {
-  deep: { label: 'Tập trung sâu', bg: 'bg-rose-500/15', text: 'text-rose-300', border: 'border-rose-500/30' },
-  meeting: { label: 'Họp & Trao đổi', bg: 'bg-purple-500/15', text: 'text-purple-300', border: 'border-purple-500/30' },
-  interruption: { label: 'Quỹ gián đoạn', bg: 'bg-amber-500/15', text: 'text-amber-300', border: 'border-amber-500/30' },
+  deep: { label: 'Tập trung sâu', bg: 'bg-rose-500/15', text: 'text-rose-700', border: 'border-rose-500/30' },
+  meeting: { label: 'Họp & Trao đổi', bg: 'bg-purple-500/15', text: 'text-purple-700', border: 'border-purple-500/30' },
+  interruption: { label: 'Quỹ gián đoạn', bg: 'bg-amber-500/15', text: 'text-amber-700', border: 'border-amber-500/30' },
   personal: { label: 'Cá nhân & Nghỉ', bg: 'bg-emerald-500/15', text: 'text-emerald-700', border: 'border-emerald-500/30' },
-  planning: { label: 'Lập kế hoạch', bg: 'bg-cyan-500/15', text: 'text-cyan-300', border: 'border-cyan-500/30' },
+  planning: { label: 'Lập kế hoạch', bg: 'bg-cyan-500/15', text: 'text-cyan-700', border: 'border-cyan-500/30' },
 };
 
 export const PlanTab: React.FC = () => {
@@ -97,7 +97,7 @@ export const PlanTab: React.FC = () => {
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>1. Thẻ ngày (B25)</span>
+              <span>1. Thẻ ngày</span>
             </button>
             <button
               onClick={() => setActiveView('timeline')}
@@ -184,7 +184,7 @@ export const PlanTab: React.FC = () => {
                 title="Bấm để xem nhật ký chen ngang"
               >
                 <div className="flex items-center justify-between text-xs sm:text-sm">
-                  <span className="text-amber-300 font-semibold group-hover:text-amber-200">Quỹ dự phòng gián đoạn tuần</span>
+                  <span className="text-amber-700 font-semibold group-hover:text-amber-700">Quỹ dự phòng gián đoạn tuần</span>
                   <span className="text-amber-400 font-mono text-xs">Đã dùng 3.5h / 7.5h (Còn 53%) ↗</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
@@ -306,12 +306,12 @@ export const PlanTab: React.FC = () => {
 
       {/* Add Block Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-slate-900">
             <h3 className="text-base font-bold mb-4">Thêm khối thời gian mới</h3>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Tên công việc</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Tên công việc</label>
                 <input
                   type="text"
                   required
@@ -324,7 +324,7 @@ export const PlanTab: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Giờ bắt đầu</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Giờ bắt đầu</label>
                   <input
                     type="time"
                     value={newStartTime}
@@ -333,7 +333,7 @@ export const PlanTab: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Giờ kết thúc</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Giờ kết thúc</label>
                   <input
                     type="time"
                     value={newEndTime}
@@ -344,7 +344,7 @@ export const PlanTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Loại khối</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Loại khối</label>
                 <select
                   value={newType}
                   onChange={e => setNewType(e.target.value as BlockType)}
@@ -359,7 +359,7 @@ export const PlanTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Phục vụ mục tiêu</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Phục vụ mục tiêu</label>
                 <select
                   value={newGoalId}
                   onChange={e => setNewGoalId(e.target.value)}

@@ -61,8 +61,8 @@ export const Navbar: React.FC = () => {
 
   return (
     <header 
-      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)' }}
-      className="sticky top-0 z-40 transition-colors duration-200 border-b border-slate-200 bg-white/95 backdrop-blur-xl shadow-xs w-full max-w-full overflow-x-hidden"
+      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', overflowX: 'clip' }}
+      className="sticky top-0 z-40 transition-colors duration-200 border-b border-slate-200 bg-white backdrop-blur-xl shadow-xs w-full max-w-full"
     >
       
       {/* Platform Window Controls (PRD D3: macOS Traffic lights / Windows Titlebar) */}
@@ -117,7 +117,7 @@ export const Navbar: React.FC = () => {
                     ? 'bg-blue-50 text-blue-700 border-blue-200' 
                     : 'bg-red-50 text-[#E0401F] border-red-200'
                 }`}>
-                  v0.3.9 Approved
+                  v0.3.9
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 -mt-0.5">TAIO.CLUB Time App</p>
@@ -170,7 +170,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setExportModalOpen(true)}
             className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold"
-            title="Xuất dữ liệu Markdown cho AI Assistant (B24)"
+            title="Xuất dữ liệu Markdown cho AI Assistant"
           >
             <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
             <span>Xuất AI</span>
@@ -180,7 +180,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setInboxModalOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold relative"
-            title="Rổ công việc (Inbox - GTD B20)"
+            title="Rổ công việc (Inbox)"
           >
             <Inbox className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
             <span>Rổ việc</span>
@@ -197,7 +197,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setIsListsModalOpen(true)}
             className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold"
-            title="Danh sách Ý tưởng, Dự án, Checklist (B26)"
+            title="Danh sách Ý tưởng, Dự án, Checklist"
           >
             <FolderKanban className="w-3.5 h-3.5 text-sky-600" />
             <span>Danh sách</span>
@@ -207,7 +207,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setIsSwipeModalOpen(true)}
             className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-amber-700 border border-slate-200 transition-all font-semibold"
-            title="Thẻ nhắc việc: Lướt rổ tồn đọng (B28)"
+            title="Thẻ nhắc việc: Lướt rổ tồn đọng"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Lướt rổ</span>
@@ -217,7 +217,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setIsActiveCaptureOpen(true)}
             className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold"
-            title="Thu thập chủ động & Ghi bù (B30)"
+            title="Thu thập chủ động & Ghi bù"
           >
             <Clock className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
             <span>Ghi bù</span>
@@ -275,7 +275,7 @@ export const Navbar: React.FC = () => {
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-white font-semibold transition-all shadow-xs ${
               isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
             }`}
-            title="Hồ sơ cá nhân (B27)"
+            title="Hồ sơ cá nhân"
           >
             <div className="w-4 h-4 rounded-full bg-white/25 text-white flex items-center justify-center text-[9px] font-black">
               {userProfileDetail.displayName.charAt(0) || 'U'}

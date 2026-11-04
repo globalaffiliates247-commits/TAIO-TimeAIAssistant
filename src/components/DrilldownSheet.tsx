@@ -113,7 +113,7 @@ export const DrilldownSheet: React.FC = () => {
                       disabled={isDone}
                       className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                         isDone
-                          ? 'bg-emerald-950/30 text-emerald-500/50 cursor-not-allowed'
+                          ? 'bg-emerald-50 text-emerald-500/50 cursor-not-allowed'
                           : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
                       }`}
                       title="Đánh dấu hoàn thành ngay (1 chạm)"
@@ -137,7 +137,7 @@ export const DrilldownSheet: React.FC = () => {
                       className={`py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${
                         isDropped
                           ? 'text-gray-600 bg-slate-50 cursor-not-allowed'
-                          : 'text-slate-500 hover:text-rose-700 bg-slate-100 hover:bg-rose-950/40 border border-slate-200 hover:border-rose-800/50'
+                          : 'text-slate-500 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200'
                       }`}
                       title="Bỏ qua nhiệm vụ này (1 chạm)"
                     >
@@ -201,7 +201,7 @@ export const DrilldownSheet: React.FC = () => {
                     </button>
                     <button
                       onClick={() => dropTask(block.id)}
-                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-700 text-xs flex items-center justify-center gap-1"
+                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-700 text-xs flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Bỏ</span>
@@ -257,7 +257,7 @@ export const DrilldownSheet: React.FC = () => {
                       : item.decision === 'decline'
                       ? 'bg-rose-500/20 text-rose-700'
                       : item.decision === 'delegate'
-                      ? 'bg-purple-500/20 text-purple-300'
+                      ? 'bg-purple-500/20 text-purple-700'
                       : 'bg-indigo-500/20 text-blue-600 font-medium'
                   }`}>
                     {item.decision === 'do_now' ? 'Làm ngay (Trừ quỹ)' : item.decision === 'decline' ? 'Từ chối (Bảo vệ giờ)' : item.decision === 'delegate' ? 'Ủy quyền' : item.decision === 'go_social' ? 'Giao lưu' : 'Lên lịch'}
@@ -276,7 +276,7 @@ export const DrilldownSheet: React.FC = () => {
                 </div>
 
                 {item.returnPoint && (
-                  <p className="text-[11px] text-blue-600 font-medium bg-indigo-950/40 p-2 rounded-lg border border-indigo-800/30">
+                  <p className="text-[11px] text-blue-600 font-medium bg-indigo-50 p-2 rounded-lg border border-indigo-200">
                     <span className="font-semibold text-blue-600">Điểm quay lại: </span>
                     {item.returnPoint}
                   </p>
@@ -294,7 +294,7 @@ export const DrilldownSheet: React.FC = () => {
         return (
           <div className="space-y-3">
             {targetGoal && (
-              <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-800/50 space-y-2">
+              <div className="p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-blue-600 font-medium font-bold">{targetGoal.name}</span>
                   <span className="text-slate-900 font-bold">{targetGoal.progressPercent}% hoàn thành</span>
@@ -342,7 +342,7 @@ export const DrilldownSheet: React.FC = () => {
                     </button>
                     <button
                       onClick={() => dropTask(block.id)}
-                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-700 text-xs flex items-center justify-center gap-1"
+                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-700 text-xs flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Bỏ</span>
@@ -361,12 +361,12 @@ export const DrilldownSheet: React.FC = () => {
 
         return (
           <div className="space-y-3">
-            <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800/40 flex items-center justify-between text-xs">
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">
               <div>
                 <span className="text-emerald-600 font-bold">Tổng thời gian bảo vệ:</span>
                 <p className="text-xl font-black text-slate-900 mt-0.5">+{totalProtected} phút</p>
               </div>
-              <span className="text-emerald-700 text-[11px] bg-emerald-900/50 px-2.5 py-1 rounded-full">
+              <span className="text-emerald-700 text-[11px] bg-emerald-50 px-2.5 py-1 rounded-full">
                 Từ chối / Ủy quyền thành công
               </span>
             </div>

@@ -594,7 +594,7 @@ export const NowTab: React.FC = () => {
                 <span>CÓ VIỆC PHÁT SINH! (SOMETHING CAME UP)</span>
               </button>
               <p className="text-center text-xs text-slate-500 mt-2.5">
-                PRD v0.3.9: 2 tình huống (Tức thì vs Xem lại) • Mặc định "Để sau" vào Rổ việc • 1 chạm
+                2 tình huống (Tức thì vs Xem lại) • Mặc định "Để sau" vào Rổ việc • 1 chạm
               </p>
             </div>
           )}
@@ -695,7 +695,7 @@ export const NowTab: React.FC = () => {
           title="Bấm để xem danh sách các việc đã từ chối/ủy quyền"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-slate-400 group-hover:text-emerald-300">Đã bảo vệ</p>
+            <p className="text-xs font-semibold text-slate-400 group-hover:text-emerald-700">Đã bảo vệ</p>
             <span className="text-[10px] text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
           </div>
           <p className="text-xl font-extrabold text-emerald-400 mt-1">

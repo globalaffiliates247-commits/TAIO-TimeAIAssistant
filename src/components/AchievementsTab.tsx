@@ -119,12 +119,12 @@ export const AchievementsTab: React.FC = () => {
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Activity className="w-5 h-5 text-orange-400" />
-              <span>Hiệu quả & Dấu vết (Efficiency - PRD v0.22 B21)</span>
+              <span>Hiệu quả & Dấu vết (Efficiency)</span>
             </h2>
             <button
               onClick={() => setMethodLibraryOpen(true)}
               className="p-1 rounded-full text-slate-500 hover:text-orange-400 hover:bg-slate-100 transition-colors"
-              title="Mở Thư viện phương pháp khoa học (B22)"
+              title="Mở Thư viện phương pháp khoa học"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -192,7 +192,7 @@ export const AchievementsTab: React.FC = () => {
               <span>Đóng ngày</span>
             </button>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-950/40 border border-orange-800/40 text-orange-300 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 text-xs font-bold">
               <CheckCircle2 className="w-4 h-4 text-orange-400" />
               <span>Đã khóa ngày</span>
             </div>
@@ -337,7 +337,7 @@ export const AchievementsTab: React.FC = () => {
                           {gap.start} - {gap.end} ({gap.durationMins} phút)
                         </span>
                         {gap.label && (
-                          <span className="px-2 py-0.5 rounded text-[10px] bg-sky-500/20 text-sky-300 font-semibold">
+                          <span className="px-2 py-0.5 rounded text-[10px] bg-sky-500/20 text-sky-700 font-semibold">
                             Đã gắn: {GAP_LABELS.find(l => l.key === gap.label)?.label}
                           </span>
                         )}
@@ -433,11 +433,11 @@ export const AchievementsTab: React.FC = () => {
                         <h4 className="text-sm font-bold text-slate-900">{b.title}</h4>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span>Mục tiêu: <strong className="text-slate-300">{b.goalName || 'Ngoài mục tiêu'}</strong></span>
+                        <span>Mục tiêu: <strong className="text-slate-500">{b.goalName || 'Ngoài mục tiêu'}</strong></span>
                         <span>•</span>
                         <span>Loại: <strong className="text-orange-400 uppercase text-[10px]">{b.taskEndType || 'timebox'}</strong></span>
                         <span>•</span>
-                        <span>Ước lượng: <strong className="text-slate-300">{b.estimatedMinutes || 60}p</strong></span>
+                        <span>Ước lượng: <strong className="text-slate-500">{b.estimatedMinutes || 60}p</strong></span>
                       </div>
                     </div>
 
@@ -492,7 +492,7 @@ export const AchievementsTab: React.FC = () => {
                   <div key={g.id} className="p-5 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-3 shadow-xs">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-orange-950/50 text-orange-400 border border-orange-800/40">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-orange-50 text-orange-400 border border-orange-200">
                           {g.workArea}
                         </span>
                         <h4 className="text-base font-bold text-slate-900">{g.name}</h4>
@@ -510,7 +510,7 @@ export const AchievementsTab: React.FC = () => {
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-500">
-                          Đã dùng: <strong className="text-slate-900">{actualHours}h</strong> / Kế hoạch: <strong className="text-slate-300">{plannedHours}h</strong>
+                          Đã dùng: <strong className="text-slate-900">{actualHours}h</strong> / Kế hoạch: <strong className="text-slate-500">{plannedHours}h</strong>
                           {varianceHours <= 0 ? (
                             <span className="text-emerald-400 ml-1.5 font-semibold">({varianceHours}h tiết kiệm)</span>
                           ) : (

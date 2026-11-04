@@ -52,7 +52,7 @@ const MainAppContent: React.FC = () => {
   const isCool = palette === 'cool';
 
   return (
-    <div className={`min-h-screen flex flex-col bg-white text-slate-900 overflow-x-hidden w-full max-w-full ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
+    <div style={{ overflowX: 'clip' }} className={`min-h-screen flex flex-col bg-white text-slate-900 w-full max-w-full ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
       {/* Ambient Progress Edge (4px peripheral awareness line) */}
       <AmbientProgressEdge />
 
@@ -106,8 +106,8 @@ const MainAppContent: React.FC = () => {
       </main>
 
       {/* Bottom Footer info */}
-      <footer className="border-t border-slate-200/80 py-5 text-center text-xs text-slate-500">
-        TAIO Time App v0.3.9 Approved • Quản trị thời gian kết hợp AI • Thương hiệu TAIO (TAIO.CLUB)
+      <footer style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }} className="border-t border-slate-200/80 pt-4 px-4 text-center text-xs text-slate-500">
+        TAIO Time App v0.3.9 • Quản trị thời gian kết hợp AI • TAIO.CLUB
       </footer>
 
       {/* Modals & Overlays */}

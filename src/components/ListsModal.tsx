@@ -124,9 +124,6 @@ export const ListsModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Danh sách</h2>
-                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-[#E0401F]/20 text-[#ff7556] border border-[#E0401F]/30">
-                  Mini App B26
-                </span>
               </div>
               <p className="text-xs text-slate-500">
                 Ý tưởng (Idea), Dự án (Project) và Checklist – Chụp nhanh dưới 5 giây
@@ -209,7 +206,7 @@ export const ListsModal: React.FC = () => {
                 <div>
                   <h3 className="text-base font-bold text-slate-900">Tạo danh sách mới</h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Chọn 1 trong 3 mẫu cố định theo PRD B26 để giữ trọn vẹn tốc độ đơn giản:
+                    Chọn 1 trong 3 mẫu cố định để giữ trọn vẹn tốc độ đơn giản:
                   </p>
                 </div>
 

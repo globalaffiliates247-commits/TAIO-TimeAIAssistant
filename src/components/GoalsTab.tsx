@@ -74,9 +74,6 @@ export const GoalsTab: React.FC = () => {
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Target className="w-5 h-5 text-[#E0401F]" />
             <span>Mục tiêu & Lộ trình (Goals / Roadmap)</span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-950/60 text-[#E0401F] border border-red-800/40">
-              PRD D3: Red Accent
-            </span>
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
             Bao quát cả bề rộng (Breadth - các mảng việc) và bề sâu (Depth - hoàn thành rốt ráo)
@@ -142,7 +139,7 @@ export const GoalsTab: React.FC = () => {
                 </p>
               </div>
 
-              {/* Progress Bar (PRD D3: Red Accent only on summary screens) */}
+              {/* Progress Bar ( only on summary screens) */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Tiến độ mục tiêu (Closeness to done)</span>
@@ -196,10 +193,10 @@ export const GoalsTab: React.FC = () => {
 
       {/* Back-planning Modal (PRD B7) */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 w-full max-w-lg shadow-2xl text-slate-900">
             <div className="mb-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/60 text-[#E0401F] text-xs font-semibold mb-2 border border-red-800/40">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[#E0401F] text-xs font-semibold mb-2 border border-red-200">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Kế hoạch ngược thông minh (Back-planning)</span>
               </div>

@@ -102,9 +102,6 @@ export const HabitInsights: React.FC = () => {
           <div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
               Dấu vết Thói quen (Habit Insights & Patterns)
-              <span className="text-[11px] font-mono bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full border border-slate-200 font-semibold">
-                B15
-              </span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               So sánh Kế hoạch vs Thực tế • Tìm ra quy luật tự nhiên của bạn để tối ưu bền vững, không phán xét.

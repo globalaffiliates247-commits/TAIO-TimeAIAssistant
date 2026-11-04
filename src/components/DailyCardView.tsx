@@ -110,9 +110,6 @@ export const DailyCardView: React.FC = () => {
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">
                   Thẻ ngày (Daily Card - Bullet Journal Sticky Note)
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
-                  PRD v0.3.1 B25
-                </span>
               </div>
               <p className="text-xs text-slate-500">
                 Lấy cảm hứng từ thói quen ghi chú giấy dán của Founder • Gạch ngang khi xong • Dời việc có chủ đích
@@ -162,16 +159,16 @@ export const DailyCardView: React.FC = () => {
             <button
               onClick={() => setIsSwipeModalOpen(true)}
               className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
-              title="Mở Thẻ nhắc việc (Lướt rổ backlog - B28)"
+              title="Mở Thẻ nhắc việc (Lướt rổ backlog)"
             >
-              <span>Lướt rổ (B28)</span>
+              <span>Lướt rổ</span>
             </button>
             <button
               onClick={() => setIsActiveCaptureOpen(true)}
               className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-[#E0401F] text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
-              title="Thu thập chủ động & Ghi bù (B30)"
+              title="Thu thập chủ động & Ghi bù"
             >
-              <span>Ghi bù (B30)</span>
+              <span>Ghi bù</span>
             </button>
           </div>
         </div>
@@ -207,7 +204,7 @@ export const DailyCardView: React.FC = () => {
               onClick={() => setShowUnplannedOptions(!showUnplannedOptions)}
               className={`px-3 py-2.5 rounded-2xl text-xs font-semibold border transition-all ${
                 newOrigin === 'unplanned_goal'
-                  ? 'bg-orange-500/20 text-orange-300 border-orange-500/40'
+                  ? 'bg-orange-500/20 text-orange-700 border-orange-500/40'
                   : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
               }`}
               title="Tùy chọn: Việc phát sinh ngoài kế hoạch (Unplanned on goal)"
@@ -231,7 +228,7 @@ export const DailyCardView: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1">
                   <label className="text-[11px] text-slate-400 font-bold uppercase block mb-1">
-                    Nguồn gốc công việc (Origin B25):
+                    Nguồn gốc công việc (Origin):
                   </label>
                   <select
                     value={newOrigin}
@@ -263,7 +260,7 @@ export const DailyCardView: React.FC = () => {
 
               {newOrigin === 'unplanned_goal' && (
                 <div>
-                  <label className="text-[11px] text-amber-300 font-bold block mb-1">
+                  <label className="text-[11px] text-amber-700 font-bold block mb-1">
                     Việc này chiếm thời gian của khối nào? (Bị đẩy lùi - Pushed back):
                   </label>
                   <select

@@ -223,7 +223,7 @@ export const PriorityMatrix: React.FC = () => {
                             {task.title}
                           </p>
                           {isOverdueAging && (
-                            <span className="text-[10px] bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full font-mono font-bold flex items-center gap-1">
+                            <span className="text-[10px] bg-rose-500/15 text-rose-700 border border-rose-500/30 px-2 py-0.5 rounded-full font-mono font-bold flex items-center gap-1">
                               <AlertTriangle className="w-2.5 h-2.5" /> Tồn {task.ageDays} ngày
                             </span>
                           )}
@@ -262,7 +262,7 @@ export const PriorityMatrix: React.FC = () => {
                         {quadrantNum !== 1 && (
                           <button
                             onClick={() => moveTaskQuadrant(task.id, 1)}
-                            className="px-2 py-0.5 rounded-lg bg-rose-500/15 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 font-bold"
+                            className="px-2 py-0.5 rounded-lg bg-rose-500/15 text-rose-700 hover:bg-rose-500/30 border border-rose-500/30 font-bold"
                             title="Chuyển sang Q1: Làm ngay"
                           >
                             Q1
@@ -271,7 +271,7 @@ export const PriorityMatrix: React.FC = () => {
                         {quadrantNum !== 2 && (
                           <button
                             onClick={() => moveTaskQuadrant(task.id, 2)}
-                            className="px-2 py-0.5 rounded-lg bg-blue-500/15 text-blue-300 hover:bg-blue-500/30 border border-blue-500/30 font-bold"
+                            className="px-2 py-0.5 rounded-lg bg-blue-500/15 text-blue-700 hover:bg-blue-500/30 border border-blue-500/30 font-bold"
                             title="Chuyển sang Q2: Lên lịch"
                           >
                             Q2
@@ -280,7 +280,7 @@ export const PriorityMatrix: React.FC = () => {
                         {quadrantNum !== 3 && (
                           <button
                             onClick={() => moveTaskQuadrant(task.id, 3)}
-                            className="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-300 hover:bg-amber-500/30 border border-amber-500/30 font-bold"
+                            className="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 hover:bg-amber-500/30 border border-amber-500/30 font-bold"
                             title="Chuyển sang Q3: Ủy quyền"
                           >
                             Q3
@@ -327,9 +327,6 @@ export const PriorityMatrix: React.FC = () => {
             <div>
               <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 Ma trận Ưu tiên Eisenhower (Stephen Covey)
-                <span className="text-[10px] font-mono bg-red-500/15 text-red-300 px-2.5 py-0.5 rounded-full border border-red-500/30 font-bold">
-                  PRD v0.11 B16
-                </span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-700 mt-0.5">
                 Phân loại công việc theo <strong className="text-slate-900">Tầm quan trọng</strong> và <strong className="text-slate-900">Tính khẩn cấp</strong> để thoát khỏi vòng xoáy chữa cháy.
@@ -487,7 +484,7 @@ export const PriorityMatrix: React.FC = () => {
             borderColor: 'border-slate-200',
             titleColor: 'text-slate-700',
             badgeColor: 'bg-slate-100 text-slate-600 border border-slate-200',
-            btnBg: 'bg-slate-700 hover:bg-slate-600'
+            btnBg: 'bg-slate-700 hover:bg-slate-200'
           }
         )}
       </div>

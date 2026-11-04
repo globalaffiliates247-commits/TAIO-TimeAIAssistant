@@ -54,21 +54,18 @@ export const MethodLibraryModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-white/95 border border-slate-200 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl p-5 sm:p-6 text-white border-t border-orange-200 sm:border">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-white/95 border border-slate-200 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl p-5 sm:p-6 text-slate-900 border-t border-orange-200 sm:border">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-950/80 border border-orange-500/30 flex items-center justify-center text-orange-400">
+            <div className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-500/30 flex items-center justify-center text-orange-400">
               <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <span>Thư viện phương pháp (Method Library)</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-950/80 text-orange-400 border border-orange-800/40">
-                  B22 Scientific Basis
-                </span>
               </h3>
               <p className="text-[11px] text-slate-500">Nền tảng khoa học & Nguyên lý quản lý thời gian đằng sau từng tính năng</p>
             </div>
@@ -112,11 +109,11 @@ export const MethodLibraryModal: React.FC = () => {
               className="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-orange-400 transition-all space-y-2.5"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-orange-400" />
                   <span>{item.nameVi}</span>
                 </h4>
-                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-700/60 text-slate-300 font-mono self-start sm:self-auto">
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono self-start sm:self-auto">
                   {item.sourceAuthor} ({item.year})
                 </span>
               </div>
@@ -128,7 +125,7 @@ export const MethodLibraryModal: React.FC = () => {
               </div>
 
               {/* How TAIO applies it */}
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 <strong className="text-slate-700">Ứng dụng trong TAIO: </strong>
                 {item.appApplicationVi}
               </p>
@@ -140,7 +137,7 @@ export const MethodLibraryModal: React.FC = () => {
                 </span>
                 <button
                   onClick={() => handleTryNow(item.id)}
-                  className="px-3 py-1 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/40 text-[11px] font-bold flex items-center gap-1 shrink-0 transition-all"
+                  className="px-3 py-1 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 text-orange-700 border border-orange-500/40 text-[11px] font-bold flex items-center gap-1 shrink-0 transition-all"
                 >
                   <span>Mở thử ngay</span>
                   <ArrowRight className="w-3 h-3" />

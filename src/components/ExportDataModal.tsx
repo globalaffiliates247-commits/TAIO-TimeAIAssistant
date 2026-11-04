@@ -114,9 +114,6 @@ export const ExportDataModal: React.FC = () => {
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">
                   Xuất dữ liệu cho AI Assistant (Data Export)
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-semibold">
-                  PRD B24 (v0.3.1)
-                </span>
               </div>
               <p className="text-xs text-slate-500">
                 1 chạm chia sẻ bản ghi ngày (Markdown) cho trợ lý AI (Claude/ChatGPT) đọc trực tiếp qua URL bí mật
@@ -211,7 +208,7 @@ export const ExportDataModal: React.FC = () => {
           {showPreview && (
             <div className="space-y-2 animate-in fade-in">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                Bản xem trước định dạng Markdown (10 phần chuẩn PRD B24):
+                Bản xem trước định dạng Markdown (10 phần chuẩn):
               </span>
               <pre className="p-4 rounded-2xl bg-white border border-slate-200 font-mono text-[11px] text-slate-700 overflow-x-auto max-h-60 leading-relaxed whitespace-pre-wrap select-all">
                 {markdownContent}

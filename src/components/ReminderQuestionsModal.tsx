@@ -59,9 +59,6 @@ export const ReminderQuestionsModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Câu hỏi nhắc việc</h2>
-                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                  B29
-                </span>
               </div>
               <p className="text-[11px] text-slate-500">
                 Những câu hỏi định hướng hành vi đúng thời điểm (Theo Benjamin Franklin & Peter Bregman)

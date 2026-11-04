@@ -94,9 +94,6 @@ export const SwipeReviewModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Thẻ nhắc việc</h2>
-                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-red-500/20 text-[#ff7556] border border-red-500/30">
-                  B28
-                </span>
               </div>
               <p className="text-[11px] text-slate-500">
                 Lướt rổ tồn đọng • Phiên 5 thẻ theo phương pháp Spaced Repetition
@@ -161,7 +158,7 @@ export const SwipeReviewModal: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                /* 3-Step Planning Form (PRD B28) */
+                /* 3-Step Planning Form (PRD ) */
                 <div className="w-full p-5 rounded-2xl bg-slate-50 border border-[#E0401F]/40 shadow-xl space-y-4 animate-in fade-in">
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
@@ -250,7 +247,7 @@ export const SwipeReviewModal: React.FC = () => {
                 </div>
               )}
 
-              {/* 4 Actions Buttons (PRD B28) */}
+              {/* 4 Actions Buttons (PRD ) */}
               {!isPlanningStep && (
                 <div className="grid grid-cols-4 gap-2 pt-2">
                   {/* Later (Swipe Left) */}
@@ -274,7 +271,7 @@ export const SwipeReviewModal: React.FC = () => {
                   {/* Do Now 2min (Swipe Up) */}
                   <button
                     onClick={() => handleAction('done_now')}
-                    className="p-3 rounded-2xl bg-[#E0401F]/15 border border-[#E0401F]/40 hover:bg-[#E0401F]/30 text-white flex flex-col items-center justify-center gap-1 transition-all group shadow-md shadow-red-500/10"
+                    className="p-3 rounded-2xl bg-[#E0401F]/15 border border-[#E0401F]/40 hover:bg-[#E0401F]/25 text-[#E0401F] flex flex-col items-center justify-center gap-1 transition-all group shadow-md shadow-red-500/10"
                   >
                     <ArrowUp className="w-5 h-5 text-[#ff7556] group-hover:-translate-y-1 transition-transform" />
                     <span className="text-[10px] font-bold">Làm ngay 2p</span>
@@ -283,7 +280,7 @@ export const SwipeReviewModal: React.FC = () => {
                   {/* Drop (Trash) */}
                   <button
                     onClick={() => handleAction('drop')}
-                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-red-950/40 text-slate-500 hover:text-red-400 flex flex-col items-center justify-center gap-1 transition-all"
+                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-red-50 text-slate-500 hover:text-red-400 flex flex-col items-center justify-center gap-1 transition-all"
                   >
                     <Trash2 className="w-5 h-5" />
                     <span className="text-[10px] font-bold">Bỏ qua</span>
@@ -292,7 +289,7 @@ export const SwipeReviewModal: React.FC = () => {
               )}
             </div>
           ) : (
-            /* Session Completed Summary (PRD B28) */
+            /* Session Completed Summary (PRD ) */
             <div className="w-full text-center py-6 space-y-5 animate-in zoom-in-95">
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto text-emerald-400">
                 <CheckCircle2 className="w-8 h-8" />

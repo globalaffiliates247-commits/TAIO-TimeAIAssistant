@@ -730,7 +730,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let md = `# TAIO Time App · Daily log ${today}\n`;
     md += `- Người dùng: ${userProfileDetail.displayName} (${userProfileDetail.salutation})\n`;
     md += `- Xuất lúc: ${exportTime} (GMT+7)\n`;
-    md += `- Phiên bản ứng dụng: TAIO Time App v0.3.7 Approved\n`;
+    md += `- Phiên bản ứng dụng: TAIO Time App v0.3.9\n`;
     md += `- Hồ sơ người dùng: ${profile.title} (${profile.workStyle || 'mixed'})\n`;
     md += `- Mã xuất dữ liệu: exp_${Date.now()}\n\n`;
 
@@ -793,7 +793,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     md += `- Việc đã xử lý hôm nay: ${inbox.filter(i => i.status !== 'inbox').length} việc\n\n`;
 
     // 9. Daily card & carry-over (B25)
-    md += `## 8. Thẻ ngày & Dời việc (Daily card & carry-over - B25)\n`;
+    md += `## 8. Thẻ ngày & Dời việc (Daily card & carry-over)\n`;
     dailyCardItems.forEach(dc => {
       const strike = dc.status === 'done' ? '✓ [Đã xong]' : dc.status === 'dropped' ? '✗ [Đã bỏ]' : '[ ]';
       const carry = dc.carryCount > 0 ? ` (Dời ↻${dc.carryCount})` : '';
@@ -808,7 +808,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     md += `- Nhiệm vụ số 1 ngày mai: Sẵn sàng thực thi\n\n`;
 
     // 11. Lists & Projects (B26)
-    md += `## 10. Danh sách & Dự án (Lists & Projects - B26)\n`;
+    md += `## 10. Danh sách & Dự án (Lists & Projects)\n`;
     lists.filter(l => !l.archived).forEach(l => {
       const items = listItems.filter(i => i.listId === l.id && !i.archived);
       md += `### ${l.name} [${l.type.toUpperCase()}]\n`;
@@ -825,7 +825,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     // 12. Active Capture & Địa điểm (B30)
-    md += `## 11. Thu thập chủ động & Địa điểm (Active Capture & Geofence - B30)\n`;
+    md += `## 11. Thu thập chủ động & Địa điểm (Active Capture & Geofence)\n`;
     savedPlaces.forEach(p => {
       md += `- **${p.name}** (Bán kính ${p.radiusMeters}m${p.isCurrentLocation ? ' - Đang ở đây' : ''})\n`;
     });

@@ -32,7 +32,7 @@ export const OnboardingModal: React.FC = () => {
   const { isOnboarded, setIsOnboarded, setProfile, profile, setCurrentTab, addNewBlock } = useApp();
   const [selectedType, setSelectedType] = useState<UserProfileType>(profile.type);
   const [step, setStep] = useState<1 | 2>(1);
-  const [weeklyTopFocus, setWeeklyTopFocus] = useState<string>('Hoàn thành bản nháp MVP v0.7 cho TAIO Time App');
+  const [weeklyTopFocus, setWeeklyTopFocus] = useState<string>('Hoàn thành bản nháp MVP cho TAIO Time App');
 
   if (isOnboarded) return null;
 
@@ -56,8 +56,8 @@ export const OnboardingModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-8 text-white">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-8 text-slate-900">
         
         {/* Header */}
         <div className="text-center mb-6">
@@ -88,7 +88,7 @@ export const OnboardingModal: React.FC = () => {
                     onClick={() => setSelectedType(p.type)}
                     className={`cursor-pointer p-4 rounded-xl border transition-all text-left flex flex-col justify-between ${
                       isSelected
-                        ? 'border-indigo-500 bg-indigo-950/40 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500'
+                        ? 'border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500'
                         : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
@@ -99,7 +99,7 @@ export const OnboardingModal: React.FC = () => {
                         </div>
                         {isSelected && <CheckCircle2 className="w-5 h-5 text-indigo-400" />}
                       </div>
-                      <h4 className="font-semibold text-sm text-white">{p.title}</h4>
+                      <h4 className="font-semibold text-sm text-slate-900">{p.title}</h4>
                       <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
                         {p.description}
                       </p>
@@ -135,7 +135,7 @@ export const OnboardingModal: React.FC = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-base text-white">{currentSelectedProfile.title}</h4>
+                  <h4 className="font-bold text-base text-slate-900">{currentSelectedProfile.title}</h4>
                   <button 
                     onClick={() => setStep(1)} 
                     className="text-xs text-indigo-400 hover:underline"
@@ -213,8 +213,8 @@ export const OnboardingModal: React.FC = () => {
             </div>
 
             {/* Weekly Top Focus Prompt */}
-            <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40">
-              <label className="block text-xs font-semibold text-indigo-300 mb-1.5 flex items-center gap-1.5">
+            <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
+              <label className="block text-xs font-semibold text-indigo-700 mb-1.5 flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5" />
                 <span>Một điều quan trọng nhất bạn muốn hoàn thành tuần này?</span>
               </label>

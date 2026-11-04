@@ -66,9 +66,6 @@ export const CloseDayModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">Đóng ngày làm việc (Close the Day)</h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-semibold">
-                  B25
-                </span>
               </div>
               <p className="text-xs text-slate-500">Quy trình 2 phút • Dời việc có chủ đích • Chuẩn bị ngày mai</p>
             </div>
@@ -102,18 +99,18 @@ export const CloseDayModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Unplanned on goal trade-off notice (PRD B25.2) */}
+          {/* Unplanned on goal trade-off notice (PRD .2) */}
           <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
             <div className="flex items-center gap-1.5 font-bold text-xs text-amber-800">
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Ghi nhận thời gian ngoài kế hoạch (B25.2):</span>
+              <span>Ghi nhận thời gian ngoài kế hoạch (.2):</span>
             </div>
             <p className="text-xs leading-relaxed text-amber-900/90 pl-5">
               Hôm nay có 45 phút việc mục tiêu ngoài kế hoạch; Kênh nội dung AI bị đẩy lùi 45 phút. Đã cân bằng lại kế hoạch.
             </p>
           </div>
 
-          {/* Carry-over (Migration) for uncompleted Daily Card items (PRD B25.3) */}
+          {/* Carry-over (Migration) for uncompleted Daily Card items (PRD .3) */}
           {pendingCardItems.length > 0 && (
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
               <div className="flex items-center justify-between">
@@ -207,7 +204,7 @@ export const CloseDayModal: React.FC = () => {
                 setExportModalOpen(true);
               }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors"
-              title="Xuất snapshot Markdown cho trợ lý AI (B24)"
+              title="Xuất snapshot Markdown cho trợ lý AI"
             >
               <Share2 className="w-3.5 h-3.5 text-blue-600" />
               <span>Xuất AI</span>

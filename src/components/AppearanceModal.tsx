@@ -87,11 +87,11 @@ export const AppearanceModal: React.FC = () => {
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-950/80 border border-orange-500/30 flex items-center justify-center text-orange-400">
+            <div className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-500/30 flex items-center justify-center text-orange-400">
               <Palette className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Cài đặt Giao diện & Nền tảng (B17)</h3>
+              <h3 className="text-sm font-bold text-slate-900">Cài đặt Giao diện & Nền tảng</h3>
               <p className="text-[11px] text-slate-500">Áp dụng tức thì, tự động lưu vào tài khoản</p>
             </div>
           </div>
@@ -116,7 +116,7 @@ export const AppearanceModal: React.FC = () => {
                   onClick={() => setDeviceLook(d.id)}
                   className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                     deviceLook === d.id
-                      ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
+                      ? 'border-[#E0401F] bg-red-50 text-slate-900'
                       : 'border-slate-200 bg-white/60 text-slate-700 hover:border-slate-300'
                   }`}
                 >
@@ -145,7 +145,7 @@ export const AppearanceModal: React.FC = () => {
                   onClick={() => setThemeMode(t.id)}
                   className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                     themeMode === t.id
-                      ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
+                      ? 'border-[#E0401F] bg-red-50 text-slate-900'
                       : 'border-slate-200 bg-white/60 text-slate-500 hover:border-slate-300 hover:text-slate-900'
                   }`}
                 >
@@ -171,7 +171,7 @@ export const AppearanceModal: React.FC = () => {
                     onClick={() => setPalette(p.id)}
                     className={`w-full p-3 rounded-xl border text-left transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       isSelected
-                        ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
+                        ? 'border-[#E0401F] bg-red-50 text-slate-900'
                         : 'border-slate-200 bg-white/60 text-slate-700 hover:border-slate-300'
                     }`}
                   >

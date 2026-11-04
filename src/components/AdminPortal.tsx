@@ -85,8 +85,8 @@ export const AdminPortal: React.FC = () => {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-white">TAIO Admin Back-end</h2>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-900/60 text-rose-300 border border-rose-700/50">
+              <h2 className="text-xl font-bold text-slate-900">TAIO Admin Back-end</h2>
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-700/50">
                 Founder Portal v1.0
               </span>
             </div>
@@ -122,8 +122,8 @@ export const AdminPortal: React.FC = () => {
               activeSubTab === 'c6_ai' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <Bot className="w-3.5 h-3.5 text-indigo-300" />
-            <span>AI Cải tiến (PRD C6)</span>
+            <Bot className="w-3.5 h-3.5 text-indigo-700" />
+            <span>AI Cải tiến</span>
           </button>
           <button
             onClick={() => setActiveSubTab('tone')}
@@ -166,7 +166,7 @@ export const AdminPortal: React.FC = () => {
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 group-hover:text-indigo-300">Onboarding &lt; 60 giây</span>
+                <span className="text-xs text-slate-500 group-hover:text-indigo-700">Onboarding &lt; 60 giây</span>
                 <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-emerald-400 mt-1">92.4%</p>
@@ -195,7 +195,7 @@ export const AdminPortal: React.FC = () => {
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 group-hover:text-indigo-300">Tỷ lệ phản hồi Check-in</span>
+                <span className="text-xs text-slate-500 group-hover:text-indigo-700">Tỷ lệ phản hồi Check-in</span>
                 <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-indigo-400 mt-1">86.7%</p>
@@ -223,7 +223,7 @@ export const AdminPortal: React.FC = () => {
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 group-hover:text-purple-300">Tỷ lệ Đóng ngày</span>
+                <span className="text-xs text-slate-500 group-hover:text-purple-700">Tỷ lệ Đóng ngày</span>
                 <span className="text-[10px] text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-purple-400 mt-1">78.1%</p>
@@ -251,7 +251,7 @@ export const AdminPortal: React.FC = () => {
               title="Bấm để xem danh sách gốc đằng sau con số (WYSIWYG)"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 group-hover:text-amber-300">Gắn với Mục tiêu</span>
+                <span className="text-xs text-slate-500 group-hover:text-amber-700">Gắn với Mục tiêu</span>
                 <span className="text-[10px] text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
               </div>
               <p className="text-2xl font-black text-amber-400 mt-1">91.0%</p>
@@ -302,7 +302,7 @@ export const AdminPortal: React.FC = () => {
                   title={`Bấm để xem danh sách ${item.count} người dùng của hồ sơ này`}
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-700 font-medium group-hover:text-indigo-300 transition-colors">{item.name}</span>
+                    <span className="text-slate-700 font-medium group-hover:text-indigo-700 transition-colors">{item.name}</span>
                     <span className="text-slate-500">{item.count} người ({item.pct}%) ↗</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
@@ -325,17 +325,17 @@ export const AdminPortal: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <span className="text-xs font-bold text-emerald-400 uppercase">Mức 1: Nhẹ nhàng (Gentle)</span>
-                <p className="text-2xl font-bold text-white mt-1">89%</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">89%</p>
                 <p className="text-[11px] text-slate-500 mt-1">Phản hồi tốt nhất ở 3 ngày đầu tiên</p>
               </div>
               <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <span className="text-xs font-bold text-indigo-400 uppercase">Mức 2: Rõ ràng (Clear)</span>
-                <p className="text-2xl font-bold text-white mt-1">84%</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">84%</p>
                 <p className="text-[11px] text-slate-500 mt-1">Ổn định nhất cho người dùng tuần 2 trở đi</p>
               </div>
               <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <span className="text-xs font-bold text-amber-400 uppercase">Mức 3: Dứt khoát (Firm)</span>
-                <p className="text-2xl font-bold text-white mt-1">72%</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">72%</p>
                 <p className="text-[11px] text-slate-500 mt-1">Hiệu quả khi có hard deadline cận kề</p>
               </div>
             </div>
@@ -356,7 +356,7 @@ export const AdminPortal: React.FC = () => {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Tìm theo tên hoặc email..."
-                className="bg-transparent text-sm text-white focus:outline-none w-full"
+                className="bg-transparent text-sm text-slate-900 focus:outline-none w-full"
               />
             </div>
 
@@ -373,7 +373,7 @@ export const AdminPortal: React.FC = () => {
               </select>
 
               <button 
-                onClick={() => alert('Xuất báo cáo CSV thành công (PRD C3)!')}
+                onClick={() => alert('Xuất báo cáo CSV thành công!')}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -400,7 +400,7 @@ export const AdminPortal: React.FC = () => {
                   {filteredUsers.map(u => (
                     <tr key={u.id} className="hover:bg-slate-50/40">
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-white">{u.name}</div>
+                        <div className="font-semibold text-slate-900">{u.name}</div>
                         <div className="text-[11px] text-slate-500">{u.email}</div>
                       </td>
                       <td className="py-3 px-4 capitalize text-slate-600">
@@ -442,17 +442,14 @@ export const AdminPortal: React.FC = () => {
         <div className="space-y-6 animate-in fade-in duration-300">
           
           {/* Top Banner */}
-          <div className="p-5 bg-gradient-to-r from-indigo-950/70 via-gray-900 to-purple-950/60 border border-indigo-500/30 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="p-5 bg-gradient-to-r from-indigo-50 via-white to-purple-50 border border-indigo-500/30 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+              <div className="w-11 h-11 rounded-2xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-700 shrink-0">
                 <Bot className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                   Phân tích Hành vi & Đề xuất Cải tiến AI (Super Admin)
-                  <span className="text-[11px] font-mono bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-                    PRD C6
-                  </span>
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
                   Phát hiện điểm rơi hành vi toàn hệ thống • Đề xuất điều chỉnh mẫu câu và tham số mặc định • Có người duyệt trước khi áp dụng
@@ -468,7 +465,7 @@ export const AdminPortal: React.FC = () => {
           {/* 1. Action Nudge Effectiveness Dashboard */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-lg space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
                 <span>Hiệu quả Nhắc nhở Hành động (Action Nudge Acceptance Rate)</span>
               </h4>
@@ -478,8 +475,8 @@ export const AdminPortal: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
-                  <span className="font-semibold text-purple-300">Ngủ đúng giờ (Sleep Nudge)</span>
-                  <span className="font-mono font-bold text-white">78%</span>
+                  <span className="font-semibold text-purple-700">Ngủ đúng giờ (Sleep Nudge)</span>
+                  <span className="font-mono font-bold text-slate-900">78%</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-purple-500 h-full rounded-full" style={{ width: '78%' }} />
@@ -490,7 +487,7 @@ export const AdminPortal: React.FC = () => {
               <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="font-semibold text-emerald-700">Xuất phát ngay (Leave Now)</span>
-                  <span className="font-mono font-bold text-white">82%</span>
+                  <span className="font-mono font-bold text-slate-900">82%</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-emerald-500 h-full rounded-full" style={{ width: '82%' }} />
@@ -500,8 +497,8 @@ export const AdminPortal: React.FC = () => {
 
               <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
-                  <span className="font-semibold text-indigo-300">Bắt đầu việc sâu (Start Deep)</span>
-                  <span className="font-mono font-bold text-white">89%</span>
+                  <span className="font-semibold text-indigo-700">Bắt đầu việc sâu (Start Deep)</span>
+                  <span className="font-mono font-bold text-slate-900">89%</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-indigo-500 h-full rounded-full" style={{ width: '89%' }} />
@@ -511,8 +508,8 @@ export const AdminPortal: React.FC = () => {
 
               <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
-                  <span className="font-semibold text-amber-300">Đóng ngày (Close Day)</span>
-                  <span className="font-mono font-bold text-white">91%</span>
+                  <span className="font-semibold text-amber-700">Đóng ngày (Close Day)</span>
+                  <span className="font-mono font-bold text-slate-900">91%</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-amber-500 h-full rounded-full" style={{ width: '91%' }} />
@@ -522,8 +519,8 @@ export const AdminPortal: React.FC = () => {
 
               <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
-                  <span className="font-semibold text-cyan-300">Quay lại kế hoạch (Back to Plan)</span>
-                  <span className="font-mono font-bold text-white">74%</span>
+                  <span className="font-semibold text-cyan-700">Quay lại kế hoạch (Back to Plan)</span>
+                  <span className="font-mono font-bold text-slate-900">74%</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-cyan-500 h-full rounded-full" style={{ width: '74%' }} />
@@ -533,8 +530,8 @@ export const AdminPortal: React.FC = () => {
 
               <div className="p-3.5 rounded-xl bg-white border border-slate-200">
                 <div className="flex justify-between items-center text-xs mb-1">
-                  <span className="font-semibold text-rose-300">Nhắc nhở bữa ăn (Meal Nudge)</span>
-                  <span className="font-mono font-bold text-white">86%</span>
+                  <span className="font-semibold text-rose-700">Nhắc nhở bữa ăn (Meal Nudge)</span>
+                  <span className="font-mono font-bold text-slate-900">86%</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
                   <div className="bg-rose-500 h-full rounded-full" style={{ width: '86%' }} />
@@ -548,7 +545,7 @@ export const AdminPortal: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-lg space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-indigo-400" />
                   <span>Danh sách Đề xuất Cải tiến từ AI ({aiSuggestions.length})</span>
                 </h4>
@@ -571,22 +568,22 @@ export const AdminPortal: React.FC = () => {
                   >
                     <div className="space-y-1.5 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-white">{sug.title}</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded uppercase bg-indigo-950 text-indigo-300 border border-indigo-800/40">
+                        <span className="text-xs font-bold text-slate-900">{sug.title}</span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
                           {sug.category}
                         </span>
                         {isAccepted && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                             <Check className="w-3 h-3" /> Đã áp dụng
                           </span>
                         )}
                         {isTesting && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800/40 flex items-center gap-1">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
                             <FlaskConical className="w-3 h-3" /> Đang chạy A/B Test (50% user)
                           </span>
                         )}
                         {isRejected && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-950 text-red-300 border border-red-800/40 flex items-center gap-1">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">
                             <X className="w-3 h-3" /> Đã từ chối
                           </span>
                         )}
@@ -610,7 +607,7 @@ export const AdminPortal: React.FC = () => {
                           </button>
                           <button
                             onClick={() => handleSuggestionAction(sug.id, 'test')}
-                            className="px-3 py-1.5 rounded-lg bg-purple-950/70 hover:bg-purple-900 text-purple-300 border border-purple-800/50 text-xs font-semibold flex items-center gap-1 transition-colors"
+                            className="px-3 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-50 text-purple-700 border border-purple-200 text-xs font-semibold flex items-center gap-1 transition-colors"
                           >
                             <FlaskConical className="w-3.5 h-3.5" /> Chạy A/B Test
                           </button>
@@ -643,7 +640,7 @@ export const AdminPortal: React.FC = () => {
       {activeSubTab === 'tone' && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl space-y-4">
           <div className="border-b border-slate-200 pb-3">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <Sliders className="w-5 h-5 text-indigo-400" />
               <span>Quản lý mẫu câu giọng điệu thích ứng (Adaptive Tone Templates)</span>
             </h3>

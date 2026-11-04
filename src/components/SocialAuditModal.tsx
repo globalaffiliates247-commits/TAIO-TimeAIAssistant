@@ -37,7 +37,7 @@ export const SocialAuditModal: React.FC = () => {
               <Wine className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold">Kiểm toán chi phí giao lưu ngoài giờ (B12)</h3>
+              <h3 className="text-base sm:text-lg font-bold">Kiểm toán chi phí giao lưu ngoài giờ</h3>
               <p className="text-xs text-slate-500">Minh bạch cái giá thực tế của hoạt động buổi tối • Không phán xét, không cấm đoán</p>
             </div>
           </div>
@@ -93,9 +93,9 @@ export const SocialAuditModal: React.FC = () => {
           </div>
 
           {/* Simulation Case: Founder Pilot Trigger */}
-          <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-800/40 space-y-3">
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
+              <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">
                 Tình huống thực tế (Founder Pilot Case):
               </span>
               <span className="text-[11px] text-amber-400">Giao lưu đột xuất lúc 20:00</span>
@@ -130,7 +130,7 @@ export const SocialAuditModal: React.FC = () => {
                     1
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-indigo-300 uppercase">Ưu tiên 1: Công việc bị trễ / dời lại</span>
+                    <span className="text-xs font-bold text-indigo-700 uppercase">Ưu tiên 1: Công việc bị trễ / dời lại</span>
                     <p className="text-xs text-slate-700 mt-1">
                       Sáng nay: Khối tập trung sâu số 1 bắt đầu trễ 50 phút; Báo cáo kế hoạch cho đối tác Minh phải dời sang ngày mai.
                     </p>
@@ -142,7 +142,7 @@ export const SocialAuditModal: React.FC = () => {
                     2
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-purple-300 uppercase">Ưu tiên 2: Mối quan hệ & Cam kết bị ảnh hưởng</span>
+                    <span className="text-xs font-bold text-purple-700 uppercase">Ưu tiên 2: Mối quan hệ & Cam kết bị ảnh hưởng</span>
                     <p className="text-xs text-slate-700 mt-1">
                       Họp đồng bộ sáng cùng đội ngũ phải lùi lại 30 phút; buổi chạy bộ cam kết cùng bạn bị hủy.
                     </p>
@@ -169,7 +169,7 @@ export const SocialAuditModal: React.FC = () => {
                     1
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-rose-300 uppercase">Ưu tiên 1: Sức khỏe & Thể trạng</span>
+                    <span className="text-xs font-bold text-rose-700 uppercase">Ưu tiên 1: Sức khỏe & Thể trạng</span>
                     <p className="text-xs text-slate-700 mt-1">
                       Thời lượng ngủ bị hụt mất 1.5 giờ so với nhịp chuẩn; thể trạng và năng lượng phục hồi cần thêm 4 tiếng nghỉ ngơi.
                     </p>
@@ -181,7 +181,7 @@ export const SocialAuditModal: React.FC = () => {
                     2
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-indigo-300 uppercase">Ưu tiên 2: Công việc bị dời lịch</span>
+                    <span className="text-xs font-bold text-indigo-700 uppercase">Ưu tiên 2: Công việc bị dời lịch</span>
                     <p className="text-xs text-slate-700 mt-1">
                       Khối xử lý hợp đồng quan trọng sáng nay phải chuyển sang buổi chiều; dời lịch họp khách hàng.
                     </p>
@@ -193,7 +193,7 @@ export const SocialAuditModal: React.FC = () => {
                     3
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-purple-300 uppercase">Ưu tiên 3: Cam kết cá nhân</span>
+                    <span className="text-xs font-bold text-purple-700 uppercase">Ưu tiên 3: Cam kết cá nhân</span>
                     <p className="text-xs text-slate-700 mt-1">
                       Các buổi tập thể dục buổi sáng bị hoãn lại.
                     </p>

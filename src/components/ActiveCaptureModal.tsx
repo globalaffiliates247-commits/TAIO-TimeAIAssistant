@@ -50,7 +50,7 @@ export const ActiveCaptureModal: React.FC = () => {
   const [bfGoalId, setBfGoalId] = useState<string>('');
   const [bfOrigin, setBfOrigin] = useState<ItemOrigin>('unplanned_goal');
   const [bfDisplacedBlock, setBfDisplacedBlock] = useState<string>('Quay video chia sẻ #TAIOCLUB');
-  const [bfNote, setBfNote] = useState('Tập trung giải quyết code tính năng B28, B29, B30');
+  const [bfNote, setBfNote] = useState('Tập trung hoàn thiện các tính năng mới');
 
   if (!isActiveCaptureOpen) return null;
 
@@ -100,9 +100,6 @@ export const ActiveCaptureModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Thu thập chủ động & Ghi bù</h2>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                  B30
-                </span>
               </div>
               <p className="text-[11px] text-slate-500">
                 Ghi bù thời gian đã qua • Đoạn thời gian AI đoán sẵn • Địa điểm Geofencing
@@ -200,7 +197,7 @@ export const ActiveCaptureModal: React.FC = () => {
 
               {/* Category */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Nhóm hoạt động (B5)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Nhóm hoạt động</label>
                 <select
                   value={bfCategory}
                   onChange={(e) => setBfCategory(e.target.value as any)}
@@ -219,7 +216,7 @@ export const ActiveCaptureModal: React.FC = () => {
 
               {/* Origin */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Nguồn gốc thời gian (Origin - B25)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Nguồn gốc thời gian (Origin)</label>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <button
                     type="button"

@@ -57,7 +57,7 @@ export const InterruptionModal: React.FC = () => {
   const isCool = palette === 'cool';
   const brandColor = currentPaletteColors.brandAccent;
 
-  // PRD v0.3.9 B5: Situation 1 (Declared in moment) vs Situation 2 (Recalled on review)
+  // : Situation 1 (Declared in moment) vs Situation 2 (Recalled on review)
   const [situation, setSituation] = useState<InterruptionSituation>('moment');
   const [showAllCategories, setShowAllCategories] = useState<boolean>(false);
 
@@ -116,7 +116,7 @@ export const InterruptionModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
       <div className={`w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl shadow-2xl p-5 sm:p-6 transition-colors duration-200 ${
         isCool 
           ? 'bg-white text-slate-800 border border-slate-200' 
@@ -130,11 +130,6 @@ export const InterruptionModal: React.FC = () => {
               <h3 className="text-base font-bold flex items-center gap-1.5">
                 <span>Ghi nhận gián đoạn & việc phát sinh</span>
               </h3>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                isCool ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-red-50 text-[#E0401F] border border-red-200'
-              }`}>
-                PRD v0.3.9 B5
-              </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">Tối ưu thao tác 1 chạm • Mặc định "Để sau" vào Rổ công việc</p>
           </div>
@@ -146,7 +141,7 @@ export const InterruptionModal: React.FC = () => {
           </button>
         </div>
 
-        {/* 1. Situation Segmented Switch (PRD v0.3.9 B5) */}
+        {/* 1. Situation Segmented Switch () */}
         <div className="mb-4 bg-slate-100/80 p-1 rounded-2xl flex border border-slate-200/80">
           <button
             type="button"
@@ -274,7 +269,7 @@ export const InterruptionModal: React.FC = () => {
             </div>
           )}
 
-          {/* 6. "Bạn sẽ...?" Segmented Control (PRD v0.3.9 B5) */}
+          {/* 6. "Bạn sẽ...?" Segmented Control () */}
           {situation === 'moment' && (
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1.5 uppercase tracking-wide flex items-center justify-between">
