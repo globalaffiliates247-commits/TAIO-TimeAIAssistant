@@ -20,7 +20,9 @@ import {
   Sparkles,
   Check,
   Smartphone,
-  Laptop
+  Laptop,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
@@ -43,9 +45,14 @@ export const ProfileModal: React.FC = () => {
     setToneLevel,
     communityConfig,
     setExportModalOpen,
+    resetAllUserData,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'community'>('profile');
+  // B27 v0.3.12: Delete all data confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteServerCopy, setDeleteServerCopy] = useState(false);
 
   if (!isProfileModalOpen) return null;
 
@@ -129,7 +136,7 @@ export const ProfileModal: React.FC = () => {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-6">
           
           {/* TAB 1: HỒ SƠ (PROFILE) */}
           {activeTab === 'profile' && (
@@ -494,6 +501,123 @@ export const ProfileModal: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* B27 v0.3.12: Section "Dữ liệu" — "Xóa toàn bộ dữ liệu…", always the last item on the Me screen */}
+          <div className="pt-5 mt-6 border-t border-slate-200 space-y-3">
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Dữ liệu
+            </h4>
+
+            {!showDeleteConfirm ? (
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-red-50/60 border border-red-200">
+                <div>
+                  <p className="text-xs font-bold text-slate-900">Xóa dữ liệu cá nhân & Đặt lại từ đầu</p>
+                  <p className="text-[11px] text-slate-600">
+                    Xóa toàn bộ dữ liệu trên thiết bị này và quay lại màn hình thiết lập hồ sơ ban đầu.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteConfirm(true);
+                    setDeleteConfirmText('');
+                    setDeleteServerCopy(false);
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-red-300 font-bold text-xs flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Xóa toàn bộ dữ liệu…</span>
+                </button>
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-red-50/70 border border-red-300 space-y-3 animate-in fade-in">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h5 className="text-xs sm:text-sm font-bold text-slate-900">
+                      Xác nhận xóa toàn bộ dữ liệu cá nhân
+                    </h5>
+                    <p className="text-[11px] text-slate-700 mt-1 leading-relaxed">
+                      Các dữ liệu sẽ bị xóa trên thiết bị này: lịch ngày và kết quả công việc, việc chen ngang, Rổ công việc, Danh sách, Ma trận ưu tiên, Thói quen, Thông báo và Cài đặt giao diện. Không thể hoàn tác sau bước này.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Offer Export first */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200">
+                  <span className="text-[11px] font-medium text-slate-700">
+                    Bạn có muốn lưu bản sao Markdown trước khi xóa?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileModalOpen(false);
+                      setExportModalOpen(true);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 text-[11px] font-bold"
+                  >
+                    Xuất dữ liệu trước
+                  </button>
+                </div>
+
+                {/* Optional server deletion checkbox */}
+                <label className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={deleteServerCopy}
+                    onChange={(e) => setDeleteServerCopy(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded text-red-600 focus:ring-0"
+                  />
+                  <div className="text-[11px]">
+                    <span className="font-bold text-slate-900">Xóa luôn bản sao trên máy chủ</span>{' '}
+                    <span className="text-red-600 font-semibold">(không khôi phục được)</span>
+                    <p className="text-slate-500 mt-0.5">
+                      Xóa hoàn toàn dữ liệu tài khoản trên máy chủ và bản sao lưu trong vòng 30 ngày.
+                    </p>
+                  </div>
+                </label>
+
+                {/* Type XÓA to enable */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Nhập chữ <span className="font-mono font-black text-red-600">XÓA</span> để mở khóa nút xác nhận:
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="Gõ XÓA tại đây..."
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 font-semibold focus:outline-none focus:border-red-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-xs font-semibold"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deleteConfirmText.trim().toUpperCase() !== 'XÓA'}
+                    onClick={() => {
+                      resetAllUserData(deleteServerCopy);
+                      setShowDeleteConfirm(false);
+                    }}
+                    className={`px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all ${
+                      deleteConfirmText.trim().toUpperCase() === 'XÓA'
+                        ? 'bg-red-600 hover:bg-red-700 shadow-sm cursor-pointer'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Xác nhận xóa vĩnh viễn
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

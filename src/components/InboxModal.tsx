@@ -117,7 +117,7 @@ export const InboxModal: React.FC = () => {
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 pr-1 space-y-4">
+        <div className="overflow-y-auto overscroll-contain flex-1 pr-1 space-y-4">
           {activeTab === 'capture' ? (
             <form onSubmit={handleCaptureSubmit} className="space-y-3.5">
               <div>

@@ -474,7 +474,7 @@ export const DrilldownSheet: React.FC = () => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto pr-1 flex-1 space-y-4">
+        <div className="overflow-y-auto overscroll-contain pr-1 flex-1 space-y-4">
           {renderContent()}
         </div>
 

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TAIO Time App | v0.3.9',
+  title: 'TAIO Time App',
   description: 'Biết ngay bạn đang làm gì, vì mục tiêu nào, và còn bao nhiêu phút. Tối ưu cho người bận rộn và hay bị gián đoạn.',
   manifest: '/manifest.json',
   appleWebApp: {

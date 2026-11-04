@@ -35,15 +35,30 @@ const GAP_LABELS: { key: GapLabel; label: string }[] = [
   { key: 'other', label: 'Khác' },
 ];
 
-const CATEGORY_COLORS: Record<TimeLedgerCategory, { bg: string; text: string; labelVi: string }> = {
-  goal_work: { bg: 'bg-[#E0401F]', text: 'text-orange-400', labelVi: 'Việc mục tiêu' },
-  meeting: { bg: 'bg-purple-500', text: 'text-purple-400', labelVi: 'Hội họp' },
-  interruption: { bg: 'bg-amber-500', text: 'text-amber-400', labelVi: 'Việc chen ngang' },
-  distraction: { bg: 'bg-rose-500', text: 'text-rose-400', labelVi: 'Xao nhãng' },
-  personal: { bg: 'bg-emerald-500', text: 'text-emerald-400', labelVi: 'Cá nhân & Nghỉ ngơi' },
-  sleep: { bg: 'bg-blue-600', text: 'text-blue-400', labelVi: 'Giấc ngủ' },
-  other: { bg: 'bg-slate-500', text: 'text-slate-500', labelVi: 'Khác' },
+const CATEGORY_COLORS: Record<TimeLedgerCategory, { bg: string; hex: string; lightHex: string; text: string; labelVi: string }> = {
+  sleep: { bg: 'bg-blue-600', hex: '#2563EB', lightHex: '#60A5FA', text: 'text-blue-700', labelVi: 'Giấc ngủ' },
+  goal_work: { bg: 'bg-[#E0401F]', hex: '#E0401F', lightHex: '#FB7185', text: 'text-red-700', labelVi: 'Việc mục tiêu' },
+  meeting: { bg: 'bg-purple-600', hex: '#9333EA', lightHex: '#C084FC', text: 'text-purple-700', labelVi: 'Hội họp' },
+  planning: { bg: 'bg-amber-400', hex: '#FBBF24', lightHex: '#FDE68A', text: 'text-amber-700', labelVi: 'Lên kế hoạch' },
+  personal: { bg: 'bg-emerald-600', hex: '#059669', lightHex: '#34D399', text: 'text-emerald-700', labelVi: 'Cá nhân & Nghỉ ngơi' },
+  interruption: { bg: 'bg-amber-500', hex: '#F59E0B', lightHex: '#FCD34D', text: 'text-amber-700', labelVi: 'Việc chen ngang' },
+  distraction: { bg: 'bg-rose-500', hex: '#F43F5E', lightHex: '#FDA4AF', text: 'text-rose-700', labelVi: 'Xao nhãng' },
+  unconfirmed: { bg: 'bg-slate-400', hex: '#94A3B8', lightHex: '#CBD5E1', text: 'text-slate-700', labelVi: 'Chưa xác nhận / Chưa khai báo' },
+  not_yet: { bg: 'bg-slate-200', hex: '#E2E8F0', lightHex: '#F1F5F9', text: 'text-slate-500', labelVi: 'Chưa diễn ra (còn lại trong ngày)' },
+  other: { bg: 'bg-slate-500', hex: '#64748B', lightHex: '#94A3B8', text: 'text-slate-600', labelVi: 'Khác' },
 };
+
+const DONUT_GROUP_ORDER: TimeLedgerCategory[] = [
+  'sleep',
+  'goal_work',
+  'meeting',
+  'planning',
+  'personal',
+  'interruption',
+  'distraction',
+  'unconfirmed',
+  'not_yet',
+];
 
 export const AchievementsTab: React.FC = () => {
   const { 
@@ -58,11 +73,44 @@ export const AchievementsTab: React.FC = () => {
     setBlocks,
     openDrilldown,
     timeLedger,
-    setMethodLibraryOpen
+    setMethodLibraryOpen,
+    setIsActiveCaptureOpen
   } = useApp();
 
   // B21: Three views in segmented control: 'time' | 'tasks' | 'projects' + 'habits'
   const [viewMode, setViewMode] = useState<'time' | 'tasks' | 'projects' | 'habits'>('time');
+  // B21 v0.3.15: Donut detail level ('groups' = 1 ring default, 'detail' = 2-ring sunburst), remembered on device
+  const [donutMode, setDonutMode] = useState<'groups' | 'detail'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('taio_b21_donut_mode');
+      if (saved === 'groups' || saved === 'detail') return saved;
+    }
+    return 'groups';
+  });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [selectedTimelineSeg, setSelectedTimelineSeg] = useState<{ title: string; time: string; kind: string } | null>(null);
+
+  const switchDonutMode = (mode: 'groups' | 'detail') => {
+    setDonutMode(mode);
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('taio_b21_donut_mode', mode);
+      }
+    } catch {}
+    if (mode === 'detail') {
+      // In Detail mode, groups with several items are open by default
+      const autoOpen: Record<string, boolean> = {};
+      DONUT_GROUP_ORDER.forEach(cat => {
+        const count = (timeLedger || []).filter(s => s.category === cat).length;
+        if (count > 1) autoOpen[cat] = true;
+      });
+      setExpandedGroups(autoOpen);
+    }
+  };
+
+  const toggleGroupExpand = (cat: string) => {
+    setExpandedGroups(prev => ({ ...prev, [cat]: !prev[cat] }));
+  };
 
   const completedBlocks = blocks.filter(b => b.status === 'done');
   const waitingBlocks = blocks.filter(b => b.status === 'unconfirmed' || b.status === 'partly_done');
@@ -87,10 +135,13 @@ export const AchievementsTab: React.FC = () => {
   const categoryTotals: Record<TimeLedgerCategory, number> = {
     goal_work: 0,
     meeting: 0,
+    planning: 0,
     interruption: 0,
     distraction: 0,
     personal: 0,
     sleep: 0,
+    unconfirmed: 0,
+    not_yet: 0,
     other: 0,
   };
 
@@ -98,9 +149,10 @@ export const AchievementsTab: React.FC = () => {
     categoryTotals[s.category] = (categoryTotals[s.category] || 0) + s.durationMins;
   });
 
-  const wakingMinutes = 1440 - (categoryTotals.sleep || 420);
-  const goalWorkRatio = wakingMinutes > 0 ? Math.round(((categoryTotals.goal_work || 285) / wakingMinutes) * 100) : 0;
-  const distractionMins = categoryTotals.distraction || 45;
+  const wakingMinutes = 1440 - (categoryTotals.sleep || 510);
+  const goalWorkRatio = wakingMinutes > 0 ? Math.round(((categoryTotals.goal_work || 240) / wakingMinutes) * 100) : 0;
+  const distractionMins = categoryTotals.distraction || 30;
+  const unconfirmedMins = categoryTotals.unconfirmed || 45;
 
   // Task Efficiency metrics (Lean / Kanban: Flow Efficiency = Touch Time / Cycle Time)
   const totalTouchTime = completedBlocks.reduce((acc, b) => acc + (b.touchTimeMinutes || 60), 0);
@@ -200,62 +252,331 @@ export const AchievementsTab: React.FC = () => {
         </div>
       </div>
 
-      {/* VIEW 1: TIME (The 24-Hour Ledger - Peter Drucker Model B1b & B21) */}
+      {/* VIEW 1: TIME (B21 v0.3.15: 24-Hour Donut for Actual Overview + Two Timelines Plan vs Actual) */}
       {viewMode === 'time' && (
         <div className="space-y-6 animate-in fade-in duration-200">
           
-          {/* 1. 24-Hour Continuous Visual Ledger Bar */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          {/* 1. 24-Hour Donut (Actual only, 100% = 24h) with Groups / Detail Sunburst Switch */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-orange-400" />
-                  <span>Sổ cái thời gian 24 giờ liên tục (The 24-Hour Time Ledger)</span>
+                  <Clock className="w-4 h-4 text-[#E0401F]" />
+                  <span>Tổng quan 24 giờ thực tế (100% = 24 giờ)</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Theo Peter Drucker (1967): Mọi phút trong ngày đều thuộc chính xác 1 danh mục, không thể xóa bỏ hay vay mượn.
+                  Nhóm nào chiếm phần lớn trong 24 giờ của bạn • Bấm vào lát cắt hoặc dòng chú giải để xem từng việc
                 </p>
               </div>
-              <span className="text-xs font-mono text-slate-500">Tổng 1.440 phút (24h)</span>
+
+              {/* Two icon buttons next to donut: Nhóm lớn (Groups) / Chi tiết (Detail 2-ring sunburst) */}
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => switchDonutMode('groups')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    donutMode === 'groups'
+                      ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="Một vòng tròn chỉ hiển thị các nhóm lớn"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 text-[#E0401F]" />
+                  <span>Nhóm lớn</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchDonutMode('detail')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    donutMode === 'detail'
+                      ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="Hai vòng đồng tâm (Sunburst): vòng trong là nhóm lớn, vòng ngoài là các việc thuộc nhóm đó"
+                >
+                  <Layers className="w-3.5 h-3.5 text-[#E0401F]" />
+                  <span>Chi tiết</span>
+                </button>
+              </div>
             </div>
 
-            {/* Visual 24-Hour Colored Segment Bar */}
-            <div className="w-full h-8 rounded-2xl overflow-hidden flex bg-slate-100 border border-slate-200 shadow-inner">
-              {ledgerSegments.map((segment) => {
-                const widthPercent = (segment.durationMins / 1440) * 100;
-                const col = CATEGORY_COLORS[segment.category] || CATEGORY_COLORS.other;
-                return (
-                  <div
-                    key={segment.id}
-                    className={`${col.bg} h-full relative group transition-all hover:opacity-90`}
-                    style={{ width: `${Math.max(0.5, widthPercent)}%` }}
-                    title={`${segment.label} (${segment.start} - ${segment.end}): ${segment.durationMins} phút`}
-                  />
-                );
-              })}
-            </div>
+            {/* Donut SVG + Interactive Legend */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              {/* SVG Donut / Sunburst */}
+              <div className="md:col-span-5 flex flex-col items-center justify-center">
+                {(() => {
+                  const innerR = 56;
+                  const innerC = 2 * Math.PI * innerR;
+                  const outerR = 78;
+                  const outerC = 2 * Math.PI * outerR;
+                  let accGroupMins = 0;
 
-            {/* Category Legend & Minutes Breakdown */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 pt-2">
-              {Object.entries(CATEGORY_COLORS).map(([catKey, col]) => {
-                const mins = categoryTotals[catKey as TimeLedgerCategory] || 0;
-                const hrs = (mins / 60).toFixed(1);
-                return (
-                  <div key={catKey} className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between shadow-xs">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-2.5 h-2.5 rounded-full ${col.bg} shrink-0`} />
-                      <span className="text-[11px] font-semibold text-slate-700 truncate">{col.labelVi}</span>
+                  const groupSlices = DONUT_GROUP_ORDER.map(cat => {
+                    const mins = categoryTotals[cat] || 0;
+                    const startFraction = accGroupMins / 1440;
+                    const sliceFraction = mins / 1440;
+                    accGroupMins += mins;
+                    return {
+                      cat,
+                      mins,
+                      startFraction,
+                      sliceFraction,
+                      col: CATEGORY_COLORS[cat],
+                      items: ledgerSegments.filter(s => s.category === cat),
+                    };
+                  }).filter(g => g.mins > 0);
+
+                  return (
+                    <div className="relative w-56 h-56 flex items-center justify-center">
+                      <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
+                        {/* Inner Ring: Major Groups */}
+                        {groupSlices.map((g) => {
+                          const len = g.sliceFraction * innerC;
+                          const offset = -g.startFraction * innerC;
+                          return (
+                            <circle
+                              key={g.cat}
+                              cx="100"
+                              cy="100"
+                              r={innerR}
+                              fill="none"
+                              stroke={g.col.hex}
+                              strokeWidth={donutMode === 'detail' ? 22 : 28}
+                              strokeDasharray={`${Math.max(0, len - 1.5)} ${innerC}`}
+                              strokeDashoffset={offset}
+                              className="cursor-pointer transition-opacity hover:opacity-85"
+                              onClick={() => toggleGroupExpand(g.cat)}
+                            >
+                              <title>{`${g.col.labelVi}: ${g.mins} phút (${Math.round(g.sliceFraction * 100)}%)`}</title>
+                            </circle>
+                          );
+                        })}
+
+                        {/* Outer Ring (only in Detail / Sunburst mode): Items right next to their group */}
+                        {donutMode === 'detail' && groupSlices.map((g) => {
+                          let itemAccMins = g.startFraction * 1440;
+                          return g.items.map((item, idx) => {
+                            const itemFrac = item.durationMins / 1440;
+                            const itemStartFrac = itemAccMins / 1440;
+                            itemAccMins += item.durationMins;
+                            const len = itemFrac * outerC;
+                            const offset = -itemStartFrac * outerC;
+                            return (
+                              <circle
+                                key={item.id}
+                                cx="100"
+                                cy="100"
+                                r={outerR}
+                                fill="none"
+                                stroke={idx % 2 === 0 ? g.col.lightHex : g.col.hex}
+                                strokeOpacity={idx % 2 === 0 ? 0.9 : 0.65}
+                                strokeWidth="16"
+                                strokeDasharray={`${Math.max(0, len - 1.5)} ${outerC}`}
+                                strokeDashoffset={offset}
+                                className="cursor-pointer transition-opacity hover:opacity-100"
+                                onClick={() => toggleGroupExpand(g.cat)}
+                              >
+                                <title>{`${item.label} (${item.start}–${item.end}): ${item.durationMins}p`}</title>
+                              </circle>
+                            );
+                          });
+                        })}
+                      </svg>
+
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                        <span className="text-xl font-mono font-black text-slate-900">24 giờ</span>
+                        <span className="text-[11px] font-semibold text-slate-500">1.440 phút</span>
+                        <span className="text-[10px] text-[#E0401F] font-bold mt-0.5">
+                          {donutMode === 'groups' ? '1 vòng • Nhóm lớn' : '2 vòng • Chi tiết'}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 mt-1">
-                      {mins}p <span className="text-[10px] text-slate-500 font-normal">({hrs}h)</span>
-                    </p>
+                  );
+                })()}
+              </div>
+
+              {/* Legend under/beside the donut: one row per group with duration & share, tap to expand items */}
+              <div className="md:col-span-7 space-y-1.5">
+                {DONUT_GROUP_ORDER.map(cat => {
+                  const mins = categoryTotals[cat] || 0;
+                  if (mins <= 0) return null;
+                  const col = CATEGORY_COLORS[cat];
+                  const hrs = (mins / 60).toFixed(1);
+                  const pct = Math.round((mins / 1440) * 100);
+                  const groupItems = ledgerSegments.filter(s => s.category === cat);
+                  const isOpen = !!expandedGroups[cat];
+
+                  return (
+                    <div key={cat} className="rounded-2xl border border-slate-200 bg-slate-50/70 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => toggleGroupExpand(cat)}
+                        className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-100/80 transition-colors"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span
+                            className="w-3 h-3 rounded-full shrink-0"
+                            style={{ backgroundColor: col.hex }}
+                          />
+                          <span className="text-xs font-bold text-slate-800 truncate">{col.labelVi}</span>
+                          <span className="text-[10px] text-slate-400">({groupItems.length} mục)</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 text-xs">
+                          <span className="font-mono font-bold text-slate-900">
+                            {mins}p <span className="text-slate-500 font-normal">({hrs}h)</span>
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-bold text-slate-700 min-w-[42px] text-center">
+                            {pct}%
+                          </span>
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-3.5 pb-2.5 pt-1 bg-white border-t border-slate-100 space-y-1">
+                          {groupItems.map(item => (
+                            <div
+                              key={item.id}
+                              onClick={() => setIsActiveCaptureOpen(true)}
+                              className="flex items-center justify-between text-[11px] py-1 px-2 rounded-lg hover:bg-slate-50 cursor-pointer"
+                            >
+                              <span className="text-slate-700 font-medium truncate">
+                                <strong className="font-mono text-slate-500">{item.start}–{item.end}</strong> • {item.label}
+                              </span>
+                              <span className="font-mono font-semibold text-slate-700 shrink-0 ml-2">
+                                {item.durationMins}p
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-500 italic pt-1 border-t border-slate-100">
+              Lưu ý: Các khối không phải nhiệm vụ (giấc ngủ, cá nhân, hội họp) được tính theo lịch cho đến khi bạn ghi bù thực tế.
+            </p>
+
+            {/* 2. Two Timeline Bars under the Donut, ALWAYS VISIBLE: "Kế hoạch" above "Thực tế" on same 0-24h axis with Now line */}
+            <div className="pt-3 border-t border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    So sánh Kế hoạch & Thực tế trên cùng trục 0–24h
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Đọc từ trên xuống dưới để thấy ngay khối nào bị dời, co lại hoặc bị việc khác chiếm chỗ • Chạm vào một đoạn để xem chi tiết
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsActiveCaptureOpen(true)}
+                  className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold shrink-0"
+                >
+                  + Ghi bù
+                </button>
+              </div>
+
+              {/* Hour axis marks 0h -> 24h */}
+              <div className="flex justify-between text-[10px] font-mono text-slate-400 px-0.5">
+                <span>00:00</span>
+                <span>06:00</span>
+                <span>12:00</span>
+                <span>18:00</span>
+                <span>24:00</span>
+              </div>
+
+              {/* Bar 1: Kế hoạch (Plan) */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-slate-700">Kế hoạch (Plan)</span>
+                  <span className="text-slate-400">Lịch ngày đã định</span>
+                </div>
+                <div className="w-full h-7 rounded-xl overflow-hidden flex bg-slate-100 border border-slate-200">
+                  {[
+                    { start: '00:00', end: '07:00', mins: 420, cat: 'sleep' as TimeLedgerCategory, title: 'Giấc ngủ đêm' },
+                    { start: '07:00', end: '08:30', mins: 90, cat: 'personal' as TimeLedgerCategory, title: 'Ăn sáng & Gia đình' },
+                    { start: '08:30', end: '09:00', mins: 30, cat: 'planning' as TimeLedgerCategory, title: 'Lên kế hoạch ngày' },
+                    { start: '09:00', end: '10:30', mins: 90, cat: 'goal_work' as TimeLedgerCategory, title: 'Khối việc sâu 1: Thiết kế Interruption Card' },
+                    { start: '10:30', end: '11:45', mins: 75, cat: 'meeting' as TimeLedgerCategory, title: 'Họp rà soát tiến độ tuần' },
+                    { start: '11:45', end: '13:30', mins: 105, cat: 'personal' as TimeLedgerCategory, title: 'Ăn trưa & Nghỉ trưa' },
+                    { start: '13:30', end: '15:30', mins: 120, cat: 'goal_work' as TimeLedgerCategory, title: 'Khối việc sâu 2: Xây dựng màn hình Now' },
+                    { start: '15:30', end: '16:30', mins: 60, cat: 'interruption' as TimeLedgerCategory, title: 'Quỹ dự phòng việc phát sinh' },
+                    { start: '16:30', end: '18:00', mins: 90, cat: 'goal_work' as TimeLedgerCategory, title: 'Khối việc sâu 3: Quay video #TAIOCLUB' },
+                    { start: '18:00', end: '22:30', mins: 270, cat: 'personal' as TimeLedgerCategory, title: 'Thể thao, cơm tối & Nghỉ ngơi' },
+                    { start: '22:30', end: '24:00', mins: 90, cat: 'sleep' as TimeLedgerCategory, title: 'Giấc ngủ đêm' },
+                  ].map((seg, i) => {
+                    const col = CATEGORY_COLORS[seg.cat];
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => setSelectedTimelineSeg({ title: seg.title, time: `${seg.start} – ${seg.end} (${seg.mins}p)`, kind: 'Kế hoạch' })}
+                        style={{ width: `${(seg.mins / 1440) * 100}%`, backgroundColor: col.hex }}
+                        className="h-full border-r border-white/40 cursor-pointer hover:opacity-85 transition-opacity"
+                        title={`[Kế hoạch] ${seg.start}–${seg.end}: ${seg.title}`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bar 2: Thực tế (Actual) with "Now" vertical marker line */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-slate-900">Thực tế (Actual)</span>
+                  <span className="text-[#E0401F] font-semibold">Vạch đỏ = Bây giờ (17:45)</span>
+                </div>
+                <div className="relative w-full h-7 rounded-xl overflow-hidden flex bg-slate-100 border border-slate-200">
+                  {ledgerSegments.map((segment) => {
+                    const widthPercent = (segment.durationMins / 1440) * 100;
+                    const col = CATEGORY_COLORS[segment.category] || CATEGORY_COLORS.other;
+                    return (
+                      <div
+                        key={segment.id}
+                        onClick={() => setSelectedTimelineSeg({
+                          title: segment.label,
+                          time: `${segment.start} – ${segment.end} (${segment.durationMins}p)`,
+                          kind: `Thực tế • ${col.labelVi}`,
+                        })}
+                        style={{ width: `${Math.max(0.5, widthPercent)}%`, backgroundColor: col.hex }}
+                        className="h-full border-r border-white/40 cursor-pointer hover:opacity-85 transition-opacity"
+                        title={`[Thực tế] ${segment.start}–${segment.end}: ${segment.label} (${segment.durationMins}p)`}
+                      />
+                    );
+                  })}
+
+                  {/* "Now" line on Actual bar (at 17:45 = 1065 / 1440 = 73.95%) */}
+                  <div
+                    style={{ left: '74%' }}
+                    className="absolute top-0 bottom-0 w-0.5 bg-[#E0401F] ring-2 ring-white z-10 pointer-events-none"
+                    title="Bây giờ"
+                  />
+                </div>
+              </div>
+
+              {/* Tapped segment detail pill */}
+              {selectedTimelineSeg && (
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs animate-in fade-in">
+                  <div>
+                    <span className="font-bold text-[#E0401F]">{selectedTimelineSeg.kind}: </span>
+                    <span className="font-semibold text-slate-900">{selectedTimelineSeg.title}</span>
+                    <span className="text-slate-500 font-mono ml-2">({selectedTimelineSeg.time})</span>
                   </div>
-                );
-              })}
+                  <button
+                    type="button"
+                    onClick={() => setIsActiveCaptureOpen(true)}
+                    className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-800 font-semibold text-[11px] shrink-0"
+                  >
+                    Chỉnh / Ghi bù
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* 2. Key Ledger Figures: Waking Goal Share & Distraction Tracker */}
+          {/* 2. Key Ledger Figures (computed from the same Actual model so numbers always match the chart) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             
             <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
@@ -263,51 +584,52 @@ export const AchievementsTab: React.FC = () => {
                 Tỷ lệ giờ thức cho mục tiêu
               </span>
               <div className="py-2 flex items-baseline gap-2">
-                <span className="text-4xl font-mono font-extrabold text-orange-400">
+                <span className="text-4xl font-mono font-extrabold text-[#E0401F]">
                   {goalWorkRatio}%
                 </span>
                 <span className="text-xs text-slate-500 font-medium">của giờ thức</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
-                <div className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full" style={{ width: `${goalWorkRatio}%` }} />
+                <div className="h-full bg-[#E0401F] rounded-full" style={{ width: `${goalWorkRatio}%` }} />
               </div>
               <p className="text-[11px] text-slate-500 mt-2">
-                Đã dùng {categoryTotals.goal_work || 285}p trên tổng {wakingMinutes}p thức.
+                Đã dùng {categoryTotals.goal_work || 240}p việc mục tiêu trên tổng {wakingMinutes}p thức.
               </p>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Xao nhãng sau timebox (Distraction)
+                Xao nhãng sau timebox
               </span>
               <div className="py-2 flex items-baseline gap-2">
-                <span className="text-4xl font-mono font-extrabold text-rose-400">
+                <span className="text-4xl font-mono font-extrabold text-rose-600">
                   {distractionMins}
                 </span>
-                <span className="text-xs text-slate-500 font-medium">phút chưa khai báo</span>
+                <span className="text-xs text-slate-500 font-medium">phút</span>
               </div>
               <p className="text-xs text-slate-600">
-                Phát sinh khi timebox kết thúc quá vùng đệm 5 phút mà chưa tuyên bố việc tiếp theo.
+                Phát sinh khi timebox kết thúc quá vùng đệm 5 phút mà chưa khai báo việc tiếp theo.
               </p>
-              <span className="text-[11px] text-orange-400 mt-2 cursor-pointer hover:underline" onClick={() => setViewMode('tasks')}>
+              <span className="text-[11px] text-[#E0401F] font-semibold mt-2 cursor-pointer hover:underline" onClick={() => setCloseDayModalOpen(true)}>
                 Có thể gán nhãn lại trong Đóng ngày ↗
               </span>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Xu hướng so với 7 ngày trước
+                Chưa xác nhận / Chưa khai báo
               </span>
-              <div className="py-2 flex items-center gap-2">
-                <TrendingUp className="w-6 h-6 text-emerald-400" />
-                <span className="text-2xl font-bold text-emerald-400">+18%</span>
-                <span className="text-xs text-slate-500">thời gian việc sâu</span>
+              <div className="py-2 flex items-baseline gap-2">
+                <span className="text-4xl font-mono font-extrabold text-slate-700">
+                  {unconfirmedMins}
+                </span>
+                <span className="text-xs text-slate-500 font-medium">phút</span>
               </div>
               <p className="text-xs text-slate-600">
-                Trung bình việc sâu tuần này đạt 165p/ngày (so với 140p tuần trước).
+                Các khung giờ đã qua nhưng chưa xác nhận hoàn thành hoặc chưa ghi bù.
               </p>
-              <span className="text-[11px] text-slate-500 mt-2">
-                Quỹ gián đoạn sử dụng ở mức lành mạnh (68%).
+              <span className="text-[11px] text-[#E0401F] font-semibold mt-2 cursor-pointer hover:underline" onClick={() => setIsActiveCaptureOpen(true)}>
+                Mở Ghi bù thời gian ↗
               </span>
             </div>
 

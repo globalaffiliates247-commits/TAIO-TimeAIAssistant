@@ -459,16 +459,108 @@ export const IMPORTANT_NOT_URGENT_BACKLOG = [
 ];
 
 // B14: Action Nudges (PRD v0.9 & v0.11)
+// B14 v0.3.10 & v0.3.11: Action Nudges with active windows (never shown outside window)
 export const INITIAL_ACTION_NUDGES: ActionNudge[] = [
+  {
+    id: 'nudge-morning-sleep-cost',
+    type: 'sleep_next_day',
+    context: 'Đêm qua đã qua mốc nghỉ ngơi (22:30). Đêm qua bạn ngủ lúc mấy giờ?',
+    ctaText: 'Ghi nhận giờ ngủ',
+    repeatCount: 1,
+    maxRepeats: 1,
+    isDismissed: false,
+    timeShown: '08:00',
+    windowStartHour: 5,
+    windowEndHour: 11,
+    status: 'active',
+  },
+  {
+    id: 'nudge-deep-work',
+    type: 'start_deep',
+    context: 'Đã đến khung việc sâu theo kế hoạch. Bắt đầu tập trung cho mục tiêu chính ngay?',
+    ctaText: 'Bắt đầu khối sâu',
+    repeatCount: 1,
+    maxRepeats: 4,
+    isDismissed: false,
+    timeShown: '14:00',
+    windowStartHour: 11,
+    windowEndHour: 18,
+    status: 'active',
+  },
+  {
+    id: 'nudge-close-day',
+    type: 'close_day',
+    context: 'Sắp kết thúc ngày làm việc. Dành 2 phút đóng ngày và chọn việc số 1 cho ngày mai?',
+    ctaText: 'Đóng ngày (2 phút)',
+    repeatCount: 1,
+    maxRepeats: 3,
+    isDismissed: false,
+    timeShown: '20:30',
+    windowStartHour: 18,
+    windowEndHour: 22,
+    status: 'active',
+  },
   {
     id: 'nudge-1',
     type: 'sleep',
-    context: 'Hiện là 23:15, đã qua mốc nghỉ ngơi (22:30). Mốc kế tiếp: Giấc ngủ phục hồi.',
+    context: 'Đã qua mốc nghỉ ngơi (22:30). Mốc kế tiếp: Giấc ngủ phục hồi.',
     ctaText: 'Đi ngủ ngay',
     repeatCount: 1,
     maxRepeats: 4,
     isDismissed: false,
-    timeShown: '23:15',
+    timeShown: '22:30',
+    windowStartHour: 22,
+    windowEndHour: 5,
+    status: 'active',
+  },
+];
+
+// B14 v0.3.11: Bell icon dropdown — 5 latest notifications
+export const INITIAL_NOTIFICATIONS: import('../types').AppNotificationItem[] = [
+  {
+    id: 'notif-1',
+    kind: 'nudge',
+    title: 'Đến giờ bắt đầu khối việc sâu: Xây dựng màn hình Now & Đồng hồ vòng tròn',
+    time: 'Vừa xong',
+    ctaLabel: 'Bắt đầu ngay',
+    read: false,
+    targetAction: 'start_deep',
+  },
+  {
+    id: 'notif-2',
+    kind: 'question',
+    title: '3 việc quan trọng nhất bạn cần làm hôm nay là gì?',
+    time: '30 phút trước',
+    ctaLabel: 'Xem câu trả lời',
+    read: false,
+    targetAction: 'open_questions',
+  },
+  {
+    id: 'notif-3',
+    kind: 'checkin',
+    title: 'Hết giờ khối 09:00–10:30: Thiết kế luồng "Có việc đột xuất" — Việc này thế nào rồi?',
+    time: '1 giờ trước',
+    ctaLabel: 'Xác nhận ngay',
+    read: false,
+    targetAction: 'open_checkin',
+  },
+  {
+    id: 'notif-4',
+    kind: 'question',
+    title: 'Liệu mình có đang bỏ sót ý tưởng nào trong rổ việc không?',
+    time: '3 giờ trước',
+    ctaLabel: 'Mở Thẻ nhắc việc',
+    read: true,
+    targetAction: 'open_swipe',
+  },
+  {
+    id: 'notif-5',
+    kind: 'nudge',
+    title: 'Đêm qua bạn ngủ lúc mấy giờ? (Tính chi phí ngày hôm sau)',
+    time: 'Sáng nay, 08:15',
+    ctaLabel: 'Ghi nhận',
+    read: true,
+    targetAction: 'sleep',
   },
 ];
 
@@ -685,23 +777,21 @@ export const INITIAL_INBOX: import('../types').InboxItem[] = [
 
 // B1b & B21: 24-Hour Time Ledger Data
 export const INITIAL_TIME_LEDGER: import('../types').TimeLedgerSegment[] = [
-  { id: 'tl-1', start: '00:00', end: '07:00', durationMins: 420, category: 'sleep', label: 'Giấc ngủ phục hồi' },
+  { id: 'tl-1', start: '00:00', end: '07:00', durationMins: 420, category: 'sleep', label: 'Giấc ngủ đêm qua (00:00 - 07:00)' },
   { id: 'tl-2', start: '07:00', end: '08:30', durationMins: 90, category: 'personal', label: 'Ăn sáng, gia đình & Di chuyển' },
-  { id: 'tl-3', start: '08:30', end: '09:00', durationMins: 30, category: 'personal', label: 'Lên kế hoạch ngày (Ritual)' },
+  { id: 'tl-3', start: '08:30', end: '09:00', durationMins: 30, category: 'planning', label: 'Lên kế hoạch ngày & Thẻ ngày' },
   { id: 'tl-4', start: '09:00', end: '10:30', durationMins: 90, category: 'goal_work', label: 'Thiết kế luồng Interruption Card', linkedTaskTitle: 'Thiết kế luồng "Có việc đột xuất"' },
   { id: 'tl-5', start: '10:30', end: '10:45', durationMins: 15, category: 'personal', label: 'Nghỉ ngắn & Thư giãn mắt' },
   { id: 'tl-6', start: '10:45', end: '11:45', durationMins: 60, category: 'meeting', label: 'Họp rà soát tiến độ tuần', linkedTaskTitle: 'Họp rà soát tiến độ' },
   { id: 'tl-7', start: '11:45', end: '13:00', durationMins: 75, category: 'personal', label: 'Ăn trưa & Nghỉ trưa' },
-  { id: 'tl-8', start: '13:00', end: '14:00', durationMins: 60, category: 'interruption', label: 'Xử lý hỗ trợ đối tác đột xuất' },
+  { id: 'tl-8', start: '13:00', end: '13:45', durationMins: 45, category: 'interruption', label: 'Xử lý hỗ trợ đối tác đột xuất' },
+  { id: 'tl-8b', start: '13:45', end: '14:00', durationMins: 15, category: 'interruption', label: 'Cuộc gọi khách hàng phát sinh' },
   { id: 'tl-9', start: '14:00', end: '15:30', durationMins: 90, category: 'goal_work', label: 'Xây dựng màn hình Now & Timer', linkedTaskTitle: 'Xây dựng màn hình Now' },
-  { id: 'tl-10', start: '15:30', end: '15:45', durationMins: 15, category: 'distraction', label: 'Xao nhãng sau timebox (quá 5p grace)' },
-  { id: 'tl-11', start: '15:45', end: '16:30', durationMins: 45, category: 'interruption', label: 'Quỹ dự phòng việc phát sinh' },
+  { id: 'tl-10', start: '15:30', end: '16:00', durationMins: 30, category: 'distraction', label: 'Lướt điện thoại sau timebox (quá 5p grace)' },
+  { id: 'tl-11', start: '16:00', end: '16:45', durationMins: 45, category: 'unconfirmed', label: 'Khung 16:00 - 16:45 chưa xác nhận hoặc chưa khai báo' },
   { id: 'tl-12', start: '16:45', end: '17:45', durationMins: 60, category: 'goal_work', label: 'Quay video chia sẻ #TAIOCLUB', linkedTaskTitle: 'Quay video chia sẻ #TAIOCLUB' },
-  { id: 'tl-13', start: '17:45', end: '19:00', durationMins: 75, category: 'personal', label: 'Chạy bộ & Di chuyển về nhà' },
-  { id: 'tl-14', start: '19:00', end: '20:30', durationMins: 90, category: 'personal', label: 'Cơm tối cùng gia đình' },
-  { id: 'tl-15', start: '20:30', end: '21:30', durationMins: 60, category: 'personal', label: 'Đọc sách & Nghỉ ngơi tự do' },
-  { id: 'tl-16', start: '21:30', end: '22:30', durationMins: 60, category: 'personal', label: 'Đóng ngày (2 phút) & Chuẩn bị ngủ' },
-  { id: 'tl-17', start: '22:30', end: '24:00', durationMins: 90, category: 'sleep', label: 'Bắt đầu giấc ngủ đêm' },
+  { id: 'tl-13', start: '17:45', end: '22:30', durationMins: 285, category: 'not_yet', label: 'Chưa diễn ra (phần còn lại trong ngày)' },
+  { id: 'tl-14', start: '22:30', end: '24:00', durationMins: 90, category: 'sleep', label: 'Giấc ngủ tối theo lịch (22:30 - 24:00)' },
 ];
 
 // B22: Method Library (Thư viện phương pháp)

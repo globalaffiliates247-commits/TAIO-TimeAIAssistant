@@ -96,7 +96,7 @@ export const ReminderQuestionsModal: React.FC = () => {
         </div>
 
         {/* Modal Body: List of Questions with Live Answer Cards */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
           {filteredQuestions.map(q => {
             const isSelected = activeQuestion?.id === q.id;
             return (

@@ -211,6 +211,7 @@ export type ToneLevel = 1 | 2 | 3 | 'auto'; // 1: Gentle, 2: Clear, 3: Firm
 // B14: Action Nudges (one CTA, never blocking)
 export type ActionNudgeType = 
   | 'sleep' 
+  | 'sleep_next_day' // v0.3.10: morning after expired sleep nudge asks B12 next-day question
   | 'meal' 
   | 'leave_now' 
   | 'start_deep' 
@@ -226,6 +227,21 @@ export interface ActionNudge {
   maxRepeats: number;
   isDismissed: boolean;
   timeShown: string;
+  // v0.3.10: active window & expiry
+  windowStartHour?: number; // 0-23
+  windowEndHour?: number;   // 0-23
+  status?: 'active' | 'accepted' | 'ignored' | 'expired';
+}
+
+// B14 v0.3.11: In-app Bell Notification History Item (5 latest notifications)
+export interface AppNotificationItem {
+  id: string;
+  kind: 'nudge' | 'question' | 'checkin';
+  title: string;
+  time: string;
+  ctaLabel: string;
+  read: boolean;
+  targetAction: 'sleep' | 'start_deep' | 'open_questions' | 'open_checkin' | 'open_swipe' | 'open_dayclose';
 }
 
 // B15: Habit Insights & Weekly Experiments
@@ -288,14 +304,17 @@ export interface InboxItem {
   status: 'inbox' | 'scheduled' | 'done_2min' | 'delegated' | 'dropped';
 }
 
-// B1b & B21: 24-Hour Time Ledger
+// B1b & B21 (v0.3.15): 24-Hour Time Ledger (Actual groups)
 export type TimeLedgerCategory = 
   | 'sleep' 
   | 'personal' 
   | 'goal_work' 
   | 'meeting' 
+  | 'planning'
   | 'interruption' 
   | 'distraction' 
+  | 'unconfirmed'
+  | 'not_yet'
   | 'other';
 
 export interface TimeLedgerSegment {

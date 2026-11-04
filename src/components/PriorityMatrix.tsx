@@ -203,7 +203,7 @@ export const PriorityMatrix: React.FC = () => {
           )}
 
           {/* Task List */}
-          <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-72 overflow-y-auto overscroll-contain pr-1">
             {tasks.length === 0 ? (
               <div className="py-7 text-center text-xs text-slate-500 italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                 Chưa có việc nào ở góc phần tư này

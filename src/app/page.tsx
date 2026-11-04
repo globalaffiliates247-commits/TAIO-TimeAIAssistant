@@ -48,7 +48,18 @@ const OrientationHint: React.FC = () => {
 };
 
 const MainAppContent: React.FC = () => {
-  const { currentTab, celebrationMsg, setCelebrationMsg, deviceLook, palette, toastMsg } = useApp();
+  const {
+    currentTab,
+    celebrationMsg,
+    setCelebrationMsg,
+    deviceLook,
+    palette,
+    toastMsg,
+    toastUndoAction,
+    isOnboarded,
+    hasServerBackupToRestore,
+    resolveServerBackupChoice
+  } = useApp();
   const isCool = palette === 'cool';
 
   return (
@@ -59,11 +70,51 @@ const MainAppContent: React.FC = () => {
       <Navbar />
       <ActionNudgeBanner />
 
-      {/* Floating Toast Notification (PRD v0.3.9 B5: "Đã cho vào Rổ công việc" 3s Toast) */}
+      {/* B27 v0.3.12: If server copy was kept after reset, ask once after onboarding: Restore or Start fresh */}
+      {isOnboarded && hasServerBackupToRestore && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 text-xs text-slate-800">
+          <div className="max-w-xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div>
+              <p className="font-bold text-slate-900">Phát hiện bản sao dữ liệu cũ trên máy chủ</p>
+              <p className="text-[11px] text-slate-600">
+                Bạn muốn khôi phục dữ liệu cũ hay bắt đầu mới? (Nếu bắt đầu mới, bản sao cũ được lưu trữ 30 ngày rồi xóa hẳn).
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => resolveServerBackupChoice('restore')}
+                className="px-3 py-1.5 rounded-xl bg-[#E0401F] text-white font-bold text-xs shadow-xs"
+              >
+                Khôi phục dữ liệu cũ
+              </button>
+              <button
+                onClick={() => resolveServerBackupChoice('fresh')}
+                className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-semibold text-xs"
+              >
+                Bắt đầu mới
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Toast Notification (with optional 3s Undo button) */}
       {toastMsg && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[90%] bg-white/95 text-slate-800 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-300 border border-slate-200">
-          <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-          <span className="text-center">{toastMsg}</span>
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[92%] bg-white/95 text-slate-800 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-between gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-300 border border-slate-200">
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+            <span className="truncate">{toastMsg}</span>
+          </div>
+          {toastUndoAction && (
+            <button
+              onClick={() => {
+                toastUndoAction();
+              }}
+              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-[#E0401F] border border-red-200 font-bold text-[11px] shrink-0"
+            >
+              Hoàn tác
+            </button>
+          )}
         </div>
       )}
 
@@ -107,7 +158,7 @@ const MainAppContent: React.FC = () => {
 
       {/* Bottom Footer info */}
       <footer style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }} className="border-t border-slate-200/80 pt-4 px-4 text-center text-xs text-slate-500">
-        TAIO Time App v0.3.9 • Quản trị thời gian kết hợp AI • TAIO.CLUB
+        TAIO Time App • Quản trị thời gian kết hợp AI • TAIO.CLUB
       </footer>
 
       {/* Modals & Overlays */}

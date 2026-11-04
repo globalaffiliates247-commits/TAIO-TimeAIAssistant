@@ -117,7 +117,7 @@ export const InterruptionModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-      <div className={`w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl shadow-2xl p-5 sm:p-6 transition-colors duration-200 ${
+      <div className={`w-full max-w-lg max-h-[92vh] overflow-y-auto overscroll-contain rounded-3xl shadow-2xl p-5 sm:p-6 transition-colors duration-200 ${
         isCool 
           ? 'bg-white text-slate-800 border border-slate-200' 
           : 'bg-white text-stone-900 border border-stone-200'

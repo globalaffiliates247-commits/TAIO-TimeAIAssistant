@@ -23,7 +23,8 @@ import {
   FolderKanban,
   Wine,
   Sun,
-  Moon
+  Moon,
+  Bell
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -49,11 +50,24 @@ export const Navbar: React.FC = () => {
     setIsActiveCaptureOpen,
     palette,
     setPalette,
-    currentPaletteColors
+    currentPaletteColors,
+    notifications,
+    markAllNotificationsRead,
+    triggerNotificationAction
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [bellOpen, setBellOpen] = React.useState(false);
+  const unreadCount = notifications.filter(n => !n.read).length;
   const isCool = palette === 'cool';
+
+  const toggleBell = () => {
+    const next = !bellOpen;
+    setBellOpen(next);
+    if (next) {
+      markAllNotificationsRead();
+    }
+  };
 
   const togglePalette = () => {
     setPalette(isCool ? 'warm' : 'cool');
@@ -112,20 +126,13 @@ export const Navbar: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black tracking-tight text-slate-900 text-base">TAIO</span>
-                <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border ${
-                  isCool 
-                    ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                    : 'bg-red-50 text-[#E0401F] border-red-200'
-                }`}>
-                  v0.3.9
-                </span>
               </div>
               <p className="text-[11px] text-slate-500 -mt-0.5">TAIO.CLUB Time App</p>
             </div>
           </div>
         </div>
 
-        {/* Mobile Action Controls (< md): Only Quick Palette + Clean Menu Hamburger */}
+        {/* Mobile Action Controls (< md): Quick Palette + Bell + Clean Menu Hamburger */}
         <div className="flex md:hidden items-center gap-1.5 shrink-0">
           <button
             onClick={togglePalette}
@@ -137,6 +144,23 @@ export const Navbar: React.FC = () => {
             title="Đổi tông màu Lạnh / Nóng"
           >
             <span>{isCool ? '❄️ Lạnh' : '🔥 Nóng'}</span>
+          </button>
+
+          {/* B14 v0.3.11: Bell icon with badge (5 latest notifications) */}
+          <button
+            onClick={toggleBell}
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 relative transition-all"
+            aria-label="Thông báo gần đây"
+            title="5 thông báo gần nhất"
+          >
+            <Bell className="w-4 h-4" />
+            {unreadCount > 0 && (
+              <span className={`absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold text-white flex items-center justify-center ${
+                isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+              }`}>
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           <button
@@ -164,6 +188,23 @@ export const Navbar: React.FC = () => {
             title="Bấm để chuyển nhanh giữa Tông màu Lạnh (Xanh) và Tông màu Nóng (Đỏ)"
           >
             <span>{isCool ? '❄️ Tông Lạnh' : '🔥 Tông Nóng'}</span>
+          </button>
+
+          {/* B14 v0.3.11: Bell icon with unread badge */}
+          <button
+            onClick={toggleBell}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold relative"
+            title="5 thông báo gần nhất"
+          >
+            <Bell className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+            <span>Thông báo</span>
+            {unreadCount > 0 && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold text-white ${
+                isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+              }`}>
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           {/* Data Export for AI Assistant Button (PRD B24) */}
@@ -284,6 +325,59 @@ export const Navbar: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* B14 v0.3.11: Bell Dropdown — 5 Most Recent Notifications (closes with × or tap outside) */}
+      {bellOpen && (
+        <>
+          <div
+            onClick={() => setBellOpen(false)}
+            className="fixed inset-0 z-40 bg-transparent"
+            aria-hidden="true"
+          />
+          <div className="relative z-50 max-w-6xl mx-auto px-3 sm:px-6">
+            <div className="mt-1 ml-auto w-full sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-xl p-3.5 space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <Bell className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                  <span className="text-xs font-bold text-slate-900">5 thông báo gần nhất</span>
+                </div>
+                <button
+                  onClick={() => setBellOpen(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  aria-label="Đóng thông báo"
+                >
+                  <CloseIcon className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-1.5 max-h-80 overflow-y-auto overscroll-contain">
+                {notifications.slice(0, 5).map((notif) => (
+                  <div
+                    key={notif.id}
+                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 flex items-center justify-between gap-2.5 transition-colors"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-800 leading-snug">{notif.title}</p>
+                      <span className="text-[10px] text-slate-500">{notif.time}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        triggerNotificationAction(notif);
+                        setBellOpen(false);
+                      }}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white shrink-0 shadow-xs transition-colors ${
+                        isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+                      }`}
+                    >
+                      {notif.ctaLabel}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Mobile Slide-down Tools Drawer (< md) */}
       {mobileMenuOpen && (

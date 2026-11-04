@@ -155,7 +155,7 @@ export const ActiveCaptureModal: React.FC = () => {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 bg-white">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-5 bg-white">
           
           {/* TAB 1: GHI BÙ (BACKFILL) */}
           {activeTab === 'backfill' && (

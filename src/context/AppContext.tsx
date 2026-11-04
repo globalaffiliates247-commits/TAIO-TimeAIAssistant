@@ -42,7 +42,8 @@ import {
   ReminderQuestion,
   BackfillEntry,
   PassiveTimeSuggestion,
-  SavedPlace
+  SavedPlace,
+  AppNotificationItem
 } from '../types';
 import { 
   PROFILES, 
@@ -52,6 +53,7 @@ import {
   INITIAL_INTERRUPTIONS, 
   INITIAL_GAPS,
   INITIAL_ACTION_NUDGES,
+  INITIAL_NOTIFICATIONS,
   INITIAL_HABIT_CARDS,
   INITIAL_EXPERIMENTS,
   INITIAL_AI_SUGGESTIONS,
@@ -303,9 +305,18 @@ interface AppContextType {
   dayClosed: boolean;
   celebrationMsg: string | null;
   setCelebrationMsg: (msg: string | null) => void;
-  // v0.3.9 B5: Toast notifications
+  // v0.3.9 B5: Toast notifications (with optional Undo action for B28 v0.3.11)
   toastMsg: string | null;
-  showToast: (msg: string) => void;
+  toastUndoAction: (() => void) | null;
+  showToast: (msg: string, onUndo?: () => void) => void;
+  // v0.3.11 B14: Bell notifications (5 most recent)
+  notifications: AppNotificationItem[];
+  markAllNotificationsRead: () => void;
+  triggerNotificationAction: (notif: AppNotificationItem) => void;
+  // v0.3.12 B27: Wipe all user data & server copy restore prompt
+  resetAllUserData: (deleteServerCopy: boolean) => void;
+  hasServerBackupToRestore: boolean;
+  resolveServerBackupChoice: (choice: 'restore' | 'fresh') => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -350,8 +361,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [interruptions, setInterruptions] = useState<InterruptionRecord[]>(INITIAL_INTERRUPTIONS);
   const [gaps, setGaps] = useState<UndeclaredGap[]>(INITIAL_GAPS);
 
-  // v0.9: Action Nudges (B14)
-  const [actionNudge, setActionNudge] = useState<ActionNudge | null>(INITIAL_ACTION_NUDGES[0] || null);
+  // v0.9 & v0.3.10: Action Nudges (B14) — select nudge matching current active window
+  const selectActiveNudgeForCurrentHour = (): ActionNudge | null => {
+    const hr = new Date().getHours();
+    const matched = INITIAL_ACTION_NUDGES.find(n => {
+      if (n.windowStartHour === undefined || n.windowEndHour === undefined) return true;
+      if (n.windowStartHour <= n.windowEndHour) {
+        return hr >= n.windowStartHour && hr < n.windowEndHour;
+      }
+      // Overnight window (e.g. 22 -> 5)
+      return hr >= n.windowStartHour || hr < n.windowEndHour;
+    });
+    return matched ? { ...matched, timeShown: new Date().toTimeString().slice(0, 5) } : null;
+  };
+  const [actionNudge, setActionNudge] = useState<ActionNudge | null>(() => selectActiveNudgeForCurrentHour());
+  const [notifications, setNotifications] = useState<AppNotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [hasServerBackupToRestore, setHasServerBackupToRestore] = useState<boolean>(false);
 
   // v0.10: Habit Insights (B15)
   const [habitCards, setHabitCards] = useState<HabitCard[]>(INITIAL_HABIT_CARDS);
@@ -375,12 +400,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [dayClosed, setDayClosed] = useState<boolean>(false);
   const [celebrationMsg, setCelebrationMsg] = useState<string | null>(null);
-  // v0.3.9 B5: Toast notifications
+  // v0.3.9 B5 & v0.3.11 B28: Toast notifications with optional 3-second Undo
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const showToast = (msg: string) => {
+  const [toastUndoAction, setToastUndoAction] = useState<(() => void) | null>(null);
+  const showToast = (msg: string, onUndo?: () => void) => {
     setToastMsg(msg);
+    setToastUndoAction(() => onUndo || null);
     setTimeout(() => {
       setToastMsg(prev => prev === msg ? null : prev);
+      setToastUndoAction(null);
     }, 3000);
   };
 
@@ -526,12 +554,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setBacklogCards(prev => prev.filter(c => c.id !== cardId));
       setCelebrationMsg(`Đã lên lịch thành công cho: "${card.text}"!`);
     } else if (action === 'done_now') {
-      setTimerMinutesRemaining(2);
+      const prevTimer = timerMinutesRemaining;
+      setTimerMinutesRemaining(card.estimatedMinutes || 15);
       setIsTimerRunning(true);
       setCurrentTab('now');
       setIsSwipeModalOpen(false);
-      setCelebrationMsg(`Bắt đầu làm ngay 2 phút: "${card.text}" (GTD Two-Minute Rule)!`);
       setBacklogCards(prev => prev.filter(c => c.id !== cardId));
+      // B28 v0.3.11: Tap the card = Làm ngay, with a 3-second "Hoàn tác" (undo) toast
+      showToast(`Đang làm ngay: "${card.text}"`, () => {
+        setBacklogCards(prev => [card, ...prev]);
+        setTimerMinutesRemaining(prevTimer);
+        setIsSwipeModalOpen(true);
+      });
     } else if (action === 'later') {
       setBacklogCards(prev => {
         const remaining = prev.filter(c => c.id !== cardId);
@@ -900,20 +934,86 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCelebrationMsg(language === 'vi' ? 'Đã quay lại nhịp kế hoạch ban đầu!' : 'Back to original plan!');
   };
 
-  // v0.9: Action Nudge actions (B14)
+  // v0.9, v0.3.10 & v0.3.11: Action Nudge & Bell Notification actions (B14)
   const acceptActionNudge = () => {
     if (!actionNudge) return;
+    const currentType = actionNudge.type;
     setActionNudge(null);
-    setCelebrationMsg(language === 'vi' ? '✓ Đã hoàn tất hành động nhắc nhở!' : 'Action completed!');
+    if (currentType === 'sleep_next_day') {
+      // B14 v0.3.10 -> opens B12 next-day cost question
+      setSocialAuditModalOpen(true);
+    } else if (currentType === 'close_day') {
+      setCloseDayModalOpen(true);
+    } else {
+      setCelebrationMsg(language === 'vi' ? '✓ Đã hoàn tất hành động nhắc nhở!' : 'Action completed!');
+    }
   };
 
   const dismissActionNudge = () => {
     if (!actionNudge) return;
-    // Dismiss temporarily, returns after pause
-    setActionNudge(prev => prev ? { ...prev, isDismissed: true, repeatCount: prev.repeatCount + 1 } : null);
-    setTimeout(() => {
-      setActionNudge(prev => prev ? { ...prev, isDismissed: false } : null);
-    }, 15000); // 15 sec demo simulation for 15 min
+    // Dismiss temporarily, returns after pause (15 min in production; 60s demo)
+    setActionNudge(prev => prev ? { ...prev, isDismissed: true, repeatCount: prev.repeatCount + 1, status: 'ignored' } : null);
+  };
+
+  const markAllNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const triggerNotificationAction = (notif: AppNotificationItem) => {
+    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+    if (notif.targetAction === 'sleep') {
+      setSocialAuditModalOpen(true);
+    } else if (notif.targetAction === 'start_deep') {
+      setCurrentTab('now');
+      setIsTimerRunning(true);
+    } else if (notif.targetAction === 'open_questions') {
+      setIsQuestionsModalOpen(true);
+    } else if (notif.targetAction === 'open_checkin') {
+      setCheckInBlock(blocks[0] || null);
+      setCheckInModalOpen(true);
+    } else if (notif.targetAction === 'open_swipe') {
+      setIsSwipeModalOpen(true);
+    } else if (notif.targetAction === 'open_dayclose') {
+      setCloseDayModalOpen(true);
+    }
+  };
+
+  // B27 v0.3.12: Wipe all personal data and return to onboarding
+  const resetAllUserData = (deleteServerCopy: boolean) => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.clear();
+      }
+    } catch {}
+    setInbox([]);
+    setDailyCardItems([]);
+    setLists([]);
+    setListItems([]);
+    setInterruptions([]);
+    setGaps([]);
+    setIsProfileModalOpen(false);
+    setHasServerBackupToRestore(!deleteServerCopy);
+    setIsOnboarded(false);
+    showToast(
+      deleteServerCopy
+        ? 'Đã xóa toàn bộ dữ liệu trên thiết bị và yêu cầu xóa bản sao máy chủ.'
+        : 'Đã xóa dữ liệu trên thiết bị và đăng xuất về màn hình thiết lập ban đầu.'
+    );
+  };
+
+  const resolveServerBackupChoice = (choice: 'restore' | 'fresh') => {
+    if (choice === 'restore') {
+      setInbox(INITIAL_INBOX);
+      setDailyCardItems(INITIAL_DAILY_CARD_ITEMS);
+      setLists(INITIAL_LISTS);
+      setListItems(INITIAL_LIST_ITEMS);
+      setInterruptions(INITIAL_INTERRUPTIONS);
+      setGaps(INITIAL_GAPS);
+      showToast('Đã khôi phục dữ liệu cũ từ máy chủ.');
+    } else {
+      showToast('Đã bắt đầu mới. Bản sao cũ được lưu trữ 30 ngày trước khi xóa hẳn.');
+    }
+    setHasServerBackupToRestore(false);
   };
 
   // v0.10: Habit Insights actions (B15)
@@ -1258,6 +1358,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCheckInBlock(null);
   };
 
+  // D5 v0.3.11: Overlays must lock the screen behind them (fixes drag scrolling behind sheets on iOS)
+  const isAnyOverlayOpen =
+    !isOnboarded ||
+    interruptionModalOpen ||
+    checkInModalOpen ||
+    closeDayModalOpen ||
+    socialAuditModalOpen ||
+    settingsModalOpen ||
+    inboxModalOpen ||
+    methodLibraryOpen ||
+    exportModalOpen ||
+    isListsModalOpen ||
+    isProfileModalOpen ||
+    isSwipeModalOpen ||
+    isQuestionsModalOpen ||
+    isActiveCaptureOpen ||
+    !!drilldown.isOpen;
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    if (isAnyOverlayOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      return () => {
+        const y = Math.abs(parseInt(document.body.style.top || '0', 10));
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, y);
+      };
+    }
+  }, [isAnyOverlayOpen]);
+
   const handleLabelGap = (gapId: string, label: GapLabel) => {
     setGaps(prev => prev.map(g => g.id === gapId ? { ...g, label } : g));
   };
@@ -1354,7 +1493,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       celebrationMsg,
       setCelebrationMsg,
       toastMsg,
+      toastUndoAction,
       showToast,
+      notifications,
+      markAllNotificationsRead,
+      triggerNotificationAction,
+      resetAllUserData,
+      hasServerBackupToRestore,
+      resolveServerBackupChoice,
       drilldown,
       openDrilldown,
       closeDrilldown,

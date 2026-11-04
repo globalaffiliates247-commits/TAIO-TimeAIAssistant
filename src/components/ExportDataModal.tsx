@@ -129,7 +129,7 @@ export const ExportDataModal: React.FC = () => {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto overscroll-contain py-4 space-y-4">
           
           {/* Share Link Box */}
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">

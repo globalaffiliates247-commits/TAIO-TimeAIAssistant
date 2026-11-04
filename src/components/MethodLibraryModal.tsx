@@ -102,7 +102,7 @@ export const MethodLibraryModal: React.FC = () => {
         </div>
 
         {/* List of Concepts */}
-        <div className="overflow-y-auto flex-1 pr-1 space-y-3.5">
+        <div className="overflow-y-auto overscroll-contain flex-1 pr-1 space-y-3.5">
           {filtered.map((item) => (
             <div 
               key={item.id}

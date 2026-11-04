@@ -28,7 +28,7 @@ export const SocialAuditModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-7 text-slate-800">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto overscroll-contain shadow-2xl p-6 sm:p-7 text-slate-800">
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-5">

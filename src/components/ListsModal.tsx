@@ -157,7 +157,7 @@ export const ListsModal: React.FC = () => {
             </div>
 
             {/* List of AppLists */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 max-h-40 md:max-h-full pr-1">
+            <div className="flex-1 overflow-y-auto overscroll-contain space-y-1.5 max-h-40 md:max-h-full pr-1">
               {activeLists.map(lst => {
                 const isSelected = lst.id === currentList?.id;
                 const count = listItems.filter(i => i.listId === lst.id && !i.archived).length;
@@ -202,7 +202,7 @@ export const ListsModal: React.FC = () => {
             
             {isCreatingList ? (
               /* Create New List Form */
-              <div className="p-6 overflow-y-auto space-y-6 max-w-lg mx-auto w-full">
+              <div className="p-6 overflow-y-auto overscroll-contain space-y-6 max-w-lg mx-auto w-full">
                 <div>
                   <h3 className="text-base font-bold text-slate-900">Tạo danh sách mới</h3>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -380,7 +380,7 @@ export const ListsModal: React.FC = () => {
                 </div>
 
                 {/* Items List Content */}
-                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2">
+                <div className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-2">
                   {itemsOfCurrentList.length === 0 ? (
                     <div className="text-center py-12 text-slate-500">
                       <p className="text-sm">Chưa có mục nào trong danh sách này.</p>

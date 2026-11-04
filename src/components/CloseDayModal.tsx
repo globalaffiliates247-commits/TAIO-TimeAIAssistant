@@ -51,7 +51,7 @@ export const CloseDayModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl p-5 sm:p-7 text-slate-900">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto overscroll-contain shadow-2xl p-5 sm:p-7 text-slate-900">
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">

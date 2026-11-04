@@ -77,9 +77,46 @@ export const NowTab: React.FC = () => {
   const currentEndType: TaskEndType = currentBlock?.taskEndType || 'timebox';
   const userTimeLimit: number = currentBlock?.timeLimitMins || currentBlock?.estimatedMinutes || 90;
 
-  // Elapsed minutes for until-done tasks (counts up)
+  // Elapsed minutes for until-done tasks (counts up) + live seconds for B19 v0.3.11 ring & units
   const [elapsedMinutes, setElapsedMinutes] = useState<number>(35);
+  const [secondsTick, setSecondsTick] = useState<number>(5);
   const [showOverrunNotice, setShowOverrunNotice] = useState<boolean>(false);
+  const [liveActivityActive, setLiveActivityActive] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (!isTimerRunning) return;
+    const interval = setInterval(() => {
+      setSecondsTick(prev => {
+        if (currentEndType === 'timebox') {
+          if (prev <= 0) {
+            setTimerMinutesRemaining(m => Math.max(0, m - 1));
+            return 59;
+          }
+          return prev - 1;
+        } else {
+          if (prev >= 59) {
+            setElapsedMinutes(m => m + 1);
+            return 0;
+          }
+          return prev + 1;
+        }
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isTimerRunning, currentEndType, setTimerMinutesRemaining]);
+
+  // B19 v0.3.11: Format clock value & unit label ("phút : giây" under 1h, "giờ : phút" from 1h)
+  const formatClockDisplay = (mins: number, secs: number) => {
+    const absMins = Math.abs(mins);
+    if (absMins < 60) {
+      const mStr = String(absMins).padStart(2, '0');
+      const sStr = String(secs).padStart(2, '0');
+      return { value: `${mStr}:${sStr}`, unitLabel: 'phút : giây' };
+    }
+    const hrs = Math.floor(absMins / 60);
+    const remMins = absMins % 60;
+    return { value: `${hrs}:${String(remMins).padStart(2, '0')}`, unitLabel: 'giờ : phút' };
+  };
 
   // Check overrun for until-done tasks
   const isOverTimeLimit = (currentEndType !== 'timebox') && (elapsedMinutes > userTimeLimit);
@@ -254,7 +291,7 @@ export const NowTab: React.FC = () => {
             <span className="text-base font-black text-amber-600">{intUsedMins} / {profile.interruptionReserveMins}p</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold">3. Xao nhãng (v0.3.9)</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">3. Xao nhãng</span>
             <span className="text-base font-black text-rose-600">45 phút</span>
           </div>
           <div className="flex flex-col">
@@ -430,39 +467,93 @@ export const NowTab: React.FC = () => {
               </span>
             </div>
 
-            {/* Timer Output */}
-            {currentEndType === 'timebox' ? (
-              // Case A: Timebox counts down
-              <div className="py-2 flex items-baseline gap-3">
-                <span className="text-5xl font-mono font-black text-slate-900 tracking-tight">
-                  {timerMinutesRemaining}
-                </span>
-                <span className="text-lg text-slate-500 font-bold">phút đếm ngược</span>
-              </div>
-            ) : (
-              // Case B: Until done counts UP (elapsed) with faint marker at user limit
-              <div className="py-2 space-y-2">
-                <div className="flex items-baseline gap-3">
-                  <span className={`text-5xl font-mono font-black tracking-tight ${isOverTimeLimit ? 'text-amber-600' : 'text-slate-900'}`}>
-                    +{elapsedMinutes}
-                  </span>
-                  <span className="text-lg text-slate-500 font-bold">phút trôi qua</span>
+            {/* B19 v0.3.11: Circular Progress Ring + m:s (<1h) or h:m (>=1h) with label underneath */}
+            {(() => {
+              const activeMins = currentEndType === 'timebox' ? timerMinutesRemaining : elapsedMinutes;
+              const { value, unitLabel } = formatClockDisplay(activeMins, secondsTick);
+              const totalTargetMins = currentEndType === 'timebox'
+                ? (profile.focusBlockDurationMins || 90)
+                : (userTimeLimit || 60);
+              const rawRatio = currentEndType === 'timebox'
+                ? activeMins / Math.max(1, totalTargetMins)
+                : (activeMins % Math.max(1, totalTargetMins)) / Math.max(1, totalTargetMins);
+              const progressRatio = Math.max(0, Math.min(1, rawRatio));
+              const radius = 58;
+              const circumference = 2 * Math.PI * radius;
+              const dashOffset = circumference * (1 - progressRatio);
+              const isWarning = (currentEndType === 'timebox' && activeMins <= 0) || isOverTimeLimit;
+              const strokeColor = isWarning ? '#F59E0B' : (isCool ? '#007AFF' : '#E0401F');
+
+              return (
+                <div className="py-3 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 136 136">
+                      <circle
+                        cx="68"
+                        cy="68"
+                        r={radius}
+                        fill="none"
+                        stroke="#E2E8F0"
+                        strokeWidth="8"
+                      />
+                      <circle
+                        cx="68"
+                        cy="68"
+                        r={radius}
+                        fill="none"
+                        stroke={strokeColor}
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={dashOffset}
+                        style={{ transition: 'stroke-dashoffset 300ms ease' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                      <span className={`text-2xl sm:text-3xl font-mono font-black tracking-tight ${
+                        isWarning ? 'text-amber-600' : 'text-slate-900'
+                      }`}>
+                        {currentEndType !== 'timebox' ? `+${value}` : value}
+                      </span>
+                      <span className="text-[11px] font-semibold text-slate-500 mt-0.5">
+                        {unitLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-2 text-center sm:text-left w-full">
+                    <p className="text-xs font-semibold text-slate-700">
+                      {currentEndType === 'timebox'
+                        ? 'Đếm ngược trong khung Timebox'
+                        : `Đếm xuôi tới giới hạn ${userTimeLimit} phút`}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-semibold text-slate-700">
+                        <span className={`w-1.5 h-1.5 rounded-full ${liveActivityActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                        {liveActivityActive ? 'Live Activity màn hình khóa: Bật' : 'Live Activity: Tắt'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setLiveActivityActive(v => !v)}
+                        className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-600"
+                      >
+                        {liveActivityActive ? 'Ẩn trên MH khóa' : 'Hiện trên MH khóa'}
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => alert('Đã gửi lệnh hẹn giờ sang ứng dụng Đồng hồ của thiết bị (Shortcuts / System Timer).')}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-700 shadow-2xs"
+                      >
+                        <Clock className="w-3 h-3 text-slate-500" />
+                        <span>Dùng đồng hồ của máy</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                {/* Visual marker at user appetite limit */}
-                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden relative">
-                  <div 
-                    className={`h-full rounded-full transition-all ${isOverTimeLimit ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                    style={{ width: `${Math.min(100, (elapsedMinutes / userTimeLimit) * 100)}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                  <span>Mốc giới hạn khẩu vị: <strong>{userTimeLimit} phút</strong></span>
-                  <span className={isOverTimeLimit ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'}>
-                    {isOverTimeLimit ? `Đã quá ${elapsedMinutes - userTimeLimit}p` : `Còn ${userTimeLimit - elapsedMinutes}p trong hạn`}
-                  </span>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Overrun Notice for Until-Done Tasks (PRD v0.22 B19 / B23) */}
             {isOverTimeLimit && (

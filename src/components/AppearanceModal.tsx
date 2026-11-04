@@ -103,7 +103,7 @@ export const AppearanceModal: React.FC = () => {
           </button>
         </div>
 
-        <div className="p-5 space-y-5 max-h-[80vh] overflow-y-auto">
+        <div className="p-5 space-y-5 max-h-[80vh] overflow-y-auto overscroll-contain">
           {/* Setting 1: Device */}
           <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
