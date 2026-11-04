@@ -47,11 +47,11 @@ export const CloseDayModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-7 text-white">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-slate-50/95 border border-slate-100 backdrop-blur-2xl rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-7 text-slate-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-2xl bg-orange-950/80 border border-orange-500/30 text-orange-400">
               <Moon className="w-5 h-5" />
@@ -63,12 +63,12 @@ export const CloseDayModal: React.FC = () => {
                   PRD v0.3.1 B25
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Quy trình 2 phút • Dời việc có chủ đích • Chuẩn bị ngày mai</p>
+              <p className="text-xs text-slate-500">Quy trình 2 phút • Dời việc có chủ đích • Chuẩn bị ngày mai</p>
             </div>
           </div>
           <button 
             onClick={() => setCloseDayModalOpen(false)}
-            className="text-slate-400 hover:text-white p-1"
+            className="text-slate-500 hover:text-slate-900 p-1"
           >
             <X className="w-5 h-5" />
           </button>
@@ -77,24 +77,24 @@ export const CloseDayModal: React.FC = () => {
         <div className="space-y-4">
           
           {/* Quick Summary Card */}
-          <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <div className="p-3.5 rounded-2xl bg-slate-100/60 border border-slate-200/60 space-y-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Kết quả hôm nay của bạn:
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <span className="text-slate-400 text-[11px]">Nhiệm vụ hoàn thành:</span>
+              <div className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-100">
+                <span className="text-slate-500 text-[11px]">Nhiệm vụ hoàn thành:</span>
                 <p className="font-bold text-emerald-400 text-sm mt-0.5">{completedBlocks.length} khối việc</p>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <span className="text-slate-400 text-[11px]">Tập trung chất lượng:</span>
+              <div className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-100">
+                <span className="text-slate-500 text-[11px]">Tập trung chất lượng:</span>
                 <p className="font-bold text-orange-400 text-sm mt-0.5">150 phút việc sâu</p>
               </div>
             </div>
           </div>
 
           {/* Unplanned on goal trade-off notice (PRD B25.2) */}
-          <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-xs text-slate-300 space-y-1">
+          <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-xs text-slate-700 space-y-1">
             <div className="flex items-center gap-1.5 font-bold text-amber-400">
               <AlertTriangle className="w-4 h-4" />
               <span>Ghi nhận thời gian ngoài kế hoạch (B25.2):</span>
@@ -106,18 +106,18 @@ export const CloseDayModal: React.FC = () => {
 
           {/* Carry-over (Migration) for uncompleted Daily Card items (PRD B25.3) */}
           {pendingCardItems.length > 0 && (
-            <div className="p-3.5 rounded-2xl bg-slate-800/70 border border-slate-700 space-y-2.5">
+            <div className="p-3.5 rounded-2xl bg-slate-100/70 border border-slate-200 space-y-2.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                   <RotateCw className="w-3.5 h-3.5 text-amber-400" />
                   <span>Dời việc còn lại sang ngày mai (Bullet Journal Migration):</span>
                 </label>
-                <span className="text-[10px] text-slate-400">{pendingCardItems.length} việc chưa gạch</span>
+                <span className="text-[10px] text-slate-500">{pendingCardItems.length} việc chưa gạch</span>
               </div>
 
               <div className="space-y-2">
                 {pendingCardItems.map((item) => (
-                  <div key={item.id} className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-2 text-xs">
+                  <div key={item.id} className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center justify-between gap-2 text-xs">
                     <span className="text-slate-200 truncate flex-1">{item.text}</span>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
@@ -129,7 +129,7 @@ export const CloseDayModal: React.FC = () => {
                       </button>
                       <button
                         onClick={() => carryOverItem(item.id, 'leave')}
-                        className="px-2 py-1 rounded bg-slate-800 text-slate-400 hover:text-white text-[10px]"
+                        className="px-2 py-1 rounded bg-slate-100 text-slate-500 hover:text-slate-900 text-[10px]"
                         title="Để lại thẻ hôm nay"
                       >
                         Để lại
@@ -149,13 +149,13 @@ export const CloseDayModal: React.FC = () => {
           )}
 
           {/* Tomorrow's Top Task (PRD B10) */}
-          <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-100/80 border border-slate-200/80 space-y-3">
             <div>
               <label className="text-xs font-bold text-orange-400 flex items-center gap-1.5">
                 <Target className="w-4 h-4" />
                 <span>Việc quan trọng số 1 của ngày mai (Tomorrow's Top Task):</span>
               </label>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5">
                 Chọn đúng 1 điều bạn sẽ làm đầu tiên vào sáng mai để tạo đà chiến thắng.
               </p>
             </div>
@@ -165,15 +165,15 @@ export const CloseDayModal: React.FC = () => {
               value={tomorrowTask}
               onChange={e => setTomorrowTask(e.target.value)}
               placeholder="Nhập nhiệm vụ hàng đầu của ngày mai..."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-orange-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-orange-500"
             />
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">Gắn với mục tiêu:</label>
+              <label className="block text-[11px] font-semibold text-slate-500 mb-1">Gắn với mục tiêu:</label>
               <select
                 value={selectedGoalId}
                 onChange={e => setSelectedGoalId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-200 text-xs text-slate-900 focus:outline-none"
               >
                 {goals.map(g => (
                   <option key={g.id} value={g.id}>{g.name}</option>
@@ -197,7 +197,7 @@ export const CloseDayModal: React.FC = () => {
                 setCloseDayModalOpen(false);
                 setExportModalOpen(true);
               }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 text-xs font-semibold border border-slate-700"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-700 text-orange-400 text-xs font-semibold border border-slate-200"
               title="Xuất snapshot Markdown cho trợ lý AI (B24)"
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -207,13 +207,13 @@ export const CloseDayModal: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCloseDayModalOpen(false)}
-                className="px-3.5 py-2 rounded-xl text-slate-400 hover:text-white text-xs"
+                className="px-3.5 py-2 rounded-xl text-slate-500 hover:text-slate-900 text-xs"
               >
                 Để sau
               </button>
               <button
                 onClick={onConfirmClose}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c83516] hover:to-orange-600 text-white font-bold text-xs shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c83516] hover:to-orange-600 text-slate-900 font-bold text-xs shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
               >
                 <span>Khóa ngày & Hoàn tất</span>
                 <ArrowRight className="w-4 h-4" />

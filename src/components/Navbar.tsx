@@ -58,11 +58,10 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className={`sticky top-0 z-40 transition-colors duration-200 border-b backdrop-blur-xl ${
-      isCool 
-        ? 'bg-white/95 border-slate-200 shadow-sm' 
-        : 'bg-white/95 border-stone-200 shadow-sm'
-    }`}>
+    <header 
+      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)' }}
+      className="sticky top-0 z-40 transition-colors duration-200 border-b border-slate-200 bg-white/95 backdrop-blur-xl shadow-xs"
+    >
       
       {/* Platform Window Controls (PRD D3: macOS Traffic lights / Windows Titlebar) */}
       {deviceLook === 'macos' && (
@@ -260,9 +259,12 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* 4 Core Tabs Bar with Native App Store Style */}
-      <nav className={`max-w-6xl mx-auto px-4 sm:px-6 flex border-t ${
-        isCool ? 'border-slate-200 bg-slate-50/70' : 'border-stone-200 bg-stone-50/70'
-      } ${deviceLook === 'phone' ? 'fixed bottom-0 left-0 right-0 z-50 shadow-2xl py-1' : ''}`}>
+      <nav 
+        style={{ paddingBottom: deviceLook === 'phone' ? 'max(env(safe-area-inset-bottom, 0px), 8px)' : undefined }}
+        className={`max-w-6xl mx-auto px-4 sm:px-6 flex border-t border-slate-200 bg-white ${
+          deviceLook === 'phone' ? 'fixed bottom-0 left-0 right-0 z-50 shadow-2xl py-1' : ''
+        }`}
+      >
         {/* Tab 1: Now */}
         <button
           onClick={() => setCurrentTab('now')}

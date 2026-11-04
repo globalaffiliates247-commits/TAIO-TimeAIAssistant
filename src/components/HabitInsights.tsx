@@ -95,7 +95,7 @@ export const HabitInsights: React.FC = () => {
             <Compass className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
               Dấu vết Thói quen (Habit Insights & Patterns)
               <span className="text-[11px] font-mono bg-purple-500/20 text-purple-300 px-2.5 py-0.5 rounded-full border border-purple-500/30">
                 PRD v0.10 B15
@@ -111,7 +111,7 @@ export const HabitInsights: React.FC = () => {
           <Moon className="w-4 h-4 text-purple-400" />
           <div className="text-xs">
             <span className="text-gray-400 block text-[10px]">Neo giấc ngủ cá nhân</span>
-            <span className="font-bold text-white">{profile.personalAnchors.windDownTime}</span>
+            <span className="font-bold text-slate-900">{profile.personalAnchors.windDownTime}</span>
           </div>
         </div>
       </div>
@@ -119,7 +119,7 @@ export const HabitInsights: React.FC = () => {
       {/* Plan vs Actual Comparative Timeline Visual */}
       <div className="p-5 bg-gray-900/90 border border-gray-800 rounded-2xl shadow-md space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <Clock className="w-4 h-4 text-indigo-400" />
             <span>Kế hoạch vs Thực tế hôm nay (Plan vs Actual Timeline)</span>
           </h3>
@@ -140,16 +140,16 @@ export const HabitInsights: React.FC = () => {
               <span>08:00 - 18:00</span>
             </div>
             <div className="h-7 w-full bg-gray-950 rounded-xl overflow-hidden flex p-1 gap-1 border border-gray-800">
-              <div style={{ width: '30%' }} className="h-full bg-indigo-600/80 rounded flex items-center justify-center text-[10px] text-white truncate px-1">
+              <div style={{ width: '30%' }} className="h-full bg-indigo-600/80 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1">
                 09:00 Việc sâu (90p)
               </div>
-              <div style={{ width: '20%' }} className="h-full bg-purple-600/80 rounded flex items-center justify-center text-[10px] text-white truncate px-1">
+              <div style={{ width: '20%' }} className="h-full bg-purple-600/80 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1">
                 11:00 Họp tuần (60p)
               </div>
-              <div style={{ width: '20%' }} className="h-full bg-amber-600/80 rounded flex items-center justify-center text-[10px] text-white truncate px-1">
+              <div style={{ width: '20%' }} className="h-full bg-amber-600/80 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1">
                 14:00 Quỹ gián đoạn (60p)
               </div>
-              <div style={{ width: '30%' }} className="h-full bg-indigo-600/80 rounded flex items-center justify-center text-[10px] text-white truncate px-1">
+              <div style={{ width: '30%' }} className="h-full bg-indigo-600/80 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1">
                 15:30 Hoàn thiện App (90p)
               </div>
             </div>
@@ -162,16 +162,16 @@ export const HabitInsights: React.FC = () => {
               <span>Ghi nhận liên tục</span>
             </div>
             <div className="h-7 w-full bg-gray-950 rounded-xl overflow-hidden flex p-1 gap-1 border border-gray-800">
-              <div style={{ width: '32%' }} className="h-full bg-emerald-600/90 rounded flex items-center justify-center text-[10px] text-white truncate px-1">
+              <div style={{ width: '32%' }} className="h-full bg-emerald-600/90 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1">
                 ✓ Xong việc sâu (95p)
               </div>
-              <div style={{ width: '18%' }} className="h-full bg-purple-600/90 rounded flex items-center justify-center text-[10px] text-white truncate px-1">
+              <div style={{ width: '18%' }} className="h-full bg-purple-600/90 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1">
                 ✓ Họp tuần (50p)
               </div>
-              <div style={{ width: '15%' }} className="h-full bg-amber-500/90 rounded flex items-center justify-center text-[10px] text-white truncate px-1 font-bold">
+              <div style={{ width: '15%' }} className="h-full bg-amber-500/90 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1 font-bold">
                 ⚡ Chen ngang (40p)
               </div>
-              <div style={{ width: '35%' }} className="h-full bg-indigo-600/90 rounded flex items-center justify-center text-[10px] text-white truncate px-1">
+              <div style={{ width: '35%' }} className="h-full bg-indigo-600/90 rounded flex items-center justify-center text-[10px] text-slate-900 truncate px-1">
                 ● Đang làm App (còn 38p)
               </div>
             </div>
@@ -183,7 +183,7 @@ export const HabitInsights: React.FC = () => {
       <div className="p-5 bg-gray-900/90 border border-gray-800 rounded-2xl shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
               <span>Đường xu hướng hành vi 7 ngày (Behavior Trend Lines)</span>
             </h3>
@@ -195,7 +195,7 @@ export const HabitInsights: React.FC = () => {
             <button
               onClick={() => setActiveMetric('completion')}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                activeMetric === 'completion' ? 'bg-emerald-600 text-white' : 'text-gray-400 hover:text-white'
+                activeMetric === 'completion' ? 'bg-emerald-600 text-slate-900' : 'text-gray-400 hover:text-slate-900'
               }`}
             >
               Hoàn thành %
@@ -203,7 +203,7 @@ export const HabitInsights: React.FC = () => {
             <button
               onClick={() => setActiveMetric('deep')}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                activeMetric === 'deep' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+                activeMetric === 'deep' ? 'bg-indigo-600 text-slate-900' : 'text-gray-400 hover:text-slate-900'
               }`}
             >
               Việc sâu (phút)
@@ -211,7 +211,7 @@ export const HabitInsights: React.FC = () => {
             <button
               onClick={() => setActiveMetric('interruptions')}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                activeMetric === 'interruptions' ? 'bg-amber-600 text-white' : 'text-gray-400 hover:text-white'
+                activeMetric === 'interruptions' ? 'bg-amber-600 text-slate-900' : 'text-gray-400 hover:text-slate-900'
               }`}
             >
               Gián đoạn
@@ -219,7 +219,7 @@ export const HabitInsights: React.FC = () => {
             <button
               onClick={() => setActiveMetric('bedtime')}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                activeMetric === 'bedtime' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+                activeMetric === 'bedtime' ? 'bg-purple-600 text-slate-900' : 'text-gray-400 hover:text-slate-900'
               }`}
             >
               Lệch giờ ngủ
@@ -237,7 +237,7 @@ export const HabitInsights: React.FC = () => {
 
               return (
                 <div key={day} className="flex-1 flex flex-col items-center gap-1.5 group cursor-pointer">
-                  <div className="text-[10px] font-mono text-gray-400 group-hover:text-white transition-colors">
+                  <div className="text-[10px] font-mono text-gray-400 group-hover:text-slate-900 transition-colors">
                     {val}{activeMetric === 'completion' ? '%' : 'p'}
                   </div>
                   <div className="w-full bg-gray-950 rounded-t-lg h-28 flex items-end p-1">
@@ -247,7 +247,7 @@ export const HabitInsights: React.FC = () => {
                       title={`${day}: ${val} ${currentMetricObj.unit}`}
                     />
                   </div>
-                  <span className="text-[11px] font-semibold text-gray-400 group-hover:text-white">
+                  <span className="text-[11px] font-semibold text-gray-400 group-hover:text-slate-900">
                     {day}
                   </span>
                 </div>
@@ -260,7 +260,7 @@ export const HabitInsights: React.FC = () => {
       {/* Slip Map (Bản đồ trượt) */}
       <div className="p-5 bg-gray-900/90 border border-gray-800 rounded-2xl shadow-md space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <Zap className="w-4 h-4 text-amber-400" />
             <span>Bản đồ trượt trong ngày (Slip Map)</span>
           </h3>
@@ -301,7 +301,7 @@ export const HabitInsights: React.FC = () => {
       <div className="p-5 bg-gray-900/90 border border-gray-800 rounded-2xl shadow-md space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-amber-400" />
               <span>Thẻ Thói quen từ Dữ liệu thực (Habit Cards)</span>
             </h3>
@@ -337,11 +337,11 @@ export const HabitInsights: React.FC = () => {
                       {isKeep ? 'Thói quen nên giữ' : isChange ? 'Thói quen cần sửa' : 'Gợi ý tuần này'}
                     </span>
                     <span className="text-[11px] font-mono text-gray-400">
-                      Độ tự tin: <strong className="text-white">{card.confidence}%</strong>
+                      Độ tự tin: <strong className="text-slate-900">{card.confidence}%</strong>
                     </span>
                   </div>
 
-                  <h4 className="text-sm font-bold text-white mb-1.5">{card.title}</h4>
+                  <h4 className="text-sm font-bold text-slate-900 mb-1.5">{card.title}</h4>
                   
                   <div className="space-y-1 text-xs text-gray-300 mb-3 bg-black/30 p-2.5 rounded-xl border border-white/5">
                     <p><strong className="text-gray-400 font-normal">Minh chứng:</strong> {card.evidence}</p>
@@ -359,7 +359,7 @@ export const HabitInsights: React.FC = () => {
                     <>
                       <button
                         onClick={() => handleHabitAction(card.id, 'dismiss')}
-                        className="px-2.5 py-1 text-[11px] text-gray-400 hover:text-white rounded-lg hover:bg-white/5"
+                        className="px-2.5 py-1 text-[11px] text-gray-400 hover:text-slate-900 rounded-lg hover:bg-white/5"
                       >
                         Để sau
                       </button>
@@ -371,7 +371,7 @@ export const HabitInsights: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleHabitAction(card.id, 'try')}
-                        className="px-3 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm flex items-center gap-1"
+                        className="px-3 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-slate-900 shadow-sm flex items-center gap-1"
                       >
                         Thử tuần này <ChevronRight className="w-3.5 h-3.5" />
                       </button>
@@ -392,7 +392,7 @@ export const HabitInsights: React.FC = () => {
               <RefreshCw className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Vòng lặp Thử nghiệm Tuần (Weekly Experiment)</h3>
+              <h3 className="text-sm font-bold text-slate-900">Vòng lặp Thử nghiệm Tuần (Weekly Experiment)</h3>
               <p className="text-xs text-gray-400">Mỗi tuần chọn tối đa 1 thay đổi nhỏ để kiểm nghiệm trước khi quyết định giữ lại.</p>
             </div>
           </div>
@@ -406,7 +406,7 @@ export const HabitInsights: React.FC = () => {
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-white">{exp.habit}</span>
+                  <span className="text-xs font-bold text-slate-900">{exp.habit}</span>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                     exp.status === 'kept' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/40' : 'bg-indigo-950 text-indigo-300 border border-indigo-800/40'
                   }`}>
@@ -423,7 +423,7 @@ export const HabitInsights: React.FC = () => {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => keepExperiment(exp.id)}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1 shadow-sm"
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-900 text-xs font-semibold flex items-center gap-1 shadow-sm"
                   >
                     <Check className="w-3.5 h-3.5" /> Giữ thói quen này
                   </button>

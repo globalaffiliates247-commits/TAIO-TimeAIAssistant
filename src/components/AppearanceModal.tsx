@@ -81,23 +81,23 @@ export const AppearanceModal: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-slate-50/95 border border-slate-100 backdrop-blur-2xl rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-orange-950/80 border border-orange-500/30 flex items-center justify-center text-orange-400">
               <Palette className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Cài đặt Giao diện & Nền tảng (B17)</h3>
-              <p className="text-[11px] text-slate-400">Áp dụng tức thì, tự động lưu vào tài khoản</p>
+              <h3 className="text-sm font-bold text-slate-900">Cài đặt Giao diện & Nền tảng (B17)</h3>
+              <p className="text-[11px] text-slate-500">Áp dụng tức thì, tự động lưu vào tài khoản</p>
             </div>
           </div>
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800"
+            className="p-1 rounded-lg text-gray-400 hover:text-slate-900 hover:bg-gray-800"
           >
             <X className="w-5 h-5" />
           </button>
@@ -116,7 +116,7 @@ export const AppearanceModal: React.FC = () => {
                   onClick={() => setDeviceLook(d.id)}
                   className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                     deviceLook === d.id
-                      ? 'border-[#E0401F] bg-red-950/20 text-white'
+                      ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
                       : 'border-gray-800 bg-gray-900/60 text-gray-300 hover:border-gray-700'
                   }`}
                 >
@@ -145,8 +145,8 @@ export const AppearanceModal: React.FC = () => {
                   onClick={() => setThemeMode(t.id)}
                   className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                     themeMode === t.id
-                      ? 'border-[#E0401F] bg-red-950/20 text-white'
-                      : 'border-gray-800 bg-gray-900/60 text-gray-400 hover:border-gray-700 hover:text-white'
+                      ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
+                      : 'border-gray-800 bg-gray-900/60 text-gray-400 hover:border-gray-700 hover:text-slate-900'
                   }`}
                 >
                   {t.icon}
@@ -171,7 +171,7 @@ export const AppearanceModal: React.FC = () => {
                     onClick={() => setPalette(p.id)}
                     className={`w-full p-3 rounded-xl border text-left transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       isSelected
-                        ? 'border-[#E0401F] bg-red-950/20 text-white'
+                        ? 'border-[#E0401F] bg-red-950/20 text-slate-900'
                         : 'border-gray-800 bg-gray-900/60 text-gray-300 hover:border-gray-700'
                     }`}
                   >
@@ -222,7 +222,7 @@ export const AppearanceModal: React.FC = () => {
         <div className="px-5 py-3 border-t border-gray-800 bg-gray-900/50 flex justify-end">
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-md shadow-red-950/40 transition-all"
+            className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-slate-900 text-xs font-bold shadow-md shadow-red-950/40 transition-all"
           >
             Áp dụng và Đóng
           </button>

@@ -32,14 +32,14 @@ const OrientationHint: React.FC = () => {
   const [dismissed, setDismissed] = React.useState(false);
   if (dismissed) return null;
   return (
-    <div className="md:hidden mb-4 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between gap-2 shadow-sm">
+    <div className="md:hidden mb-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-700 flex items-center justify-between gap-2 shadow-xs">
       <div className="flex items-center gap-1.5">
-        <Smartphone className="w-3.5 h-3.5 text-[#ff7556] shrink-0 rotate-90" />
+        <Smartphone className="w-3.5 h-3.5 text-blue-600 shrink-0 rotate-90" />
         <span>Xoay ngang hoặc mở trên máy tính để xem đầy đủ hơn.</span>
       </div>
       <button 
         onClick={() => setDismissed(true)}
-        className="text-slate-500 hover:text-white p-1"
+        className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
       >
         <X className="w-3 h-3" />
       </button>
@@ -52,11 +52,7 @@ const MainAppContent: React.FC = () => {
   const isCool = palette === 'cool';
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors duration-200 ${
-      isCool 
-        ? 'bg-[#f1f5f9] text-[#0f172a]' 
-        : 'bg-[#FBEFEC] text-[#1f1a18]'
-    } ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
+    <div className={`min-h-screen flex flex-col bg-white text-slate-900 ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
       {/* Ambient Progress Edge (4px peripheral awareness line) */}
       <AmbientProgressEdge />
 

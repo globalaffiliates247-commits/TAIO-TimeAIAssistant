@@ -42,9 +42,9 @@ export const DrilldownSheet: React.FC = () => {
       case 'tasks': {
         return (
           <div className="space-y-3">
-            <div className="text-xs text-gray-400 flex items-center justify-between pb-1 border-b border-gray-800">
+            <div className="text-xs text-slate-500 flex items-center justify-between pb-1 border-b border-slate-100">
               <span>Danh sách toàn bộ các việc hôm nay:</span>
-              <span className="text-indigo-400 font-semibold">1 chạm: Xong • Dời • Bỏ</span>
+              <span className="text-blue-600 font-semibold">1 chạm: Xong • Dời • Bỏ</span>
             </div>
 
             {blocks.map((block) => {
@@ -54,7 +54,7 @@ export const DrilldownSheet: React.FC = () => {
               const isExtended = block.status === 'extended';
 
               let statusLabel = 'Chưa đến giờ';
-              let statusClass = 'bg-gray-800 text-gray-300 border-gray-700';
+              let statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
 
               if (isDone) {
                 statusLabel = 'Đã xong';
@@ -75,31 +75,31 @@ export const DrilldownSheet: React.FC = () => {
                   key={block.id}
                   className={`p-3.5 rounded-xl border transition-all ${
                     isDone 
-                      ? 'bg-gray-900/40 border-gray-800 opacity-75' 
+                      ? 'bg-slate-50/40 border-slate-100 opacity-75' 
                       : isInProgress
                       ? 'bg-indigo-950/30 border-indigo-500/50 shadow-md shadow-indigo-500/10'
-                      : 'bg-gray-900 border-gray-800'
+                      : 'bg-slate-50 border-slate-100'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-300">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
                           {block.startTime} - {block.endTime}
                         </span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${statusClass}`}>
                           {statusLabel}
                         </span>
                         {block.type === 'deep' && (
-                          <span className="text-[10px] text-indigo-400 font-medium">● Việc sâu</span>
+                          <span className="text-[10px] text-blue-600 font-medium">● Việc sâu</span>
                         )}
                       </div>
-                      <h4 className={`text-sm font-bold ${isDone ? 'line-through text-gray-400' : 'text-white'}`}>
+                      <h4 className={`text-sm font-bold ${isDone ? 'line-through text-slate-500' : 'text-slate-900'}`}>
                         {block.title}
                       </h4>
                       {block.goalName && (
-                        <p className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1">
-                          <Target className="w-3 h-3 text-indigo-400" />
+                        <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
+                          <Target className="w-3 h-3 text-blue-600" />
                           <span>{block.goalName}</span>
                         </p>
                       )}
@@ -107,14 +107,14 @@ export const DrilldownSheet: React.FC = () => {
                   </div>
 
                   {/* 1-Tap Actions: Xong, Dời, Bỏ */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-gray-800/60">
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100/60">
                     <button
                       onClick={() => markTaskDone(block.id)}
                       disabled={isDone}
                       className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                         isDone
                           ? 'bg-emerald-950/30 text-emerald-500/50 cursor-not-allowed'
-                          : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                          : 'bg-emerald-600 hover:bg-emerald-500 text-slate-900 shadow-sm'
                       }`}
                       title="Đánh dấu hoàn thành ngay (1 chạm)"
                     >
@@ -136,8 +136,8 @@ export const DrilldownSheet: React.FC = () => {
                       disabled={isDropped}
                       className={`py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${
                         isDropped
-                          ? 'text-gray-600 bg-gray-900 cursor-not-allowed'
-                          : 'text-gray-400 hover:text-rose-300 bg-gray-800 hover:bg-rose-950/40 border border-gray-700 hover:border-rose-800/50'
+                          ? 'text-gray-600 bg-slate-50 cursor-not-allowed'
+                          : 'text-slate-500 hover:text-rose-300 bg-slate-100 hover:bg-rose-950/40 border border-slate-200 hover:border-rose-800/50'
                       }`}
                       title="Bỏ qua nhiệm vụ này (1 chạm)"
                     >
@@ -156,52 +156,52 @@ export const DrilldownSheet: React.FC = () => {
         const deepBlocks = blocks.filter(b => b.type === 'deep');
         return (
           <div className="space-y-3">
-            <div className="text-xs text-gray-400 flex items-center justify-between pb-1 border-b border-gray-800">
+            <div className="text-xs text-slate-500 flex items-center justify-between pb-1 border-b border-slate-100">
               <span>Danh sách các khối tập trung sâu chất lượng cao:</span>
-              <span className="text-indigo-400 font-semibold">{deepBlocks.length} khối</span>
+              <span className="text-blue-600 font-semibold">{deepBlocks.length} khối</span>
             </div>
 
             {deepBlocks.map(block => {
               const isDone = block.status === 'done';
               return (
-                <div key={block.id} className="p-3.5 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+                <div key={block.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-900/60 text-indigo-300 border border-indigo-700/50">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-900/60 text-blue-600 font-medium border border-indigo-700/50">
                         {profile.focusBlockDurationMins} PHÚT
                       </span>
-                      <span className="text-xs text-gray-300">{block.startTime} - {block.endTime}</span>
+                      <span className="text-xs text-slate-700">{block.startTime} - {block.endTime}</span>
                     </div>
                     <span className={`text-[11px] font-bold ${isDone ? 'text-emerald-400' : 'text-amber-400'}`}>
                       {isDone ? '✓ Đã hoàn thành' : 'Đang triển khai'}
                     </span>
                   </div>
 
-                  <h4 className="text-sm font-bold text-white">{block.title}</h4>
+                  <h4 className="text-sm font-bold text-slate-900">{block.title}</h4>
                   {block.goalName && (
-                    <p className="text-xs text-indigo-300">Mục tiêu: {block.goalName}</p>
+                    <p className="text-xs text-blue-600 font-medium">Mục tiêu: {block.goalName}</p>
                   )}
 
                   {/* 1-Tap Actions */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-gray-800">
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                     <button
                       onClick={() => markTaskDone(block.id)}
                       disabled={isDone}
-                      className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-slate-900 text-xs font-bold flex items-center justify-center gap-1"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Xong</span>
                     </button>
                     <button
                       onClick={() => shiftTaskTime(block.id, 30)}
-                      className="flex-1 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-sky-300 text-xs font-medium flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-sky-300 text-xs font-medium flex items-center justify-center gap-1"
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>Dời</span>
                     </button>
                     <button
                       onClick={() => dropTask(block.id)}
-                      className="py-1.5 px-3 rounded-lg bg-gray-800 hover:bg-rose-900/40 text-gray-400 hover:text-rose-300 text-xs flex items-center justify-center gap-1"
+                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-300 text-xs flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Bỏ</span>
@@ -224,28 +224,28 @@ export const DrilldownSheet: React.FC = () => {
             {/* Header breakdown */}
             <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/40 flex items-center justify-between text-xs">
               <div>
-                <span className="text-gray-400">Quỹ dự phòng:</span>
+                <span className="text-slate-500">Quỹ dự phòng:</span>
                 <p className="font-bold text-amber-300 text-sm mt-0.5">
                   Đã dùng {intUsedMins} / {profile.interruptionReserveMins} phút
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-gray-400">Còn lại an toàn:</span>
+                <span className="text-slate-500">Còn lại an toàn:</span>
                 <p className="font-bold text-emerald-400 text-sm mt-0.5">
                   {Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút
                 </p>
               </div>
             </div>
 
-            <div className="text-xs text-gray-400 pb-1 border-b border-gray-800">
+            <div className="text-xs text-slate-500 pb-1 border-b border-slate-100">
               Nhật ký chen ngang, kèm loại việc và người kéo bạn vào:
             </div>
 
             {interruptions.map((item) => (
-              <div key={item.id} className="p-3.5 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+              <div key={item.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-300">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
                       {item.timestamp}
                     </span>
                     <span className="text-xs font-bold text-amber-400">{item.minutes} phút</span>
@@ -258,26 +258,26 @@ export const DrilldownSheet: React.FC = () => {
                       ? 'bg-rose-500/20 text-rose-300'
                       : item.decision === 'delegate'
                       ? 'bg-purple-500/20 text-purple-300'
-                      : 'bg-indigo-500/20 text-indigo-300'
+                      : 'bg-indigo-500/20 text-blue-600 font-medium'
                   }`}>
                     {item.decision === 'do_now' ? 'Làm ngay (Trừ quỹ)' : item.decision === 'decline' ? 'Từ chối (Bảo vệ giờ)' : item.decision === 'delegate' ? 'Ủy quyền' : item.decision === 'go_social' ? 'Giao lưu' : 'Lên lịch'}
                   </span>
                 </div>
 
-                <h4 className="text-sm font-bold text-white">{item.title}</h4>
+                <h4 className="text-sm font-bold text-slate-900">{item.title}</h4>
 
                 {/* Source Person */}
-                <div className="p-2 rounded-lg bg-gray-950 border border-gray-800/80 flex items-center justify-between text-xs">
-                  <span className="text-gray-400 flex items-center gap-1.5">
+                <div className="p-2 rounded-lg bg-gray-950 border border-slate-100/80 flex items-center justify-between text-xs">
+                  <span className="text-slate-500 flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-amber-400" />
                     <span>Người kéo vào:</span>
                   </span>
-                  <span className="text-white font-medium">{item.sourcePerson || 'Đối tác bên ngoài'}</span>
+                  <span className="text-slate-900 font-medium">{item.sourcePerson || 'Đối tác bên ngoài'}</span>
                 </div>
 
                 {item.returnPoint && (
-                  <p className="text-[11px] text-indigo-300 bg-indigo-950/40 p-2 rounded-lg border border-indigo-800/30">
-                    <span className="font-semibold text-indigo-400">Điểm quay lại: </span>
+                  <p className="text-[11px] text-blue-600 font-medium bg-indigo-950/40 p-2 rounded-lg border border-indigo-800/30">
+                    <span className="font-semibold text-blue-600">Điểm quay lại: </span>
                     {item.returnPoint}
                   </p>
                 )}
@@ -296,17 +296,17 @@ export const DrilldownSheet: React.FC = () => {
             {targetGoal && (
               <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-800/50 space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-indigo-300 font-bold">{targetGoal.name}</span>
-                  <span className="text-white font-bold">{targetGoal.progressPercent}% hoàn thành</span>
+                  <span className="text-blue-600 font-medium font-bold">{targetGoal.name}</span>
+                  <span className="text-slate-900 font-bold">{targetGoal.progressPercent}% hoàn thành</span>
                 </div>
-                <p className="text-xs text-gray-300">{targetGoal.measurableResult}</p>
-                <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                <p className="text-xs text-slate-700">{targetGoal.measurableResult}</p>
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                   <div className="bg-indigo-500 h-full rounded-full" style={{ width: `${targetGoal.progressPercent}%` }} />
                 </div>
               </div>
             )}
 
-            <div className="text-xs text-gray-400 pb-1 border-b border-gray-800">
+            <div className="text-xs text-slate-500 pb-1 border-b border-slate-100">
               Các việc hôm nay phục vụ mục tiêu này ({goalTasks.length} việc):
             </div>
 
@@ -314,35 +314,35 @@ export const DrilldownSheet: React.FC = () => {
               <p className="text-xs text-gray-500 italic py-2">Chưa có nhiệm vụ nào được lên lịch hôm nay cho mục tiêu này.</p>
             ) : (
               goalTasks.map(block => (
-                <div key={block.id} className="p-3.5 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+                <div key={block.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-300">{block.startTime} - {block.endTime}</span>
+                    <span className="text-xs text-slate-700">{block.startTime} - {block.endTime}</span>
                     <span className={`text-[11px] font-bold ${block.status === 'done' ? 'text-emerald-400' : 'text-amber-400'}`}>
                       {block.status === 'done' ? '✓ Đã xong' : 'Đang lên lịch'}
                     </span>
                   </div>
-                  <h4 className="text-sm font-bold text-white">{block.title}</h4>
+                  <h4 className="text-sm font-bold text-slate-900">{block.title}</h4>
 
                   {/* 1-Tap Actions */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-gray-800">
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                     <button
                       onClick={() => markTaskDone(block.id)}
                       disabled={block.status === 'done'}
-                      className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-slate-900 text-xs font-bold flex items-center justify-center gap-1"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Xong</span>
                     </button>
                     <button
                       onClick={() => shiftTaskTime(block.id, 30)}
-                      className="flex-1 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-sky-300 text-xs font-medium flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-sky-300 text-xs font-medium flex items-center justify-center gap-1"
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>Dời</span>
                     </button>
                     <button
                       onClick={() => dropTask(block.id)}
-                      className="py-1.5 px-3 rounded-lg bg-gray-800 hover:bg-rose-900/40 text-gray-400 hover:text-rose-300 text-xs flex items-center justify-center gap-1"
+                      className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-900/40 text-slate-500 hover:text-rose-300 text-xs flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Bỏ</span>
@@ -364,22 +364,22 @@ export const DrilldownSheet: React.FC = () => {
             <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800/40 flex items-center justify-between text-xs">
               <div>
                 <span className="text-emerald-400 font-bold">Tổng thời gian bảo vệ:</span>
-                <p className="text-xl font-black text-white mt-0.5">+{totalProtected} phút</p>
+                <p className="text-xl font-black text-slate-900 mt-0.5">+{totalProtected} phút</p>
               </div>
               <span className="text-emerald-300 text-[11px] bg-emerald-900/50 px-2.5 py-1 rounded-full">
                 Từ chối / Ủy quyền thành công
               </span>
             </div>
 
-            <div className="text-xs text-gray-400 pb-1 border-b border-gray-800">
+            <div className="text-xs text-slate-500 pb-1 border-b border-slate-100">
               Chi tiết các yêu cầu chen ngang đã được xử lý để giữ nhịp tập trung:
             </div>
 
             {protectedItems.map(item => (
-              <div key={item.id} className="p-3 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-between text-xs">
+              <div key={item.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
                 <div>
-                  <h5 className="font-bold text-white">{item.title}</h5>
-                  <p className="text-gray-400 mt-0.5">Từ: {item.sourcePerson || 'Liên hệ ngoài'}</p>
+                  <h5 className="font-bold text-slate-900">{item.title}</h5>
+                  <p className="text-slate-500 mt-0.5">Từ: {item.sourcePerson || 'Liên hệ ngoài'}</p>
                 </div>
                 <div className="text-right">
                   <span className="font-bold text-emerald-400">+{item.minutes}p bảo vệ</span>
@@ -393,39 +393,39 @@ export const DrilldownSheet: React.FC = () => {
 
       case 'admin_stat': {
         const adminData = drilldown.adminData;
-        if (!adminData) return <p className="text-xs text-gray-400">Không có dữ liệu chi tiết.</p>;
+        if (!adminData) return <p className="text-xs text-slate-500">Không có dữ liệu chi tiết.</p>;
 
         return (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-indigo-950/40 border border-indigo-800/40">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-200">
               <div>
-                <span className="text-xs text-gray-400">{adminData.title}</span>
-                <p className="text-2xl font-black text-indigo-400 mt-0.5">{adminData.total}</p>
+                <span className="text-xs text-slate-500">{adminData.title}</span>
+                <p className="text-2xl font-black text-blue-600 mt-0.5">{adminData.total}</p>
               </div>
               <button
                 onClick={() => setIsAnonymous(!isAnonymous)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 border border-gray-700"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 border border-slate-200"
               >
                 {isAnonymous ? <EyeOff className="w-3.5 h-3.5 text-amber-400" /> : <Eye className="w-3.5 h-3.5 text-sky-400" />}
                 <span>{isAnonymous ? 'Chế độ ẩn danh (Bật)' : 'Hiện thông tin đầy đủ'}</span>
               </button>
             </div>
 
-            <div className="text-xs text-gray-400 pb-1 border-b border-gray-800">
+            <div className="text-xs text-slate-500 pb-1 border-b border-slate-100">
               Danh sách dữ liệu gốc ({adminData.items.length} bản ghi):
             </div>
 
             <div className="space-y-2">
               {adminData.items.map((item, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-between text-xs">
+                <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
                   <div>
-                    <div className="font-bold text-white">
+                    <div className="font-bold text-slate-900">
                       {isAnonymous ? `User #${idx + 101} (Ẩn danh)` : item.label}
                     </div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">{item.detail}</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">{item.detail}</div>
                   </div>
                   {item.badge && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-900/60 text-indigo-300 border border-indigo-700/50">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-900/60 text-blue-600 font-medium border border-indigo-700/50">
                       {item.badge}
                     </span>
                   )}
@@ -442,31 +442,31 @@ export const DrilldownSheet: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
       
       {/* Click outside backdrop to close */}
       <div className="absolute inset-0" onClick={closeDrilldown} />
 
       {/* Slide-up Bottom Sheet on Mobile, Centered Card on Desktop */}
-      <div className="relative bg-slate-900/95 border border-slate-800 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl p-5 sm:p-6 text-white border-t border-orange-500/40 sm:border animate-in slide-in-from-bottom-6 duration-300">
+      <div className="relative bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl p-5 sm:p-6 text-slate-900 animate-in slide-in-from-bottom-6 duration-300">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-800 mb-4 shrink-0">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 shrink-0">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-              <h3 className="text-base sm:text-lg font-bold text-white">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
                 {drilldown.title}
               </h3>
             </div>
             {drilldown.subtitle && (
-              <p className="text-xs text-indigo-300 mt-0.5">{drilldown.subtitle}</p>
+              <p className="text-xs text-blue-600 font-medium mt-0.5">{drilldown.subtitle}</p>
             )}
           </div>
 
           <button
             onClick={closeDrilldown}
-            className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            className="p-1.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
             title="Đóng bảng (hoặc bấm ra ngoài)"
           >
             <X className="w-5 h-5" />
@@ -479,10 +479,10 @@ export const DrilldownSheet: React.FC = () => {
         </div>
 
         {/* Bottom Close Button */}
-        <div className="pt-4 border-t border-gray-800 mt-4 shrink-0 flex justify-end">
+        <div className="pt-4 border-t border-slate-100 mt-4 shrink-0 flex justify-end">
           <button
             onClick={closeDrilldown}
-            className="px-5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-xs transition-colors"
+            className="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-medium text-xs transition-colors"
           >
             Đóng
           </button>

@@ -114,10 +114,10 @@ export const AchievementsTab: React.FC = () => {
     <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Activity className="w-5 h-5 text-orange-400" />
               <span>Hiệu quả & Dấu vết (Efficiency - PRD v0.22 B21)</span>
             </h2>
@@ -129,20 +129,20 @@ export const AchievementsTab: React.FC = () => {
               <HelpCircle className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             Thời gian đã đi đâu • Việc đã xong • Tiến độ dự án • Cuối ngày đóng ngày trong 2 phút
           </p>
         </div>
 
         {/* View mode segmented switcher & Close day button */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
+          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-xs">
             <button
               onClick={() => setViewMode('time')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'time' 
                   ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -153,7 +153,7 @@ export const AchievementsTab: React.FC = () => {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'tasks' 
                   ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <CheckSquare className="w-3.5 h-3.5" />
@@ -164,7 +164,7 @@ export const AchievementsTab: React.FC = () => {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'projects' 
                   ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <FolderKanban className="w-3.5 h-3.5" />
@@ -175,7 +175,7 @@ export const AchievementsTab: React.FC = () => {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'habits' 
                   ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Compass className="w-3.5 h-3.5" />
@@ -205,14 +205,14 @@ export const AchievementsTab: React.FC = () => {
         <div className="space-y-6 animate-in fade-in duration-200">
           
           {/* 1. 24-Hour Continuous Visual Ledger Bar */}
-          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <Clock className="w-4 h-4 text-orange-400" />
                   <span>Sổ cái thời gian 24 giờ liên tục (The 24-Hour Time Ledger)</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Theo Peter Drucker (1967): Mọi phút trong ngày đều thuộc chính xác 1 danh mục, không thể xóa bỏ hay vay mượn.
                 </p>
               </div>
@@ -220,7 +220,7 @@ export const AchievementsTab: React.FC = () => {
             </div>
 
             {/* Visual 24-Hour Colored Segment Bar */}
-            <div className="w-full h-8 rounded-2xl overflow-hidden flex bg-slate-950 border border-slate-800 shadow-inner">
+            <div className="w-full h-8 rounded-2xl overflow-hidden flex bg-slate-100 border border-slate-200 shadow-inner">
               {ledgerSegments.map((segment) => {
                 const widthPercent = (segment.durationMins / 1440) * 100;
                 const col = CATEGORY_COLORS[segment.category] || CATEGORY_COLORS.other;
@@ -241,12 +241,12 @@ export const AchievementsTab: React.FC = () => {
                 const mins = categoryTotals[catKey as TimeLedgerCategory] || 0;
                 const hrs = (mins / 60).toFixed(1);
                 return (
-                  <div key={catKey} className="p-2.5 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex flex-col justify-between">
+                  <div key={catKey} className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between shadow-xs">
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2.5 h-2.5 rounded-full ${col.bg} shrink-0`} />
-                      <span className="text-[11px] font-semibold text-slate-300 truncate">{col.labelVi}</span>
+                      <span className="text-[11px] font-semibold text-slate-700 truncate">{col.labelVi}</span>
                     </div>
-                    <p className="text-sm font-bold text-white mt-1">
+                    <p className="text-sm font-bold text-slate-900 mt-1">
                       {mins}p <span className="text-[10px] text-slate-400 font-normal">({hrs}h)</span>
                     </p>
                   </div>
@@ -258,7 +258,7 @@ export const AchievementsTab: React.FC = () => {
           {/* 2. Key Ledger Figures: Waking Goal Share & Distraction Tracker */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             
-            <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Tỷ lệ giờ thức cho mục tiêu
               </span>
@@ -268,7 +268,7 @@ export const AchievementsTab: React.FC = () => {
                 </span>
                 <span className="text-xs text-slate-400 font-medium">của giờ thức</span>
               </div>
-              <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
                 <div className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full" style={{ width: `${goalWorkRatio}%` }} />
               </div>
               <p className="text-[11px] text-slate-400 mt-2">
@@ -276,7 +276,7 @@ export const AchievementsTab: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Xao nhãng sau timebox (Distraction)
               </span>
@@ -286,7 +286,7 @@ export const AchievementsTab: React.FC = () => {
                 </span>
                 <span className="text-xs text-slate-400 font-medium">phút chưa khai báo</span>
               </div>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-slate-600">
                 Phát sinh khi timebox kết thúc quá vùng đệm 5 phút mà chưa tuyên bố việc tiếp theo.
               </p>
               <span className="text-[11px] text-orange-400 mt-2 cursor-pointer hover:underline" onClick={() => setViewMode('tasks')}>
@@ -294,7 +294,7 @@ export const AchievementsTab: React.FC = () => {
               </span>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Xu hướng so với 7 ngày trước
               </span>
@@ -303,7 +303,7 @@ export const AchievementsTab: React.FC = () => {
                 <span className="text-2xl font-bold text-emerald-400">+18%</span>
                 <span className="text-xs text-slate-400">thời gian việc sâu</span>
               </div>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-slate-600">
                 Trung bình việc sâu tuần này đạt 165p/ngày (so với 140p tuần trước).
               </p>
               <span className="text-[11px] text-slate-400 mt-2">
@@ -314,13 +314,13 @@ export const AchievementsTab: React.FC = () => {
           </div>
 
           {/* 3. Undeclared Time Gaps (PRD B10 & B1b) */}
-          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-5 shadow-2xl space-y-3">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Tag className="w-4 h-4 text-sky-400" />
                 <span>Khoảng thời gian chưa khai báo (Undeclared Gaps - 15p+)</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Gắn nhãn 1 chạm không phán xét để giúp hệ thống học thích ứng theo thói quen của bạn.
               </p>
             </div>
@@ -330,10 +330,10 @@ export const AchievementsTab: React.FC = () => {
             ) : (
               <div className="space-y-2.5">
                 {gaps.map((gap) => (
-                  <div key={gap.id} className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div key={gap.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-200">
+                        <span className="text-xs font-semibold text-slate-800">
                           {gap.start} - {gap.end} ({gap.durationMins} phút)
                         </span>
                         {gap.label && (
@@ -353,7 +353,7 @@ export const AchievementsTab: React.FC = () => {
                           className={`px-2.5 py-1 rounded-xl text-xs font-medium transition-colors ${
                             gap.label === item.key
                               ? 'bg-sky-600 text-white font-bold'
-                              : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
+                              : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-xs'
                           }`}
                         >
                           {item.label}
@@ -375,7 +375,7 @@ export const AchievementsTab: React.FC = () => {
           
           {/* Summary Cards: Done on time vs Done over time & Flow efficiency */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+            <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Xong đúng hẹn
               </span>
@@ -383,7 +383,7 @@ export const AchievementsTab: React.FC = () => {
               <span className="text-[11px] text-slate-400">Khớp chuẩn DoD & Timebox</span>
             </div>
 
-            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+            <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-amber-400" /> Xong quá giờ
               </span>
@@ -391,7 +391,7 @@ export const AchievementsTab: React.FC = () => {
               <span className="text-[11px] text-slate-400">+15p bù giờ ghi nhận</span>
             </div>
 
-            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+            <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                 <Activity className="w-3.5 h-3.5 text-orange-400" /> Flow Efficiency
               </span>
@@ -399,7 +399,7 @@ export const AchievementsTab: React.FC = () => {
               <span className="text-[11px] text-slate-400">Touch time / Cycle time (Lean)</span>
             </div>
 
-            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+            <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                 <Target className="w-3.5 h-3.5 text-sky-400" /> Độ chuẩn ước lượng
               </span>
@@ -409,9 +409,9 @@ export const AchievementsTab: React.FC = () => {
           </div>
 
           {/* Detailed Task Execution Breakdown */}
-          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <CheckSquare className="w-4 h-4 text-orange-400" />
                 <span>Chi tiết hiệu suất từng nhiệm vụ (Touch Time & Cycle Time)</span>
               </h3>
@@ -426,11 +426,11 @@ export const AchievementsTab: React.FC = () => {
                 const isDone = b.status === 'done';
 
                 return (
-                  <div key={b.id} className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div key={b.id} className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className={`w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-400' : b.status === 'in_progress' ? 'bg-orange-400 animate-pulse' : 'bg-slate-500'}`} />
-                        <h4 className="text-sm font-bold text-white">{b.title}</h4>
+                        <h4 className="text-sm font-bold text-slate-900">{b.title}</h4>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
                         <span>Mục tiêu: <strong className="text-slate-300">{b.goalName || 'Ngoài mục tiêu'}</strong></span>
@@ -443,7 +443,7 @@ export const AchievementsTab: React.FC = () => {
 
                     <div className="flex items-center gap-4 shrink-0">
                       <div className="text-right">
-                        <div className="text-xs font-semibold text-slate-200">
+                        <div className="text-xs font-semibold text-slate-800">
                           Touch: <strong className="text-orange-400">{touch}p</strong> / Cycle: <strong className="text-slate-400">{cycle}p</strong>
                         </div>
                         <div className="text-[11px] text-slate-400">
@@ -470,13 +470,13 @@ export const AchievementsTab: React.FC = () => {
       {viewMode === 'projects' && (
         <div className="space-y-6 animate-in fade-in duration-200">
           
-          <div className="bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <FolderKanban className="w-4 h-4 text-orange-400" />
                 <span>Tiến độ dự án & Kiểm soát sai lệch (Variance Analysis - PMBOK)</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Kế hoạch giờ vs Thực tế đã dùng • Dự báo khi hoàn thành (Forecast at Completion)
               </p>
             </div>
@@ -489,20 +489,20 @@ export const AchievementsTab: React.FC = () => {
                 const forecastHours = Math.round(actualHours + (plannedHours * (1 - g.progressPercent / 100)));
 
                 return (
-                  <div key={g.id} className="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+                  <div key={g.id} className="p-5 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-3 shadow-xs">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-orange-950/50 text-orange-400 border border-orange-800/40">
                           {g.workArea}
                         </span>
-                        <h4 className="text-base font-bold text-white">{g.name}</h4>
+                        <h4 className="text-base font-bold text-slate-900">{g.name}</h4>
                       </div>
                       <div className="text-xs font-mono text-slate-400">
                         Hạn chót: <strong className="text-slate-200">{g.deadline}</strong> ({g.horizonDays} ngày)
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-300 font-medium">
+                    <p className="text-xs text-slate-700 font-medium">
                       Kết quả đo lường: {g.measurableResult}
                     </p>
 
@@ -510,7 +510,7 @@ export const AchievementsTab: React.FC = () => {
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-400">
-                          Đã dùng: <strong className="text-white">{actualHours}h</strong> / Kế hoạch: <strong className="text-slate-300">{plannedHours}h</strong>
+                          Đã dùng: <strong className="text-slate-900">{actualHours}h</strong> / Kế hoạch: <strong className="text-slate-300">{plannedHours}h</strong>
                           {varianceHours <= 0 ? (
                             <span className="text-emerald-400 ml-1.5 font-semibold">({varianceHours}h tiết kiệm)</span>
                           ) : (
@@ -519,7 +519,7 @@ export const AchievementsTab: React.FC = () => {
                         </span>
                         <span className="text-orange-400 font-bold">{g.progressPercent}% hoàn thành</span>
                       </div>
-                      <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                      <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
                         <div 
                           className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full" 
                           style={{ width: `${g.progressPercent}%` }} 

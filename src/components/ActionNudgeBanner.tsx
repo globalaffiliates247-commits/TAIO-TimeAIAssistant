@@ -22,17 +22,17 @@ export const ActionNudgeBanner: React.FC = () => {
   const Icon = NUDGE_ICONS[actionNudge.type] || Bell;
 
   return (
-    <div className="bg-slate-900/90 border-b border-slate-700/60 text-white px-4 sm:px-6 py-2.5 shadow-xl backdrop-blur-xl sticky top-[57px] z-30 animate-in slide-in-from-top-2 duration-300">
+    <div className="bg-slate-50 border-b border-slate-200 text-slate-900 px-4 sm:px-6 py-2.5 shadow-xs sticky top-[57px] z-30 animate-in slide-in-from-top-2 duration-300">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         
         {/* Context info */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/25 text-[#E0401F] flex items-center justify-center shrink-0 shadow-sm">
+          <div className="w-8 h-8 rounded-xl bg-red-50 border border-red-200 text-[#E0401F] flex items-center justify-center shrink-0 shadow-sm">
             <Icon className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/15 text-red-300 border border-red-500/25">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
                 Nhắc nhở 1 hành động
               </span>
               {actionNudge.repeatCount > 1 && (
@@ -41,7 +41,7 @@ export const ActionNudgeBanner: React.FC = () => {
                 </span>
               )}
             </div>
-            <p className="text-xs sm:text-sm font-medium text-slate-200 mt-0.5">
+            <p className="text-xs sm:text-sm font-medium text-slate-800 mt-0.5">
               {actionNudge.context}
             </p>
           </div>
@@ -58,7 +58,7 @@ export const ActionNudgeBanner: React.FC = () => {
           </button>
           <button
             onClick={dismissActionNudge}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
             title="Tạm ẩn (nhắc lại sau 10-15 phút)"
           >
             <X className="w-4 h-4" />

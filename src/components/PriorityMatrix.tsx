@@ -113,7 +113,7 @@ export const PriorityMatrix: React.FC = () => {
         <div>
           <div className="flex items-start justify-between gap-3 mb-2.5">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-md">
+              <div className="p-2.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
                 {icon}
               </div>
               <div>
@@ -135,9 +135,9 @@ export const PriorityMatrix: React.FC = () => {
                 subtitle: `Các công việc thuộc góc phần tư Q${quadrantNum}`
               })}
               title="Bấm để xem danh sách chi tiết (WYSIWYG)"
-              className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 text-right cursor-pointer group transition-all"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs text-right cursor-pointer group transition-all"
             >
-              <div className="text-sm font-extrabold text-white group-hover:text-amber-400 transition-colors">
+              <div className="text-sm font-extrabold text-slate-900 group-hover:text-amber-400 transition-colors">
                 {tasks.length} việc
               </div>
               <div className="text-[10px] text-slate-400 font-mono">
@@ -156,21 +156,21 @@ export const PriorityMatrix: React.FC = () => {
             </span>
             <button
               onClick={() => setQuickAddQuadrant(quickAddQuadrant === quadrantNum ? null : quadrantNum)}
-              className="text-xs text-slate-200 hover:text-white flex items-center gap-1.5 font-semibold bg-slate-800/80 hover:bg-slate-700/90 px-3 py-1.5 rounded-xl transition-all border border-slate-700/60 shadow-sm"
+              className="text-xs text-slate-200 hover:text-slate-900 flex items-center gap-1.5 font-semibold bg-white hover:bg-slate-50 px-3 py-1.5 rounded-xl transition-all border border-slate-200 shadow-xs text-slate-700"
             >
-              <Plus className="w-3.5 h-3.5 text-white" /> Thêm nhanh
+              <Plus className="w-3.5 h-3.5 text-slate-900" /> Thêm nhanh
             </button>
           </div>
 
           {/* Inline Quick Add Form */}
           {quickAddQuadrant === quadrantNum && (
-            <div className="p-3.5 mb-3.5 bg-slate-900/95 border border-slate-700 rounded-2xl space-y-2.5 animate-in fade-in duration-200 shadow-xl">
+            <div className="p-3.5 mb-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5 animate-in fade-in duration-200 shadow-xs">
               <input
                 type="text"
                 placeholder="Tên công việc mới..."
                 value={quickAddTitle}
                 onChange={(e) => setQuickAddTitle(e.target.value)}
-                className="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500"
                 autoFocus
                 onKeyDown={(e) => { if (e.key === 'Enter') handleQuickAdd(quadrantNum); }}
               />
@@ -180,12 +180,12 @@ export const PriorityMatrix: React.FC = () => {
                   placeholder="Phút"
                   value={quickAddMinutes}
                   onChange={(e) => setQuickAddMinutes(Number(e.target.value))}
-                  className="w-20 bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white"
+                  className="w-20 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 shadow-xs"
                 />
                 <select
                   value={quickAddGoalId}
                   onChange={(e) => setQuickAddGoalId(e.target.value)}
-                  className="flex-1 bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 shadow-xs focus:outline-none"
                 >
                   <option value="">-- Thuộc mục tiêu nào? --</option>
                   {goals.map(g => (
@@ -194,7 +194,7 @@ export const PriorityMatrix: React.FC = () => {
                 </select>
                 <button
                   onClick={() => handleQuickAdd(quadrantNum)}
-                  className="px-4 py-1.5 bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold rounded-xl shadow-md transition-all"
+                  className="px-4 py-1.5 bg-[#E0401F] hover:bg-[#d03515] text-slate-900 text-xs font-bold rounded-xl shadow-md transition-all"
                 >
                   Lưu
                 </button>
@@ -205,7 +205,7 @@ export const PriorityMatrix: React.FC = () => {
           {/* Task List */}
           <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
             {tasks.length === 0 ? (
-              <div className="py-7 text-center text-xs text-slate-500 italic bg-slate-950/40 rounded-2xl border border-dashed border-slate-800">
+              <div className="py-7 text-center text-xs text-slate-500 italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                 Chưa có việc nào ở góc phần tư này
               </div>
             ) : (
@@ -214,12 +214,12 @@ export const PriorityMatrix: React.FC = () => {
                 return (
                   <div
                     key={task.id}
-                    className="p-3.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 rounded-2xl transition-all shadow-md group"
+                    className="p-3.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl transition-all shadow-xs group"
                   >
                     <div className="flex items-start justify-between gap-2.5">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`text-xs sm:text-sm font-bold ${task.status === 'done' ? 'line-through text-slate-500' : 'text-white'}`}>
+                          <p className={`text-xs sm:text-sm font-bold ${task.status === 'done' ? 'line-through text-slate-500' : 'text-slate-900'}`}>
                             {task.title}
                           </p>
                           {isOverdueAging && (
@@ -231,15 +231,15 @@ export const PriorityMatrix: React.FC = () => {
 
                         <div className="flex items-center gap-2 mt-2 flex-wrap text-xs text-slate-400">
                           {task.goalName ? (
-                            <span className="text-slate-200 bg-slate-900/90 px-2.5 py-0.5 rounded-full border border-slate-700/80 truncate max-w-[170px] font-medium text-[11px]">
+                            <span className="text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 font-semibold truncate max-w-[170px] font-medium text-[11px]">
                               {task.goalName}
                             </span>
                           ) : (
-                            <span className="text-slate-400 bg-slate-900/60 px-2 py-0.5 rounded-full text-[11px]">
+                            <span className="text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full text-[11px]">
                               Ngoài mục tiêu
                             </span>
                           )}
-                          <span className="flex items-center gap-1 text-slate-300 font-mono text-[11px]">
+                          <span className="flex items-center gap-1 text-slate-700 font-mono text-[11px]">
                             <Clock className="w-3 h-3 text-slate-400" /> {task.estimatedMinutes || 60}p
                           </span>
                         </div>
@@ -289,7 +289,7 @@ export const PriorityMatrix: React.FC = () => {
                         {quadrantNum !== 4 && (
                           <button
                             onClick={() => moveTaskQuadrant(task.id, 4)}
-                            className="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 font-bold"
+                            className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 font-bold"
                             title="Chuyển sang Q4: Bỏ qua"
                           >
                             Q4
@@ -318,28 +318,28 @@ export const PriorityMatrix: React.FC = () => {
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Educational Card: Eisenhower / Stephen Covey explanation */}
-      <div className="p-5 sm:p-6 bg-slate-900/80 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl">
+      <div className="p-5 sm:p-6 bg-white border border-slate-200 rounded-3xl shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#E0401F] to-orange-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-red-500/25">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#E0401F] to-orange-500 flex items-center justify-center text-slate-900 shrink-0 shadow-lg shadow-red-500/25">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 Ma trận Ưu tiên Eisenhower (Stephen Covey)
                 <span className="text-[10px] font-mono bg-red-500/15 text-red-300 px-2.5 py-0.5 rounded-full border border-red-500/30 font-bold">
                   PRD v0.11 B16
                 </span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-                Phân loại công việc theo <strong className="text-white">Tầm quan trọng</strong> và <strong className="text-white">Tính khẩn cấp</strong> để thoát khỏi vòng xoáy chữa cháy.
+              <p className="text-xs sm:text-sm text-slate-700 mt-0.5">
+                Phân loại công việc theo <strong className="text-slate-900">Tầm quan trọng</strong> và <strong className="text-slate-900">Tính khẩn cấp</strong> để thoát khỏi vòng xoáy chữa cháy.
               </p>
             </div>
           </div>
 
           <button
             onClick={() => setShowEduCard(!showEduCard)}
-            className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-900 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
             title={showEduCard ? 'Thu gọn giải thích' : 'Mở rộng giải thích'}
           >
             {showEduCard ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -347,7 +347,7 @@ export const PriorityMatrix: React.FC = () => {
         </div>
 
         {showEduCard && (
-          <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs text-slate-300">
+          <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs text-slate-700">
             <div className="p-3.5 bg-rose-500/10 border border-rose-500/25 rounded-2xl">
               <span className="font-bold text-rose-400 block mb-1">Q1: Làm ngay</span>
               Khẩn cấp + Quan trọng. Khủng hoảng, hạn chót sát nút. Cần giải quyết ngay lập tức.
@@ -360,8 +360,8 @@ export const PriorityMatrix: React.FC = () => {
               <span className="font-bold text-amber-400 block mb-1">Q3: Cắt gọn / Ủy quyền</span>
               Khẩn cấp + Không quan trọng. Cuộc gọi gián đoạn, việc nhờ vả. Cần giao việc hoặc nói không khéo léo.
             </div>
-            <div className="p-3.5 bg-slate-800/60 border border-slate-700/60 rounded-2xl">
-              <span className="font-bold text-slate-300 block mb-1">Q4: Bỏ qua / Loại trừ</span>
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+              <span className="font-bold text-slate-700 block mb-1">Q4: Bỏ qua / Loại trừ</span>
               Không khẩn + Không quan trọng. Lướt mạng vô thức, việc thừa. Cần dũng cảm loại bỏ khỏi lịch trình.
             </div>
           </div>
@@ -369,10 +369,10 @@ export const PriorityMatrix: React.FC = () => {
       </div>
 
       {/* Balance Signal Bar (Thanh tín hiệu cân bằng) */}
-      <div className="p-5 sm:p-6 bg-slate-900/80 border border-slate-800 rounded-3xl shadow-xl backdrop-blur-xl">
+      <div className="p-5 sm:p-6 bg-white border border-slate-200 rounded-3xl shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
           <div>
-            <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+            <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#E0401F]" />
               Tín hiệu Cân bằng Phân bổ Thời gian
             </h3>
@@ -388,7 +388,7 @@ export const PriorityMatrix: React.FC = () => {
         </div>
 
         {/* Progress bar split */}
-        <div className="w-full h-4 bg-slate-950 rounded-full overflow-hidden flex p-0.5 gap-1 border border-slate-800">
+        <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex p-0.5 gap-1 border border-slate-200">
           <div 
             style={{ width: `${q1Pct}%` }} 
             className="h-full bg-gradient-to-r from-rose-500 to-rose-600 rounded-l-full transition-all" 
@@ -485,8 +485,8 @@ export const PriorityMatrix: React.FC = () => {
           {
             cardBg: 'bg-gradient-to-b from-slate-900/40 to-slate-900/80',
             borderColor: 'border-slate-700/60',
-            titleColor: 'text-slate-300',
-            badgeColor: 'bg-slate-800 text-slate-400 border border-slate-700',
+            titleColor: 'text-slate-700',
+            badgeColor: 'bg-slate-100 text-slate-600 border border-slate-200',
             btnBg: 'bg-slate-700 hover:bg-slate-600'
           }
         )}

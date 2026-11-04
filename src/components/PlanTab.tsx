@@ -72,28 +72,28 @@ export const PlanTab: React.FC = () => {
     <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
       
       {/* Header and Add button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E0401F] to-orange-500 flex items-center justify-center text-white shadow-md shadow-red-500/25">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E0401F] to-orange-500 flex items-center justify-center text-slate-900 shadow-md shadow-red-500/25">
               <Calendar className="w-4 h-4" />
             </div>
             <span>Kế hoạch thời gian (Plan)</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Xem và định hình ngày hôm nay cũng như tuần này • Chuyển đổi giữa Dòng thời gian & Ma trận ưu tiên
           </p>
         </div>
 
         {/* View Switcher: Daily Card vs Timeline vs Priority Matrix (B25) */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center bg-slate-900/90 p-1 rounded-2xl border border-slate-800 shadow-md">
+          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-xs">
             <button
               onClick={() => setActiveView('card')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'card' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-red-500/25' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-slate-900 shadow-md shadow-red-500/25' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -103,8 +103,8 @@ export const PlanTab: React.FC = () => {
               onClick={() => setActiveView('timeline')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'timeline' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-red-500/25' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-slate-900 shadow-md shadow-red-500/25' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
@@ -114,8 +114,8 @@ export const PlanTab: React.FC = () => {
               onClick={() => setActiveView('matrix')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'matrix' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-red-500/25' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-slate-900 shadow-md shadow-red-500/25' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -125,7 +125,7 @@ export const PlanTab: React.FC = () => {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 shadow-sm transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold border border-slate-200 shadow-xs transition-all"
           >
             <Plus className="w-4 h-4 text-[#E0401F]" />
             <span>Thêm khối</span>
@@ -138,9 +138,9 @@ export const PlanTab: React.FC = () => {
       {activeView === 'timeline' && (
         <>
           {/* Weekly Budget Progress (PRD B6) */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Layers className="w-4 h-4 text-[#E0401F]" />
                 <span>Ngân sách tuần (Weekly Budget)</span>
               </h3>
@@ -157,14 +157,14 @@ export const PlanTab: React.FC = () => {
                     subtitle: `Ngân sách tuần: ${g.dailyBudgetMins * 5 / 60}h/tuần • Đang đúng tiến độ`,
                     goalId: g.id,
                   })}
-                  className="space-y-1.5 p-3 rounded-2xl hover:bg-slate-800/60 border border-transparent hover:border-slate-700/60 transition-all cursor-pointer group"
+                  className="space-y-1.5 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all cursor-pointer group"
                   title="Bấm để xem danh sách nhiệm vụ của mục tiêu này"
                 >
                   <div className="flex items-center justify-between text-xs sm:text-sm">
-                    <span className="text-slate-200 font-semibold group-hover:text-white transition-colors">{g.name}</span>
+                    <span className="text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">{g.name}</span>
                     <span className="text-slate-400 font-mono text-xs">{g.dailyBudgetMins * 5 / 60}h/tuần (~{g.dailyBudgetMins}p/ngày) ↗</span>
                   </div>
-                  <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
                     <div 
                       className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full group-hover:brightness-110 transition-all" 
                       style={{ width: `${Math.min(100, (g.progressPercent + 20))}%` }} 
@@ -180,14 +180,14 @@ export const PlanTab: React.FC = () => {
                   title: 'Quỹ dự phòng gián đoạn tuần (3.5h / 7.5h)',
                   subtitle: 'Bấm để xem danh sách việc chen ngang và người kéo bạn vào',
                 })}
-                className="space-y-1.5 p-3 rounded-2xl hover:bg-slate-800/60 border border-transparent hover:border-slate-700/60 transition-all cursor-pointer group"
+                className="space-y-1.5 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all cursor-pointer group"
                 title="Bấm để xem nhật ký chen ngang"
               >
                 <div className="flex items-center justify-between text-xs sm:text-sm">
                   <span className="text-amber-300 font-semibold group-hover:text-amber-200">Quỹ dự phòng gián đoạn tuần</span>
                   <span className="text-amber-400 font-mono text-xs">Đã dùng 3.5h / 7.5h (Còn 53%) ↗</span>
                 </div>
-                <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
                   <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full group-hover:brightness-110 transition-all" style={{ width: '47%' }} />
                 </div>
               </div>
@@ -195,14 +195,14 @@ export const PlanTab: React.FC = () => {
           </div>
 
           {/* Daily Plan Timeline */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-              <h3 className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#E0401F]" />
                 <span>Dòng thời gian hôm nay (Daily Timeline)</span>
               </h3>
               <span className="text-xs text-slate-400">
-                Hồ sơ: <strong className="text-white">{profile.title}</strong>
+                Hồ sơ: <strong className="text-slate-900">{profile.title}</strong>
               </span>
             </div>
 
@@ -218,15 +218,15 @@ export const PlanTab: React.FC = () => {
                     key={block.id}
                     className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       isCurrent 
-                        ? 'border-red-500/60 bg-red-950/20 ring-1 ring-red-500/40 shadow-lg'
+                        ? 'border-red-300 bg-red-50/70 ring-1 ring-red-400/40 shadow-xs'
                         : isCompleted
-                        ? 'border-slate-800/60 bg-slate-900/40 opacity-70'
-                        : 'border-slate-700/60 bg-slate-800/70 hover:border-slate-600 hover:bg-slate-800/90'
+                        ? 'border-slate-200 bg-slate-50/70 opacity-70'
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-xs'
                     }`}
                   >
                     <div className="flex items-start sm:items-center gap-3.5">
                       {/* Time Badge */}
-                      <div className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/70 text-slate-300 text-xs font-mono font-bold whitespace-nowrap">
+                      <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-bold whitespace-nowrap">
                         {block.startTime} - {block.endTime}
                       </div>
 
@@ -246,7 +246,7 @@ export const PlanTab: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <h4 className={`text-sm sm:text-base font-bold mt-1 ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                        <h4 className={`text-sm sm:text-base font-bold mt-1 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
                           {block.title}
                         </h4>
                         {block.goalName && (
@@ -259,7 +259,7 @@ export const PlanTab: React.FC = () => {
                     </div>
 
                     {block.returnPoint && (
-                      <div className="text-xs bg-slate-900/90 border border-slate-700/60 px-3.5 py-2 rounded-xl text-slate-300 max-w-xs truncate shadow-sm">
+                      <div className="text-xs bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-700 max-w-xs truncate shadow-xs">
                         <span className="font-bold text-amber-400">Điểm về: </span>
                         {block.returnPoint}
                       </div>
@@ -271,10 +271,10 @@ export const PlanTab: React.FC = () => {
           </div>
 
           {/* Important, Not Urgent List (PRD B6) */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-400" />
                   <span>Việc quan trọng, không khẩn cấp (Important, Not Urgent)</span>
                 </h3>
@@ -286,14 +286,14 @@ export const PlanTab: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {IMPORTANT_NOT_URGENT_BACKLOG.map(item => (
-                <div key={item.id} className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between gap-3 shadow-md hover:border-slate-600 transition-all">
+                <div key={item.id} className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-xs hover:border-slate-300 transition-all">
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-white">{item.title}</h4>
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900">{item.title}</h4>
                     <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">Dự kiến: {item.defaultMinutes} phút</span>
                   </div>
                   <button
                     onClick={() => handleAcceptBacklogItem(item)}
-                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#d03515] hover:to-orange-600 text-white text-xs font-bold shadow-md shadow-red-500/20 transition-all shrink-0"
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#d03515] hover:to-orange-600 text-slate-900 text-xs font-bold shadow-md shadow-red-500/20 transition-all shrink-0"
                   >
                     Làm tuần này
                   </button>
@@ -307,7 +307,7 @@ export const PlanTab: React.FC = () => {
       {/* Add Block Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-white">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-slate-900">
             <h3 className="text-base font-bold mb-4">Thêm khối thời gian mới</h3>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
@@ -318,7 +318,7 @@ export const PlanTab: React.FC = () => {
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
                   placeholder="Ví dụ: Rà soát hợp đồng..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
                 />
               </div>
 
@@ -329,7 +329,7 @@ export const PlanTab: React.FC = () => {
                     type="time"
                     value={newStartTime}
                     onChange={e => setNewStartTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -338,7 +338,7 @@ export const PlanTab: React.FC = () => {
                     type="time"
                     value={newEndTime}
                     onChange={e => setNewEndTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
                   />
                 </div>
               </div>
@@ -348,7 +348,7 @@ export const PlanTab: React.FC = () => {
                 <select
                   value={newType}
                   onChange={e => setNewType(e.target.value as BlockType)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
                 >
                   <option value="deep">Tập trung sâu (Deep Work)</option>
                   <option value="meeting">Họp hành (Meeting)</option>
@@ -363,7 +363,7 @@ export const PlanTab: React.FC = () => {
                 <select
                   value={newGoalId}
                   onChange={e => setNewGoalId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-900 focus:outline-none"
                 >
                   <option value="">Ngoài mục tiêu chính (Outside goals)</option>
                   {goals.map(g => (
@@ -376,13 +376,13 @@ export const PlanTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl text-slate-400 hover:text-slate-900 text-xs font-semibold"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white font-bold text-xs shadow-md shadow-red-500/25"
+                  className="px-5 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-slate-900 font-bold text-xs shadow-md shadow-red-500/25"
                 >
                   Thêm vào lịch
                 </button>

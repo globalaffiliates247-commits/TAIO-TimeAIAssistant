@@ -143,14 +143,14 @@ export const NowTab: React.FC = () => {
       
       {/* Off-plan Warning Banner (PRD v0.8 B5) */}
       {isOffPlan && (
-        <div className="bg-rose-500/10 border border-rose-500/30 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl backdrop-blur-xl">
+        <div className="bg-rose-50 border border-rose-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-2xl bg-rose-500/20 text-rose-400">
-              <AlertTriangle className="w-5 h-5 text-rose-400" />
+            <div className="p-2.5 rounded-2xl bg-rose-100 text-rose-600">
+              <AlertTriangle className="w-5 h-5 text-rose-600" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-rose-300">Đang ngoài kế hoạch (Off-plan: {offPlanMinutes} phút)</h4>
-              <p className="text-xs text-slate-300 mt-0.5">
+              <h4 className="text-sm font-bold text-rose-900">Đang ngoài kế hoạch (Off-plan: {offPlanMinutes} phút)</h4>
+              <p className="text-xs text-rose-700 mt-0.5">
                 Bạn đang lệch mốc dự kiến {offPlanMinutes} phút. Hãy đưa ra 1 lựa chọn nhanh:
               </p>
             </div>
@@ -158,13 +158,15 @@ export const NowTab: React.FC = () => {
           <div className="flex items-center gap-2 self-end sm:self-center">
             <button
               onClick={() => setInterruptionModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700"
+              className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 border border-slate-300 shadow-xs"
             >
               Ghi nhận việc này
             </button>
             <button
               onClick={backToPlan}
-              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 text-xs font-bold text-white shadow-md shadow-red-500/25"
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold text-white shadow-sm ${
+                isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#d03515]'
+              }`}
             >
               Quay lại kế hoạch
             </button>
@@ -174,16 +176,16 @@ export const NowTab: React.FC = () => {
 
       {/* Return Point Prompt if returning from interruption (PRD B5) */}
       {activeReturnPoint && !isOffPlan && (
-        <div className="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3 shadow-xl backdrop-blur-xl">
-          <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+          <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wide">
+              <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">
                 Điểm quay lại của bạn (Return Point):
               </span>
-              <span className="text-[11px] text-slate-400">Đã lưu từ lúc có việc phát sinh</span>
+              <span className="text-[11px] text-amber-600">Đã lưu từ lúc có việc phát sinh</span>
             </div>
-            <p className="text-sm text-slate-100 font-medium mt-1">
+            <p className="text-sm text-amber-950 font-medium mt-1">
               "{activeReturnPoint}"
             </p>
           </div>
@@ -191,26 +193,22 @@ export const NowTab: React.FC = () => {
       )}
 
       {/* Master Card: Who am I? Where am I? What am I doing? (PRD v0.8 B5 & v0.22 B19/B23) */}
-      <div className={`rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden transition-all border ${
-        isCool ? 'bg-white border-slate-200 text-slate-800' : 'bg-white border-stone-200 text-stone-900'
-      }`}>
+      <div className="rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden transition-all border bg-white border-slate-200 text-slate-900">
         {/* Subtle accent glow */}
-        <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none opacity-10 ${
+        <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none opacity-5 ${
           isCool ? 'bg-blue-500' : 'bg-red-500'
         }`} />
 
         {/* Top Header & Role Selector (Who am I?) */}
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 mb-6 ${
-          isCool ? 'border-slate-100' : 'border-stone-100'
-        }`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-6">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-600">
               Trọng tâm hiện tại (Bây giờ - Now)
             </h2>
             
             {/* Role Chip (PRD B5: Who am I right now?) */}
-            <div className="flex items-center gap-1.5 ml-1 bg-slate-100 border border-slate-200/80 rounded-full px-3 py-1">
+            <div className="flex items-center gap-1.5 ml-1 bg-slate-50 border border-slate-200 rounded-full px-3 py-1 shadow-xs">
               <UserCheck className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
               <span className="text-[11px] text-slate-500">Vai trò:</span>
               <select
@@ -237,7 +235,7 @@ export const NowTab: React.FC = () => {
               className={`text-xs px-3 py-1.5 rounded-xl border transition-all font-semibold ${
                 isOffPlan 
                   ? 'bg-rose-50 text-rose-600 border-rose-200 font-bold' 
-                  : 'bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200'
+                  : 'bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 shadow-xs'
               }`}
             >
               {isOffPlan ? '● Đang Lệch kế hoạch' : 'Giả lập Lệch kế hoạch'}
@@ -246,31 +244,27 @@ export const NowTab: React.FC = () => {
         </div>
 
         {/* B19: Always visible 4-Number Time Ledger Glance */}
-        <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 p-3.5 rounded-2xl border text-xs ${
-          isCool ? 'bg-slate-50/80 border-slate-200/80' : 'bg-stone-50/80 border-stone-200/80'
-        }`}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 p-3.5 rounded-2xl border text-xs bg-slate-50/90 border-slate-200 shadow-xs">
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 uppercase font-semibold">1. Việc mục tiêu</span>
-            <span className={`text-sm font-black ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>285 phút</span>
+            <span className={`text-base font-black ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>285 phút</span>
           </div>
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 uppercase font-semibold">2. Chen ngang</span>
-            <span className="text-sm font-black text-amber-600">{intUsedMins} / {profile.interruptionReserveMins}p</span>
+            <span className="text-base font-black text-amber-600">{intUsedMins} / {profile.interruptionReserveMins}p</span>
           </div>
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 uppercase font-semibold">3. Xao nhãng (v0.3.9)</span>
-            <span className="text-sm font-black text-rose-600">45 phút</span>
+            <span className="text-base font-black text-rose-600">45 phút</span>
           </div>
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 uppercase font-semibold">4. Thời gian ngày còn</span>
-            <span className="text-sm font-black text-emerald-600">3 giờ 30 phút</span>
+            <span className="text-base font-black text-emerald-600">3 giờ 30 phút</span>
           </div>
         </div>
 
         {/* B5: Where am I? (Breadcrumb Chain in Goal) */}
-        <div className={`mb-6 p-3.5 rounded-2xl border flex items-center gap-2 text-xs overflow-x-auto ${
-          isCool ? 'bg-blue-50/40 border-blue-100 text-slate-700' : 'bg-amber-50/40 border-amber-100 text-stone-700'
-        }`}>
+        <div className="mb-6 p-3.5 rounded-2xl border flex items-center gap-2 text-xs overflow-x-auto bg-slate-50/80 border-slate-200 text-slate-700 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">
             Bạn đang ở đâu:
           </span>
@@ -288,20 +282,22 @@ export const NowTab: React.FC = () => {
         {/* Question 1: What am I doing right now? */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-            <div className="text-xs font-bold text-slate-400 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-red-500/15 text-red-400 text-xs flex items-center justify-center font-bold">1</span>
+            <div className="text-xs font-bold text-slate-600 flex items-center gap-2">
+              <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold ${
+                isCool ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-[#E0401F]'
+              }`}>1</span>
               <span>BẠN ĐANG LÀM GÌ NGAY LÚC NÀY?</span>
             </div>
 
             {/* B23: Task End Type Segmented Selector */}
-            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-700/70 self-start sm:self-auto">
-              <span className="text-[10px] text-slate-400 font-bold px-1.5">Cách kết thúc:</span>
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+              <span className="text-[10px] text-slate-500 font-bold px-1.5">Cách kết thúc:</span>
               <button
                 onClick={() => handleSetEndType('timebox')}
                 className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
                   currentEndType === 'timebox'
-                    ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E0401F] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
                 title="Hết giờ chuyển việc, bất kể xong 80% hay 100% (Đếm ngược)"
               >
@@ -311,8 +307,8 @@ export const NowTab: React.FC = () => {
                 onClick={() => handleSetEndType('until_done_pausable')}
                 className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
                   currentEndType === 'until_done_pausable'
-                    ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E0401F] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
                 title="Chạy đến khi đánh dấu xong, có thể tạm dừng (Đếm tiến)"
               >
@@ -322,8 +318,8 @@ export const NowTab: React.FC = () => {
                 onClick={() => handleSetEndType('until_done_atomic')}
                 className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
                   currentEndType === 'until_done_atomic'
-                    ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E0401F] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
                 title="Khối nguyên tử: Không thể ngắt quãng, chỉ xếp lịch việc phát sinh sau"
               >
@@ -332,29 +328,31 @@ export const NowTab: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-md">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/90 p-5 rounded-2xl border border-slate-200 shadow-xs">
             <div>
               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-500/15 text-red-300 border border-red-500/30">
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                  isCool ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-red-50 text-red-700 border-red-200'
+                }`}>
                   TẬP TRUNG SÂU (DEEP WORK)
                 </span>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-500 font-mono font-medium">
                   {currentBlock?.startTime || '14:00'} - {currentBlock?.endTime || '15:30'}
                 </span>
                 {currentEndType === 'until_done_atomic' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-950/80 text-purple-300 border border-purple-800/50">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
                     <Lock className="w-3 h-3" />
                     Không làm phiền (Atomic block)
                   </span>
                 )}
               </div>
-              <h1 className="text-lg sm:text-xl font-extrabold text-white">
+              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">
                 {currentBlock?.title || 'Phát triển màn hình Now & cơ chế Interruption Card'}
               </h1>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-bold border border-emerald-500/30">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 Đang diễn ra
               </span>
             </div>
@@ -363,8 +361,8 @@ export const NowTab: React.FC = () => {
 
         {/* Question 2: Which big goal does it serve? */}
         <div className="mb-6">
-          <div className="text-xs font-bold text-slate-400 flex items-center gap-2 mb-2">
-            <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs flex items-center justify-center font-bold">2</span>
+          <div className="text-xs font-bold text-slate-600 flex items-center gap-2 mb-2">
+            <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs flex items-center justify-center font-bold">2</span>
             <span>PHỤC VỤ MỤC TIÊU LỚN NÀO?</span>
           </div>
           <div 
@@ -378,8 +376,8 @@ export const NowTab: React.FC = () => {
                 });
               }
             }}
-            className={`bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-md transition-all ${
-              linkedGoal ? 'cursor-pointer hover:border-red-500/50 hover:bg-slate-800 group' : ''
+            className={`bg-slate-50/90 p-5 rounded-2xl border border-slate-200 shadow-xs transition-all ${
+              linkedGoal ? 'cursor-pointer hover:border-slate-300 hover:bg-slate-100/60 group' : ''
             }`}
             title={linkedGoal ? 'Bấm để mở danh sách các việc hôm nay phục vụ mục tiêu này (WYSIWYG)' : ''}
           >
@@ -387,28 +385,32 @@ export const NowTab: React.FC = () => {
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
-                    <span className="font-bold text-white text-sm sm:text-base group-hover:text-red-300 transition-colors">{linkedGoal.name}</span>
+                    <Target className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+                      isCool ? 'text-blue-600' : 'text-[#E0401F]'
+                    }`} />
+                    <span className="font-bold text-slate-900 text-sm sm:text-base">{linkedGoal.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-red-400">{linkedGoal.progressPercent}% hoàn thành</span>
-                    <span className="text-[10px] text-slate-300 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-700">Chi tiết ↗</span>
+                    <span className={`text-xs font-bold ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>{linkedGoal.progressPercent}% hoàn thành</span>
+                    <span className="text-[10px] text-slate-600 bg-white px-2 py-0.5 rounded-full border border-slate-200 shadow-xs font-semibold">Chi tiết ↗</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-300">
-                  <span className="text-slate-400 font-medium">Kết quả đo lường: </span>
+                <p className="text-xs text-slate-600">
+                  <span className="text-slate-500 font-medium">Kết quả đo lường: </span>
                   {linkedGoal.measurableResult}
                 </p>
                 {/* Progress bar */}
-                <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
                   <div 
-                    className="bg-gradient-to-r from-[#E0401F] to-orange-500 h-full rounded-full transition-all duration-500" 
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      isCool ? 'bg-blue-600' : 'bg-gradient-to-r from-[#E0401F] to-orange-500'
+                    }`}
                     style={{ width: `${linkedGoal.progressPercent}%` }} 
                   />
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-slate-400 italic">
+              <div className="text-xs text-slate-500 italic">
                 Công việc này đang được phân loại "Ngoài mục tiêu lớn"
               </div>
             )}
@@ -418,12 +420,12 @@ export const NowTab: React.FC = () => {
         {/* Question 3: Clock direction follows B19 / B23 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* Timer Display */}
-          <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-md flex flex-col justify-between">
+          <div className="bg-slate-50/90 p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {currentEndType === 'timebox' ? '3. THỜI GIAN CÒN LẠI (TIMEBOX):' : '3. THỜI GIAN ĐÃ CHẠY (UNTIL DONE):'}
               </span>
-              <span className="text-[11px] font-mono text-slate-400">
+              <span className="text-[11px] font-mono text-slate-500 font-semibold">
                 {currentEndType === 'timebox' ? `Hộp: ${profile.focusBlockDurationMins}p` : `Giới hạn: ${userTimeLimit}p`}
               </span>
             </div>
@@ -432,30 +434,30 @@ export const NowTab: React.FC = () => {
             {currentEndType === 'timebox' ? (
               // Case A: Timebox counts down
               <div className="py-2 flex items-baseline gap-3">
-                <span className="text-5xl font-mono font-extrabold text-white tracking-tight">
+                <span className="text-5xl font-mono font-black text-slate-900 tracking-tight">
                   {timerMinutesRemaining}
                 </span>
-                <span className="text-lg text-slate-400 font-bold">phút đếm ngược</span>
+                <span className="text-lg text-slate-500 font-bold">phút đếm ngược</span>
               </div>
             ) : (
               // Case B: Until done counts UP (elapsed) with faint marker at user limit
               <div className="py-2 space-y-2">
                 <div className="flex items-baseline gap-3">
-                  <span className={`text-5xl font-mono font-extrabold tracking-tight ${isOverTimeLimit ? 'text-amber-400' : 'text-white'}`}>
+                  <span className={`text-5xl font-mono font-black tracking-tight ${isOverTimeLimit ? 'text-amber-600' : 'text-slate-900'}`}>
                     +{elapsedMinutes}
                   </span>
-                  <span className="text-lg text-slate-400 font-bold">phút trôi qua</span>
+                  <span className="text-lg text-slate-500 font-bold">phút trôi qua</span>
                 </div>
                 {/* Visual marker at user appetite limit */}
-                <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800 relative">
+                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden relative">
                   <div 
-                    className={`h-full rounded-full transition-all ${isOverTimeLimit ? 'bg-amber-400' : 'bg-gradient-to-r from-emerald-500 to-teal-500'}`}
+                    className={`h-full rounded-full transition-all ${isOverTimeLimit ? 'bg-amber-500' : 'bg-emerald-500'}`}
                     style={{ width: `${Math.min(100, (elapsedMinutes / userTimeLimit) * 100)}%` }}
                   />
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
                   <span>Mốc giới hạn khẩu vị: <strong>{userTimeLimit} phút</strong></span>
-                  <span className={isOverTimeLimit ? 'text-amber-400 font-bold' : 'text-emerald-400'}>
+                  <span className={isOverTimeLimit ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'}>
                     {isOverTimeLimit ? `Đã quá ${elapsedMinutes - userTimeLimit}p` : `Còn ${userTimeLimit - elapsedMinutes}p trong hạn`}
                   </span>
                 </div>
@@ -464,18 +466,18 @@ export const NowTab: React.FC = () => {
 
             {/* Overrun Notice for Until-Done Tasks (PRD v0.22 B19 / B23) */}
             {isOverTimeLimit && (
-              <div className="my-2 p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs space-y-2 animate-in fade-in">
+              <div className="my-2 p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-2 animate-in fade-in">
                 <div className="flex items-center gap-1.5 font-bold">
-                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
                   <span>Quá giới hạn {userTimeLimit} phút của bạn; việc kế tiếp sẽ dời 20 phút.</span>
                 </div>
-                <p className="text-[11px] text-slate-300">
+                <p className="text-[11px] text-slate-600">
                   Bạn có toàn quyền quyết định: hoàn thành ngay, tiếp tục chạy, hoặc để lại làm tiếp sau.
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={handleFinishEarly}
-                    className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs"
+                    className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs"
                   >
                     Hoàn thành
                   </button>
@@ -484,13 +486,13 @@ export const NowTab: React.FC = () => {
                       handleAddExtraTime(30);
                       setShowOverrunNotice(false);
                     }}
-                    className="flex-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700"
+                    className="flex-1 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-300 shadow-xs"
                   >
                     Tiếp tục (+30p)
                   </button>
                   <button
                     onClick={handleFinishEarly}
-                    className="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs"
+                    className="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-xs"
                   >
                     Để lại làm sau
                   </button>
@@ -499,13 +501,13 @@ export const NowTab: React.FC = () => {
             )}
 
             {/* Quick Timer Controls */}
-            <div className="flex items-center gap-2 pt-3 border-t border-slate-700/60">
+            <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
               <button
                 onClick={handleTimerToggle}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs ${
                   isTimerRunning 
-                    ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25' 
-                    : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25'
+                    ? 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200' 
+                    : 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
                 }`}
               >
                 {isTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -514,7 +516,7 @@ export const NowTab: React.FC = () => {
 
               <button
                 onClick={() => handleAddExtraTime(15)}
-                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700"
+                className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-300 shadow-xs"
                 title="Cộng thêm 15 phút"
               >
                 +15p
@@ -522,7 +524,7 @@ export const NowTab: React.FC = () => {
 
               <button
                 onClick={handleFinishEarly}
-                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-emerald-950 text-emerald-400 text-xs font-bold border border-emerald-500/30"
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
                 title="Check-in đạt tiêu chí (DoD)"
               >
                 Hoàn thành
@@ -531,32 +533,32 @@ export const NowTab: React.FC = () => {
           </div>
 
           {/* Next Hard Deadline */}
-          <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-md flex flex-col justify-between">
+          <div className="bg-slate-50/90 p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   HẠN CHÓT CỨNG KẾ TIẾP:
                 </span>
-                <span className="text-[11px] font-bold text-red-400 bg-red-500/15 border border-red-500/25 px-2 py-0.5 rounded-full">
+                <span className="text-[11px] font-bold text-red-700 bg-red-100 border border-red-200 px-2.5 py-0.5 rounded-full">
                   16:00
                 </span>
               </div>
 
               {nextDeadline ? (
                 <div>
-                  <h4 className="text-base font-extrabold text-white mt-2">
+                  <h4 className="text-base font-extrabold text-slate-900 mt-2">
                     {nextDeadline.title}
                   </h4>
-                  <p className="text-xs text-slate-400 mt-1">Nguồn: {nextDeadline.source === 'calendar' ? 'Lịch công việc' : 'Cài thủ công'}</p>
+                  <p className="text-xs text-slate-500 mt-1">Nguồn: {nextDeadline.source === 'calendar' ? 'Lịch công việc' : 'Cài thủ công'}</p>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 mt-3">Tiếp theo: 15:45 - Khung giờ dự phòng giải quyết phát sinh.</p>
+                <p className="text-xs text-slate-500 mt-3">Tiếp theo: 15:45 - Khung giờ dự phòng giải quyết phát sinh.</p>
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400 font-mono">
+            <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 font-mono">
               <span>Còn khoảng 1 giờ 45 phút</span>
-              <span className="text-emerald-400 font-bold">Đang đúng mắt xích</span>
+              <span className="text-emerald-600 font-bold">Đang đúng mắt xích</span>
             </div>
           </div>
         </div>
