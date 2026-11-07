@@ -66,5 +66,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
+	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TAIO Time sử dụng vị trí trên thiết bị để nhắc việc theo địa điểm (Geofencing) khi bạn đến hoặc rời nơi đã lưu.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>TAIO Time sử dụng vùng địa lý trên thiết bị để tự động nhắc việc khi bạn đến hoặc rời địa điểm đã cài đặt.</string>
 </dict>
 </plist>

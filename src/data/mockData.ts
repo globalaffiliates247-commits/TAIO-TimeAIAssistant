@@ -549,7 +549,7 @@ export const INITIAL_NOTIFICATIONS: import('../types').AppNotificationItem[] = [
     kind: 'question',
     title: 'Liệu mình có đang bỏ sót ý tưởng nào trong rổ việc không?',
     time: '3 giờ trước',
-    ctaLabel: 'Mở Thẻ nhắc việc',
+    ctaLabel: 'Mở Quẹt thẻ nhiệm vụ',
     read: true,
     targetAction: 'open_swipe',
   },
@@ -1235,7 +1235,7 @@ export const INITIAL_LIST_ITEMS: ListItem[] = [
   },
 ];
 
-// B28 (PRD v0.3.6): Thẻ nhắc việc (Backlog Swipe Cards)
+// B28 (PRD v0.3.16): Quẹt thẻ nhiệm vụ (Backlog Swipe Cards)
 export const INITIAL_BACKLOG_CARDS: BacklogCard[] = [
   {
     id: 'bc-1',
@@ -1307,7 +1307,7 @@ export const INITIAL_REMINDER_QUESTIONS: ReminderQuestion[] = [
     text: '3 việc quan trọng nhất bạn cần làm hôm nay là gì?',
     category: 'today',
     triggerType: 'day_start',
-    answerSummary: 'Hôm nay bạn có 2 việc thuộc Mục tiêu Q2 đã lên lịch: Làm giao diện Thẻ nhắc việc và Quay video #TAIOCLUB.',
+    answerSummary: 'Hôm nay bạn có 2 việc thuộc Mục tiêu Q2 đã lên lịch: Làm giao diện Quẹt thẻ nhiệm vụ và Quay video #TAIOCLUB.',
     targetScreen: 'plan',
     actionLabel: 'Mở Kế hoạch chọn Top việc',
   },
@@ -1345,7 +1345,7 @@ export const INITIAL_REMINDER_QUESTIONS: ReminderQuestion[] = [
     triggerType: 'backlog_untouched',
     answerSummary: 'Có 5 ý tưởng trong Rổ việc chưa được rà soát trong 7 ngày qua.',
     targetScreen: 'swipe_review',
-    actionLabel: 'Mở Thẻ nhắc việc (Lướt rổ)',
+    actionLabel: 'Mở Quẹt thẻ nhiệm vụ',
   },
   {
     id: 'rq-6',

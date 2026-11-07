@@ -94,6 +94,8 @@ export interface TimeBlock {
   // v0.22.0 B23 additions:
   taskEndType?: TaskEndType;
   timeLimitMins?: number; // User-set appetite / time limit when planning (default = estimate)
+  deadline?: string;
+  updatedAt?: string | number;
 }
 
 export interface HardDeadline {
@@ -123,6 +125,9 @@ export interface Goal {
   workArea: 'Business' | 'Product' | 'Operations' | 'Personal';
   progressPercent: number;
   color?: string;
+  plannedMinutesTotal?: number;
+  actualMinutesTotal?: number;
+  updatedAt?: string | number;
 }
 
 export type InterruptionDecision = 
@@ -302,6 +307,7 @@ export interface InboxItem {
   linkedGoalName?: string;
   suggestedQuadrant?: 1 | 2 | 3 | 4;
   status: 'inbox' | 'scheduled' | 'done_2min' | 'delegated' | 'dropped';
+  updatedAt?: string | number;
 }
 
 // B1b & B21 (v0.3.15): 24-Hour Time Ledger (Actual groups)
@@ -374,6 +380,7 @@ export interface DailyCardItem {
   displacedMinutes?: number;
   dropReason?: string;
   dodChecklist?: DodItem[];
+  updatedAt?: string | number;
 }
 
 // B24 (PRD v0.3.0 / v0.23.0): Data Export for AI Assistant
@@ -487,7 +494,7 @@ export interface ScreenDwellEvent {
   deviceClass: 'phone' | 'tablet' | 'desktop';
 }
 
-// B28 (PRD v0.3.6): Thẻ nhắc việc (Swipe review of the backlog)
+// B28 (PRD v0.3.16): Quẹt thẻ nhiệm vụ (Swipe review of the backlog)
 export interface BacklogCard {
   id: string;
   text: string;
@@ -501,6 +508,7 @@ export interface BacklogCard {
   whyThisCard: string; // "Tồn đọng 7 ngày", "Thuộc mục tiêu chậm tiến độ", "Khám phá ngẫu nhiên (1/5)"
   estimatedMinutes?: number;
   deadline?: string;
+  updatedAt?: string | number;
 }
 
 // B29 (PRD v0.3.6): Câu hỏi nhắc việc (Reminder questions)

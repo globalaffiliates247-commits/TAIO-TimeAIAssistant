@@ -11,9 +11,25 @@ import {
   CheckCircle2, 
   Layers, 
   Target,
-  Zap
+  Zap,
+  Calendar
 } from 'lucide-react';
 import { BacklogCard } from '../types';
+
+const VI_WEEKDAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+
+function formatVietnameseDateChip(isoDate: string): string {
+  if (!isoDate) return 'Chọn ngày';
+  const parts = isoDate.split('-').map(Number);
+  if (parts.length !== 3) return isoDate;
+  const [y, m, d] = parts;
+  const dateObj = new Date(y, m - 1, d);
+  if (Number.isNaN(dateObj.getTime())) return isoDate;
+  const weekday = VI_WEEKDAYS[dateObj.getDay()] || '';
+  const dd = String(d).padStart(2, '0');
+  const mm = String(m).padStart(2, '0');
+  return `${weekday} ${dd}/${mm}`;
+}
 
 export const SwipeReviewModal: React.FC = () => {
   const { 
@@ -22,6 +38,7 @@ export const SwipeReviewModal: React.FC = () => {
     setIsSwipeModalOpen,
     handleSwipeAction,
     goals,
+    blocks,
     palette
   } = useApp();
 
@@ -30,11 +47,15 @@ export const SwipeReviewModal: React.FC = () => {
   const [sessionCards, setSessionCards] = useState<BacklogCard[]>([]);
   const [sessionHistory, setSessionHistory] = useState<Array<{ card: BacklogCard; action: 'plan' | 'later' | 'done_now' | 'drop' }>>([]);
   
-  // 3-step planning state for current card
+  // 3-step planning state for current card (B28 v0.3.16)
   const [isPlanningStep, setIsPlanningStep] = useState(false);
   const [planDuration, setPlanDuration] = useState<number>(30);
-  const [planDeadline, setPlanDeadline] = useState<string>('Hôm nay');
+  const [planDeadlineMode, setPlanDeadlineMode] = useState<'Hôm nay' | 'Tuần này' | 'Chọn ngày' | 'Chưa có'>('Hôm nay');
+  const [pickedIsoDate, setPickedIsoDate] = useState<string>('');
   const [planGoalId, setPlanGoalId] = useState<string>('');
+  const [showCustomSlotPicker, setShowCustomSlotPicker] = useState<boolean>(false);
+  const [customStartTime, setCustomStartTime] = useState<string>('15:00');
+  const dateInputRef = useRef<HTMLInputElement | null>(null);
 
   // B28 v0.3.11: Real Tinder-style swipe gesture state
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -43,14 +64,24 @@ export const SwipeReviewModal: React.FC = () => {
   const [dragX, setDragX] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  // Initialize 5 cards on open
+  // Initialize 5 cards on open (4 weighted + 1 random exploration per B28)
   React.useEffect(() => {
     if (isSwipeModalOpen) {
-      const deck = backlogCards.slice(0, 5);
+      const scored = [...backlogCards].sort((a, b) => {
+        const goalA = goals.find(g => g.id === a.goalId);
+        const goalB = goals.find(g => g.id === b.goalId);
+        const behindA = goalA && goalA.progressPercent < 50 ? 15 : 0;
+        const behindB = goalB && goalB.progressPercent < 50 ? 15 : 0;
+        const weightA = a.ageDays * 2 + a.snoozesCount * 5 + behindA + (a.deadline ? 10 : 0);
+        const weightB = b.ageDays * 2 + b.snoozesCount * 5 + behindB + (b.deadline ? 10 : 0);
+        return weightB - weightA;
+      });
+      const deck = scored.slice(0, 5);
       setSessionCards(deck);
       setCurrentIndex(0);
       setSessionHistory([]);
       setIsPlanningStep(false);
+      setShowCustomSlotPicker(false);
       setDragX(0);
     }
   }, [isSwipeModalOpen]);
@@ -68,6 +99,9 @@ export const SwipeReviewModal: React.FC = () => {
       setIsPlanningStep(true);
       setPlanGoalId(currentCard.goalId || goals[0]?.id || '');
       setPlanDuration(currentCard.estimatedMinutes || 30);
+      setPlanDeadlineMode('Hôm nay');
+      setPickedIsoDate('');
+      setShowCustomSlotPicker(false);
       return;
     }
 
@@ -78,15 +112,59 @@ export const SwipeReviewModal: React.FC = () => {
     }
   };
 
+  // Compute live deadline label, urgency, quadrant, and suggested slot for Step 3 preview
+  const resolvedDeadlineLabel =
+    planDeadlineMode === 'Chọn ngày'
+      ? (pickedIsoDate ? formatVietnameseDateChip(pickedIsoDate) : 'Chọn ngày')
+      : planDeadlineMode;
+
+  const isUrgentDeadline = (() => {
+    if (planDeadlineMode === 'Hôm nay' || planDeadlineMode === 'Tuần này') return true;
+    if (planDeadlineMode === 'Chưa có') return false;
+    if (pickedIsoDate) {
+      const targetMs = Date.parse(pickedIsoDate);
+      const diffDays = (targetMs - Date.now()) / (1000 * 3600 * 24);
+      return diffDays <= 7;
+    }
+    return false;
+  })();
+
+  const computedQuadrant: 1 | 2 | 3 | 4 = planGoalId
+    ? (isUrgentDeadline ? 1 : 2)
+    : (isUrgentDeadline ? 3 : 4);
+
+  const quadrantLabelMap: Record<1 | 2 | 3 | 4, string> = {
+    1: 'Ô 1: Quan trọng, gấp',
+    2: 'Ô 2: Quan trọng, không gấp',
+    3: 'Ô 3: Gấp, ngoài mục tiêu',
+    4: 'Ô 4: Không gấp, ngoài mục tiêu',
+  };
+
+  const reservedGoalBlock = planGoalId
+    ? blocks.find(b => b.goalId === planGoalId && b.status !== 'done')
+    : undefined;
+
+  const suggestedStartTime = showCustomSlotPicker
+    ? customStartTime
+    : (reservedGoalBlock ? reservedGoalBlock.startTime : (planGoalId ? '15:00' : '11:15'));
+
+  const [sH, sM] = suggestedStartTime.split(':').map(Number);
+  const endTotalMins = (sH || 15) * 60 + (sM || 0) + planDuration;
+  const suggestedEndTime = `${String(Math.floor(endTotalMins / 60) % 24).padStart(2, '0')}:${String(endTotalMins % 60).padStart(2, '0')}`;
+
   const submitPlan = () => {
     if (!currentCard) return;
     handleSwipeAction(currentCard.id, 'plan', {
       durationMins: planDuration,
-      deadline: planDeadline,
+      deadline: resolvedDeadlineLabel,
+      isUrgentDeadline,
       goalId: planGoalId,
+      customStartTime: suggestedStartTime,
+      customEndTime: suggestedEndTime,
     });
     setSessionHistory(prev => [...prev, { card: currentCard, action: 'plan' }]);
     setIsPlanningStep(false);
+    setShowCustomSlotPicker(false);
     setCurrentIndex(prev => prev + 1);
   };
 
@@ -131,6 +209,22 @@ export const SwipeReviewModal: React.FC = () => {
   const showLeftLabel = swipeRatio <= -0.3;
   const showRightLabel = swipeRatio >= 0.3;
 
+  const openNativeDatePicker = () => {
+    setPlanDeadlineMode('Chọn ngày');
+    if (dateInputRef.current) {
+      try {
+        if (typeof (dateInputRef.current as any).showPicker === 'function') {
+          (dateInputRef.current as any).showPicker();
+        } else {
+          dateInputRef.current.focus();
+          dateInputRef.current.click();
+        }
+      } catch {
+        dateInputRef.current.focus();
+      }
+    }
+  };
+
   return (
     <div
       style={{ touchAction: 'none' }}
@@ -149,7 +243,7 @@ export const SwipeReviewModal: React.FC = () => {
               <Layers className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Thẻ nhắc việc</h2>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Quẹt thẻ nhiệm vụ</h2>
               <p className="text-[11px] text-slate-500">
                 Vuốt trái: Để sau • Vuốt phải: Lên lịch • Chạm thẻ: Làm ngay
               </p>
@@ -164,7 +258,7 @@ export const SwipeReviewModal: React.FC = () => {
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 flex flex-col items-center">
+        <div className="p-5 sm:p-6 flex flex-col items-center max-h-[82vh] overflow-y-auto overscroll-contain">
           {!isSessionFinished ? (
             <div className="w-full space-y-4">
               {/* Progress counter */}
@@ -245,7 +339,7 @@ export const SwipeReviewModal: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                /* 3-Step Planning Form */
+                /* 3-Step Planning Form (B28 v0.3.16) */
                 <div className="w-full p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-lg space-y-4 animate-in fade-in">
                   <div>
                     <h4 className="text-xs font-bold text-slate-900">
@@ -290,26 +384,63 @@ export const SwipeReviewModal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Step 2: Deadline */}
+                  {/* Step 2: Deadline (B28 v0.3.16: Hôm nay / Tuần này / Chọn ngày / Chưa có) */}
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
                       2. Hạn chót:
                     </label>
-                    <div className="grid grid-cols-3 gap-1.5 text-xs">
-                      {['Hôm nay', 'Chọn ngày', 'Không có'].map(d => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => setPlanDeadline(d)}
-                          className={`py-1.5 rounded-lg border font-medium ${
-                            planDeadline === d 
-                              ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#E0401F] text-white border-[#E0401F]')
-                              : 'bg-white text-slate-700 border-slate-200'
-                          }`}
-                        >
-                          {d}
-                        </button>
-                      ))}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
+                      {(['Hôm nay', 'Tuần này', 'Chọn ngày', 'Chưa có'] as const).map(chip => {
+                        const isSelected = planDeadlineMode === chip;
+                        if (chip === 'Chọn ngày') {
+                          const displayDateLabel = pickedIsoDate
+                            ? formatVietnameseDateChip(pickedIsoDate)
+                            : 'Chọn ngày';
+                          return (
+                            <div key={chip} className="relative">
+                              <button
+                                type="button"
+                                onClick={openNativeDatePicker}
+                                className={`w-full py-1.5 px-2 rounded-lg border font-medium flex items-center justify-center gap-1 truncate ${
+                                  isSelected
+                                    ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#E0401F] text-white border-[#E0401F]')
+                                    : 'bg-white text-slate-700 border-slate-200'
+                                }`}
+                              >
+                                <Calendar className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{displayDateLabel}</span>
+                              </button>
+                              <input
+                                ref={dateInputRef}
+                                type="date"
+                                value={pickedIsoDate}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setPickedIsoDate(val);
+                                  setPlanDeadlineMode('Chọn ngày');
+                                }}
+                                onClick={() => setPlanDeadlineMode('Chọn ngày')}
+                                aria-label="Chọn ngày hạn chót"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              />
+                            </div>
+                          );
+                        }
+                        return (
+                          <button
+                            key={chip}
+                            type="button"
+                            onClick={() => setPlanDeadlineMode(chip)}
+                            className={`py-1.5 px-2 rounded-lg border font-medium ${
+                              isSelected
+                                ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#E0401F] text-white border-[#E0401F]')
+                                : 'bg-white text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            {chip}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -321,7 +452,7 @@ export const SwipeReviewModal: React.FC = () => {
                     <select
                       value={planGoalId}
                       onChange={(e) => setPlanGoalId(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800"
+                      className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800 font-medium"
                     >
                       {goals.map(g => (
                         <option key={g.id} value={g.id}>{g.name}</option>
@@ -330,23 +461,73 @@ export const SwipeReviewModal: React.FC = () => {
                     </select>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-2">
+                  {/* B28 v0.3.16: What happens after choosing a goal (Priority quadrant + Slot suggestion inside goal's blocks) */}
+                  <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 font-medium">Ưu tiên tự động:</span>
+                      <span className={`font-bold px-2 py-0.5 rounded-md ${
+                        computedQuadrant === 1
+                          ? 'bg-red-50 text-red-700 border border-red-200'
+                          : computedQuadrant === 2
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}>
+                        {quadrantLabelMap[computedQuadrant]}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 font-medium">Khung giờ đề xuất:</span>
+                      <span className="font-bold text-slate-900">
+                        {suggestedStartTime} – {suggestedEndTime}{' '}
+                        <span className="text-[10px] font-normal text-slate-500">
+                          ({reservedGoalBlock ? 'Trong khối mục tiêu' : (planGoalId ? 'Khung trống kế tiếp' : 'Quỹ dự phòng')})
+                        </span>
+                      </span>
+                    </div>
+                    {showCustomSlotPicker && (
+                      <div className="pt-1 flex items-center justify-between gap-2 border-t border-slate-100">
+                        <span className="text-[11px] font-semibold text-slate-600">Chọn giờ bắt đầu khác:</span>
+                        <input
+                          type="time"
+                          value={customStartTime}
+                          onChange={(e) => setCustomStartTime(e.target.value)}
+                          className="px-2.5 py-1 rounded-lg border border-slate-300 bg-slate-50 text-xs font-mono font-bold text-slate-900"
+                        />
+                      </div>
+                    )}
+                    <p className="text-[10px] text-slate-500 leading-snug pt-0.5">
+                      {planGoalId
+                        ? '✓ Gắn vào danh sách việc & dự án của mục tiêu; số phút được cộng vào tiến độ mục tiêu.'
+                        : '✓ Xếp vào khoảng trống hoặc quỹ dự phòng gián đoạn trong ngày.'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-2">
                     <button
                       type="button"
                       onClick={() => setIsPlanningStep(false)}
-                      className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-800"
+                      className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-800 font-medium"
                     >
                       Quay lại
                     </button>
-                    <button
-                      type="button"
-                      onClick={submitPlan}
-                      className={`px-4 py-2 text-xs font-bold text-white rounded-xl shadow-sm ${
-                        isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
-                      }`}
-                    >
-                      Xếp vào lịch
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomSlotPicker(v => !v)}
+                        className="px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl"
+                      >
+                        Chọn giờ khác
+                      </button>
+                      <button
+                        type="button"
+                        onClick={submitPlan}
+                        className={`px-4 py-2 text-xs font-bold text-white rounded-xl shadow-sm ${
+                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
+                        }`}
+                      >
+                        Xếp vào lịch
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -391,7 +572,7 @@ export const SwipeReviewModal: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Hoàn thành phiên Thẻ nhắc việc!</h3>
+                <h3 className="text-lg font-bold text-slate-900">Hoàn thành phiên Quẹt thẻ nhiệm vụ!</h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Đã rà soát xong 5 thẻ tồn đọng. Sẵn sàng quay lại công việc chính.
                 </p>
@@ -399,41 +580,43 @@ export const SwipeReviewModal: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-2 text-left">
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] text-slate-500">Đã lên lịch</span>
-                  <p className="text-base font-bold text-slate-900">
+                  <span className="text-[11px] text-slate-500">Đã lên lịch:</span>
+                  <p className="text-base font-bold text-emerald-600">
                     {sessionHistory.filter(h => h.action === 'plan').length} việc
                   </p>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] text-slate-500">Làm ngay</span>
-                  <p className="text-base font-bold text-emerald-700">
+                  <span className="text-[11px] text-slate-500">Làm ngay:</span>
+                  <p className="text-base font-bold text-blue-600">
                     {sessionHistory.filter(h => h.action === 'done_now').length} việc
                   </p>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] text-slate-500">Để sau</span>
-                  <p className="text-base font-bold text-amber-700">
+                  <span className="text-[11px] text-slate-500">Để sau:</span>
+                  <p className="text-base font-bold text-amber-600">
                     {sessionHistory.filter(h => h.action === 'later').length} việc
                   </p>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] text-slate-500">Đã bỏ hẳn</span>
-                  <p className="text-base font-bold text-slate-600">
+                  <span className="text-[11px] text-slate-500">Đã bỏ hẳn:</span>
+                  <p className="text-base font-bold text-rose-600">
                     {sessionHistory.filter(h => h.action === 'drop').length} việc
                   </p>
                 </div>
               </div>
 
-              <div className="pt-2">
-                <button
-                  onClick={() => setIsSwipeModalOpen(false)}
-                  className={`w-full py-3 rounded-xl text-white font-bold text-xs tracking-wider uppercase transition-all shadow-sm ${
-                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
-                  }`}
-                >
-                  Xong & Quay lại làm việc
-                </button>
+              <div className="text-xs text-slate-500">
+                Còn lại trong rổ: <strong className="text-slate-800">{backlogCards.length} thẻ</strong>
               </div>
+
+              <button
+                onClick={() => setIsSwipeModalOpen(false)}
+                className={`w-full py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
+                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
+                }`}
+              >
+                Quay lại làm việc
+              </button>
             </div>
           )}
         </div>

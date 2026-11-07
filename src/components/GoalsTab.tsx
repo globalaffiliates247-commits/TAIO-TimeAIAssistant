@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const GoalsTab: React.FC = () => {
-  const { goals, setGoals, addGoalWithBackplanning } = useApp();
+  const { goals, setGoals, blocks, addGoalWithBackplanning, markTaskDone } = useApp();
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
   // Form for Back-planning (PRD B7)
@@ -185,6 +185,46 @@ export const GoalsTab: React.FC = () => {
                   })}
                 </div>
               </div>
+
+              {/* B28 v0.3.16: Tasks linked to this Goal */}
+              {(() => {
+                const goalTasks = blocks.filter(b => b.goalId === goal.id);
+                if (goalTasks.length === 0) return null;
+                const totalPlannedMins = goalTasks.reduce((acc, t) => acc + (t.estimatedMinutes || 60), 0);
+                return (
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Nhiệm vụ gắn với mục tiêu ({goalTasks.length} việc • {totalPlannedMins}p):
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {goalTasks.map(t => (
+                        <div
+                          key={t.id}
+                          onClick={() => markTaskDone(t.id)}
+                          className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs cursor-pointer hover:bg-slate-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${t.status === 'done' ? 'text-emerald-600' : 'text-slate-400'}`} />
+                            <span className={`font-medium truncate ${t.status === 'done' ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                              {t.title}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 text-[11px] text-slate-500 font-mono">
+                            {t.quadrant && (
+                              <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[10px] font-bold text-slate-700">
+                                Ô {t.quadrant}
+                              </span>
+                            )}
+                            <span>{t.startTime}–{t.endTime}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
             </div>
           );

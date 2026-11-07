@@ -248,10 +248,10 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setIsSwipeModalOpen(true)}
             className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-amber-700 border border-slate-200 transition-all font-semibold"
-            title="Thẻ nhắc việc: Lướt rổ tồn đọng"
+            title="Quẹt thẻ nhiệm vụ"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Lướt rổ</span>
+            <span>Quẹt thẻ nhiệm vụ</span>
           </button>
 
           {/* Active Capture & Backfill (PRD B30) */}
@@ -419,7 +419,7 @@ export const Navbar: React.FC = () => {
               className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-amber-700"
             >
               <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>Lướt rổ việc</span>
+              <span>Quẹt thẻ nhiệm vụ</span>
             </button>
 
             <button

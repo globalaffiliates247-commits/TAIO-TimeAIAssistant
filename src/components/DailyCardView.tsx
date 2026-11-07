@@ -159,9 +159,9 @@ export const DailyCardView: React.FC = () => {
             <button
               onClick={() => setIsSwipeModalOpen(true)}
               className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
-              title="Mở Thẻ nhắc việc (Lướt rổ backlog)"
+              title="Mở Quẹt thẻ nhiệm vụ"
             >
-              <span>Lướt rổ</span>
+              <span>Quẹt thẻ nhiệm vụ</span>
             </button>
             <button
               onClick={() => setIsActiveCaptureOpen(true)}

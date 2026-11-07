@@ -1,6 +1,16 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import {
+  saveDurableState,
+  loadDurableState,
+  clearAllDurableState,
+  mergeCollectionsByUpdatedAt
+} from '../core/storage/durableStorage';
+import {
+  detectRuntimeCapabilities,
+  TAIONative
+} from '../features/native';
 import { 
   UserProfile, 
   Goal, 
@@ -186,11 +196,24 @@ interface AppContextType {
   screenDwells: ScreenDwellEvent[];
   recordScreenDwell: (screenId: string, dwellSeconds: number, source?: string) => void;
 
-  // v0.3.6 B28: Thẻ nhắc việc (Backlog Swipe Review)
+  // v0.3.16 B28: Quẹt thẻ nhiệm vụ (Backlog Swipe Review)
   backlogCards: BacklogCard[];
   isSwipeModalOpen: boolean;
   setIsSwipeModalOpen: (v: boolean) => void;
-  handleSwipeAction: (cardId: string, action: 'plan' | 'later' | 'done_now' | 'drop', planDetails?: { durationMins: number; deadline?: string; goalId?: string }) => void;
+  handleSwipeAction: (
+    cardId: string,
+    action: 'plan' | 'later' | 'done_now' | 'drop',
+    planDetails?: {
+      durationMins: number;
+      deadline?: string;
+      isUrgentDeadline?: boolean;
+      goalId?: string;
+      customStartTime?: string;
+      customEndTime?: string;
+    }
+  ) => void;
+  // v0.3.16 E4: Native platform capability flag
+  isNativePlatform: boolean;
 
   // v0.3.6 B29: Câu hỏi nhắc việc (Reminder Questions)
   reminderQuestions: ReminderQuestion[];
@@ -517,49 +540,155 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setScreenDwells(prev => [ev, ...prev.slice(0, 49)]);
   };
 
-  // v0.3.6 B28: Thẻ nhắc việc (Backlog Swipe Review)
+  // v0.3.16 B28: Quẹt thẻ nhiệm vụ (Backlog Swipe Review)
   const [backlogCards, setBacklogCards] = useState<BacklogCard[]>(INITIAL_BACKLOG_CARDS);
   const [isSwipeModalOpen, setIsSwipeModalOpen] = useState<boolean>(false);
+  const [isNativePlatform, setIsNativePlatform] = useState<boolean>(() => detectRuntimeCapabilities().isNative);
+  const isHydratedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    setIsNativePlatform(detectRuntimeCapabilities().isNative);
+  }, []);
 
   const handleSwipeAction = (
     cardId: string, 
     action: 'plan' | 'later' | 'done_now' | 'drop', 
-    planDetails?: { durationMins: number; deadline?: string; goalId?: string }
+    planDetails?: {
+      durationMins: number;
+      deadline?: string;
+      isUrgentDeadline?: boolean;
+      goalId?: string;
+      customStartTime?: string;
+      customEndTime?: string;
+    }
   ) => {
     const card = backlogCards.find(c => c.id === cardId);
     if (!card) return;
 
     if (action === 'plan') {
       const duration = planDetails?.durationMins || card.estimatedMinutes || 30;
-      const goal = goals.find(g => g.id === planDetails?.goalId);
-      // Add to plan / timeblocks
+      const targetGoalId = planDetails?.goalId !== undefined ? planDetails.goalId : card.goalId;
+      const goal = goals.find(g => g.id === targetGoalId);
+      const deadlineLabel = planDetails?.deadline || 'Hôm nay';
+      const isUrgent = planDetails?.isUrgentDeadline ?? (deadlineLabel === 'Hôm nay' || deadlineLabel === 'Tuần này');
+      const isImportant = !!targetGoalId;
+
+      // B28 v0.3.16 Point 2: Priority quadrant calculation
+      const computedQuadrant: 1 | 2 | 3 | 4 = isImportant
+        ? (isUrgent ? 1 : 2)
+        : (isUrgent ? 3 : 4);
+
+      // B28 v0.3.16 Point 3: Slot suggestion (inside blocks reserved for that goal first, then free gaps / interruption buffer)
+      const reservedGoalBlock = targetGoalId
+        ? blocks.find(b => b.goalId === targetGoalId && b.status !== 'done')
+        : undefined;
+      const startTime = planDetails?.customStartTime
+        || (reservedGoalBlock ? reservedGoalBlock.startTime : (targetGoalId ? '15:00' : '11:15'));
+      const [startH, startM] = startTime.split(':').map(Number);
+      const totalEndMins = (startH || 15) * 60 + (startM || 0) + duration;
+      const endH = String(Math.floor(totalEndMins / 60) % 24).padStart(2, '0');
+      const endM = String(totalEndMins % 60).padStart(2, '0');
+      const endTime = planDetails?.customEndTime || `${endH}:${endM}`;
+
+      // 1. Add to plan / timeblocks linked to goalId
       addNewBlock({
         title: card.text,
-        startTime: '15:00',
-        endTime: `15:${duration < 60 ? duration : 45}`,
-        type: 'deep',
+        startTime,
+        endTime,
+        type: targetGoalId ? 'deep' : 'interruption',
         status: 'planned',
-        goalId: planDetails?.goalId || card.goalId,
-        goalName: goal?.name || card.goalName,
-        quadrant: 2,
+        goalId: targetGoalId || undefined,
+        goalName: goal?.name || (targetGoalId ? card.goalName : undefined),
+        quadrant: computedQuadrant,
+        isImportant,
+        isUrgent,
         estimatedMinutes: duration,
-        notes: `Xếp lịch từ Thẻ nhắc việc: ${card.note || ''}`,
+        deadline: deadlineLabel,
+        notes: `Xếp lịch từ Quẹt thẻ nhiệm vụ (${deadlineLabel}): ${card.note || ''}`,
       });
-      // Also add to today's daily card
+
+      // 2. Also add to today's daily card
       addDailyCardItem({
         text: card.text,
-        goalId: planDetails?.goalId || card.goalId,
+        goalId: targetGoalId || undefined,
         origin: 'planned',
+        start: startTime,
+        end: endTime,
       });
+
+      // 3. B28 v0.3.16 Point 1: If the goal has projects (B26), update/link in project list
+      if (targetGoalId) {
+        const nowStr = new Date().toISOString();
+        setListItems(prev => {
+          const hasMatchingProject = prev.some(li => li.goalId === targetGoalId && li.projectStatus !== undefined);
+          if (hasMatchingProject) {
+            return prev.map(li =>
+              li.goalId === targetGoalId && li.projectStatus !== undefined
+                ? {
+                    ...li,
+                    nextAction: card.text,
+                    timeSpentMinutes: (li.timeSpentMinutes || 0) + duration,
+                    updatedAt: nowStr,
+                  }
+                : li
+            );
+          }
+          const projectList = lists.find(l => l.type === 'project');
+          if (!projectList) return prev;
+          const newProjItem: ListItem = {
+            id: `li-proj-${Date.now()}`,
+            listId: projectList.id,
+            text: `Dự án: ${goal?.name || card.text}`,
+            order: 1,
+            archived: false,
+            createdAt: nowStr,
+            updatedAt: nowStr,
+            source: 'inbox',
+            goalId: targetGoalId,
+            goalName: goal?.name,
+            deadline: deadlineLabel,
+            projectStatus: 'active',
+            progressMode: 'auto',
+            progress: goal?.progressPercent || 25,
+            nextAction: card.text,
+            timeSpentMinutes: duration,
+          };
+          return [newProjItem, ...prev];
+        });
+
+        // 4. B28 v0.3.16 Point 4: Time counts for the goal (planned minutes & progress)
+        setGoals(prev => prev.map(g =>
+          g.id === targetGoalId
+            ? {
+                ...g,
+                plannedMinutesTotal: (g.plannedMinutesTotal || g.dailyBudgetMins) + duration,
+                updatedAt: Date.now(),
+              }
+            : g
+        ));
+      }
+
       setBacklogCards(prev => prev.filter(c => c.id !== cardId));
-      setCelebrationMsg(`Đã lên lịch thành công cho: "${card.text}"!`);
+      setCelebrationMsg(`Đã xếp lịch "${card.text}" (${startTime}–${endTime}, Ô ${computedQuadrant})!`);
     } else if (action === 'done_now') {
       const prevTimer = timerMinutesRemaining;
-      setTimerMinutesRemaining(card.estimatedMinutes || 15);
+      const dur = card.estimatedMinutes || 15;
+      setTimerMinutesRemaining(dur);
       setIsTimerRunning(true);
       setCurrentTab('now');
       setIsSwipeModalOpen(false);
       setBacklogCards(prev => prev.filter(c => c.id !== cardId));
+      if (card.goalId) {
+        setGoals(prev => prev.map(g =>
+          g.id === card.goalId
+            ? {
+                ...g,
+                actualMinutesTotal: (g.actualMinutesTotal || 0) + dur,
+                updatedAt: Date.now(),
+              }
+            : g
+        ));
+      }
       // B28 v0.3.11: Tap the card = Làm ngay, with a 3-second "Hoàn tác" (undo) toast
       showToast(`Đang làm ngay: "${card.text}"`, () => {
         setBacklogCards(prev => [card, ...prev]);
@@ -569,12 +698,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else if (action === 'later') {
       setBacklogCards(prev => {
         const remaining = prev.filter(c => c.id !== cardId);
-        return [...remaining, { ...card, snoozesCount: card.snoozesCount + 1 }];
+        return [...remaining, { ...card, snoozesCount: card.snoozesCount + 1, updatedAt: Date.now() }];
       });
-      setCelebrationMsg(`Đã dời thẻ "${card.text}" xem lại sau.`);
+      setCelebrationMsg(`Đã dời thẻ "${card.text}" để xem lại sau.`);
     } else if (action === 'drop') {
       setBacklogCards(prev => prev.filter(c => c.id !== cardId));
-      setCelebrationMsg(`Đã loại bỏ thẻ khỏi rổ tồn đọng.`);
+      setCelebrationMsg(`Đã bỏ hẳn thẻ khỏi danh sách.`);
     }
   };
 
@@ -670,13 +799,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const togglePlaceLocation = (placeId: string) => {
+    const target = savedPlaces.find(p => p.id === placeId);
+    const willBeActive = target ? !target.isCurrentLocation : false;
     setSavedPlaces(prev => prev.map(p => {
       const isTarget = p.id === placeId;
       return { ...p, isCurrentLocation: isTarget ? !p.isCurrentLocation : false };
     }));
-    const target = savedPlaces.find(p => p.id === placeId);
     if (target) {
-      setCelebrationMsg(`Đã kích hoạt vị trí mô phỏng: Đang ở "${target.name}"! Các quy tắc If-Then tự động sẵn sàng.`);
+      if (isNativePlatform) {
+        if (willBeActive) {
+          TAIONative.startMonitoringPlace({
+            id: target.id,
+            name: target.name,
+            radiusMeters: target.radiusMeters,
+          }).catch(() => {});
+          setCelebrationMsg(`Đã bật giám sát địa điểm: Đang ở "${target.name}"! Các quy tắc If-Then tự động sẵn sàng.`);
+        } else {
+          TAIONative.stopMonitoringPlace({ id: target.id }).catch(() => {});
+          setCelebrationMsg(`Đã rời khỏi địa điểm "${target.name}".`);
+        }
+      } else {
+        setCelebrationMsg(`Đã cập nhật trạng thái vị trí: Đang ở "${target.name}"! Các quy tắc If-Then tự động sẵn sàng.`);
+      }
     }
   };
 
@@ -706,7 +850,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }) => {
     const goal = goals.find(g => g.id === item.goalId);
     const newItem: DailyCardItem = {
-      id: `dc-${Date.now()}`,
+      id: `dc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       text: item.text,
       date: selectedCardDate,
       goalId: item.goalId,
@@ -719,8 +863,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       displacedItemId: item.displacedItemId,
       displacedItemTitle: item.displacedItemTitle,
       displacedMinutes: item.displacedMinutes,
+      updatedAt: Date.now(),
     };
-    setDailyCardItems(prev => [newItem, ...prev]);
+    setDailyCardItems(prev => {
+      const next = [newItem, ...prev];
+      saveDurableState('dailyCardItems', next, Date.now());
+      return next;
+    });
   };
 
   const toggleDailyCardItem = (id: string) => {
@@ -980,11 +1129,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // B27 v0.3.12: Wipe all personal data and return to onboarding
   const resetAllUserData = (deleteServerCopy: boolean) => {
+    clearAllDurableState().catch(() => {});
     try {
       if (typeof window !== 'undefined') {
         window.localStorage.clear();
       }
     } catch {}
+    setBlocks([]);
     setInbox([]);
     setDailyCardItems([]);
     setLists([]);
@@ -1003,12 +1154,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const resolveServerBackupChoice = (choice: 'restore' | 'fresh') => {
     if (choice === 'restore') {
+      setBlocks(INITIAL_BLOCKS);
       setInbox(INITIAL_INBOX);
       setDailyCardItems(INITIAL_DAILY_CARD_ITEMS);
       setLists(INITIAL_LISTS);
       setListItems(INITIAL_LIST_ITEMS);
       setInterruptions(INITIAL_INTERRUPTIONS);
       setGaps(INITIAL_GAPS);
+      saveDurableState('blocks', INITIAL_BLOCKS, Date.now());
+      saveDurableState('dailyCardItems', INITIAL_DAILY_CARD_ITEMS, Date.now());
       showToast('Đã khôi phục dữ liệu cũ từ máy chủ.');
     } else {
       showToast('Đã bắt đầu mới. Bản sao cũ được lưu trữ 30 ngày trước khi xóa hẳn.');
@@ -1412,17 +1566,185 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addNewBlock = (blockData: Omit<TimeBlock, 'id'>) => {
+    const nowTs = Date.now();
     const newB: TimeBlock = {
       ...blockData,
-      id: `b-${Date.now()}`,
+      id: `b-${nowTs}-${Math.random().toString(36).slice(2, 6)}`,
       quadrant: blockData.quadrant || (blockData.goalId ? 2 : 4),
-      isImportant: !!blockData.goalId,
-      isUrgent: false,
-      estimatedMinutes: 60,
+      isImportant: blockData.isImportant ?? !!blockData.goalId,
+      isUrgent: blockData.isUrgent ?? false,
+      estimatedMinutes: blockData.estimatedMinutes || 60,
       ageDays: 1,
+      updatedAt: nowTs,
     };
-    setBlocks(prev => [...prev, newB]);
+    setBlocks(prev => {
+      const next = [...prev, newB];
+      saveDurableState('blocks', next, nowTs);
+      return next;
+    });
   };
+
+  // E5 (PRD v0.3.16): Hydrate durable storage (SQLite on native / IndexedDB on web) on open
+  // Local data is shown first and merged with server/seed data so a newer local change is NEVER overwritten.
+  useEffect(() => {
+    let cancelled = false;
+    async function hydrateDurableData() {
+      const [
+        savedBlocks,
+        savedDailyCards,
+        savedInbox,
+        savedGoals,
+        savedLists,
+        savedListItems,
+        savedInterruptions,
+        savedGaps,
+        savedTimeLedger,
+        savedBacklogCards,
+        savedPlacesRec,
+        savedProfileDetail,
+        savedPalette,
+        savedDeviceLook,
+      ] = await Promise.all([
+        loadDurableState<TimeBlock[]>('blocks'),
+        loadDurableState<DailyCardItem[]>('dailyCardItems'),
+        loadDurableState<InboxItem[]>('inbox'),
+        loadDurableState<Goal[]>('goals'),
+        loadDurableState<AppList[]>('lists'),
+        loadDurableState<ListItem[]>('listItems'),
+        loadDurableState<InterruptionRecord[]>('interruptions'),
+        loadDurableState<UndeclaredGap[]>('gaps'),
+        loadDurableState<TimeLedgerSegment[]>('timeLedger'),
+        loadDurableState<BacklogCard[]>('backlogCards'),
+        loadDurableState<SavedPlace[]>('savedPlaces'),
+        loadDurableState<UserProfileDetail>('userProfileDetail'),
+        loadDurableState<ColorPalette>('palette'),
+        loadDurableState<DeviceLook>('deviceLook'),
+      ]);
+
+      if (cancelled) return;
+
+      if (savedBlocks?.value) {
+        setBlocks(mergeCollectionsByUpdatedAt(savedBlocks.value, INITIAL_BLOCKS));
+      }
+      if (savedDailyCards?.value) {
+        setDailyCardItems(mergeCollectionsByUpdatedAt(savedDailyCards.value, INITIAL_DAILY_CARD_ITEMS));
+      }
+      if (savedInbox?.value) {
+        setInbox(mergeCollectionsByUpdatedAt(savedInbox.value, INITIAL_INBOX));
+      }
+      if (savedGoals?.value) {
+        setGoals(mergeCollectionsByUpdatedAt(savedGoals.value, INITIAL_GOALS));
+      }
+      if (savedLists?.value) {
+        setLists(mergeCollectionsByUpdatedAt(savedLists.value, INITIAL_LISTS));
+      }
+      if (savedListItems?.value) {
+        setListItems(mergeCollectionsByUpdatedAt(savedListItems.value, INITIAL_LIST_ITEMS));
+      }
+      if (savedInterruptions?.value) {
+        setInterruptions(savedInterruptions.value);
+      }
+      if (savedGaps?.value) {
+        setGaps(savedGaps.value);
+      }
+      if (savedTimeLedger?.value) {
+        setTimeLedger(savedTimeLedger.value);
+      }
+      if (savedBacklogCards?.value) {
+        setBacklogCards(savedBacklogCards.value);
+      }
+      if (savedPlacesRec?.value) {
+        setSavedPlaces(savedPlacesRec.value);
+      }
+      if (savedProfileDetail?.value) {
+        setUserProfileDetail(savedProfileDetail.value);
+      }
+      if (savedPalette?.value) {
+        setPalette(savedPalette.value);
+      }
+      if (savedDeviceLook?.value) {
+        setDeviceLook(savedDeviceLook.value);
+      }
+
+      isHydratedRef.current = true;
+    }
+
+    hydrateDurableData();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // E5: Persist every state change immediately to durable storage (SQLite + IndexedDB)
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('blocks', blocks, Date.now());
+  }, [blocks]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('dailyCardItems', dailyCardItems, Date.now());
+  }, [dailyCardItems]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('inbox', inbox, Date.now());
+  }, [inbox]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('goals', goals, Date.now());
+  }, [goals]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('lists', lists, Date.now());
+  }, [lists]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('listItems', listItems, Date.now());
+  }, [listItems]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('interruptions', interruptions, Date.now());
+  }, [interruptions]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('gaps', gaps, Date.now());
+  }, [gaps]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('timeLedger', timeLedger, Date.now());
+  }, [timeLedger]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('backlogCards', backlogCards, Date.now());
+  }, [backlogCards]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('savedPlaces', savedPlaces, Date.now());
+  }, [savedPlaces]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('userProfileDetail', userProfileDetail, Date.now());
+  }, [userProfileDetail]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('palette', palette, Date.now());
+  }, [palette]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('deviceLook', deviceLook, Date.now());
+  }, [deviceLook]);
 
   const addGoalWithBackplanning = (goalData: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => {
     const weeks = Math.ceil(goalData.horizonDays / 7);
@@ -1574,6 +1896,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isSwipeModalOpen,
       setIsSwipeModalOpen,
       handleSwipeAction,
+      isNativePlatform,
       reminderQuestions,
       isQuestionsModalOpen,
       setIsQuestionsModalOpen,
