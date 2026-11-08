@@ -71,7 +71,7 @@ export function computeGoalMetrics(
   const progressType: GoalProgressType = goal.progressType || 'tasks';
 
   const linkedBlocks = blocks.filter(
-    (b) => b.goalId === goal.id && b.status !== 'dropped'
+    (b) => b.goalId === goal.id && b.status !== 'dropped' && !b.isTemplateBlock
   );
   const linkedDailyItems = dailyCardItems.filter(
     (item) =>
@@ -86,13 +86,16 @@ export function computeGoalMetrics(
   const completedTasksCount = completedBlocks.length + completedDaily.length;
   const totalTasksCount = linkedBlocks.length + linkedDailyItems.length;
 
-  // Effort minutes across all linked blocks (actual if done/in_progress)
-  const effortMinutes = linkedBlocks.reduce((acc, b) => {
-    if (b.status === 'done' || b.status === 'in_progress' || b.status === 'partly_done') {
-      return acc + getBlockActualMinutes(b);
-    }
-    return acc;
-  }, 0);
+  // Effort minutes across all linked blocks (actual if done/in_progress) or cumulative imported actualMinutesTotal
+  const blocksEffortMinutes = blocks
+    .filter((b) => b.goalId === goal.id && b.status !== 'dropped')
+    .reduce((acc, b) => {
+      if (b.status === 'done' || b.status === 'in_progress' || b.status === 'partly_done') {
+        return acc + getBlockActualMinutes(b);
+      }
+      return acc;
+    }, 0);
+  const effortMinutes = Math.max(goal.actualMinutesTotal || 0, blocksEffortMinutes);
 
   const effortHours = Math.round((effortMinutes / 60) * 10) / 10;
   const effortText =

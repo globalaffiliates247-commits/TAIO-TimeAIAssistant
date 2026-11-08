@@ -124,19 +124,40 @@ function formatEstimateTotal(totalMins: number): string {
 
 function parseDeadlineRank(block: TimeBlock): number {
   const dl = (block.deadline || '').trim().toLowerCase();
-  if (!dl || dl === 'chưa có' || dl === 'chưa có hạn') return 999999;
+  if (!dl || dl === 'chưa có' || dl === 'chưa có hạn') return 99999999;
   if (dl.includes('hôm nay')) return 100;
   if (dl.includes('ngày mai')) return 200;
   if (dl.includes('tuần này')) return 300;
+  // Match ISO YYYY-MM-DD or YYYY-MM-DDTHH:mm
+  const isoParts = dl.match(/(\d{4})-(\d{2})-(\d{2})(?:t(\d{2}):(\d{2}))?/);
+  if (isoParts) {
+    const year = parseInt(isoParts[1], 10);
+    const month = parseInt(isoParts[2], 10);
+    const day = parseInt(isoParts[3], 10);
+    const hr = isoParts[4] ? parseInt(isoParts[4], 10) : 23;
+    return year * 1000000 + month * 10000 + day * 100 + hr;
+  }
   // Match DD/MM/YYYY or DD/MM
   const parts = dl.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?/);
   if (parts) {
     const day = parseInt(parts[1], 10);
     const month = parseInt(parts[2], 10);
     const year = parts[3] ? parseInt(parts[3], 10) : 2026;
-    return year * 10000 + month * 100 + day;
+    return year * 1000000 + month * 10000 + day * 100;
   }
-  return 500000;
+  return 50000000;
+}
+
+function formatDeadlineLabel(task: TimeBlock): string {
+  if (task.deadline) {
+    const iso = task.deadline.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}:\d{2}))?/i);
+    if (iso) {
+      return iso[4] ? `${iso[3]}/${iso[2]} ${iso[4]}` : `${iso[3]}/${iso[2]}/${iso[1]}`;
+    }
+    return task.deadline;
+  }
+  if (task.startTime) return `Khung ${task.startTime}`;
+  return 'Chưa có hạn';
 }
 
 export const PriorityMatrix: React.FC = () => {
@@ -179,8 +200,8 @@ export const PriorityMatrix: React.FC = () => {
     } catch {}
   };
 
-  // All open (non-done, non-dropped) tasks
-  const openTasks = blocks.filter(b => b.status !== 'done' && b.status !== 'dropped');
+  // All open (non-done, non-dropped) tasks (excluding routine day-template slots)
+  const openTasks = blocks.filter(b => !b.isTemplateBlock && b.status !== 'done' && b.status !== 'dropped');
 
   const getTasksForQuadrant = (q: QuadrantId): TimeBlock[] => {
     const list = openTasks.filter(b => (b.quadrant || 2) === q);
@@ -190,11 +211,11 @@ export const PriorityMatrix: React.FC = () => {
   // Guard for Tab 3 (Quan trọng, chưa khẩn — quadrant 2): how many tasks already have a time slot this week
   const tab3Tasks = getTasksForQuadrant(2);
   const tab3ScheduledCount = tab3Tasks.filter(
-    t => Boolean(t.startTime && t.endTime)
+    t => Boolean((t.startTime && t.endTime) || (t.notes && /\d{1,2}:\d{2}/.test(t.notes)))
   ).length;
 
-  // Time balance calculations across all blocks (including done)
-  const validBlocks = blocks.filter(b => b.status !== 'dropped');
+  // Time balance calculations across all matrix tasks (including done)
+  const validBlocks = blocks.filter(b => !b.isTemplateBlock && b.status !== 'dropped');
   const totalMinutes = validBlocks.reduce((acc, b) => acc + (b.estimatedMinutes || 60), 0) || 1;
 
   const minsByQuadrant: Record<QuadrantId, number> = {
@@ -436,7 +457,7 @@ export const PriorityMatrix: React.FC = () => {
                 {visibleTasks.map((task) => {
                   const isRowOpen = expandedTaskId === task.id;
                   const estMins = task.estimatedMinutes || 30;
-                  const deadlineText = task.deadline || (task.startTime ? `Khung ${task.startTime}` : 'Chưa có hạn');
+                  const deadlineText = formatDeadlineLabel(task);
 
                   return (
                     <div

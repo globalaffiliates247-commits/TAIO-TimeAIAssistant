@@ -12,6 +12,14 @@ import {
   TAIONative
 } from '../features/native';
 import { computeGoalMetrics } from '../features/goals/goalMetrics';
+import {
+  parseAndValidateTaioExport,
+  applyTaioImport,
+  buildTaioExportV1,
+  DayTemplateSlot,
+  ExportedDayRecord,
+  TaioImportSummary
+} from '../features/data-transfer';
 import { 
   UserProfile, 
   Goal, 
@@ -163,12 +171,17 @@ interface AppContextType {
   toggleDailyCardItem: (id: string) => void;
   carryOverItem: (id: string, action: 'tomorrow' | 'leave' | 'drop', reason?: string) => void;
 
-  // v0.3.0 / v0.23.0 B24: Data Export for AI Assistant
+  // v0.3.0 / v0.23.0 B24 & v0.3.20: Data Export & Import (taio-time-export v1)
   exportModalOpen: boolean;
   setExportModalOpen: (val: boolean) => void;
   shareToken: string;
   rotateShareToken: () => void;
   generateMarkdownSnapshot: () => string;
+  generateJsonExportV1: () => string;
+  exportTaioJsonV1: () => void;
+  importTaioData: (rawJson: string, mode: 'merge' | 'replace') => TaioImportSummary | null;
+  dayTemplate: DayTemplateSlot[];
+  importedDays: ExportedDayRecord[];
 
   // v0.3.2 B26: Mini app Lists ("Danh sách")
   lists: AppList[];
@@ -387,6 +400,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [deadlines, setDeadlines] = useState<HardDeadline[]>(INITIAL_DEADLINES);
   const [interruptions, setInterruptions] = useState<InterruptionRecord[]>(INITIAL_INTERRUPTIONS);
   const [gaps, setGaps] = useState<UndeclaredGap[]>(INITIAL_GAPS);
+  const [dayTemplate, setDayTemplate] = useState<DayTemplateSlot[]>([]);
+  const [importedDays, setImportedDays] = useState<ExportedDayRecord[]>([]);
 
   // v0.9 & v0.3.10: Action Nudges (B14) — select nudge matching current active window
   const selectActiveNudgeForCurrentHour = (): ActionNudge | null => {
@@ -1667,6 +1682,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         savedProfileDetail,
         savedPalette,
         savedDeviceLook,
+        savedDayTemplate,
+        savedImportedDays,
       ] = await Promise.all([
         loadDurableState<TimeBlock[]>('blocks'),
         loadDurableState<DailyCardItem[]>('dailyCardItems'),
@@ -1682,6 +1699,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loadDurableState<UserProfileDetail>('userProfileDetail'),
         loadDurableState<ColorPalette>('palette'),
         loadDurableState<DeviceLook>('deviceLook'),
+        loadDurableState<DayTemplateSlot[]>('dayTemplate'),
+        loadDurableState<ExportedDayRecord[]>('importedDays'),
       ]);
 
       if (cancelled) return;
@@ -1724,6 +1743,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (savedPalette?.value) {
         setPalette(savedPalette.value);
+      }
+      if (savedDayTemplate?.value) {
+        setDayTemplate(savedDayTemplate.value);
+      }
+      if (savedImportedDays?.value) {
+        setImportedDays(savedImportedDays.value);
       }
       if (savedDeviceLook?.value) {
         const caps = detectRuntimeCapabilities();
@@ -1830,6 +1855,115 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isHydratedRef.current) return;
     saveDurableState('deviceLook', deviceLook, Date.now());
   }, [deviceLook]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('dayTemplate', dayTemplate, Date.now());
+  }, [dayTemplate]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('importedDays', importedDays, Date.now());
+  }, [importedDays]);
+
+  // B24 v0.3.20: Import & Export `taio-time-export` v1 JSON
+  const importTaioData = (rawJson: string, mode: 'merge' | 'replace'): TaioImportSummary | null => {
+    const preview = parseAndValidateTaioExport(rawJson);
+    if (!preview.isValidFormat || !preview.payload) {
+      showToast(preview.errorMessage || 'File dữ liệu không hợp lệ.', undefined, 'error');
+      return null;
+    }
+
+    const { nextState, summary } = applyTaioImport(
+      preview.payload,
+      {
+        profile,
+        userProfileDetail,
+        goals,
+        lists,
+        listItems,
+        blocks,
+        dailyCardItems,
+        interruptions,
+        backlogCards,
+        timeLedger,
+        dayTemplate,
+        importedDays,
+      },
+      mode
+    );
+
+    const nowTs = Date.now();
+    setProfile(nextState.profile);
+    setUserProfileDetail(nextState.userProfileDetail);
+    setGoals(nextState.goals);
+    setLists(nextState.lists);
+    setListItems(nextState.listItems);
+    setBlocks(nextState.blocks);
+    setDailyCardItems(nextState.dailyCardItems);
+    setInterruptions(nextState.interruptions);
+    setBacklogCards(nextState.backlogCards);
+    setTimeLedger(nextState.timeLedger);
+    setDayTemplate(nextState.dayTemplate);
+    setImportedDays(nextState.importedDays);
+
+    if (nextState.importedDays.length > 0) {
+      const sortedDates = nextState.importedDays.map(d => d.date).sort();
+      setSelectedCardDate(sortedDates[sortedDates.length - 1]);
+    }
+
+    // Immediate durable writes (E5)
+    saveDurableState('userProfileDetail', nextState.userProfileDetail, nowTs);
+    saveDurableState('goals', nextState.goals, nowTs);
+    saveDurableState('lists', nextState.lists, nowTs);
+    saveDurableState('listItems', nextState.listItems, nowTs);
+    saveDurableState('blocks', nextState.blocks, nowTs);
+    saveDurableState('dailyCardItems', nextState.dailyCardItems, nowTs);
+    saveDurableState('interruptions', nextState.interruptions, nowTs);
+    saveDurableState('backlogCards', nextState.backlogCards, nowTs);
+    saveDurableState('timeLedger', nextState.timeLedger, nowTs);
+    saveDurableState('dayTemplate', nextState.dayTemplate, nowTs);
+    saveDurableState('importedDays', nextState.importedDays, nowTs);
+
+    showToast(
+      `Đã nhập dữ liệu (${mode === 'merge' ? 'Gộp' : 'Thay thế'}): thêm +${summary.added}, cập nhật ${summary.updated}, giữ nguyên ${summary.skippedUnchanged}.`
+    );
+
+    return summary;
+  };
+
+  const generateJsonExportV1 = (): string => {
+    const exportedObj = buildTaioExportV1({
+      profile,
+      userProfileDetail,
+      goals,
+      lists,
+      listItems,
+      blocks,
+      dailyCardItems,
+      interruptions,
+      backlogCards,
+      timeLedger,
+      dayTemplate,
+      importedDays,
+    });
+    return JSON.stringify(exportedObj, null, 2);
+  };
+
+  const exportTaioJsonV1 = () => {
+    const jsonContent = generateJsonExportV1();
+    const todayStr = new Date().toISOString().split('T')[0];
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `taio-time-export-${todayStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Đã xuất file JSON (taio-time-export v1).');
+  };
 
   const addGoalWithBackplanning = (goalData: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => {
     const weeks = Math.ceil(goalData.horizonDays / 7);
@@ -1958,6 +2092,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       shareToken,
       rotateShareToken,
       generateMarkdownSnapshot,
+      generateJsonExportV1,
+      exportTaioJsonV1,
+      importTaioData,
+      dayTemplate,
+      importedDays,
       lists,
       listItems,
       activeListId,

@@ -21,7 +21,9 @@ export const ExportDataModal: React.FC = () => {
     setExportModalOpen, 
     shareToken, 
     rotateShareToken,
-    generateMarkdownSnapshot 
+    generateMarkdownSnapshot,
+    exportTaioJsonV1,
+    setIsProfileModalOpen
   } = useApp();
 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
@@ -112,11 +114,11 @@ export const ExportDataModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                  Xuất dữ liệu cho AI Assistant (Data Export)
+                  Xuất dữ liệu cho trợ lý AI
                 </h3>
               </div>
               <p className="text-xs text-slate-500">
-                1 chạm chia sẻ bản ghi ngày (Markdown) cho trợ lý AI (Claude/ChatGPT) đọc trực tiếp qua URL bí mật
+                1 chạm chia sẻ bản ghi ngày (Markdown & JSON) cho trợ lý AI đọc trực tiếp hoặc lưu trữ dự phòng
               </p>
             </div>
           </div>
@@ -134,9 +136,9 @@ export const ExportDataModal: React.FC = () => {
           {/* Share Link Box */}
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0401F] font-bold uppercase tracking-wide flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#E0401F] uppercase tracking-wide flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
-                <span>Link chia sẻ cố định cho Trợ lý AI (Latest):</span>
+                <span>Link chia sẻ cố định cho trợ lý AI:</span>
               </span>
               <span className="text-[10px] text-slate-500">Bảo vệ bằng token bí mật</span>
             </div>
@@ -150,9 +152,9 @@ export const ExportDataModal: React.FC = () => {
               />
               <button
                 onClick={handleCopyLink}
-                className="py-2 px-3 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c83516] hover:to-orange-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-orange-500/20 shrink-0"
+                className="py-2 px-3 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
-                {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5 text-white" />}
                 <span>{copiedLink ? 'Đã sao chép' : 'Sao chép link'}</span>
               </button>
             </div>
@@ -180,27 +182,50 @@ export const ExportDataModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Action Buttons: Download file & Copy text */}
-          <div className="flex items-center gap-2.5">
+          {/* Action Buttons: Download .md, Download .json (taio-time-export v1), Copy text, Preview */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <button
               onClick={handleDownloadFile}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+              className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Download className="w-4 h-4 text-emerald-400" />
+              <Download className="w-4 h-4 text-emerald-600" />
               <span>Tải file .md</span>
             </button>
             <button
-              onClick={handleCopyText}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+              onClick={exportTaioJsonV1}
+              className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Copy className="w-4 h-4 text-sky-400" />
-              <span>{copiedText ? 'Đã copy nội dung' : 'Copy toàn bộ Text'}</span>
+              <Download className="w-4 h-4 text-[#E0401F]" />
+              <span>Tải file .json</span>
+            </button>
+            <button
+              onClick={handleCopyText}
+              className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Copy className="w-4 h-4 text-sky-600" />
+              <span>{copiedText ? 'Đã sao chép' : 'Sao chép nội dung'}</span>
             </button>
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200"
+              className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 cursor-pointer"
             >
               {showPreview ? 'Ẩn xem trước' : 'Xem trước'}
+            </button>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs">
+            <span className="text-slate-600">
+              Muốn khôi phục hoặc gộp dữ liệu từ file JSON chuẩn?
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setExportModalOpen(false);
+                setIsProfileModalOpen(true);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-[#E0401F] border border-slate-200 font-bold text-xs shrink-0 cursor-pointer"
+            >
+              Mở Nhập dữ liệu
             </button>
           </div>
 

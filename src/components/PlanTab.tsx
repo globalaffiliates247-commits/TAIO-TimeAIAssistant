@@ -208,7 +208,10 @@ export const PlanTab: React.FC = () => {
 
             {/* Timeline List */}
             <div className="space-y-3">
-              {blocks.map((block) => {
+              {blocks
+                .filter(b => Boolean(b.startTime && b.endTime))
+                .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                .map((block) => {
                 const conf = TYPE_CONFIG[block.type] || TYPE_CONFIG.deep;
                 const isCompleted = block.status === 'done';
                 const isCurrent = block.status === 'in_progress';
@@ -231,17 +234,22 @@ export const PlanTab: React.FC = () => {
                       </div>
 
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${conf.bg} ${conf.text} ${conf.border}`}>
                             {conf.label}
                           </span>
                           {block.status === 'done' && (
-                            <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                            <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
                               <CheckCircle className="w-3.5 h-3.5" /> Đã xong
                             </span>
                           )}
+                          {block.status === 'partly_done' && (
+                            <span className="text-[11px] text-amber-600 font-bold flex items-center gap-1">
+                              ● Xong 1 phần
+                            </span>
+                          )}
                           {block.status === 'in_progress' && (
-                            <span className="text-[11px] text-amber-400 font-extrabold animate-pulse">
+                            <span className="text-[11px] text-amber-600 font-extrabold animate-pulse">
                               ● Đang diễn ra
                             </span>
                           )}
@@ -249,6 +257,11 @@ export const PlanTab: React.FC = () => {
                         <h4 className={`text-sm sm:text-base font-bold mt-1 ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
                           {block.title}
                         </h4>
+                        {block.nextStep && (
+                          <p className="text-xs text-amber-700 font-medium mt-0.5">
+                            Bước kế tiếp: {block.nextStep}
+                          </p>
+                        )}
                         {block.goalName && (
                           <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
                             <Target className="w-3.5 h-3.5 text-red-400" />

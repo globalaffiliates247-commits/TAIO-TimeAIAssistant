@@ -96,6 +96,15 @@ export interface TimeBlock {
   timeLimitMins?: number; // User-set appetite / time limit when planning (default = estimate)
   deadline?: string;
   updatedAt?: string | number;
+  // v0.3.20 B24 additions:
+  isTemplateBlock?: boolean;
+  templateKind?: string;
+  goalMinutes?: Record<string, number>;
+  matrixGroup?: 'do_now' | 'delegate' | 'schedule' | 'drop';
+  taskSource?: string;
+  carryFrom?: string;
+  createdAt?: string;
+  extra?: Record<string, unknown>;
 }
 
 export interface HardDeadline {
@@ -136,6 +145,13 @@ export interface Goal {
   plannedMinutesTotal?: number;
   actualMinutesTotal?: number;
   updatedAt?: string | number;
+  start?: string;
+  commitment?: {
+    minutesPerDay: number;
+    days: number;
+    start: string;
+  };
+  extra?: Record<string, unknown>;
 }
 
 export type InterruptionDecision = 
@@ -189,6 +205,9 @@ export interface InterruptionRecord {
   note?: string;
   situation?: InterruptionSituation;
   isDistraction?: boolean; // v0.3.9: tách riêng Xao nhãng và Chen ngang
+  date?: string;
+  updatedAt?: string | number;
+  extra?: Record<string, unknown>;
 }
 
 export type GapLabel = 
@@ -388,7 +407,12 @@ export interface DailyCardItem {
   displacedMinutes?: number;
   dropReason?: string;
   dodChecklist?: DodItem[];
+  note?: string;
+  nextStep?: string;
+  timeUsedFor?: string;
+  movedTo?: string;
   updatedAt?: string | number;
+  extra?: Record<string, unknown>;
 }
 
 // B24 (PRD v0.3.0 / v0.23.0): Data Export for AI Assistant
@@ -416,6 +440,7 @@ export interface AppList {
   archived: boolean;
   createdAt: string;
   updatedAt: string;
+  extra?: Record<string, unknown>;
 }
 
 export interface ListItemLink {
@@ -449,6 +474,7 @@ export interface ListItem {
   timeSpentMinutes?: number;
   // Simple checklist field
   checked?: boolean;
+  extra?: Record<string, unknown>;
 }
 
 // B27 (PRD v0.3.4): Profile, Personalization and Community links ("Cá nhân / Me")
@@ -458,10 +484,12 @@ export interface UserProfileDetail {
   avatarType: 'initials' | 'image' | 'preset';
   avatarPreset?: string;
   avatarUrl?: string;
-  defaultHomeScreen: 'daycard' | 'now';
+  defaultHomeScreen: 'inbox' | 'daycard' | 'now' | 'plan' | 'lists';
   quietHoursStart: string; // "22:00"
   quietHoursEnd: string;   // "07:00"
   analyticsOptOut: boolean;
+  updatedAt?: string | number;
+  extra?: Record<string, unknown>;
 }
 
 export interface CommunityRemoteConfig {

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
+import { DataImportSection } from '../features/data-transfer';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -46,6 +47,8 @@ export const ProfileModal: React.FC = () => {
     communityConfig,
     setExportModalOpen,
     resetAllUserData,
+    importTaioData,
+    exportTaioJsonV1,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'community'>('profile');
@@ -229,29 +232,40 @@ export const ProfileModal: React.FC = () => {
               
               {/* Default Home Screen */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">Màn hình mở đầu mặc định (Home Screen)</label>
-                <div className="grid grid-cols-2 gap-2.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Màn hình mở đầu mặc định</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'inbox' })}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      userProfileDetail.defaultHomeScreen === 'inbox'
+                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
+                        : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
+                    }`}
+                  >
+                    <p className="text-xs font-bold text-slate-800">Rổ công việc</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Ghi nhanh và xử lý việc chờ</p>
+                  </button>
                   <button
                     onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'daycard' })}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
                       userProfileDetail.defaultHomeScreen === 'daycard'
                         ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
                         : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                     }`}
                   >
-                    <p className="text-xs font-bold text-slate-800">1. Thẻ ngày (Daily Card)</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Sticky-note danh sách việc cần làm hôm nay</p>
+                    <p className="text-xs font-bold text-slate-800">Thẻ ngày</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Danh sách việc cần làm hôm nay</p>
                   </button>
                   <button
                     onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'now' })}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
                       userProfileDetail.defaultHomeScreen === 'now'
                         ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
                         : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                     }`}
                   >
-                    <p className="text-xs font-bold text-slate-800">2. Bây giờ (Now)</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Đồng hồ đếm ngược nhiệm vụ hiện tại</p>
+                    <p className="text-xs font-bold text-slate-800">Bây giờ</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Đồng hồ nhiệm vụ hiện tại</p>
                   </button>
                 </div>
               </div>
@@ -502,11 +516,16 @@ export const ProfileModal: React.FC = () => {
             </div>
           )}
 
-          {/* B27 v0.3.12: Section "Dữ liệu" — "Xóa toàn bộ dữ liệu…", always the last item on the Me screen */}
-          <div className="pt-5 mt-6 border-t border-slate-200 space-y-3">
+          {/* B24 v0.3.20 & B27 v0.3.12: Section "Dữ liệu" — "Nhập dữ liệu", followed by "Xóa toàn bộ dữ liệu…" as the last item */}
+          <div className="pt-5 mt-6 border-t border-slate-200 space-y-3.5">
             <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
               Dữ liệu
             </h4>
+
+            <DataImportSection
+              onImport={importTaioData}
+              onExportJson={exportTaioJsonV1}
+            />
 
             {!showDeleteConfirm ? (
               <div className="flex items-center justify-between p-3.5 rounded-2xl bg-red-50/60 border border-red-200">

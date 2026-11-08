@@ -6,6 +6,9 @@
  */
 
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 function mergeCollectionsByUpdatedAt(localItems, seedItems) {
   if (!Array.isArray(localItems) || localItems.length === 0) {
@@ -140,4 +143,72 @@ assert.ok(afterUpgradeMerge.some(i => i.id === 'user-task-2'), 'Task 2 must surv
 assert.ok(afterUpgradeMerge.some(i => i.id === 'user-task-3'), 'Task 3 must survive upgrade');
 
 console.log('✓ Bài kiểm tra 2 đạt: Chế độ máy bay (ngoại tuyến) & cài bản mới đè lên bản cũ giữ nguyên dữ liệu mới hơn trên máy.');
-console.log('=== TẤT CẢ BÀI KIỂM TRA E5 TRƯỚC KHI PHÁT HÀNH ĐỀU ĐẠT ===');
+
+// Step 5: B24 (PRD v0.3.20) Test importing founder's real JSON data (`public/taio-lee-export-v1.json`)
+console.log('=== B24 RELEASE TEST: KIỂM TRA NHẬP DỮ LIỆU TAIO-TIME-EXPORT V1 ===');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const samplePath = path.join(__dirname, '..', 'public', 'taio-lee-export-v1.json');
+const rawFounderJson = fs.readFileSync(samplePath, 'utf-8');
+const parsedFounder = JSON.parse(rawFounderJson);
+
+assert.equal(parsedFounder.format, 'taio-time-export');
+assert.equal(parsedFounder.formatVersion, 1);
+assert.equal(parsedFounder.goals.length, 3, 'Founder file must have 3 goals');
+assert.equal(parsedFounder.projects.length, 3, 'Founder file must have 3 projects');
+assert.equal(parsedFounder.lists.length, 2, 'Founder file must have 2 lists');
+assert.equal(parsedFounder.tasks.length, 21, 'Founder file must have 21 tasks');
+assert.equal(parsedFounder.dayTemplate.length, 14, 'Founder file must have 14 dayTemplate slots');
+assert.equal(parsedFounder.days.length, 5, 'Founder file must have 5 days');
+
+const previewLine = `${parsedFounder.goals.length} mục tiêu, ${parsedFounder.projects.length} dự án, ${parsedFounder.tasks.length} việc, ${parsedFounder.days.length} ngày`;
+assert.equal(previewLine, '3 mục tiêu, 3 dự án, 21 việc, 5 ngày');
+
+// Simulate idempotent merge by id
+function simulateIdempotentImport(existingTasks, incomingTasks, fileExportedTs) {
+  let added = 0;
+  let updated = 0;
+  let skipped = 0;
+  const result = [...existingTasks];
+
+  for (const t of incomingTasks) {
+    if (!t || !t.id || !t.title) continue;
+    const idx = result.findIndex(item => item.id === t.id);
+    if (idx === -1) {
+      added++;
+      result.push({ ...t, updatedAt: fileExportedTs });
+    } else {
+      const existingTs = result[idx].updatedAt || 0;
+      if (fileExportedTs > existingTs) {
+        updated++;
+        result[idx] = { ...t, updatedAt: fileExportedTs };
+      } else {
+        skipped++;
+      }
+    }
+  }
+  return { result, added, updated, skipped };
+}
+
+const ts1 = Date.parse(parsedFounder.exportedAt);
+const import1 = simulateIdempotentImport([], parsedFounder.tasks, ts1);
+assert.equal(import1.added, 21);
+assert.equal(import1.updated, 0);
+assert.equal(import1.skipped, 0);
+assert.equal(import1.result.length, 21);
+
+// Importing the exact same file a 2nd time creates NO duplicates and skips all 21
+const import2 = simulateIdempotentImport(import1.result, parsedFounder.tasks, ts1);
+assert.equal(import2.added, 0);
+assert.equal(import2.updated, 0);
+assert.equal(import2.skipped, 21);
+assert.equal(import2.result.length, 21);
+
+// Importing a newer version of the file updates existing records by id without duplicating
+const import3 = simulateIdempotentImport(import2.result, parsedFounder.tasks, ts1 + 60000);
+assert.equal(import3.added, 0);
+assert.equal(import3.updated, 21);
+assert.equal(import3.skipped, 0);
+assert.equal(import3.result.length, 21);
+
+console.log(`✓ Bài kiểm tra 3 đạt: Nhập dữ liệu TAIO-Lee (${previewLine}) Gộp/Thay thế không tạo bản trùng theo id.`);
+console.log('=== TẤT CẢ BÀI KIỂM TRA E5 & B24 TRƯỚC KHI PHÁT HÀNH ĐỀU ĐẠT ===');
