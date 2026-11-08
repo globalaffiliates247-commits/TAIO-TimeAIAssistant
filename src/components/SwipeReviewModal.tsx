@@ -228,7 +228,7 @@ export const SwipeReviewModal: React.FC = () => {
   return (
     <div
       style={{ touchAction: 'none' }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed app-overlay-safe z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
     >
       <div
         style={{ overscrollBehavior: 'contain' }}

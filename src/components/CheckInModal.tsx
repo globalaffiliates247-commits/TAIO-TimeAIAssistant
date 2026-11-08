@@ -52,7 +52,7 @@ export const CheckInModal: React.FC = () => {
   // Case 1: Ritual Block (PRD v0.20 B9 - Ritual card: e.g. Close the Day)
   if (checkInBlock.blockKind === 'ritual') {
     return (
-      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="fixed app-bottom-sheet-safe z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
         <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-orange-500/30 sm:border">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
             <span className="text-[11px] font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
@@ -101,7 +101,7 @@ export const CheckInModal: React.FC = () => {
   // Case 2: Meeting Block (PRD v0.20 B9 - Ends silently with Inbox prompt)
   if (checkInBlock.blockKind === 'meeting') {
     return (
-      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="fixed app-bottom-sheet-safe z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
         <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-purple-500/30 sm:border">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-purple-400">
@@ -142,7 +142,7 @@ export const CheckInModal: React.FC = () => {
 
   // Case 3: Standard Task Timebox with Definition of Done (B9 Anatomy)
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed app-bottom-sheet-safe z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
       <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-orange-500/30 sm:border">
         
         {/* 1. Kicker (small, grey): what happened and when */}

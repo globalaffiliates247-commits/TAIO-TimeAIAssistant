@@ -65,15 +65,63 @@ async function build() {
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
+  --native-sat: 0px;
+  --native-sab: 0px;
+  --sat: max(env(safe-area-inset-top, 0px), var(--native-sat, 0px));
+  --sab: max(env(safe-area-inset-bottom, 0px), var(--native-sab, 0px));
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+/* Guaranteed hardware safe-area floor on iPhone portrait (iOS WebKit / WKWebView / IPA) */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 600px) and (orientation: portrait) {
+    :root {
+      --native-sat: 59px;
+      --native-sab: 34px;
+      --sat: max(env(safe-area-inset-top, 0px), var(--native-sat, 59px));
+      --sab: max(env(safe-area-inset-bottom, 0px), var(--native-sab, 34px));
+    }
+  }
+}
+
+html.is-native-ios {
+  --native-sat: 59px;
+  --native-sab: 34px;
+  --sat: max(env(safe-area-inset-top, 0px), var(--native-sat, 59px));
+  --sab: max(env(safe-area-inset-bottom, 0px), var(--native-sab, 34px));
+}
+
+.app-overlay-safe {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: calc(var(--sat, 0px) + 12px);
+  padding-bottom: calc(var(--sab, 0px) + 12px);
+  padding-left: max(var(--sal, 0px), 12px);
+  padding-right: max(var(--sar, 0px), 12px);
+}
+
+.app-bottom-sheet-safe {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: calc(var(--sat, 0px) + 16px);
+  padding-bottom: var(--sab, 0px);
 }
 
 html, body {
   background-color: #ffffff;
   color: #0f172a;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Be Vietnam Pro", sans-serif;
-  overflow-x: clip;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: clip;
 }
 
 /* Custom scrollbars */

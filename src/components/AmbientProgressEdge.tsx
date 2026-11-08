@@ -31,7 +31,8 @@ export const AmbientProgressEdge: React.FC = () => {
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 h-1 z-50 bg-black/40 overflow-hidden pointer-events-none"
+      style={{ top: 'var(--sat, 0px)' }}
+      className="fixed left-0 right-0 h-1 z-50 bg-black/40 overflow-hidden pointer-events-none"
       title={`Tiến độ ngoại vi: Đã trôi qua ${elapsed}/${totalDuration} phút (${progressPercent}%)`}
     >
       <div 

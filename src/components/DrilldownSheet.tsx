@@ -442,7 +442,7 @@ export const DrilldownSheet: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed app-bottom-sheet-safe z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
       
       {/* Click outside backdrop to close */}
       <div className="absolute inset-0" onClick={closeDrilldown} />

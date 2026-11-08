@@ -1,12 +1,13 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-const config: CapacitorConfig = {
+const config: CapacitorConfig & { packageClassList?: string[] } = {
   appId: 'club.taio.timeapp',
   appName: 'TAIO Time',
   webDir: 'out',
   backgroundColor: '#ffffff',
+  packageClassList: ['TAIONativePlugin'],
   ios: {
-    // Web layer handles safe areas itself via env(safe-area-inset-*)
+    // Web layer + AppShell handle safe areas via --sat / --sab
     contentInset: 'never',
     backgroundColor: '#ffffff',
   },

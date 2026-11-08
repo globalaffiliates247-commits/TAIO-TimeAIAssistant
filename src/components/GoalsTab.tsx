@@ -488,7 +488,7 @@ export const GoalsTab: React.FC = () => {
 
       {/* Back-planning Modal (PRD B7) */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed app-overlay-safe z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 w-full max-w-lg shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto">
             <div className="mb-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[#E0401F] text-xs font-semibold mb-2 border border-red-200">

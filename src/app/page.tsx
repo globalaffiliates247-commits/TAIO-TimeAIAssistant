@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AppProvider, useApp } from '../context/AppContext';
+import { AppShell } from '../ui-kit/app-shell';
 import { Navbar } from '../components/Navbar';
 import { NowTab } from '../components/NowTab';
 import { PlanTab } from '../components/PlanTab';
@@ -87,14 +88,8 @@ const MainAppContent: React.FC = () => {
     touchStartYRef.current = null;
   };
 
-  return (
-    <div style={{ overflowX: 'clip' }} className={`min-h-screen flex flex-col bg-white text-slate-900 w-full max-w-full ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
-      {/* Ambient Progress Edge (4px peripheral awareness line) */}
-      <AmbientProgressEdge />
-
-      <Navbar />
-      <ActionNudgeBanner />
-
+  const topBanners = (
+    <>
       {/* B14 v0.3.17: Top messages sit below the header (never covering tab bar or header buttons), support swipe-up & close button */}
       {toastMsg && (
         <div
@@ -192,31 +187,11 @@ const MainAppContent: React.FC = () => {
           </div>
         </div>
       )}
+    </>
+  );
 
-      {/* Main Container - D5 Mobile First: Everyday tabs constrained to mobile-width column; Management tabs responsive */}
-      <main className={`flex-1 w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 transition-all duration-300 ${
-        currentTab === 'now' || currentTab === 'plan' 
-          ? 'max-w-xl' 
-          : 'max-w-6xl'
-      }`}>
-        {/* Orientation Hint on portrait mobile for management screens (PRD D5) */}
-        {(currentTab === 'achievements' || (currentTab as any) === 'efficiency' || currentTab === 'goals') && (
-          <OrientationHint />
-        )}
-
-        {currentTab === 'now' && <NowTab />}
-        {currentTab === 'plan' && <PlanTab />}
-        {(currentTab === 'achievements' || (currentTab as any) === 'efficiency') && <AchievementsTab />}
-        {currentTab === 'goals' && <GoalsTab />}
-        {currentTab === 'admin' && <AdminPortal />}
-      </main>
-
-      {/* Bottom Footer info */}
-      <footer style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }} className="border-t border-slate-200/80 pt-4 px-4 text-center text-xs text-slate-500">
-        TAIO Time App • Quản trị thời gian kết hợp AI • TAIO.CLUB
-      </footer>
-
-      {/* Modals & Overlays */}
+  const overlays = (
+    <>
       <AppearanceModal />
       <OnboardingModal />
       <InterruptionModal />
@@ -233,7 +208,31 @@ const MainAppContent: React.FC = () => {
       <SwipeReviewModal />
       <ReminderQuestionsModal />
       <ActiveCaptureModal />
-    </div>
+    </>
+  );
+
+  return (
+    <AppShell
+      topEdge={<AmbientProgressEdge />}
+      header={<Navbar />}
+      nudge={<ActionNudgeBanner />}
+      banners={topBanners}
+      hasBottomTabBar={deviceLook === 'phone'}
+      mainMaxWidthClass={currentTab === 'now' || currentTab === 'plan' ? 'max-w-xl' : 'max-w-6xl'}
+      footer="TAIO Time App • Quản trị thời gian kết hợp AI • TAIO.CLUB"
+      overlays={overlays}
+    >
+      {/* Orientation Hint on portrait mobile for management screens (PRD D5) */}
+      {(currentTab === 'achievements' || (currentTab as any) === 'efficiency' || currentTab === 'goals') && (
+        <OrientationHint />
+      )}
+
+      {currentTab === 'now' && <NowTab />}
+      {currentTab === 'plan' && <PlanTab />}
+      {(currentTab === 'achievements' || (currentTab as any) === 'efficiency') && <AchievementsTab />}
+      {currentTab === 'goals' && <GoalsTab />}
+      {currentTab === 'admin' && <AdminPortal />}
+    </AppShell>
   );
 };
 

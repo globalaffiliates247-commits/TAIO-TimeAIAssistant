@@ -54,7 +54,7 @@ export const MethodLibraryModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed app-bottom-sheet-safe z-50 bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
       <div className="bg-white/95 border border-slate-200 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl p-5 sm:p-6 text-slate-900 border-t border-orange-200 sm:border">
         
         {/* Header */}

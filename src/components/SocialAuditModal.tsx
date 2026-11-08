@@ -27,7 +27,7 @@ export const SocialAuditModal: React.FC = () => {
   const equivalentDeepBlocks = Math.round((totalSocialTimeHours * 60) / profile.focusBlockDurationMins);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed app-overlay-safe z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto overscroll-contain shadow-2xl p-6 sm:p-7 text-slate-800">
         
         {/* Header */}

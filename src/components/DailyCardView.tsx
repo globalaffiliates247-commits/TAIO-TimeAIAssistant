@@ -285,7 +285,7 @@ export const DailyCardView: React.FC = () => {
       {/* 3. The Sticky-Note Card (Tập trung & Trực quan) */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm relative overflow-hidden">
         {/* Sticky note style left accent strip */}
-        <div className="absolute top-0 left-0 bottom-0 w-2 bg-gradient-to-b from-amber-400 to-orange-500" />
+        <div className="absolute top-0 left-0 bottom-0 w-2 bg-amber-500" />
 
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 pl-2">
           <div className="flex items-center gap-2">

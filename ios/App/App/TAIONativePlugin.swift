@@ -84,16 +84,34 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
             liveActivitiesSupported = ActivityAuthorizationInfo().areActivitiesEnabled
             #endif
         }
-        call.resolve([
-            "isNativeApp": true,
-            "platform": "ios",
-            "hasSQLite": db != nil,
-            "hasLiveActivities": true,
-            "liveActivitiesEnabled": liveActivitiesSupported,
-            "hasNativeNotifications": true,
-            "hasGeofencing": CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self),
-            "hasShortcutsTimer": true
-        ])
+        DispatchQueue.main.async {
+            var rawTop: Int = 0
+            var rawBottom: Int = 0
+            if let vcView = self.webView {
+                let insets = vcView.window?.safeAreaInsets ?? vcView.safeAreaInsets
+                rawTop = Int(ceil(insets.top))
+                rawBottom = Int(ceil(insets.bottom))
+            }
+            let isPhone = UIDevice.current.userInterfaceIdiom == .phone
+            let isPortrait = UIScreen.main.bounds.height >= UIScreen.main.bounds.width
+            let safeTop: Int = (isPhone && isPortrait) ? max(rawTop, 59) : max(rawTop, 0)
+            let safeBottom: Int = isPhone ? max(rawBottom, 20) : max(rawBottom, 0)
+            let hasSQLiteDB: Bool = (self.db != nil)
+            let hasGeo: Bool = CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self)
+
+            var payload: [String: Any] = [:]
+            payload["isNativeApp"] = true
+            payload["platform"] = "ios"
+            payload["hasSQLite"] = hasSQLiteDB
+            payload["hasLiveActivities"] = true
+            payload["liveActivitiesEnabled"] = liveActivitiesSupported
+            payload["hasNativeNotifications"] = true
+            payload["hasGeofencing"] = hasGeo
+            payload["hasShortcutsTimer"] = true
+            payload["safeAreaTop"] = safeTop
+            payload["safeAreaBottom"] = safeBottom
+            call.resolve(payload)
+        }
     }
 
     @objc func sqliteSetItem(_ call: CAPPluginCall) {

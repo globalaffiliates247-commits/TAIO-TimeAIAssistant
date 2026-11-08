@@ -75,10 +75,88 @@ export const Navbar: React.FC = () => {
     setPalette(isCool ? 'warm' : 'cool');
   };
 
+  const renderCoreTabsNav = (isFixedBottom: boolean) => (
+    <nav
+      style={
+        isFixedBottom
+          ? { bottom: 0, paddingBottom: 'max(var(--sab, 0px), 8px)' }
+          : undefined
+      }
+      className={`max-w-6xl mx-auto px-4 sm:px-6 flex border-t border-slate-200 bg-white ${
+        isFixedBottom ? 'fixed left-0 right-0 z-40 shadow-2xl py-1' : ''
+      }`}
+    >
+      {/* Tab 1: Now */}
+      <button
+        onClick={() => setCurrentTab('now')}
+        title={language === 'vi' ? 'Đang làm gì, vì mục tiêu nào, việc kế tiếp' : "What I'm doing, for which goal, what's next"}
+        className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
+          currentTab === 'now'
+            ? isCool 
+              ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+              : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+            : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
+        }`}
+      >
+        <Clock className="w-4 h-4" />
+        <span>{language === 'vi' ? 'Bây giờ (Now)' : 'Now'}</span>
+      </button>
+
+      {/* Tab 2: Plan */}
+      <button
+        onClick={() => setCurrentTab('plan')}
+        title={language === 'vi' ? 'Lịch ngày và ma trận ưu tiên' : 'Day timeline and priority matrix'}
+        className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
+          currentTab === 'plan'
+            ? isCool 
+              ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+              : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+            : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
+        }`}
+      >
+        <Calendar className="w-4 h-4" />
+        <span>{language === 'vi' ? 'Kế hoạch (Plan)' : 'Plan'}</span>
+      </button>
+
+      {/* Tab 3: Efficiency */}
+      <button
+        onClick={() => setCurrentTab('achievements')}
+        title={language === 'vi' ? 'Thời gian đã đi đâu, việc đã xong, tiến độ dự án' : 'Where your time went, what you finished, project progress'}
+        className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
+          currentTab === 'achievements' || (currentTab as any) === 'efficiency'
+            ? isCool 
+              ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+              : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+            : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
+        }`}
+      >
+        <Activity className="w-4 h-4" />
+        <span>{language === 'vi' ? 'Hiệu quả (Efficiency)' : 'Efficiency'}</span>
+      </button>
+
+      {/* Tab 4: Goals / Roadmap */}
+      <button
+        onClick={() => setCurrentTab('goals')}
+        title={language === 'vi' ? 'Mục tiêu lớn và lộ trình đến đích' : 'Big goals and the roadmap to reach them'}
+        className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
+          currentTab === 'goals'
+            ? isCool 
+              ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
+              : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
+            : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
+        }`}
+      >
+        <Target className="w-4 h-4" />
+        <span>{language === 'vi' ? 'Mục tiêu (Goals)' : 'Goals'}</span>
+      </button>
+    </nav>
+  );
+
   return (
+    <>
     <header 
-      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', overflowX: 'clip' }}
-      className="sticky top-0 z-40 transition-colors duration-200 border-b border-slate-200 bg-white backdrop-blur-xl shadow-xs w-full max-w-full"
+      style={{ top: 'var(--sat, 0px)', overflowX: 'clip' }}
+      className="sticky z-40 transition-colors duration-200 border-b border-slate-200 bg-white shadow-xs w-full max-w-full"
     >
       
       {/* Platform Window Controls (PRD D3 & D5 v0.3.17: Never shown on phone / native shell) */}
@@ -333,7 +411,8 @@ export const Navbar: React.FC = () => {
         <>
           <div
             onClick={() => setBellOpen(false)}
-            className="fixed inset-0 z-40 bg-transparent"
+            style={{ top: 'var(--sat, 0px)', bottom: 'var(--sab, 0px)' }}
+            className="fixed left-0 right-0 z-40 bg-transparent"
             aria-hidden="true"
           />
           <div className="relative z-50 max-w-6xl mx-auto px-3 sm:px-6">
@@ -383,7 +462,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Slide-down Tools Drawer (< md) */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white/98 backdrop-blur-2xl px-4 py-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
           <div className="grid grid-cols-2 gap-2 text-xs mb-3">
             <button
               onClick={() => { setInboxModalOpen(true); setMobileMenuOpen(false); }}
@@ -474,77 +553,10 @@ export const Navbar: React.FC = () => {
         </div>
       )}
 
-      {/* 4 Core Tabs Bar with Native App Store Style */}
-      <nav 
-        style={{ paddingBottom: deviceLook === 'phone' ? 'max(env(safe-area-inset-bottom, 0px), 8px)' : undefined }}
-        className={`max-w-6xl mx-auto px-4 sm:px-6 flex border-t border-slate-200 bg-white ${
-          deviceLook === 'phone' ? 'fixed bottom-0 left-0 right-0 z-50 shadow-2xl py-1' : ''
-        }`}
-      >
-        {/* Tab 1: Now */}
-        <button
-          onClick={() => setCurrentTab('now')}
-          title={language === 'vi' ? 'Đang làm gì, vì mục tiêu nào, việc kế tiếp' : "What I'm doing, for which goal, what's next"}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
-            currentTab === 'now'
-              ? isCool 
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
-                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
-          }`}
-        >
-          <Clock className="w-4 h-4" />
-          <span>{language === 'vi' ? 'Bây giờ (Now)' : 'Now'}</span>
-        </button>
-
-        {/* Tab 2: Plan */}
-        <button
-          onClick={() => setCurrentTab('plan')}
-          title={language === 'vi' ? 'Lịch ngày và ma trận ưu tiên' : 'Day timeline and priority matrix'}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
-            currentTab === 'plan'
-              ? isCool 
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
-                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
-          }`}
-        >
-          <Calendar className="w-4 h-4" />
-          <span>{language === 'vi' ? 'Kế hoạch (Plan)' : 'Plan'}</span>
-        </button>
-
-        {/* Tab 3: Efficiency */}
-        <button
-          onClick={() => setCurrentTab('achievements')}
-          title={language === 'vi' ? 'Thời gian đã đi đâu, việc đã xong, tiến độ dự án' : 'Where your time went, what you finished, project progress'}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
-            currentTab === 'achievements' || (currentTab as any) === 'efficiency'
-              ? isCool 
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
-                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          <span>{language === 'vi' ? 'Hiệu quả (Efficiency)' : 'Efficiency'}</span>
-        </button>
-
-        {/* Tab 4: Goals / Roadmap */}
-        <button
-          onClick={() => setCurrentTab('goals')}
-          title={language === 'vi' ? 'Mục tiêu lớn và lộ trình đến đích' : 'Big goals and the roadmap to reach them'}
-          className={`flex-1 py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border-b-2 font-bold text-xs sm:text-sm transition-all ${
-            currentTab === 'goals'
-              ? isCool 
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
-                : 'border-[#E0401F] text-[#E0401F] bg-red-50/50'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
-          }`}
-        >
-          <Target className="w-4 h-4" />
-          <span>{language === 'vi' ? 'Mục tiêu (Goals)' : 'Goals'}</span>
-        </button>
-      </nav>
+      {/* 4 Core Tabs Bar in Header when not in phone bottom-tab mode */}
+      {deviceLook !== 'phone' && renderCoreTabsNav(false)}
     </header>
+    {deviceLook === 'phone' && renderCoreTabsNav(true)}
+    </>
   );
 };

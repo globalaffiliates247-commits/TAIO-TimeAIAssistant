@@ -319,7 +319,7 @@ export const PlanTab: React.FC = () => {
 
       {/* Add Block Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed app-overlay-safe z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-slate-900">
             <h3 className="text-base font-bold mb-4">Thêm khối thời gian mới</h3>
             <form onSubmit={handleAddSubmit} className="space-y-4">
