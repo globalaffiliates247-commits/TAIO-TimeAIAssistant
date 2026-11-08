@@ -395,8 +395,8 @@ export const ProfileModal: React.FC = () => {
               {communityConfig.advisor.visible && (
                 <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#E0401F]/15 via-white to-white border border-[#E0401F]/30 space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#E0401F] flex items-center justify-center text-slate-900 font-bold shrink-0 shadow-md shadow-red-500/30">
-                      <Sparkles className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-[#E0401F] flex items-center justify-center text-white font-bold shrink-0 shadow-md">
+                      <Sparkles className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">{communityConfig.advisor.name}</h4>

@@ -53,13 +53,15 @@ export const Navbar: React.FC = () => {
     currentPaletteColors,
     notifications,
     markAllNotificationsRead,
-    triggerNotificationAction
+    triggerNotificationAction,
+    isNativePlatform
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [bellOpen, setBellOpen] = React.useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
   const isCool = palette === 'cool';
+  const isPhoneLook = isNativePlatform || deviceLook === 'phone' || deviceLook === 'auto';
 
   const toggleBell = () => {
     const next = !bellOpen;
@@ -79,9 +81,9 @@ export const Navbar: React.FC = () => {
       className="sticky top-0 z-40 transition-colors duration-200 border-b border-slate-200 bg-white backdrop-blur-xl shadow-xs w-full max-w-full"
     >
       
-      {/* Platform Window Controls (PRD D3: macOS Traffic lights / Windows Titlebar) */}
-      {deviceLook === 'macos' && (
-        <div className={`px-4 py-1.5 flex items-center justify-between border-b text-[11px] select-none ${
+      {/* Platform Window Controls (PRD D3 & D5 v0.3.17: Never shown on phone / native shell) */}
+      {!isNativePlatform && deviceLook === 'macos' && (
+        <div className={`hidden md:flex px-4 py-1.5 items-center justify-between border-b text-[11px] select-none ${
           isCool ? 'bg-slate-50 border-slate-200 text-slate-500' : 'bg-stone-50 border-stone-200 text-stone-500'
         }`}>
           <div className="flex items-center gap-1.5">
@@ -94,8 +96,8 @@ export const Navbar: React.FC = () => {
         </div>
       )}
 
-      {deviceLook === 'windows' && (
-        <div className={`px-3 py-1 flex items-center justify-between border-b text-[11px] select-none ${
+      {!isNativePlatform && deviceLook === 'windows' && (
+        <div className={`hidden md:flex px-3 py-1 items-center justify-between border-b text-[11px] select-none ${
           isCool ? 'bg-slate-50 border-slate-200 text-slate-500' : 'bg-stone-50 border-stone-200 text-stone-500'
         }`}>
           <div className="flex items-center gap-2">
@@ -389,7 +391,7 @@ export const Navbar: React.FC = () => {
             >
               <div className="flex items-center gap-2">
                 <Inbox className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
-                <span>Rổ việc (Inbox)</span>
+                <span>Rổ việc</span>
               </div>
               {inbox.filter(i => i.status === 'inbox').length > 0 && (
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold text-white ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`}>
@@ -427,7 +429,7 @@ export const Navbar: React.FC = () => {
               className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
             >
               <UploadCloud className="w-4 h-4 text-blue-600" />
-              <span>Xuất AI Markdown</span>
+              <span>Xuất dữ liệu AI</span>
             </button>
 
             <button

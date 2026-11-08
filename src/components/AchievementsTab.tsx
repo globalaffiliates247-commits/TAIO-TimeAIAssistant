@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { GapLabel, TimeLedgerCategory } from '../types';
 import { HabitInsights } from './HabitInsights';
+import { computeGoalMetrics, computeTaskTimeEfficiency } from '../features/goals/goalMetrics';
 import { 
   Trophy, 
   CheckCircle2, 
@@ -64,6 +65,7 @@ export const AchievementsTab: React.FC = () => {
   const { 
     blocks, 
     goals, 
+    dailyCardItems,
     interruptions, 
     gaps, 
     profile, 
@@ -170,63 +172,63 @@ export const AchievementsTab: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-orange-400" />
-              <span>Hiệu quả & Dấu vết (Efficiency)</span>
+              <Activity className="w-5 h-5 text-[#E0401F]" />
+              <span>Hiệu quả</span>
             </h2>
             <button
               onClick={() => setMethodLibraryOpen(true)}
-              className="p-1 rounded-full text-slate-500 hover:text-orange-400 hover:bg-slate-100 transition-colors"
+              className="p-1 rounded-full text-slate-500 hover:text-[#E0401F] hover:bg-slate-100 transition-colors"
               title="Mở Thư viện phương pháp khoa học"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Thời gian đã đi đâu • Việc đã xong • Tiến độ dự án • Cuối ngày đóng ngày trong 2 phút
+            Thời gian đã đi đâu • Việc đã xong • Tiến độ dự án & hiệu suất thời gian • Cuối ngày đóng ngày trong 2 phút
           </p>
         </div>
 
-        {/* View mode segmented switcher & Close day button */}
+        {/* View mode segmented switcher & Close day button (unnumbered, flat fill, white text per D4/D5) */}
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-xs">
             <button
               onClick={() => setViewMode('time')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'time' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  ? 'bg-[#E0401F] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>1. Thời gian (24h)</span>
+              <span>Thời gian</span>
             </button>
             <button
               onClick={() => setViewMode('tasks')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'tasks' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  ? 'bg-[#E0401F] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <CheckSquare className="w-3.5 h-3.5" />
-              <span>2. Công việc</span>
+              <span>Công việc</span>
             </button>
             <button
               onClick={() => setViewMode('projects')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'projects' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  ? 'bg-[#E0401F] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <FolderKanban className="w-3.5 h-3.5" />
-              <span>3. Dự án</span>
+              <span>Dự án</span>
             </button>
             <button
               onClick={() => setViewMode('habits')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'habits' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white shadow-md shadow-orange-500/20' 
+                  ? 'bg-[#E0401F] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -238,14 +240,14 @@ export const AchievementsTab: React.FC = () => {
           {!dayClosed ? (
             <button
               onClick={() => setCloseDayModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c83516] hover:to-orange-600 text-white font-bold text-xs shadow-lg shadow-orange-500/20 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-sm transition-all"
             >
-              <Moon className="w-4 h-4" />
+              <Moon className="w-4 h-4 text-white" />
               <span>Đóng ngày</span>
             </button>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4 text-orange-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-[#E0401F] text-xs font-bold">
+              <CheckCircle2 className="w-4 h-4 text-[#E0401F]" />
               <span>Đã khóa ngày</span>
             </div>
           )}
@@ -699,34 +701,40 @@ export const AchievementsTab: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Xong đúng hẹn
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Xong đúng hẹn
               </span>
-              <p className="text-2xl font-bold text-emerald-400 mt-1">{doneOnTimeCount} việc</p>
-              <span className="text-[11px] text-slate-500">Khớp chuẩn DoD & Timebox</span>
+              <p className="text-2xl font-bold text-emerald-600 mt-1">{doneOnTimeCount} việc</p>
+              <span className="text-[11px] text-slate-500">Hoàn thành trong khung giờ</span>
             </div>
 
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-amber-400" /> Xong quá giờ
+                <Clock className="w-3.5 h-3.5 text-amber-600" /> Xong quá giờ
               </span>
-              <p className="text-2xl font-bold text-amber-400 mt-1">{doneOverTimeCount} việc</p>
-              <span className="text-[11px] text-slate-500">+15p bù giờ ghi nhận</span>
+              <p className="text-2xl font-bold text-amber-600 mt-1">{doneOverTimeCount} việc</p>
+              <span className="text-[11px] text-slate-500">+15 phút bù giờ ghi nhận</span>
             </div>
 
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                <Activity className="w-3.5 h-3.5 text-orange-400" /> Flow Efficiency
+                <Activity className="w-3.5 h-3.5 text-[#E0401F]" /> Hiệu suất dòng chảy
               </span>
-              <p className="text-2xl font-bold text-orange-400 mt-1">{avgFlowEfficiency}%</p>
-              <span className="text-[11px] text-slate-500">Touch time / Cycle time (Lean)</span>
+              <p className="text-2xl font-bold text-[#E0401F] mt-1">{avgFlowEfficiency}%</p>
+              <span className="text-[11px] text-slate-500">Thời gian làm thực / Tổng chu kỳ</span>
             </div>
 
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                <Target className="w-3.5 h-3.5 text-sky-400" /> Độ chuẩn ước lượng
+                <Target className="w-3.5 h-3.5 text-sky-600" /> Hiệu suất thời gian
               </span>
-              <p className="text-2xl font-bold text-sky-400 mt-1">88%</p>
-              <span className="text-[11px] text-slate-500">Giảm thiểu Planning Fallacy</span>
+              <p className="text-2xl font-bold text-sky-600 mt-1">
+                {(() => {
+                  const estSum = completedBlocks.reduce((a, b) => a + (b.estimatedMinutes || 60), 0);
+                  const actSum = completedBlocks.reduce((a, b) => a + (b.cycleTimeMinutes || b.estimatedMinutes || 60), 0);
+                  return actSum > 0 ? `${Math.round((estSum / actSum) * 100)}%` : '100%';
+                })()}
+              </p>
+              <span className="text-[11px] text-slate-500">Ước lượng ÷ Thực tế (&gt;100% là nhanh hơn dự kiến)</span>
             </div>
           </div>
 
@@ -734,49 +742,54 @@ export const AchievementsTab: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <CheckSquare className="w-4 h-4 text-orange-400" />
-                <span>Chi tiết hiệu suất từng nhiệm vụ (Touch Time & Cycle Time)</span>
+                <CheckSquare className="w-4 h-4 text-[#E0401F]" />
+                <span>Chi tiết hiệu suất thời gian từng công việc</span>
               </h3>
-              <span className="text-xs text-slate-500">Chuẩn Kanban Flow Metrics</span>
+              <span className="text-xs text-slate-500">Hiệu suất = Thời gian ước lượng ÷ Thời gian thực tế</span>
             </div>
 
             <div className="space-y-3">
               {blocks.map((b) => {
-                const touch = b.touchTimeMinutes || (b.estimatedMinutes ? Math.round(b.estimatedMinutes * 0.9) : 45);
-                const cycle = b.cycleTimeMinutes || (b.estimatedMinutes || 60);
-                const flow = Math.round((touch / cycle) * 100);
+                const taskEff = computeTaskTimeEfficiency(b);
                 const isDone = b.status === 'done';
 
                 return (
                   <div key={b.id} className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-400' : b.status === 'in_progress' ? 'bg-orange-400 animate-pulse' : 'bg-slate-500'}`} />
+                        <span className={`w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-500' : b.status === 'in_progress' ? 'bg-[#E0401F] animate-pulse' : 'bg-slate-400'}`} />
                         <h4 className="text-sm font-bold text-slate-900">{b.title}</h4>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span>Mục tiêu: <strong className="text-slate-500">{b.goalName || 'Ngoài mục tiêu'}</strong></span>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
+                        <span>Mục tiêu: <strong className="text-slate-700">{b.goalName || 'Ngoài mục tiêu'}</strong></span>
                         <span>•</span>
-                        <span>Loại: <strong className="text-orange-400 uppercase text-[10px]">{b.taskEndType || 'timebox'}</strong></span>
+                        <span>Ước lượng: <strong className="text-slate-700">{taskEff.estimatedMinutes} phút</strong></span>
                         <span>•</span>
-                        <span>Ước lượng: <strong className="text-slate-500">{b.estimatedMinutes || 60}p</strong></span>
+                        <span>Thực tế: <strong className="text-slate-700">{taskEff.actualMinutes} phút</strong></span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 shrink-0">
+                    <div className="flex items-center gap-3 shrink-0">
                       <div className="text-right">
-                        <div className="text-xs font-semibold text-slate-800">
-                          Touch: <strong className="text-orange-400">{touch}p</strong> / Cycle: <strong className="text-slate-500">{cycle}p</strong>
+                        <div className="text-xs font-bold text-slate-800">
+                          Hiệu suất thời gian:{' '}
+                          <strong className={taskEff.efficiencyPercent >= 100 ? 'text-emerald-600' : 'text-amber-600'}>
+                            {taskEff.efficiencyPercent}%
+                          </strong>
                         </div>
                         <div className="text-[11px] text-slate-500">
-                          Hiệu suất dòng chảy: <strong className="text-emerald-400">{flow}%</strong>
+                          {taskEff.efficiencyPercent > 100
+                            ? 'Nhanh hơn ước lượng'
+                            : taskEff.efficiencyPercent === 100
+                              ? 'Đúng chuẩn ước lượng'
+                              : 'Cần thêm thời gian so với ước lượng'}
                         </div>
                       </div>
 
                       <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${
-                        isDone ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
+                        isDone ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600'
                       }`}>
-                        {isDone ? 'Đã hoàn thành ✓' : b.status === 'in_progress' ? 'Đang chạy' : 'Đã lên lịch'}
+                        {isDone ? 'Đã xong ✓' : b.status === 'in_progress' ? 'Đang chạy' : 'Đã lên lịch'}
                       </span>
                     </div>
                   </div>
@@ -788,33 +801,31 @@ export const AchievementsTab: React.FC = () => {
         </div>
       )}
 
-      {/* VIEW 3: PROJECTS & LONG-TERM GOALS (PMBOK Schedule Control & Variance) */}
+      {/* VIEW 3: PROJECTS & LONG-TERM GOALS (B7 v0.3.18/v0.3.19: Separate Progress % and Time Efficiency) */}
       {viewMode === 'projects' && (
         <div className="space-y-6 animate-in fade-in duration-200">
           
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <FolderKanban className="w-4 h-4 text-orange-400" />
-                <span>Tiến độ dự án & Kiểm soát sai lệch (Variance Analysis - PMBOK)</span>
+                <FolderKanban className="w-4 h-4 text-[#E0401F]" />
+                <span>Tiến độ dự án & Hiệu suất thời gian</span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Kế hoạch giờ vs Thực tế đã dùng • Dự báo khi hoàn thành (Forecast at Completion)
+                Tách bạch rõ ràng: Tiến độ hoàn thành (đã gần đích bao nhiêu %) và Hiệu suất thời gian (ước lượng ÷ thực tế)
               </p>
             </div>
 
             <div className="space-y-4 pt-2">
               {goals.map((g) => {
+                const metrics = computeGoalMetrics(g, blocks, dailyCardItems);
                 const plannedHours = Math.round(g.dailyBudgetMins * (g.horizonDays / 7) / 60);
-                const actualHours = Math.round(plannedHours * (g.progressPercent / 100) * 0.9);
-                const varianceHours = actualHours - Math.round(plannedHours * (g.progressPercent / 100));
-                const forecastHours = Math.round(actualHours + (plannedHours * (1 - g.progressPercent / 100)));
 
                 return (
                   <div key={g.id} className="p-5 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-3 shadow-xs">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-orange-50 text-orange-400 border border-orange-200">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-50 text-[#E0401F] border border-red-200">
                           {g.workArea}
                         </span>
                         <h4 className="text-base font-bold text-slate-900">{g.name}</h4>
@@ -828,28 +839,38 @@ export const AchievementsTab: React.FC = () => {
                       Kết quả đo lường: {g.measurableResult}
                     </p>
 
-                    {/* Progress & Variance Bar */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-500">
-                          Đã dùng: <strong className="text-slate-900">{actualHours}h</strong> / Kế hoạch: <strong className="text-slate-500">{plannedHours}h</strong>
-                          {varianceHours <= 0 ? (
-                            <span className="text-emerald-400 ml-1.5 font-semibold">({varianceHours}h tiết kiệm)</span>
-                          ) : (
-                            <span className="text-amber-400 ml-1.5 font-semibold">(+{varianceHours}h vượt)</span>
-                          )}
-                        </span>
-                        <span className="text-orange-400 font-bold">{g.progressPercent}% hoàn thành</span>
+                    {/* Progress & Basis + Separate Effort & Time Efficiency */}
+                    <div className="space-y-2">
+                      <div className="flex items-baseline justify-between text-xs">
+                        <div>
+                          <span className="font-bold text-slate-800">Tiến độ hoàn thành</span>
+                          <p className="text-[11px] font-semibold text-slate-600 mt-0.5">
+                            {metrics.basisText}
+                          </p>
+                        </div>
+                        <span className="text-[#E0401F] text-base font-black">{metrics.progressPercent}% hoàn thành</span>
                       </div>
-                      <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
+                      <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full" 
-                          style={{ width: `${g.progressPercent}%` }} 
+                          className="h-full bg-[#E0401F] rounded-full transition-all" 
+                          style={{ width: `${metrics.progressPercent}%` }} 
                         />
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5 font-mono">
-                        <span>Dự báo khi hoàn thành: <strong>{forecastHours}h</strong></span>
-                        <span>Cột mốc: {g.milestones.filter(m => m.status === 'completed').length}/{g.milestones.length} xong</span>
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 pt-1">
+                        <span>
+                          Công sức đã dành: <strong className="text-slate-900">{metrics.effortText}</strong> (kế hoạch kỳ: {plannedHours} giờ)
+                        </span>
+                        {metrics.timeEfficiencyPercent !== null ? (
+                          <span className={`px-2.5 py-0.5 rounded-lg font-bold border ${
+                            metrics.timeEfficiencyPercent >= 100
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}>
+                            Hiệu suất thời gian: {metrics.timeEfficiencyPercent}% (ước lượng {metrics.estimatedDoneMinutes} phút / thực tế {metrics.actualDoneMinutes} phút)
+                          </span>
+                        ) : (
+                          <span>Cột mốc: {g.milestones.filter(m => m.status === 'completed').length}/{g.milestones.length} xong</span>
+                        )}
                       </div>
                     </div>
                   </div>

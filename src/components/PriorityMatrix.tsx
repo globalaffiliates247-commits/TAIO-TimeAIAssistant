@@ -1,492 +1,650 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TimeBlock } from '../types';
-import { 
-  Flame, 
-  Target, 
-  Users, 
-  Trash2, 
-  Clock, 
-  AlertTriangle, 
-  Plus, 
-  CheckCircle2, 
-  TrendingUp, 
-  Sparkles, 
-  ChevronDown, 
+import {
+  Flame,
+  Calendar,
+  Users,
+  Trash2,
+  Clock,
+  Target,
+  AlertTriangle,
+  Sparkles,
+  CheckCircle2,
+  ChevronDown,
   ChevronUp,
-  HelpCircle
+  Play,
+  Plus,
+  CalendarCheck
 } from 'lucide-react';
 
+type QuadrantId = 1 | 3 | 2 | 4;
+
+interface FolderTabConfig {
+  quadrant: QuadrantId;
+  shortTitle: string;
+  fullTitle: string;
+  actionTag: string;
+  explanation: string;
+  tabBgActive: string;
+  tabBgInactive: string;
+  tabBorderActive: string;
+  panelBg: string;
+  panelBorder: string;
+  tagBg: string;
+  barColor: string;
+  textColor: string;
+  icon: React.FC<{ className?: string }>;
+}
+
+// B16 v0.3.19: Ordered by how soon you must act:
+// 1. Khẩn cấp & Quan trọng (Làm ngay - Pink)
+// 2. Khẩn cấp, không quan trọng (Giao ngay - Amber)
+// 3. Quan trọng, chưa khẩn (Lên lịch - Blue)
+// 4. Không khẩn, không quan trọng (Loại bỏ - Gray)
+const FOLDER_TABS: FolderTabConfig[] = [
+  {
+    quadrant: 1,
+    shortTitle: 'Khẩn & Quan trọng',
+    fullTitle: 'Khẩn cấp & Quan trọng',
+    actionTag: 'Làm ngay',
+    explanation: 'Hạn chót sát nút, sự cố cần xử lý ngay, không giao được cho người khác',
+    tabBgActive: 'bg-rose-50 text-rose-900',
+    tabBgInactive: 'bg-rose-50/40 text-rose-700 hover:bg-rose-50/80',
+    tabBorderActive: 'border-rose-300 border-b-rose-50',
+    panelBg: 'bg-rose-50/50',
+    panelBorder: 'border-rose-200',
+    tagBg: 'bg-rose-600 text-white',
+    barColor: 'bg-rose-500',
+    textColor: 'text-rose-700',
+    icon: Flame,
+  },
+  {
+    quadrant: 3,
+    shortTitle: 'Khẩn, không quan trọng',
+    fullTitle: 'Khẩn cấp, không quan trọng',
+    actionTag: 'Giao ngay',
+    explanation: 'Gấp với người khác nhưng không thuộc mục tiêu của bạn: giao ngay hoặc làm gọn trong vài phút',
+    tabBgActive: 'bg-amber-50 text-amber-900',
+    tabBgInactive: 'bg-amber-50/40 text-amber-700 hover:bg-amber-50/80',
+    tabBorderActive: 'border-amber-300 border-b-amber-50',
+    panelBg: 'bg-amber-50/50',
+    panelBorder: 'border-amber-200',
+    tagBg: 'bg-amber-600 text-white',
+    barColor: 'bg-amber-500',
+    textColor: 'text-amber-700',
+    icon: Users,
+  },
+  {
+    quadrant: 2,
+    shortTitle: 'Quan trọng, chưa khẩn',
+    fullTitle: 'Quan trọng, chưa khẩn',
+    actionTag: 'Lên lịch',
+    explanation: 'Còn thời gian để lên kế hoạch: học, xây dựng, lập kế hoạch; giữ giờ cố định mỗi tuần',
+    tabBgActive: 'bg-blue-50 text-blue-900',
+    tabBgInactive: 'bg-blue-50/40 text-blue-700 hover:bg-blue-50/80',
+    tabBorderActive: 'border-blue-300 border-b-blue-50',
+    panelBg: 'bg-blue-50/50',
+    panelBorder: 'border-blue-200',
+    tagBg: 'bg-blue-600 text-white',
+    barColor: 'bg-blue-500',
+    textColor: 'text-blue-700',
+    icon: Calendar,
+  },
+  {
+    quadrant: 4,
+    shortTitle: 'Không khẩn, không quan trọng',
+    fullTitle: 'Không khẩn, không quan trọng',
+    actionTag: 'Loại bỏ',
+    explanation: 'Không mục tiêu, không hạn: bỏ bớt để danh sách nhẹ hơn',
+    tabBgActive: 'bg-slate-100 text-slate-900',
+    tabBgInactive: 'bg-slate-100/50 text-slate-600 hover:bg-slate-100',
+    tabBorderActive: 'border-slate-300 border-b-slate-100',
+    panelBg: 'bg-slate-100/60',
+    panelBorder: 'border-slate-300',
+    tagBg: 'bg-slate-600 text-white',
+    barColor: 'bg-slate-400',
+    textColor: 'text-slate-700',
+    icon: Trash2,
+  },
+];
+
+const STORAGE_KEY = 'taio_priority_matrix_active_tab';
+
+function formatEstimateTotal(totalMins: number): string {
+  if (totalMins <= 0) return '0 phút';
+  if (totalMins < 60) return `~${totalMins} phút`;
+  const hrs = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
+  if (mins === 0) return `~${hrs} giờ`;
+  return `~${hrs} giờ ${mins} phút`;
+}
+
+function parseDeadlineRank(block: TimeBlock): number {
+  const dl = (block.deadline || '').trim().toLowerCase();
+  if (!dl || dl === 'chưa có' || dl === 'chưa có hạn') return 999999;
+  if (dl.includes('hôm nay')) return 100;
+  if (dl.includes('ngày mai')) return 200;
+  if (dl.includes('tuần này')) return 300;
+  // Match DD/MM/YYYY or DD/MM
+  const parts = dl.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?/);
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = parseInt(parts[2], 10);
+    const year = parts[3] ? parseInt(parts[3], 10) : 2026;
+    return year * 10000 + month * 100 + day;
+  }
+  return 500000;
+}
+
 export const PriorityMatrix: React.FC = () => {
-  const { 
-    blocks, 
-    moveTaskQuadrant, 
-    markTaskDone, 
-    dropTask, 
-    addNewBlock, 
-    goals, 
-    openDrilldown,
-    language 
+  const {
+    blocks,
+    setBlocks,
+    goals,
+    moveTaskQuadrant,
+    markTaskDone,
+    dropTask,
+    addNewBlock,
+    setCurrentTab,
+    setTimerMinutesRemaining,
+    setIsTimerRunning,
+    showToast,
+    triggerReminderQuestion
   } = useApp();
 
-  const [showEduCard, setShowEduCard] = useState<boolean>(true);
-  const [quickAddQuadrant, setQuickAddQuadrant] = useState<1 | 2 | 3 | 4 | null>(null);
-  const [quickAddTitle, setQuickAddTitle] = useState('');
-  const [quickAddMinutes, setQuickAddMinutes] = useState(45);
-  const [quickAddGoalId, setQuickAddGoalId] = useState<string>('');
+  // Default open tab: Tab 1 (quadrant 1); last tab opened is remembered
+  const [activeQuadrant, setActiveQuadrant] = useState<QuadrantId>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = Number(window.localStorage.getItem(STORAGE_KEY));
+      if (saved === 1 || saved === 2 || saved === 3 || saved === 4) {
+        return saved as QuadrantId;
+      }
+    }
+    return 1;
+  });
 
-  // Partition blocks into 4 quadrants
-  const q1Tasks = blocks.filter(b => b.quadrant === 1);
-  const q2Tasks = blocks.filter(b => b.quadrant === 2);
-  const q3Tasks = blocks.filter(b => b.quadrant === 3);
-  const q4Tasks = blocks.filter(b => b.quadrant === 4);
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [showAllRows, setShowAllRows] = useState<Record<number, boolean>>({});
+  const [quickAddTitle, setQuickAddTitle] = useState<string>('');
+  const [showQuickAdd, setShowQuickAdd] = useState<boolean>(false);
 
-  // Time calculations
-  const getTime = (taskList: TimeBlock[]) => taskList.reduce((acc, t) => acc + (t.estimatedMinutes || 60), 0);
-  const q1Time = getTime(q1Tasks);
-  const q2Time = getTime(q2Tasks);
-  const q3Time = getTime(q3Tasks);
-  const q4Time = getTime(q4Tasks);
-  const totalTime = q1Time + q2Time + q3Time + q4Time || 1;
-
-  const q1Pct = Math.round((q1Time / totalTime) * 100);
-  const q2Pct = Math.round((q2Time / totalTime) * 100);
-  const q3Pct = Math.round((q3Time / totalTime) * 100);
-  const q4Pct = Math.round((q4Time / totalTime) * 100);
-
-  // Balance assessment
-  let balanceStatus = 'healthy';
-  let balanceMessage = 'Phân bổ thời gian lý tưởng: Bạn dành phần lớn công sức cho mục tiêu dài hạn (Q2)!';
-  if (q1Pct > 40) {
-    balanceStatus = 'firefighting';
-    balanceMessage = 'Cảnh báo "Chữa cháy": Quá nhiều thời gian cho việc khẩn cấp Q1. Hãy giảm áp lực bằng cách lên lịch sớm hơn ở Q2.';
-  } else if (q3Pct > 30) {
-    balanceStatus = 'distracted';
-    balanceMessage = 'Cảnh báo "Bị lôi kéo": Việc khẩn nhưng ít quan trọng (Q3) chiếm nhiều thì giờ. Hãy ủy quyền hoặc từ chối bớt.';
-  } else if (q4Pct > 20) {
-    balanceStatus = 'waste';
-    balanceMessage = 'Nhiều việc ở Q4 không phục vụ mục tiêu nào. Hãy mạnh dạn xóa bỏ để giải phóng tâm trí.';
-  }
-
-  const handleQuickAdd = (quadrant: 1 | 2 | 3 | 4) => {
-    if (!quickAddTitle.trim()) return;
-    const selectedGoal = goals.find(g => g.id === quickAddGoalId);
-    addNewBlock({
-      title: quickAddTitle.trim(),
-      startTime: '16:00',
-      endTime: '17:00',
-      type: quadrant === 1 || quadrant === 2 ? 'deep' : 'personal',
-      status: 'planned',
-      quadrant,
-      isImportant: quadrant === 1 || quadrant === 2,
-      isUrgent: quadrant === 1 || quadrant === 3,
-      estimatedMinutes: Number(quickAddMinutes) || 45,
-      goalId: selectedGoal ? selectedGoal.id : undefined,
-      goalName: selectedGoal ? selectedGoal.name : undefined,
-      ageDays: 1,
-    });
-    setQuickAddTitle('');
-    setQuickAddQuadrant(null);
+  const handleSelectTab = (q: QuadrantId) => {
+    setActiveQuadrant(q);
+    setExpandedTaskId(null);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, String(q));
+    } catch {}
   };
 
-  const renderQuadrantCard = (
-    quadrantNum: 1 | 2 | 3 | 4,
-    title: string,
-    subtitle: string,
-    icon: React.ReactNode,
-    tasks: TimeBlock[],
-    timeMins: number,
-    percentage: number,
-    styling: {
-      cardBg: string;
-      borderColor: string;
-      titleColor: string;
-      badgeColor: string;
-      btnBg: string;
-    }
-  ) => {
-    return (
-      <div className={`rounded-3xl border ${styling.borderColor} ${styling.cardBg} p-5 sm:p-6 flex flex-col justify-between shadow-2xl relative transition-all`}>
-        {/* Quadrant Header */}
-        <div>
-          <div className="flex items-start justify-between gap-3 mb-2.5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-                {icon}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-full ${styling.badgeColor}`}>
-                    Q{quadrantNum}
-                  </span>
-                  <h3 className={`text-base sm:text-lg font-bold tracking-tight ${styling.titleColor}`}>{title}</h3>
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
-              </div>
-            </div>
+  // All open (non-done, non-dropped) tasks
+  const openTasks = blocks.filter(b => b.status !== 'done' && b.status !== 'dropped');
 
-            {/* WYSIWYG drilldown trigger button */}
-            <button
-              onClick={() => openDrilldown({
-                type: 'tasks',
-                title: `Chi tiết Q${quadrantNum}: ${title} (${tasks.length} việc)`,
-                subtitle: `Các công việc thuộc góc phần tư Q${quadrantNum}`
-              })}
-              title="Bấm để xem danh sách chi tiết (WYSIWYG)"
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs text-right cursor-pointer group transition-all"
-            >
-              <div className="text-sm font-extrabold text-slate-900 group-hover:text-amber-400 transition-colors">
-                {tasks.length} việc
-              </div>
-              <div className="text-[10px] text-slate-500 font-mono">
-                {timeMins}p ({percentage}%)
-              </div>
-            </button>
-          </div>
+  const getTasksForQuadrant = (q: QuadrantId): TimeBlock[] => {
+    const list = openTasks.filter(b => (b.quadrant || 2) === q);
+    return [...list].sort((a, b) => parseDeadlineRank(a) - parseDeadlineRank(b));
+  };
 
-          {/* Quick add trigger button */}
-          <div className="flex items-center justify-between mb-3.5 mt-2 pt-2 border-t border-white/5">
-            <span className="text-[11px] text-slate-500 font-medium">
-              {quadrantNum === 1 && 'Khủng hoảng & Hạn chót gấp'}
-              {quadrantNum === 2 && 'Trọng tâm phát triển dài hạn'}
-              {quadrantNum === 3 && 'Việc của người khác / Họp vụn'}
-              {quadrantNum === 4 && 'Việc thừa / Cần loại bỏ'}
-            </span>
-            <button
-              onClick={() => setQuickAddQuadrant(quickAddQuadrant === quadrantNum ? null : quadrantNum)}
-              className="text-xs text-slate-700 hover:text-slate-900 flex items-center gap-1.5 font-semibold bg-white hover:bg-slate-50 px-3 py-1.5 rounded-xl transition-all border border-slate-200 shadow-xs text-slate-700"
-            >
-              <Plus className="w-3.5 h-3.5 text-slate-900" /> Thêm nhanh
-            </button>
-          </div>
+  // Guard for Tab 3 (Quan trọng, chưa khẩn — quadrant 2): how many tasks already have a time slot this week
+  const tab3Tasks = getTasksForQuadrant(2);
+  const tab3ScheduledCount = tab3Tasks.filter(
+    t => Boolean(t.startTime && t.endTime)
+  ).length;
 
-          {/* Inline Quick Add Form */}
-          {quickAddQuadrant === quadrantNum && (
-            <div className="p-3.5 mb-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5 animate-in fade-in duration-200 shadow-xs">
-              <input
-                type="text"
-                placeholder="Tên công việc mới..."
-                value={quickAddTitle}
-                onChange={(e) => setQuickAddTitle(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500"
-                autoFocus
-                onKeyDown={(e) => { if (e.key === 'Enter') handleQuickAdd(quadrantNum); }}
-              />
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="Phút"
-                  value={quickAddMinutes}
-                  onChange={(e) => setQuickAddMinutes(Number(e.target.value))}
-                  className="w-20 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 shadow-xs"
-                />
-                <select
-                  value={quickAddGoalId}
-                  onChange={(e) => setQuickAddGoalId(e.target.value)}
-                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 shadow-xs focus:outline-none"
-                >
-                  <option value="">-- Thuộc mục tiêu nào? --</option>
-                  {goals.map(g => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => handleQuickAdd(quadrantNum)}
-                  className="px-4 py-1.5 bg-[#E0401F] hover:bg-[#d03515] text-slate-900 text-xs font-bold rounded-xl shadow-md transition-all"
-                >
-                  Lưu
-                </button>
-              </div>
-            </div>
-          )}
+  // Time balance calculations across all blocks (including done)
+  const validBlocks = blocks.filter(b => b.status !== 'dropped');
+  const totalMinutes = validBlocks.reduce((acc, b) => acc + (b.estimatedMinutes || 60), 0) || 1;
 
-          {/* Task List */}
-          <div className="space-y-2.5 max-h-72 overflow-y-auto overscroll-contain pr-1">
-            {tasks.length === 0 ? (
-              <div className="py-7 text-center text-xs text-slate-500 italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                Chưa có việc nào ở góc phần tư này
-              </div>
-            ) : (
-              tasks.map(task => {
-                const isOverdueAging = (task.ageDays || 0) > 7;
-                return (
-                  <div
-                    key={task.id}
-                    className="p-3.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl transition-all shadow-xs group"
-                  >
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`text-xs sm:text-sm font-bold ${task.status === 'done' ? 'line-through text-slate-500' : 'text-slate-900'}`}>
-                            {task.title}
-                          </p>
-                          {isOverdueAging && (
-                            <span className="text-[10px] bg-rose-500/15 text-rose-700 border border-rose-500/30 px-2 py-0.5 rounded-full font-mono font-bold flex items-center gap-1">
-                              <AlertTriangle className="w-2.5 h-2.5" /> Tồn {task.ageDays} ngày
-                            </span>
-                          )}
-                        </div>
+  const minsByQuadrant: Record<QuadrantId, number> = {
+    1: validBlocks.filter(b => (b.quadrant || 2) === 1).reduce((acc, b) => acc + (b.estimatedMinutes || 60), 0),
+    3: validBlocks.filter(b => (b.quadrant || 2) === 3).reduce((acc, b) => acc + (b.estimatedMinutes || 60), 0),
+    2: validBlocks.filter(b => (b.quadrant || 2) === 2).reduce((acc, b) => acc + (b.estimatedMinutes || 60), 0),
+    4: validBlocks.filter(b => (b.quadrant || 2) === 4).reduce((acc, b) => acc + (b.estimatedMinutes || 60), 0),
+  };
 
-                        <div className="flex items-center gap-2 mt-2 flex-wrap text-xs text-slate-500">
-                          {task.goalName ? (
-                            <span className="text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 font-semibold truncate max-w-[170px] font-medium text-[11px]">
-                              {task.goalName}
-                            </span>
-                          ) : (
-                            <span className="text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full text-[11px]">
-                              Ngoài mục tiêu
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 text-slate-700 font-mono text-[11px]">
-                            <Clock className="w-3 h-3 text-slate-500" /> {task.estimatedMinutes || 60}p
-                          </span>
-                        </div>
-                      </div>
+  const pctByQuadrant: Record<QuadrantId, number> = {
+    1: Math.round((minsByQuadrant[1] / totalMinutes) * 100),
+    3: Math.round((minsByQuadrant[3] / totalMinutes) * 100),
+    2: Math.round((minsByQuadrant[2] / totalMinutes) * 100),
+    4: Math.max(
+      0,
+      100 -
+        Math.round((minsByQuadrant[1] / totalMinutes) * 100) -
+        Math.round((minsByQuadrant[3] / totalMinutes) * 100) -
+        Math.round((minsByQuadrant[2] / totalMinutes) * 100)
+    ),
+  };
 
-                      {/* 1-tap Done button */}
-                      <button
-                        onClick={() => markTaskDone(task.id)}
-                        title="Đánh dấu hoàn thành"
-                        className="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 shrink-0 transition-colors"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                      </button>
-                    </div>
+  const isLowPriorityHeavy = pctByQuadrant[3] + pctByQuadrant[4] >= 30;
 
-                    {/* Quick Move Quadrant Row */}
-                    <div className="mt-2.5 pt-2 border-t border-slate-200/50 flex items-center justify-between text-[11px]">
-                      <span className="text-slate-500 font-medium">Chuyển góc:</span>
-                      <div className="flex items-center gap-1">
-                        {quadrantNum !== 1 && (
-                          <button
-                            onClick={() => moveTaskQuadrant(task.id, 1)}
-                            className="px-2 py-0.5 rounded-lg bg-rose-500/15 text-rose-700 hover:bg-rose-500/30 border border-rose-500/30 font-bold"
-                            title="Chuyển sang Q1: Làm ngay"
-                          >
-                            Q1
-                          </button>
-                        )}
-                        {quadrantNum !== 2 && (
-                          <button
-                            onClick={() => moveTaskQuadrant(task.id, 2)}
-                            className="px-2 py-0.5 rounded-lg bg-blue-500/15 text-blue-700 hover:bg-blue-500/30 border border-blue-500/30 font-bold"
-                            title="Chuyển sang Q2: Lên lịch"
-                          >
-                            Q2
-                          </button>
-                        )}
-                        {quadrantNum !== 3 && (
-                          <button
-                            onClick={() => moveTaskQuadrant(task.id, 3)}
-                            className="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-700 hover:bg-amber-500/30 border border-amber-500/30 font-bold"
-                            title="Chuyển sang Q3: Ủy quyền"
-                          >
-                            Q3
-                          </button>
-                        )}
-                        {quadrantNum !== 4 && (
-                          <button
-                            onClick={() => moveTaskQuadrant(task.id, 4)}
-                            className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 font-bold"
-                            title="Chuyển sang Q4: Bỏ qua"
-                          >
-                            Q4
-                          </button>
-                        )}
-                        <button
-                          onClick={() => dropTask(task.id)}
-                          className="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 ml-1.5 transition-colors"
-                          title="Xóa bỏ việc này"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </div>
+  const activeConfig = FOLDER_TABS.find(t => t.quadrant === activeQuadrant) || FOLDER_TABS[0];
+  const activeTasks = getTasksForQuadrant(activeQuadrant);
+  const activeTotalMins = activeTasks.reduce((acc, b) => acc + (b.estimatedMinutes || 30), 0);
+  const isExpandedList = !!showAllRows[activeQuadrant];
+  const visibleTasks = isExpandedList ? activeTasks : activeTasks.slice(0, 7);
+  const hiddenCount = Math.max(0, activeTasks.length - 7);
+
+  const handleDoNow = (task: TimeBlock) => {
+    setBlocks(prev =>
+      prev.map(b =>
+        b.id === task.id
+          ? { ...b, status: 'in_progress', updatedAt: Date.now() }
+          : b.status === 'in_progress'
+            ? { ...b, status: 'planned' }
+            : b
+      )
     );
+    setTimerMinutesRemaining(task.estimatedMinutes || 30);
+    setIsTimerRunning(true);
+    setCurrentTab('now');
+    showToast(`Đang làm ngay: "${task.title}"`);
+  };
+
+  const handleScheduleSlot = (task: TimeBlock) => {
+    const nextStart = task.startTime || '16:00';
+    const nextEnd = task.endTime || '16:45';
+    setBlocks(prev =>
+      prev.map(b =>
+        b.id === task.id
+          ? {
+              ...b,
+              startTime: nextStart,
+              endTime: nextEnd,
+              deadline: b.deadline || 'Tuần này',
+              updatedAt: Date.now(),
+            }
+          : b
+      )
+    );
+    showToast(`Đã giữ khung giờ ${nextStart}–${nextEnd} cho "${task.title}".`);
+  };
+
+  const handleDelegateTask = (task: TimeBlock) => {
+    setBlocks(prev =>
+      prev.map(b =>
+        b.id === task.id
+          ? {
+              ...b,
+              quadrant: 3,
+              isImportant: false,
+              isUrgent: true,
+              notes: 'Đã giao việc / Chờ phản hồi',
+              updatedAt: Date.now(),
+            }
+          : b
+      )
+    );
+    showToast(`Đã đánh dấu giao việc: "${task.title}".`);
+  };
+
+  const handleQuickAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickAddTitle.trim()) return;
+    const isImp = activeQuadrant === 1 || activeQuadrant === 2;
+    const isUrg = activeQuadrant === 1 || activeQuadrant === 3;
+    const defaultGoal = isImp ? goals[0] : undefined;
+    addNewBlock({
+      title: quickAddTitle.trim(),
+      startTime: '17:00',
+      endTime: '17:30',
+      type: isImp ? 'deep' : 'interruption',
+      status: 'planned',
+      goalId: defaultGoal?.id,
+      goalName: defaultGoal?.name,
+      quadrant: activeQuadrant,
+      isImportant: isImp,
+      isUrgent: isUrg,
+      estimatedMinutes: 30,
+      deadline: isUrg ? 'Hôm nay' : 'Tuần này',
+    });
+    setQuickAddTitle('');
+    setShowQuickAdd(false);
+    showToast(`Đã thêm vào nhóm "${activeConfig.fullTitle}".`);
   };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      
-      {/* Educational Card: Eisenhower / Stephen Covey explanation */}
-      <div className="p-5 sm:p-6 bg-white border border-slate-200 rounded-3xl shadow-sm">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#E0401F] to-orange-500 flex items-center justify-center text-slate-900 shrink-0 shadow-lg shadow-red-500/25">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                Ma trận Ưu tiên Eisenhower (Stephen Covey)
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-700 mt-0.5">
-                Phân loại công việc theo <strong className="text-slate-900">Tầm quan trọng</strong> và <strong className="text-slate-900">Tính khẩn cấp</strong> để thoát khỏi vòng xoáy chữa cháy.
+      {/* Four Folder Tabs + Open Panel */}
+      <div>
+        {/* Folder Tab Headers Row (4 tabs side by side in order of how soon to act) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 px-1">
+          {FOLDER_TABS.map((tab) => {
+            const count = getTasksForQuadrant(tab.quadrant).length;
+            const isSelected = activeQuadrant === tab.quadrant;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.quadrant}
+                type="button"
+                onClick={() => handleSelectTab(tab.quadrant)}
+                className={`relative text-left px-3 py-2.5 rounded-t-2xl border transition-all flex flex-col justify-between gap-1 ${
+                  isSelected
+                    ? `${tab.tabBgActive} ${tab.tabBorderActive} shadow-xs z-10 -mb-px pb-3`
+                    : `${tab.tabBgInactive} border-slate-200/80 opacity-85 hover:opacity-100`
+                }`}
+              >
+                <div className="flex items-center justify-between gap-1.5">
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold ${tab.tagBg}`}>
+                    <Icon className="w-3 h-3 text-white" />
+                    <span>{tab.actionTag}</span>
+                  </span>
+                  <span className="text-[11px] font-extrabold font-mono px-1.5 py-0.5 rounded-full bg-white/80 text-slate-800 border border-slate-200/60">
+                    {count} việc
+                  </span>
+                </div>
+                <p className="text-xs font-extrabold leading-snug mt-0.5 line-clamp-1">
+                  {tab.shortTitle}
+                </p>
+                {/* B16 v0.3.19 Guard on Tab 3 header */}
+                {tab.quadrant === 2 && (
+                  <span className="text-[10px] font-semibold text-blue-700 flex items-center gap-1">
+                    <CalendarCheck className="w-3 h-3 shrink-0" />
+                    <span>{tab3ScheduledCount}/{tab3Tasks.length} đã có lịch</span>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Open Folder Panel */}
+        <div className={`rounded-b-3xl rounded-tr-3xl border p-4 sm:p-6 shadow-xs transition-all ${activeConfig.panelBg} ${activeConfig.panelBorder}`}>
+          {/* Panel Header: full name, action tag (white text on group color), explanation, count & total estimate */}
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-slate-200/80">
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
+                  {activeConfig.fullTitle}
+                </h3>
+                <span className={`px-2.5 py-0.5 rounded-lg text-xs font-bold shadow-2xs ${activeConfig.tagBg}`}>
+                  {activeConfig.actionTag}
+                </span>
+                <span className="text-xs font-bold text-slate-600 bg-white/90 px-2.5 py-0.5 rounded-lg border border-slate-200">
+                  {activeTasks.length} việc · {formatEstimateTotal(activeTotalMins)}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                {activeConfig.explanation}
               </p>
+
+              {/* B16 v0.3.19 Guard for Tab 3 (Quan trọng, chưa khẩn) */}
+              {activeQuadrant === 2 && (
+                <div className="mt-2 inline-flex flex-wrap items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-100/80 border border-blue-200 text-xs text-blue-900">
+                  <CalendarCheck className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                  <span className="font-semibold">
+                    Tuần này: {tab3ScheduledCount}/{tab3Tasks.length} việc quan trọng đã có khung giờ cố định
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => triggerReminderQuestion('backlog_untouched')}
+                    className="underline font-bold text-blue-700 hover:text-blue-900 ml-1"
+                  >
+                    Rà soát lịch tuần
+                  </button>
+                </div>
+              )}
             </div>
+
+            <button
+              type="button"
+              onClick={() => setShowQuickAdd(!showQuickAdd)}
+              className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-bold shadow-2xs shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5 text-[#E0401F]" />
+              <span>Thêm việc</span>
+            </button>
           </div>
 
-          <button
-            onClick={() => setShowEduCard(!showEduCard)}
-            className="p-2 text-slate-500 hover:text-slate-900 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
-            title={showEduCard ? 'Thu gọn giải thích' : 'Mở rộng giải thích'}
-          >
-            {showEduCard ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+          {/* Quick Add Form inside active folder */}
+          {showQuickAdd && (
+            <form onSubmit={handleQuickAddSubmit} className="mt-3 p-3 rounded-2xl bg-white border border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <input
+                type="text"
+                value={quickAddTitle}
+                onChange={e => setQuickAddTitle(e.target.value)}
+                placeholder={`Nhập tên việc mới cho nhóm "${activeConfig.fullTitle}"...`}
+                className="flex-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+              />
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="submit"
+                  className="px-3.5 py-2 rounded-xl bg-[#E0401F] text-white text-xs font-bold"
+                >
+                  Lưu việc
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowQuickAdd(false)}
+                  className="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold"
+                >
+                  Đóng
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Compact Task List (sorted by deadline, first 7 rows then "Xem thêm N việc") */}
+          <div className="mt-4 space-y-2">
+            {activeTasks.length === 0 ? (
+              <div className="py-8 text-center bg-white/70 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-500">
+                Không có công việc nào đang chờ trong nhóm "{activeConfig.fullTitle}".
+              </div>
+            ) : (
+              <>
+                {visibleTasks.map((task) => {
+                  const isRowOpen = expandedTaskId === task.id;
+                  const estMins = task.estimatedMinutes || 30;
+                  const deadlineText = task.deadline || (task.startTime ? `Khung ${task.startTime}` : 'Chưa có hạn');
+
+                  return (
+                    <div
+                      key={task.id}
+                      className="rounded-2xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs transition-all overflow-hidden"
+                    >
+                      {/* One compact row per task: title, goal, estimate, age if 7+ days, deadline on the right */}
+                      <button
+                        type="button"
+                        onClick={() => setExpandedTaskId(isRowOpen ? null : task.id)}
+                        className="w-full px-3.5 py-3 text-left flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                              {task.title}
+                            </span>
+                            {task.ageDays && task.ageDays >= 7 && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                Tồn {task.ageDays} ngày
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2.5 mt-1 text-[11px] text-slate-500">
+                            <span className="inline-flex items-center gap-1 font-medium text-slate-600">
+                              <Target className="w-3 h-3 text-[#E0401F] shrink-0" />
+                              <span className="truncate max-w-[200px]">
+                                {task.goalName || 'Ngoài mục tiêu chính'}
+                              </span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 font-mono">
+                              <Clock className="w-3 h-3 text-slate-400" />
+                              <span>{estMins} phút</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Right side: Deadline + expand chevron */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                            deadlineText.toLowerCase().includes('hôm nay')
+                              ? 'bg-rose-50 text-rose-700 border-rose-200'
+                              : deadlineText === 'Chưa có hạn'
+                                ? 'bg-slate-50 text-slate-500 border-slate-200'
+                                : 'bg-blue-50 text-blue-700 border-blue-200'
+                          }`}>
+                            {deadlineText}
+                          </span>
+                          {isRowOpen ? (
+                            <ChevronUp className="w-4 h-4 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-slate-400" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Expanded row actions: Làm ngay, Lên lịch, Giao việc, Loại bỏ, or move to another group */}
+                      {isRowOpen && (
+                        <div className="px-3.5 pb-3.5 pt-2 border-t border-slate-100 bg-slate-50/70 space-y-2.5 animate-in fade-in duration-150">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleDoNow(task)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-2xs"
+                            >
+                              <Play className="w-3 h-3 fill-white text-white" />
+                              <span>Làm ngay</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleScheduleSlot(task)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-2xs"
+                            >
+                              <Calendar className="w-3 h-3 text-white" />
+                              <span>Lên lịch</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelegateTask(task)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-2xs"
+                            >
+                              <Users className="w-3 h-3 text-white" />
+                              <span>Giao việc</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => markTaskDone(task.id)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs"
+                            >
+                              <CheckCircle2 className="w-3 h-3 text-white" />
+                              <span>Đã xong</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => dropTask(task.id)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>Loại bỏ</span>
+                            </button>
+                          </div>
+
+                          {/* Move to another group (by plain Vietnamese name, no Q1-Q4 codes) */}
+                          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                            <span className="text-[11px] font-semibold text-slate-500">
+                              Chuyển sang nhóm:
+                            </span>
+                            {FOLDER_TABS.filter(ft => ft.quadrant !== activeQuadrant).map(ft => (
+                              <button
+                                key={ft.quadrant}
+                                type="button"
+                                onClick={() => {
+                                  moveTaskQuadrant(task.id, ft.quadrant);
+                                  setExpandedTaskId(null);
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-semibold transition-colors"
+                              >
+                                {ft.shortTitle} ({ft.actionTag})
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* "Xem thêm N việc" after first 7 rows */}
+                {hiddenCount > 0 && !isExpandedList && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllRows(prev => ({ ...prev, [activeQuadrant]: true }))}
+                    className="w-full py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-bold shadow-2xs transition-all"
+                  >
+                    Xem thêm {hiddenCount} việc
+                  </button>
+                )}
+
+                {isExpandedList && activeTasks.length > 7 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllRows(prev => ({ ...prev, [activeQuadrant]: false }))}
+                    className="w-full py-2 rounded-2xl bg-white/80 hover:bg-white text-slate-600 border border-slate-200 text-xs font-semibold transition-all"
+                  >
+                    Thu gọn danh sách
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
-
-        {showEduCard && (
-          <div className="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs text-slate-700">
-            <div className="p-3.5 bg-rose-500/10 border border-rose-500/25 rounded-2xl">
-              <span className="font-bold text-rose-400 block mb-1">Q1: Làm ngay</span>
-              Khẩn cấp + Quan trọng. Khủng hoảng, hạn chót sát nút. Cần giải quyết ngay lập tức.
-            </div>
-            <div className="p-3.5 bg-blue-500/10 border border-blue-500/30 rounded-2xl ring-1 ring-blue-500/30">
-              <span className="font-bold text-blue-400 block mb-1">Q2: Lên lịch (Trọng tâm)</span>
-              Không khẩn + Quan trọng. Lập kế hoạch, rèn luyện, việc sâu dài hạn. Càng dành nhiều thời gian cho Q2, bạn càng bớt rơi vào Q1.
-            </div>
-            <div className="p-3.5 bg-amber-500/10 border border-amber-500/25 rounded-2xl">
-              <span className="font-bold text-amber-400 block mb-1">Q3: Cắt gọn / Ủy quyền</span>
-              Khẩn cấp + Không quan trọng. Cuộc gọi gián đoạn, việc nhờ vả. Cần giao việc hoặc nói không khéo léo.
-            </div>
-            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-              <span className="font-bold text-slate-700 block mb-1">Q4: Bỏ qua / Loại trừ</span>
-              Không khẩn + Không quan trọng. Lướt mạng vô thức, việc thừa. Cần dũng cảm loại bỏ khỏi lịch trình.
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Balance Signal Bar (Thanh tín hiệu cân bằng) */}
-      <div className="p-5 sm:p-6 bg-white border border-slate-200 rounded-3xl shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
+      {/* Time Balance Bar Below (same 4 colors and same action order) */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#E0401F]" />
-              Tín hiệu Cân bằng Phân bổ Thời gian
+            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#E0401F]" />
+              <span>Cân bằng thời gian giữa 4 nhóm ưu tiên</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">{balanceMessage}</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Tỷ lệ thời gian phân bổ theo thứ tự hành động: Làm ngay · Giao ngay · Lên lịch · Loại bỏ
+            </p>
           </div>
 
-          <div className="flex items-center gap-2.5 text-xs font-mono">
-            <span className="text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20">Q1: {q1Pct}%</span>
-            <span className="text-blue-400 font-extrabold bg-blue-500/15 px-2.5 py-0.5 rounded-md border border-blue-500/30">Q2: {q2Pct}%</span>
-            <span className="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">Q3: {q3Pct}%</span>
-            <span className="text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">Q4: {q4Pct}%</span>
+          {isLowPriorityHeavy && (
+            <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-2 text-xs text-amber-800">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                Gợi ý nhẹ: Nhóm "Giao ngay" và "Loại bỏ" đang chiếm {pctByQuadrant[3] + pctByQuadrant[4]}% thời gian. Hãy giữ thêm giờ cho việc "Quan trọng, chưa khẩn".
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* 4-segment bar in exact tab order (1 -> 3 -> 2 -> 4) */}
+        <div className="space-y-2.5">
+          <div className="h-4 w-full rounded-full overflow-hidden flex bg-slate-100 p-0.5 gap-0.5 border border-slate-200">
+            {FOLDER_TABS.map(tab => (
+              <div
+                key={tab.quadrant}
+                style={{ width: `${pctByQuadrant[tab.quadrant]}%` }}
+                className={`${tab.barColor} h-full first:rounded-l-full last:rounded-r-full transition-all duration-500`}
+                title={`${tab.fullTitle} (${tab.actionTag}): ${pctByQuadrant[tab.quadrant]}%`}
+              />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            {FOLDER_TABS.map(tab => (
+              <button
+                key={tab.quadrant}
+                type="button"
+                onClick={() => handleSelectTab(tab.quadrant)}
+                className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-left transition-colors"
+              >
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${tab.barColor}`} />
+                <div className="min-w-0">
+                  <p className="font-bold text-slate-800 truncate text-[11px]">{tab.shortTitle}</p>
+                  <p className="text-[10px] text-slate-500 font-mono">
+                    {pctByQuadrant[tab.quadrant]}% ({minsByQuadrant[tab.quadrant]} phút)
+                  </p>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
-
-        {/* Progress bar split */}
-        <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex p-0.5 gap-1 border border-slate-200">
-          <div 
-            style={{ width: `${q1Pct}%` }} 
-            className="h-full bg-gradient-to-r from-rose-500 to-rose-600 rounded-l-full transition-all" 
-            title={`Q1 Khẩn cấp: ${q1Pct}% (${q1Time} phút)`}
-          />
-          <div 
-            style={{ width: `${q2Pct}%` }} 
-            className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all" 
-            title={`Q2 Trọng tâm dài hạn: ${q2Pct}% (${q2Time} phút)`}
-          />
-          <div 
-            style={{ width: `${q3Pct}%` }} 
-            className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 transition-all" 
-            title={`Q3 Ủy quyền: ${q3Pct}% (${q3Time} phút)`}
-          />
-          <div 
-            style={{ width: `${q4Pct}%` }} 
-            className="h-full bg-slate-700 rounded-r-full transition-all" 
-            title={`Q4 Loại bỏ: ${q4Pct}% (${q4Time} phút)`}
-          />
-        </div>
-        
-        <div className="flex justify-between items-center text-[11px] text-slate-500 mt-2 font-mono">
-          <span>Khuyến nghị mục tiêu: Q2 &ge; 60%</span>
-          <span>Tổng số phút: <strong className="text-slate-700">{totalTime} phút</strong> ({blocks.length} việc)</span>
-        </div>
-      </div>
-
-      {/* 2x2 Quadrant Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-        {/* Q1: Do Now */}
-        {renderQuadrantCard(
-          1,
-          'Làm ngay (Do Now)',
-          'Quan trọng & Khẩn cấp',
-          <Flame className="w-5 h-5 text-rose-400" />,
-          q1Tasks,
-          q1Time,
-          q1Pct,
-          {
-            cardBg: 'bg-gradient-to-b from-rose-50 to-white',
-            borderColor: 'border-rose-200',
-            titleColor: 'text-rose-600',
-            badgeColor: 'bg-rose-50 text-rose-600 border border-rose-200',
-            btnBg: 'bg-rose-600 hover:bg-rose-500'
-          }
-        )}
-
-        {/* Q2: Schedule */}
-        {renderQuadrantCard(
-          2,
-          'Lên lịch (Schedule)',
-          'Quan trọng & Không khẩn cấp (Khuyến nghị ưu tiên)',
-          <Target className="w-5 h-5 text-blue-400" />,
-          q2Tasks,
-          q2Time,
-          q2Pct,
-          {
-            cardBg: 'bg-gradient-to-b from-blue-50 to-white',
-            borderColor: 'border-blue-200 ring-1 ring-blue-100',
-            titleColor: 'text-blue-600',
-            badgeColor: 'bg-blue-50 text-blue-600 border border-blue-200',
-            btnBg: 'bg-blue-600 hover:bg-blue-500'
-          }
-        )}
-
-        {/* Q3: Delegate */}
-        {renderQuadrantCard(
-          3,
-          'Ủy quyền / Cắt gọn (Delegate)',
-          'Khẩn cấp & Không quan trọng',
-          <Users className="w-5 h-5 text-amber-400" />,
-          q3Tasks,
-          q3Time,
-          q3Pct,
-          {
-            cardBg: 'bg-gradient-to-b from-amber-50 to-white',
-            borderColor: 'border-amber-200',
-            titleColor: 'text-amber-600',
-            badgeColor: 'bg-amber-50 text-amber-600 border border-amber-200',
-            btnBg: 'bg-amber-600 hover:bg-amber-500'
-          }
-        )}
-
-        {/* Q4: Drop */}
-        {renderQuadrantCard(
-          4,
-          'Bỏ qua / Loại trừ (Drop / Park)',
-          'Không khẩn cấp & Không quan trọng',
-          <Trash2 className="w-5 h-5 text-slate-500" />,
-          q4Tasks,
-          q4Time,
-          q4Pct,
-          {
-            cardBg: 'bg-gradient-to-b from-slate-50 to-white',
-            borderColor: 'border-slate-200',
-            titleColor: 'text-slate-700',
-            badgeColor: 'bg-slate-100 text-slate-600 border border-slate-200',
-            btnBg: 'bg-slate-700 hover:bg-slate-200'
-          }
-        )}
       </div>
     </div>
   );

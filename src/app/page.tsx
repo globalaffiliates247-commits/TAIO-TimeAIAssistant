@@ -26,7 +26,7 @@ import { ProfileModal } from '../components/ProfileModal';
 import { SwipeReviewModal } from '../components/SwipeReviewModal';
 import { ReminderQuestionsModal } from '../components/ReminderQuestionsModal';
 import { ActiveCaptureModal } from '../components/ActiveCaptureModal';
-import { Sparkles, X, Smartphone } from 'lucide-react';
+import { Sparkles, X, Smartphone, AlertCircle } from 'lucide-react';
 
 const OrientationHint: React.FC = () => {
   const [dismissed, setDismissed] = React.useState(false);
@@ -55,12 +55,37 @@ const MainAppContent: React.FC = () => {
     deviceLook,
     palette,
     toastMsg,
+    toastType,
     toastUndoAction,
+    dismissToast,
     isOnboarded,
     hasServerBackupToRestore,
     resolveServerBackupChoice
   } = useApp();
   const isCool = palette === 'cool';
+  const touchStartYRef = React.useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartYRef.current = e.touches[0]?.clientY ?? null;
+  };
+
+  const handleToastTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartYRef.current === null) return;
+    const endY = e.changedTouches[0]?.clientY ?? touchStartYRef.current;
+    if (endY - touchStartYRef.current < -18) {
+      dismissToast();
+    }
+    touchStartYRef.current = null;
+  };
+
+  const handleCelebrationTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartYRef.current === null) return;
+    const endY = e.changedTouches[0]?.clientY ?? touchStartYRef.current;
+    if (endY - touchStartYRef.current < -18) {
+      setCelebrationMsg(null);
+    }
+    touchStartYRef.current = null;
+  };
 
   return (
     <div style={{ overflowX: 'clip' }} className={`min-h-screen flex flex-col bg-white text-slate-900 w-full max-w-full ${deviceLook === 'phone' ? 'pb-24' : ''}`}>
@@ -69,6 +94,76 @@ const MainAppContent: React.FC = () => {
 
       <Navbar />
       <ActionNudgeBanner />
+
+      {/* B14 v0.3.17: Top messages sit below the header (never covering tab bar or header buttons), support swipe-up & close button */}
+      {toastMsg && (
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleToastTouchEnd}
+          className={`w-full border-b px-4 py-2.5 transition-all duration-200 ${
+            toastType === 'error'
+              ? 'bg-red-50 border-red-200 text-red-900'
+              : 'bg-slate-50 border-slate-200 text-slate-800'
+          }`}
+        >
+          <div className="max-w-xl mx-auto flex items-center justify-between gap-2.5 text-xs font-semibold">
+            <div className="flex items-center gap-2 min-w-0">
+              {toastType === 'error' ? (
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              ) : (
+                <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+              )}
+              <span className="leading-snug">{toastMsg}</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {toastUndoAction && (
+                <button
+                  onClick={() => {
+                    toastUndoAction();
+                    dismissToast();
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[#E0401F] text-white font-bold text-[11px] shrink-0"
+                >
+                  Hoàn tác
+                </button>
+              )}
+              <button
+                onClick={dismissToast}
+                aria-label="Đóng thông báo"
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {celebrationMsg && (
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleCelebrationTouchEnd}
+          className="w-full bg-slate-50 border-b border-slate-200 px-4 py-2.5 text-slate-800 transition-all duration-200"
+        >
+          <div className="max-w-xl mx-auto flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 text-white ${
+                isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+              }`}>
+                <Sparkles className="w-3.5 h-3.5 text-white" />
+              </div>
+              <p className="text-xs font-semibold text-slate-800 leading-snug">{celebrationMsg}</p>
+            </div>
+            <button
+              onClick={() => setCelebrationMsg(null)}
+              aria-label="Đóng thông báo"
+              className="text-slate-500 hover:text-slate-800 p-1 rounded-lg hover:bg-slate-200/60 transition-colors shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* B27 v0.3.12: If server copy was kept after reset, ask once after onboarding: Restore or Start fresh */}
       {isOnboarded && hasServerBackupToRestore && (
@@ -95,46 +190,6 @@ const MainAppContent: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Floating Toast Notification (with optional 3s Undo button) */}
-      {toastMsg && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[92%] bg-white/95 text-slate-800 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-between gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-300 border border-slate-200">
-          <div className="flex items-center gap-2 min-w-0">
-            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-            <span className="truncate">{toastMsg}</span>
-          </div>
-          {toastUndoAction && (
-            <button
-              onClick={() => {
-                toastUndoAction();
-              }}
-              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-[#E0401F] border border-red-200 font-bold text-[11px] shrink-0"
-            >
-              Hoàn tác
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Floating Celebration Toast */}
-      {celebrationMsg && (
-        <div className="fixed top-20 right-4 z-50 max-w-md bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-slate-800 animate-in slide-in-from-top-4 duration-300">
-          <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-white shadow-sm ${
-              isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
-            }`}>
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-800">{celebrationMsg}</p>
-          </div>
-          <button 
-            onClick={() => setCelebrationMsg(null)}
-            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
       )}
 

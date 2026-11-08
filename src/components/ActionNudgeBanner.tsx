@@ -18,8 +18,9 @@ const NUDGE_ICONS: Record<ActionNudgeType, any> = {
 export const ActionNudgeBanner: React.FC = () => {
   const { actionNudge, acceptActionNudge, dismissActionNudge, palette } = useApp();
   const isCool = palette === 'cool';
+  const touchStartYRef = React.useRef<number | null>(null);
 
-  // B14 v0.3.11: Banner auto-hides after 15 seconds if the user does nothing (counts as ignored)
+  // B14 v0.3.17: Banner auto-hides after 15 seconds if the user does nothing (counts as ignored)
   useEffect(() => {
     if (!actionNudge || actionNudge.isDismissed) return;
     const timer = setTimeout(() => {
@@ -32,8 +33,25 @@ export const ActionNudgeBanner: React.FC = () => {
 
   const Icon = NUDGE_ICONS[actionNudge.type] || Bell;
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartYRef.current = e.touches[0]?.clientY ?? null;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartYRef.current === null) return;
+    const endY = e.changedTouches[0]?.clientY ?? touchStartYRef.current;
+    if (endY - touchStartYRef.current < -18) {
+      dismissActionNudge();
+    }
+    touchStartYRef.current = null;
+  };
+
   return (
-    <div className="bg-slate-50 border-b border-slate-200 text-slate-900 px-4 sm:px-6 py-2.5 shadow-xs animate-in slide-in-from-top-2 duration-300">
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="bg-slate-50 border-b border-slate-200 text-slate-900 px-4 sm:px-6 py-2.5 shadow-xs animate-in slide-in-from-top-2 duration-300"
+    >
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         
         {/* Context info */}

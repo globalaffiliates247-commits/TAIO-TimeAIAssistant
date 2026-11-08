@@ -134,10 +134,10 @@ export const SwipeReviewModal: React.FC = () => {
     : (isUrgentDeadline ? 3 : 4);
 
   const quadrantLabelMap: Record<1 | 2 | 3 | 4, string> = {
-    1: 'Ô 1: Quan trọng, gấp',
-    2: 'Ô 2: Quan trọng, không gấp',
-    3: 'Ô 3: Gấp, ngoài mục tiêu',
-    4: 'Ô 4: Không gấp, ngoài mục tiêu',
+    1: 'Khẩn cấp & Quan trọng (Làm ngay)',
+    2: 'Quan trọng, chưa khẩn (Lên lịch)',
+    3: 'Khẩn cấp, không quan trọng (Giao ngay)',
+    4: 'Không khẩn, không quan trọng (Loại bỏ)',
   };
 
   const reservedGoalBlock = planGoalId

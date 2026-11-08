@@ -75,51 +75,51 @@ export const PlanTab: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E0401F] to-orange-500 flex items-center justify-center text-slate-900 shadow-md shadow-red-500/25">
-              <Calendar className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl bg-[#E0401F] flex items-center justify-center text-white shadow-sm">
+              <Calendar className="w-4 h-4 text-white" />
             </div>
-            <span>Kế hoạch thời gian (Plan)</span>
+            <span>Kế hoạch thời gian</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Xem và định hình ngày hôm nay cũng như tuần này • Chuyển đổi giữa Dòng thời gian & Ma trận ưu tiên
+            Xem và định hình ngày hôm nay cũng như tuần này • Chuyển đổi giữa Thẻ ngày, Dòng thời gian & Ma trận ưu tiên
           </p>
         </div>
 
-        {/* View Switcher: Daily Card vs Timeline vs Priority Matrix (B25) */}
+        {/* View Switcher: Daily Card vs Timeline vs Priority Matrix (unnumbered, flat fill, white text on accent per D4/D5) */}
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-xs">
             <button
               onClick={() => setActiveView('card')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'card' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-slate-900 shadow-md shadow-red-500/25' 
+                  ? 'bg-[#E0401F] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>1. Thẻ ngày</span>
+              <span>Thẻ ngày</span>
             </button>
             <button
               onClick={() => setActiveView('timeline')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'timeline' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-slate-900 shadow-md shadow-red-500/25' 
+                  ? 'bg-[#E0401F] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>2. Dòng thời gian</span>
+              <span>Dòng thời gian</span>
             </button>
             <button
               onClick={() => setActiveView('matrix')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'matrix' 
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-slate-900 shadow-md shadow-red-500/25' 
+                  ? 'bg-[#E0401F] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>3. Ma trận ưu tiên</span>
+              <span>Ma trận ưu tiên</span>
             </button>
           </div>
 
@@ -137,14 +137,14 @@ export const PlanTab: React.FC = () => {
       {activeView === 'matrix' && <PriorityMatrix />}
       {activeView === 'timeline' && (
         <>
-          {/* Weekly Budget Progress (PRD B6) */}
+          {/* Weekly Budget Progress */}
           <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Layers className="w-4 h-4 text-[#E0401F]" />
-                <span>Ngân sách tuần (Weekly Budget)</span>
+                <span>Ngân sách tuần</span>
               </h3>
-              <span className="text-xs text-slate-500 font-mono">Đã dùng 18h / 40h kế hoạch</span>
+              <span className="text-xs text-slate-500 font-mono">Đã dùng 18 giờ / 40 giờ kế hoạch</span>
             </div>
 
             <div className="space-y-3.5">
@@ -154,7 +154,7 @@ export const PlanTab: React.FC = () => {
                   onClick={() => openDrilldown({
                     type: 'goal_tasks',
                     title: `Ngân sách & Nhiệm vụ: ${g.name}`,
-                    subtitle: `Ngân sách tuần: ${g.dailyBudgetMins * 5 / 60}h/tuần • Đang đúng tiến độ`,
+                    subtitle: `Ngân sách tuần: ${g.dailyBudgetMins * 5 / 60} giờ/tuần • Đang đúng tiến độ`,
                     goalId: g.id,
                   })}
                   className="space-y-1.5 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all cursor-pointer group"
@@ -162,11 +162,11 @@ export const PlanTab: React.FC = () => {
                 >
                   <div className="flex items-center justify-between text-xs sm:text-sm">
                     <span className="text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">{g.name}</span>
-                    <span className="text-slate-500 font-mono text-xs">{g.dailyBudgetMins * 5 / 60}h/tuần (~{g.dailyBudgetMins}p/ngày) ↗</span>
+                    <span className="text-slate-500 font-mono text-xs">{g.dailyBudgetMins * 5 / 60} giờ/tuần (~{g.dailyBudgetMins} phút/ngày) ↗</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
                     <div 
-                      className="h-full bg-gradient-to-r from-[#E0401F] to-orange-500 rounded-full group-hover:brightness-110 transition-all" 
+                      className="h-full bg-[#E0401F] rounded-full transition-all" 
                       style={{ width: `${Math.min(100, (g.progressPercent + 20))}%` }} 
                     />
                   </div>
@@ -177,7 +177,7 @@ export const PlanTab: React.FC = () => {
               <div 
                 onClick={() => openDrilldown({
                   type: 'interruptions',
-                  title: 'Quỹ dự phòng gián đoạn tuần (3.5h / 7.5h)',
+                  title: 'Quỹ dự phòng gián đoạn tuần (3.5 giờ / 7.5 giờ)',
                   subtitle: 'Bấm để xem danh sách việc chen ngang và người kéo bạn vào',
                 })}
                 className="space-y-1.5 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all cursor-pointer group"
@@ -185,10 +185,10 @@ export const PlanTab: React.FC = () => {
               >
                 <div className="flex items-center justify-between text-xs sm:text-sm">
                   <span className="text-amber-700 font-semibold group-hover:text-amber-700">Quỹ dự phòng gián đoạn tuần</span>
-                  <span className="text-amber-400 font-mono text-xs">Đã dùng 3.5h / 7.5h (Còn 53%) ↗</span>
+                  <span className="text-amber-600 font-mono text-xs">Đã dùng 3.5 giờ / 7.5 giờ (Còn 53%) ↗</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
-                  <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full group-hover:brightness-110 transition-all" style={{ width: '47%' }} />
+                  <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: '47%' }} />
                 </div>
               </div>
             </div>
@@ -199,7 +199,7 @@ export const PlanTab: React.FC = () => {
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#E0401F]" />
-                <span>Dòng thời gian hôm nay (Daily Timeline)</span>
+                <span>Dòng thời gian hôm nay</span>
               </h3>
               <span className="text-xs text-slate-500">
                 Hồ sơ: <strong className="text-slate-900">{profile.title}</strong>
@@ -270,13 +270,13 @@ export const PlanTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Important, Not Urgent List (PRD B6) */}
+          {/* Important, Not Urgent List */}
           <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>Việc quan trọng, không khẩn cấp (Important, Not Urgent)</span>
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>Việc quan trọng, chưa khẩn</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Các đầu việc định kỳ giúp duy trì đà phát triển dài hạn. Bấm "Làm tuần này" để đưa vào lịch.
@@ -293,7 +293,7 @@ export const PlanTab: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleAcceptBacklogItem(item)}
-                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#d03515] hover:to-orange-600 text-slate-900 text-xs font-bold shadow-md shadow-red-500/20 transition-all shrink-0"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-sm transition-all shrink-0"
                   >
                     Làm tuần này
                   </button>
@@ -350,8 +350,8 @@ export const PlanTab: React.FC = () => {
                   onChange={e => setNewType(e.target.value as BlockType)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
                 >
-                  <option value="deep">Tập trung sâu (Deep Work)</option>
-                  <option value="meeting">Họp hành (Meeting)</option>
+                  <option value="deep">Tập trung sâu</option>
+                  <option value="meeting">Họp & Trao đổi</option>
                   <option value="interruption">Khung dự phòng gián đoạn</option>
                   <option value="personal">Cá nhân / Nghỉ ngơi</option>
                   <option value="planning">Lập kế hoạch</option>
@@ -365,7 +365,7 @@ export const PlanTab: React.FC = () => {
                   onChange={e => setNewGoalId(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
                 >
-                  <option value="">Ngoài mục tiêu chính (Outside goals)</option>
+                  <option value="">Ngoài mục tiêu chính</option>
                   {goals.map(g => (
                     <option key={g.id} value={g.id}>{g.name}</option>
                   ))}
@@ -382,7 +382,7 @@ export const PlanTab: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-slate-900 font-bold text-xs shadow-md shadow-red-500/25"
+                  className="px-5 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white font-bold text-xs shadow-md"
                 >
                   Thêm vào lịch
                 </button>

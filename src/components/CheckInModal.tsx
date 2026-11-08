@@ -81,7 +81,7 @@ export const CheckInModal: React.FC = () => {
                 setCheckInModalOpen(false);
                 setCloseDayModalOpen(true);
               }}
-              className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c93517] hover:to-orange-600 text-slate-900 font-bold text-sm shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2"
+              className="flex-1 py-3 px-4 rounded-2xl bg-[#E0401F] hover:bg-[#c93517] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2"
             >
               <span>Mở Đóng ngày (2 phút)</span>
               <ArrowRight className="w-4 h-4" />

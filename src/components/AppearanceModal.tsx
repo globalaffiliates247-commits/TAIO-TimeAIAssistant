@@ -35,47 +35,47 @@ export const AppearanceModal: React.FC = () => {
   const devices: { id: DeviceLook; label: string; desc: string; icon: React.ReactNode }[] = [
     { 
       id: 'auto', 
-      label: 'Tự động (Auto)', 
+      label: 'Tự động theo thiết bị', 
       desc: 'Nhận diện tự động theo thiết bị bạn đang dùng', 
       icon: <Sparkles className="w-4 h-4 text-amber-400" /> 
     },
     { 
       id: 'macos', 
-      label: 'macOS', 
-      desc: 'Nút traffic-light, tiêu đề trung tâm, bo góc 12px', 
+      label: 'Máy tính macOS', 
+      desc: 'Thanh tiêu đề trung tâm, bo góc 12px', 
       icon: <Laptop className="w-4 h-4 text-red-400" /> 
     },
     { 
       id: 'windows', 
-      label: 'Windows', 
-      desc: 'Thanh tiêu đề trái, nút thu phóng góc phải, bo góc 8px', 
+      label: 'Máy tính Windows', 
+      desc: 'Thanh tiêu đề trái, nút điều khiển góc phải, bo góc 8px', 
       icon: <Monitor className="w-4 h-4 text-blue-400" /> 
     },
     { 
       id: 'phone', 
-      label: 'Điện thoại (Phone)', 
-      desc: 'Thanh điều hướng dưới đáy (Bottom bar), touch target lớn', 
+      label: 'Điện thoại', 
+      desc: 'Thanh điều hướng dưới đáy, nút bấm lớn dễ chạm', 
       icon: <Smartphone className="w-4 h-4 text-emerald-400" /> 
     },
   ];
 
   const themes: { id: ThemeMode; label: string; icon: React.ReactNode }[] = [
     { id: 'system', label: 'Theo hệ thống', icon: <Sparkles className="w-4 h-4" /> },
-    { id: 'dark', label: 'Giao diện Tối (Dark)', icon: <Moon className="w-4 h-4" /> },
-    { id: 'light', label: 'Giao diện Sáng (Light)', icon: <Sun className="w-4 h-4" /> },
+    { id: 'dark', label: 'Giao diện Tối', icon: <Moon className="w-4 h-4" /> },
+    { id: 'light', label: 'Giao diện Sáng', icon: <Sun className="w-4 h-4" /> },
   ];
 
   const palettesList: { id: ColorPalette; label: string; desc: string; icon: string }[] = [
     { 
       id: 'cool', 
-      label: '❄️ Tông màu Lạnh (Cool - Xanh & Trắng)', 
-      desc: 'Nền không gian làm việc sáng #f1f5f9, thẻ trắng #ffffff, điểm nhấn xanh Apple #007aff chuẩn phong cách Native iOS.',
+      label: '❄️ Tông màu Lạnh (Xanh & Trắng)', 
+      desc: 'Nền không gian làm việc sáng, thẻ trắng, điểm nhấn xanh #007AFF.',
       icon: '❄️'
     },
     { 
       id: 'warm', 
-      label: '🔥 Tông màu Nóng (Warm - Đỏ tươi & Trắng)', 
-      desc: 'Nền ấm #FBEFEC, thẻ trắng #ffffff, điểm nhấn đỏ cam thương hiệu #E0401F nổi bật và giàu năng lượng.',
+      label: '🔥 Tông màu Nóng (Đỏ cam & Trắng)', 
+      desc: 'Nền ấm, thẻ trắng, điểm nhấn đỏ cam thương hiệu #E0401F nổi bật.',
       icon: '🔥'
     },
   ];
@@ -107,7 +107,7 @@ export const AppearanceModal: React.FC = () => {
           {/* Setting 1: Device */}
           <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              1. Nền tảng hiển thị (Device Look & Feel)
+              Nền tảng hiển thị
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {devices.map(d => (
@@ -136,7 +136,7 @@ export const AppearanceModal: React.FC = () => {
           {/* Setting 2: Theme Light / Dark */}
           <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              2. Sáng / Tối (Theme Mode)
+              Chế độ Sáng / Tối
             </label>
             <div className="grid grid-cols-3 gap-2">
               {themes.map(t => (
@@ -159,7 +159,7 @@ export const AppearanceModal: React.FC = () => {
           {/* Setting 3: Color Palette */}
           <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              3. Bảng màu hệ thống (Color Palette)
+              Bảng màu hệ thống
             </label>
             <div className="space-y-2">
               {palettesList.map(p => {
@@ -222,7 +222,7 @@ export const AppearanceModal: React.FC = () => {
         <div className="px-5 py-3 border-t border-slate-200 bg-white/50 flex justify-end">
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-slate-900 text-xs font-bold shadow-md shadow-red-950/40 transition-all"
+            className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-md transition-all"
           >
             Áp dụng và Đóng
           </button>

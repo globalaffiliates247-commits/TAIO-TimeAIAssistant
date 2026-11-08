@@ -11,6 +11,7 @@ import {
   detectRuntimeCapabilities,
   TAIONative
 } from '../features/native';
+import { computeGoalMetrics } from '../features/goals/goalMetrics';
 import { 
   UserProfile, 
   Goal, 
@@ -212,8 +213,9 @@ interface AppContextType {
       customEndTime?: string;
     }
   ) => void;
-  // v0.3.16 E4: Native platform capability flag
+  // v0.3.16 E4 & v0.3.17 B19: Native platform capability flag and platform name
   isNativePlatform: boolean;
+  nativePlatformName: 'ios' | 'android' | 'web';
 
   // v0.3.6 B29: Câu hỏi nhắc việc (Reminder Questions)
   reminderQuestions: ReminderQuestion[];
@@ -328,10 +330,12 @@ interface AppContextType {
   dayClosed: boolean;
   celebrationMsg: string | null;
   setCelebrationMsg: (msg: string | null) => void;
-  // v0.3.9 B5: Toast notifications (with optional Undo action for B28 v0.3.11)
+  // v0.3.17 B14: Toast / Top message notifications (Confirmation: 3s, 4s with Undo; Error: persistent & goes to bell list)
   toastMsg: string | null;
+  toastType: 'confirmation' | 'error';
   toastUndoAction: (() => void) | null;
-  showToast: (msg: string, onUndo?: () => void) => void;
+  showToast: (msg: string, onUndo?: () => void, type?: 'confirmation' | 'error') => void;
+  dismissToast: () => void;
   // v0.3.11 B14: Bell notifications (5 most recent)
   notifications: AppNotificationItem[];
   markAllNotificationsRead: () => void;
@@ -422,17 +426,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [checkInBlock, setCheckInBlock] = useState<TimeBlock | null>(null);
 
   const [dayClosed, setDayClosed] = useState<boolean>(false);
-  const [celebrationMsg, setCelebrationMsg] = useState<string | null>(null);
-  // v0.3.9 B5 & v0.3.11 B28: Toast notifications with optional 3-second Undo
+  const [celebrationMsg, setCelebrationMsgState] = useState<string | null>(null);
+  const setCelebrationMsg = (msg: string | null) => {
+    setCelebrationMsgState(msg);
+    if (msg) {
+      setTimeout(() => {
+        setCelebrationMsgState(prev => (prev === msg ? null : prev));
+      }, 3000);
+    }
+  };
+  // v0.3.17 B14: Toast / Top message notifications
+  // Confirmation: hides after 3s (4s if it has an Undo button), does NOT go to bell list.
+  // Error: stays until solved or closed, and goes to bell list.
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'confirmation' | 'error'>('confirmation');
   const [toastUndoAction, setToastUndoAction] = useState<(() => void) | null>(null);
-  const showToast = (msg: string, onUndo?: () => void) => {
+  const dismissToast = () => {
+    setToastMsg(null);
+    setToastUndoAction(null);
+  };
+  const showToast = (msg: string, onUndo?: () => void, type: 'confirmation' | 'error' = 'confirmation') => {
     setToastMsg(msg);
+    setToastType(type);
     setToastUndoAction(() => onUndo || null);
+    if (type === 'error') {
+      const nowTime = new Date().toTimeString().slice(0, 5);
+      setNotifications(prev => [
+        {
+          id: `notif-err-${Date.now()}`,
+          kind: 'nudge',
+          title: msg,
+          time: nowTime,
+          ctaLabel: 'Kiểm tra',
+          read: false,
+          targetAction: 'open_checkin',
+        },
+        ...prev,
+      ]);
+      return;
+    }
+    const durationMs = onUndo ? 4000 : 3000;
     setTimeout(() => {
-      setToastMsg(prev => prev === msg ? null : prev);
+      setToastMsg(prev => (prev === msg ? null : prev));
       setToastUndoAction(null);
-    }, 3000);
+    }, durationMs);
   };
 
   // v0.3.1 B25: Daily Card & Work Diary State
@@ -544,10 +581,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [backlogCards, setBacklogCards] = useState<BacklogCard[]>(INITIAL_BACKLOG_CARDS);
   const [isSwipeModalOpen, setIsSwipeModalOpen] = useState<boolean>(false);
   const [isNativePlatform, setIsNativePlatform] = useState<boolean>(() => detectRuntimeCapabilities().isNative);
+  const [nativePlatformName, setNativePlatformName] = useState<'ios' | 'android' | 'web'>(() => detectRuntimeCapabilities().platform);
   const isHydratedRef = useRef<boolean>(false);
 
   useEffect(() => {
-    setIsNativePlatform(detectRuntimeCapabilities().isNative);
+    const caps = detectRuntimeCapabilities();
+    setIsNativePlatform(caps.isNative);
+    setNativePlatformName(caps.platform);
+    // D5 v0.3.17: Inside native iOS/Android or on phone screen (<768px), Auto or legacy default resolves to phone look
+    if (caps.isNative || (typeof window !== 'undefined' && window.innerWidth < 768)) {
+      setDeviceLook(prev => (prev === 'auto' ? 'phone' : prev));
+    }
   }, []);
 
   const handleSwipeAction = (
@@ -668,8 +712,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ));
       }
 
+      const groupNameMap: Record<1 | 2 | 3 | 4, string> = {
+        1: 'Khẩn cấp & Quan trọng',
+        2: 'Quan trọng, chưa khẩn',
+        3: 'Khẩn cấp, không quan trọng',
+        4: 'Không khẩn, không quan trọng',
+      };
       setBacklogCards(prev => prev.filter(c => c.id !== cardId));
-      setCelebrationMsg(`Đã xếp lịch "${card.text}" (${startTime}–${endTime}, Ô ${computedQuadrant})!`);
+      setCelebrationMsg(`Đã xếp lịch "${card.text}" (${startTime}–${endTime} · ${groupNameMap[computedQuadrant]})!`);
     } else if (action === 'done_now') {
       const prevTimer = timerMinutesRemaining;
       const dur = card.estimatedMinutes || 15;
@@ -1202,7 +1252,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCelebrationMsg(language === 'vi' ? '🎉 Đã biến thói quen thử nghiệm thành thói quen cố định!' : 'Kept as permanent habit!');
   };
 
-  // v0.11: Priority Matrix Move (B16)
+  // v0.11 & v0.3.18/v0.3.19: Priority Matrix Move (B16) — no Q1-Q4 codes on screen
   const moveTaskQuadrant = (taskId: string, targetQuadrant: 1 | 2 | 3 | 4) => {
     setBlocks(prev => prev.map(b => {
       if (b.id !== taskId) return b;
@@ -1213,12 +1263,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         quadrant: targetQuadrant,
         isImportant,
         isUrgent,
+        updatedAt: Date.now(),
       };
     }));
+    const groupNameVi: Record<1 | 2 | 3 | 4, string> = {
+      1: 'Khẩn cấp & Quan trọng',
+      2: 'Quan trọng, chưa khẩn',
+      3: 'Khẩn cấp, không quan trọng',
+      4: 'Không khẩn, không quan trọng',
+    };
+    const groupNameEn: Record<1 | 2 | 3 | 4, string> = {
+      1: 'Urgent & Important',
+      2: 'Important, Not Urgent',
+      3: 'Urgent, Not Important',
+      4: 'Neither Urgent nor Important',
+    };
     setCelebrationMsg(
       language === 'vi' 
-        ? `Đã chuyển nhiệm vụ sang Góc phần tư Q${targetQuadrant}!` 
-        : `Moved task to Quadrant ${targetQuadrant}!`
+        ? `Đã chuyển công việc sang nhóm "${groupNameVi[targetQuadrant]}"!` 
+        : `Moved task to "${groupNameEn[targetQuadrant]}"!`
     );
   };
 
@@ -1663,7 +1726,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setPalette(savedPalette.value);
       }
       if (savedDeviceLook?.value) {
-        setDeviceLook(savedDeviceLook.value);
+        const caps = detectRuntimeCapabilities();
+        const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+        if (caps.isNative || isMobileScreen) {
+          setDeviceLook('phone');
+        } else {
+          setDeviceLook(savedDeviceLook.value);
+        }
       }
 
       isHydratedRef.current = true;
@@ -1674,6 +1743,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cancelled = true;
     };
   }, []);
+
+  // B7 v0.3.18 & v0.3.19: Dynamically keep goal progressPercent synced with its chosen progressType
+  useEffect(() => {
+    setGoals(prev => {
+      let changed = false;
+      const next = prev.map(g => {
+        const computed = computeGoalMetrics(g, blocks, dailyCardItems);
+        if (g.progressPercent !== computed.progressPercent) {
+          changed = true;
+          return { ...g, progressPercent: computed.progressPercent };
+        }
+        return g;
+      });
+      return changed ? next : prev;
+    });
+  }, [blocks, dailyCardItems]);
 
   // E5: Persist every state change immediately to durable storage (SQLite + IndexedDB)
   useEffect(() => {
@@ -1815,8 +1900,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       celebrationMsg,
       setCelebrationMsg,
       toastMsg,
+      toastType,
       toastUndoAction,
       showToast,
+      dismissToast,
       notifications,
       markAllNotificationsRead,
       triggerNotificationAction,
@@ -1897,6 +1984,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsSwipeModalOpen,
       handleSwipeAction,
       isNativePlatform,
+      nativePlatformName,
       reminderQuestions,
       isQuestionsModalOpen,
       setIsQuestionsModalOpen,

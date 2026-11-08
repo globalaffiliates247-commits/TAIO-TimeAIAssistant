@@ -309,7 +309,7 @@ export const ListsModal: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2 text-xs font-semibold text-slate-900 bg-[#E0401F] hover:bg-[#c83515] rounded-xl shadow-lg shadow-red-500/25 transition-all"
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#E0401F] hover:bg-[#c83515] rounded-xl shadow-md transition-all"
                     >
                       Tạo danh sách
                     </button>
@@ -372,7 +372,7 @@ export const ListsModal: React.FC = () => {
                     <button
                       type="submit"
                       disabled={!quickInput.trim()}
-                      className="absolute right-2 px-3 py-1.5 rounded-lg bg-[#E0401F] text-slate-900 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#c83515] transition-all"
+                      className="absolute right-2 px-3 py-1.5 rounded-lg bg-[#E0401F] text-white text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#c83515] transition-all"
                     >
                       Lưu
                     </button>

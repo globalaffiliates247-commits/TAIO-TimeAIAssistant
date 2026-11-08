@@ -33,12 +33,18 @@ import {
 } from 'lucide-react';
 
 const ROLE_LABELS: Record<UserRole, { label: string; type: 'work' | 'personal' }> = {
-  'decision-maker': { label: 'Người ra quyết định (Decision-maker)', type: 'work' },
-  'operator': { label: 'Người vận hành (Operator)', type: 'work' },
-  'seller': { label: 'Bán hàng / Đàm phán (Seller)', type: 'work' },
-  'self': { label: 'Bản thân (Self)', type: 'personal' },
-  'family': { label: 'Gia đình (Family)', type: 'personal' },
-  'friend': { label: 'Bạn bè (Friend)', type: 'personal' },
+  'decision-maker': { label: 'Người ra quyết định', type: 'work' },
+  'operator': { label: 'Người vận hành', type: 'work' },
+  'seller': { label: 'Bán hàng / Đàm phán', type: 'work' },
+  'self': { label: 'Bản thân', type: 'personal' },
+  'family': { label: 'Gia đình', type: 'personal' },
+  'friend': { label: 'Bạn bè', type: 'personal' },
+};
+
+const WORK_STYLE_LABELS: Record<string, string> = {
+  mixed: 'Linh hoạt',
+  sequential: 'Theo trình tự',
+  multitasking: 'Đa nhiệm',
 };
 
 export const NowTab: React.FC = () => {
@@ -72,6 +78,7 @@ export const NowTab: React.FC = () => {
     palette,
     currentPaletteColors,
     isNativePlatform,
+    nativePlatformName,
     showToast
   } = useApp();
 
@@ -88,7 +95,14 @@ export const NowTab: React.FC = () => {
   const [elapsedMinutes, setElapsedMinutes] = useState<number>(35);
   const [secondsTick, setSecondsTick] = useState<number>(5);
   const [showOverrunNotice, setShowOverrunNotice] = useState<boolean>(false);
-  const [liveActivityActive, setLiveActivityActive] = useState<boolean>(true);
+  // B19 v0.3.17: Remembered per user, default on
+  const [liveActivityActive, setLiveActivityActive] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('taio_lockscreen_clock_enabled');
+      if (saved !== null) return saved === 'true';
+    }
+    return true;
+  });
 
   useEffect(() => {
     if (!isTimerRunning) return;
@@ -193,7 +207,7 @@ export const NowTab: React.FC = () => {
               <AlertTriangle className="w-5 h-5 text-rose-600" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-rose-900">Đang ngoài kế hoạch (Off-plan: {offPlanMinutes} phút)</h4>
+              <h4 className="text-sm font-bold text-rose-900">Đang ngoài kế hoạch ({offPlanMinutes} phút)</h4>
               <p className="text-xs text-rose-700 mt-0.5">
                 Bạn đang lệch mốc dự kiến {offPlanMinutes} phút. Hãy đưa ra 1 lựa chọn nhanh:
               </p>
@@ -218,14 +232,14 @@ export const NowTab: React.FC = () => {
         </div>
       )}
 
-      {/* Return Point Prompt if returning from interruption (PRD B5) */}
+      {/* Return Point Prompt if returning from interruption */}
       {activeReturnPoint && !isOffPlan && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
           <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">
-                Điểm quay lại của bạn (Return Point):
+                Điểm quay lại của bạn:
               </span>
               <span className="text-[11px] text-amber-600">Đã lưu từ lúc có việc phát sinh</span>
             </div>
@@ -236,7 +250,7 @@ export const NowTab: React.FC = () => {
         </div>
       )}
 
-      {/* Master Card: Who am I? Where am I? What am I doing? (PRD v0.8 B5 & v0.22 B19/B23) */}
+      {/* Master Card: Who am I? Where am I? What am I doing? */}
       <div className="rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden transition-all border bg-white border-slate-200 text-slate-900">
         {/* Subtle accent glow */}
         <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none opacity-5 ${
@@ -248,10 +262,10 @@ export const NowTab: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
             <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-600">
-              Trọng tâm hiện tại (Bây giờ - Now)
+              Trọng tâm hiện tại
             </h2>
             
-            {/* Role Chip (PRD B5: Who am I right now?) */}
+            {/* Role Chip (Who am I right now?) */}
             <div className="flex items-center gap-1.5 ml-1 bg-slate-50 border border-slate-200 rounded-full px-3 py-1 shadow-xs">
               <UserCheck className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
               <span className="text-[11px] text-slate-500">Vai trò:</span>
@@ -272,7 +286,7 @@ export const NowTab: React.FC = () => {
           {/* B23 Work Style & Off-Plan Toggle */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] text-slate-500">
-              Nhịp làm: <strong className={`capitalize ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>{profile.workStyle || 'mixed'}</strong>
+              Nhịp làm: <strong className={isCool ? 'text-blue-600' : 'text-[#E0401F]'}>{WORK_STYLE_LABELS[profile.workStyle || 'mixed'] || 'Linh hoạt'}</strong>
             </span>
             <button
               onClick={toggleOffPlan}
@@ -282,27 +296,27 @@ export const NowTab: React.FC = () => {
                   : 'bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 shadow-xs'
               }`}
             >
-              {isOffPlan ? '● Đang Lệch kế hoạch' : 'Báo lệch kế hoạch'}
+              {isOffPlan ? '● Đang lệch kế hoạch' : 'Báo lệch kế hoạch'}
             </button>
           </div>
         </div>
 
-        {/* B19: Always visible 4-Number Time Ledger Glance */}
+        {/* Always visible 4-Number Time Ledger Glance (unnumbered per D5 v0.3.17) */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 p-3.5 rounded-2xl border text-xs bg-slate-50/90 border-slate-200 shadow-xs">
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold">1. Việc mục tiêu</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">Việc mục tiêu</span>
             <span className={`text-base font-black ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>285 phút</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold">2. Chen ngang</span>
-            <span className="text-base font-black text-amber-600">{intUsedMins} / {profile.interruptionReserveMins}p</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">Chen ngang</span>
+            <span className="text-base font-black text-amber-600">{intUsedMins} / {profile.interruptionReserveMins} phút</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold">3. Xao nhãng</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">Xao nhãng</span>
             <span className="text-base font-black text-rose-600">45 phút</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 uppercase font-semibold">4. Thời gian ngày còn</span>
+            <span className="text-[10px] text-slate-500 uppercase font-semibold">Thời gian ngày còn</span>
             <span className="text-base font-black text-emerald-600">3 giờ 30 phút</span>
           </div>
         </div>
@@ -343,9 +357,9 @@ export const NowTab: React.FC = () => {
                     ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E0401F] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
-                title="Hết giờ chuyển việc, bất kể xong 80% hay 100% (Đếm ngược)"
+                title="Hết giờ chuyển việc, đếm ngược theo khung giờ"
               >
-                Timebox (Đếm ngược)
+                Đếm ngược
               </button>
               <button
                 onClick={() => handleSetEndType('until_done_pausable')}
@@ -354,9 +368,9 @@ export const NowTab: React.FC = () => {
                     ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E0401F] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
-                title="Chạy đến khi đánh dấu xong, có thể tạm dừng (Đếm tiến)"
+                title="Chạy đến khi đánh dấu xong, có thể tạm dừng"
               >
-                Đến khi xong (Pausable)
+                Đến khi xong
               </button>
               <button
                 onClick={() => handleSetEndType('until_done_atomic')}
@@ -365,9 +379,9 @@ export const NowTab: React.FC = () => {
                     ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E0401F] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
-                title="Khối nguyên tử: Không thể ngắt quãng, chỉ xếp lịch việc phát sinh sau"
+                title="Làm liền mạch: Không ngắt quãng, việc phát sinh sẽ xếp lịch sau"
               >
-                Nguyên tử (Atomic)
+                Làm liền mạch
               </button>
             </div>
           </div>
@@ -378,7 +392,7 @@ export const NowTab: React.FC = () => {
                 <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
                   isCool ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-red-50 text-red-700 border-red-200'
                 }`}>
-                  TẬP TRUNG SÂU (DEEP WORK)
+                  TẬP TRUNG SÂU
                 </span>
                 <span className="text-xs text-slate-500 font-mono font-medium">
                   {currentBlock?.startTime || '14:00'} - {currentBlock?.endTime || '15:30'}
@@ -386,12 +400,12 @@ export const NowTab: React.FC = () => {
                 {currentEndType === 'until_done_atomic' && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
                     <Lock className="w-3 h-3" />
-                    Không làm phiền (Atomic block)
+                    Không làm phiền
                   </span>
                 )}
               </div>
               <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {currentBlock?.title || 'Phát triển màn hình Now & cơ chế Interruption Card'}
+                {currentBlock?.title || 'Hoàn thiện màn hình Bây giờ & Đồng hồ đếm ngược'}
               </h1>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-center">
@@ -423,7 +437,7 @@ export const NowTab: React.FC = () => {
             className={`bg-slate-50/90 p-5 rounded-2xl border border-slate-200 shadow-xs transition-all ${
               linkedGoal ? 'cursor-pointer hover:border-slate-300 hover:bg-slate-100/60 group' : ''
             }`}
-            title={linkedGoal ? 'Bấm để mở danh sách các việc hôm nay phục vụ mục tiêu này (WYSIWYG)' : ''}
+            title={linkedGoal ? 'Bấm để mở danh sách các việc hôm nay phục vụ mục tiêu này' : ''}
           >
             {linkedGoal ? (
               <div className="space-y-2.5">
@@ -443,11 +457,11 @@ export const NowTab: React.FC = () => {
                   <span className="text-slate-500 font-medium">Kết quả đo lường: </span>
                   {linkedGoal.measurableResult}
                 </p>
-                {/* Progress bar */}
+                {/* Progress bar (flat fill per D4/D5) */}
                 <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
                   <div 
                     className={`h-full rounded-full transition-all duration-500 ${
-                      isCool ? 'bg-blue-600' : 'bg-gradient-to-r from-[#E0401F] to-orange-500'
+                      isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
                     }`}
                     style={{ width: `${linkedGoal.progressPercent}%` }} 
                   />
@@ -461,20 +475,20 @@ export const NowTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Question 3: Clock direction follows B19 / B23 */}
+        {/* Question 3: Clock direction & B19 v0.3.17 controls */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* Timer Display */}
           <div className="bg-slate-50/90 p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                {currentEndType === 'timebox' ? '3. THỜI GIAN CÒN LẠI (TIMEBOX):' : '3. THỜI GIAN ĐÃ CHẠY (UNTIL DONE):'}
+                {currentEndType === 'timebox' ? '3. THỜI GIAN CÒN LẠI:' : '3. THỜI GIAN ĐÃ CHẠY:'}
               </span>
               <span className="text-[11px] font-mono text-slate-500 font-semibold">
-                {currentEndType === 'timebox' ? `Hộp: ${profile.focusBlockDurationMins}p` : `Giới hạn: ${userTimeLimit}p`}
+                {currentEndType === 'timebox' ? `Khung giờ: ${profile.focusBlockDurationMins} phút` : `Giới hạn: ${userTimeLimit} phút`}
               </span>
             </div>
 
-            {/* B19 v0.3.11: Circular Progress Ring + m:s (<1h) or h:m (>=1h) with label underneath */}
+            {/* B19 v0.3.17: Circular Progress Ring + Single Lock Screen Switch + Android-only Device Timer */}
             {(() => {
               const activeMins = currentEndType === 'timebox' ? timerMinutesRemaining : elapsedMinutes;
               const { value, unitLabel } = formatClockDisplay(activeMins, secondsTick);
@@ -490,6 +504,27 @@ export const NowTab: React.FC = () => {
               const dashOffset = circumference * (1 - progressRatio);
               const isWarning = (currentEndType === 'timebox' && activeMins <= 0) || isOverTimeLimit;
               const strokeColor = isWarning ? '#F59E0B' : (isCool ? '#007AFF' : '#E0401F');
+
+              const handleToggleLockScreenClock = () => {
+                if (!isNativePlatform) return;
+                const next = !liveActivityActive;
+                setLiveActivityActive(next);
+                try {
+                  window.localStorage.setItem('taio_lockscreen_clock_enabled', String(next));
+                } catch {}
+                if (next) {
+                  startNativeLiveActivity({
+                    blockId: currentBlock?.id || 'now-block',
+                    taskTitle: currentBlock?.title || 'Tập trung sâu',
+                    goalName: linkedGoal?.name || 'Mục tiêu chính',
+                    isCountDown: currentEndType === 'timebox',
+                    totalMinutes: totalTargetMins,
+                    remainingMinutes: activeMins,
+                  });
+                } else {
+                  stopNativeLiveActivity();
+                }
+              };
 
               return (
                 <div className="py-3 flex flex-col sm:flex-row items-center gap-4">
@@ -528,58 +563,64 @@ export const NowTab: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex-1 space-y-2 text-center sm:text-left w-full">
+                  <div className="flex-1 space-y-2.5 text-center sm:text-left w-full">
                     <p className="text-xs font-semibold text-slate-700">
                       {currentEndType === 'timebox'
-                        ? 'Đếm ngược trong khung Timebox'
+                        ? 'Đếm ngược trong khung thời gian'
                         : `Đếm xuôi tới giới hạn ${userTimeLimit} phút`}
                     </p>
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
-                      {isNativePlatform ? (
-                        <>
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-semibold text-slate-700">
-                            <span className={`w-1.5 h-1.5 rounded-full ${liveActivityActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                            {liveActivityActive ? 'Live Activity màn hình khóa: Đang bật' : 'Live Activity màn hình khóa: Đang tắt'}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = !liveActivityActive;
-                              setLiveActivityActive(next);
-                              if (next) {
-                                startNativeLiveActivity({
-                                  blockId: currentBlock?.id || 'now-block',
-                                  taskTitle: currentBlock?.title || 'Tập trung sâu',
-                                  goalName: linkedGoal?.name || 'Mục tiêu chính',
-                                  isCountDown: currentEndType === 'timebox',
-                                  totalMinutes: totalTargetMins,
-                                  remainingMinutes: activeMins,
-                                });
-                              } else {
-                                stopNativeLiveActivity();
-                              }
-                            }}
-                            className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-600"
-                          >
-                            {liveActivityActive ? 'Ẩn trên MH khóa' : 'Hiện trên MH khóa'}
-                          </button>
-                        </>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-semibold text-slate-600">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                          Đồng hồ trong ứng dụng (mô phỏng)
+
+                    {/* B19 v0.3.17: One switch replaces status chip & button ("Hiện đồng hồ trên màn hình khóa") */}
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={`text-xs font-semibold ${
+                            isNativePlatform ? 'text-slate-800' : 'text-slate-400'
+                          }`}
+                          title="Hiển thị đồng hồ đếm thời gian trực tiếp trên màn hình khóa (Live Activity / thông báo ghim)"
+                        >
+                          Hiện đồng hồ trên màn hình khóa
                         </span>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={isNativePlatform ? liveActivityActive : false}
+                          disabled={!isNativePlatform}
+                          onClick={handleToggleLockScreenClock}
+                          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                            !isNativePlatform
+                              ? 'bg-slate-200 cursor-not-allowed opacity-60'
+                              : liveActivityActive
+                                ? isCool
+                                  ? 'bg-[#007AFF] cursor-pointer'
+                                  : 'bg-[#E0401F] cursor-pointer'
+                                : 'bg-slate-300 cursor-pointer'
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+                              isNativePlatform && liveActivityActive ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      {!isNativePlatform && (
+                        <p className="text-[11px] text-slate-500 text-left">
+                          Cần bản cài đặt trên điện thoại
+                        </p>
                       )}
                     </div>
-                    {isNativePlatform && (
+
+                    {/* B19 v0.3.17: "Dùng đồng hồ của máy" is Android only (hidden on iOS and web) */}
+                    {isNativePlatform && nativePlatformName === 'android' && (
                       <div>
                         <button
                           type="button"
                           onClick={() => {
-                            openNativeDeviceTimer(activeMins || 25, currentBlock?.title || 'TAIO Timer');
-                            showToast('Đã mở liên kết hẹn giờ trên thiết bị (iOS Shortcuts).');
+                            openNativeDeviceTimer(activeMins || 25, currentBlock?.title || 'Đồng hồ TAIO');
+                            showToast('Đã mở đồng hồ hẹn giờ của máy.');
                           }}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-700 shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-700 shadow-2xs"
                         >
                           <Clock className="w-3 h-3 text-slate-500" />
                           <span>Dùng đồng hồ của máy</span>
@@ -591,7 +632,7 @@ export const NowTab: React.FC = () => {
               );
             })()}
 
-            {/* Overrun Notice for Until-Done Tasks (PRD v0.22 B19 / B23) */}
+            {/* Overrun Notice for Until-Done Tasks */}
             {isOverTimeLimit && (
               <div className="my-2 p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-2 animate-in fade-in">
                 <div className="flex items-center gap-1.5 font-bold">
@@ -606,7 +647,7 @@ export const NowTab: React.FC = () => {
                     onClick={handleFinishEarly}
                     className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs"
                   >
-                    Hoàn thành
+                    Đã xong
                   </button>
                   <button
                     onClick={() => {
@@ -615,7 +656,7 @@ export const NowTab: React.FC = () => {
                     }}
                     className="flex-1 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-300 shadow-xs"
                   >
-                    Tiếp tục (+30p)
+                    Tiếp tục (+30 phút)
                   </button>
                   <button
                     onClick={handleFinishEarly}
@@ -627,18 +668,18 @@ export const NowTab: React.FC = () => {
               </div>
             )}
 
-            {/* Quick Timer Controls */}
+            {/* B19 v0.3.17: Primary actions stay in one row: Tạm dừng · +15 phút · Đã xong */}
             <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
               <button
                 onClick={handleTimerToggle}
                 className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs ${
                   isTimerRunning 
-                    ? 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200' 
-                    : 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
+                    ? 'bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200' 
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
                 }`}
               >
                 {isTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                <span>{isTimerRunning ? 'Tạm dừng' : 'Bắt đầu đếm'}</span>
+                <span>{isTimerRunning ? 'Tạm dừng' : 'Tiếp tục'}</span>
               </button>
 
               <button
@@ -646,15 +687,15 @@ export const NowTab: React.FC = () => {
                 className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-300 shadow-xs"
                 title="Cộng thêm 15 phút"
               >
-                +15p
+                +15 phút
               </button>
 
               <button
                 onClick={handleFinishEarly}
                 className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
-                title="Check-in đạt tiêu chí (DoD)"
+                title="Đánh dấu hoàn thành công việc"
               >
-                Hoàn thành
+                Đã xong
               </button>
             </div>
           </div>
@@ -690,24 +731,22 @@ export const NowTab: React.FC = () => {
           </div>
         </div>
 
-        {/* PROMINENT ACTION BUTTON: Conditional by Atomic vs Standard (B19/B23) */}
+        {/* PROMINENT ACTION BUTTON: Conditional by Atomic vs Standard (flat fill, pure Vietnamese per D4/D5) */}
         <div className="pt-2">
           {currentEndType === 'until_done_atomic' ? (
-            // For Atomic Tasks: Replaces "Something came up" with "Schedule it for later"!
             <div>
               <button
                 onClick={handleScheduleForLater}
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 text-white font-black text-base sm:text-lg shadow-lg shadow-purple-900/20 flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
+                className="w-full py-4 px-6 rounded-2xl bg-purple-700 hover:bg-purple-800 text-white font-black text-base sm:text-lg shadow-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.99] cursor-pointer"
               >
-                <Calendar className="w-6 h-6" />
-                <span>XẾP LỊCH VIỆC PHÁT SINH SAU (SCHEDULE FOR LATER)</span>
+                <Calendar className="w-6 h-6 text-white" />
+                <span>XẾP LỊCH VIỆC PHÁT SINH SAU</span>
               </button>
               <p className="text-center text-xs text-purple-600 mt-2.5">
-                Khối nguyên tử (Atomic) không thể ngắt quãng • Mọi việc phát sinh đều được xếp lịch làm sau
+                Khối làm liền mạch không ngắt quãng • Mọi việc phát sinh đều được xếp lịch làm sau
               </p>
             </div>
           ) : (
-            // Standard: SOMETHING CAME UP
             <div>
               <button
                 onClick={() => setInterruptionModalOpen(true)}
@@ -717,11 +756,11 @@ export const NowTab: React.FC = () => {
                     : 'bg-[#E0401F] hover:bg-[#d03515] shadow-red-500/25'
                 }`}
               >
-                <Zap className="w-6 h-6 fill-white" />
-                <span>CÓ VIỆC PHÁT SINH! (SOMETHING CAME UP)</span>
+                <Zap className="w-6 h-6 fill-white text-white" />
+                <span>CÓ VIỆC PHÁT SINH!</span>
               </button>
               <p className="text-center text-xs text-slate-500 mt-2.5">
-                2 tình huống (Tức thì vs Xem lại) • Mặc định "Để sau" vào Rổ việc • 1 chạm
+                Ghi nhận tức thì hoặc xem lại • Mặc định "Để sau" vào Rổ việc • 1 chạm
               </p>
             </div>
           )}
@@ -761,7 +800,7 @@ export const NowTab: React.FC = () => {
         <div 
           onClick={() => openDrilldown({
             type: 'deep_work',
-            title: 'Các khối việc sâu hôm nay (Deep Work)',
+            title: 'Các khối việc sâu hôm nay',
             subtitle: `Tổng cộng ${deepWorkMinutes} phút tập trung chất lượng cao`,
           })}
           className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
@@ -788,7 +827,7 @@ export const NowTab: React.FC = () => {
           onClick={() => openDrilldown({
             type: 'interruptions',
             title: 'Nhật ký việc chen ngang & Quỹ dự phòng',
-            subtitle: `Đã dùng ${intUsedMins}p / ${profile.interruptionReserveMins}p • Còn lại ${Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút`,
+            subtitle: `Đã dùng ${intUsedMins} phút / ${profile.interruptionReserveMins} phút • Còn lại ${Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút`,
           })}
           className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
             isCool 
@@ -802,17 +841,17 @@ export const NowTab: React.FC = () => {
             <span className="text-[10px] font-bold text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity">Xem ↗</span>
           </div>
           <p className="text-xl font-black text-amber-600 mt-1">
-            {intUsedMins} / {profile.interruptionReserveMins}p
+            {intUsedMins} / {profile.interruptionReserveMins} phút
           </p>
-          <p className="text-[10px] text-slate-400 mt-0.5">Còn {Math.max(0, profile.interruptionReserveMins - intUsedMins)}p • Xem chi tiết</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">Còn {Math.max(0, profile.interruptionReserveMins - intUsedMins)} phút • Xem chi tiết</p>
         </div>
 
         {/* Metric 4: Protected minutes */}
         <div 
           onClick={() => openDrilldown({
             type: 'protected_focus',
-            title: 'Thời gian tập trung đã bảo vệ (+45p)',
-            subtitle: 'Đạt được từ các việc từ chối hoặc ủy quyền đúng lúc',
+            title: `Thời gian tập trung đã bảo vệ (+${protectedMins} phút)`,
+            subtitle: 'Đạt được từ các việc từ chối hoặc giao việc đúng lúc',
           })}
           className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
             isCool 

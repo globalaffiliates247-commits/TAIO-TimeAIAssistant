@@ -108,11 +108,11 @@ export const DailyCardView: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                  Thẻ ngày (Daily Card - Bullet Journal Sticky Note)
+                  Thẻ ngày
                 </h3>
               </div>
               <p className="text-xs text-slate-500">
-                Lấy cảm hứng từ thói quen ghi chú giấy dán của Founder • Gạch ngang khi xong • Dời việc có chủ đích
+                Ghi nhanh các việc trong ngày • Gạch ngang khi xong • Dời việc có chủ đích
               </p>
             </div>
           </div>
@@ -215,9 +215,9 @@ export const DailyCardView: React.FC = () => {
 
             <button
               type="submit"
-              className="py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#E0401F] to-orange-500 hover:from-[#c83516] hover:to-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5"
+              className="py-2.5 px-4 rounded-2xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-white" />
               <span>Thêm</span>
             </button>
           </div>
@@ -228,16 +228,16 @@ export const DailyCardView: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1">
                   <label className="text-[11px] text-slate-400 font-bold uppercase block mb-1">
-                    Nguồn gốc công việc (Origin):
+                    Nguồn gốc công việc:
                   </label>
                   <select
                     value={newOrigin}
                     onChange={e => setNewOrigin(e.target.value as ItemOrigin)}
                     className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none shadow-xs"
                   >
-                    <option value="planned">Theo kế hoạch (Planned)</option>
-                    <option value="unplanned_goal">Ngoài kế hoạch, có phục vụ mục tiêu (Unplanned on goal)</option>
-                    <option value="interruption">Việc chen ngang ngoài mục tiêu (Interruption)</option>
+                    <option value="planned">Theo kế hoạch</option>
+                    <option value="unplanned_goal">Ngoài kế hoạch, có phục vụ mục tiêu</option>
+                    <option value="interruption">Việc chen ngang ngoài mục tiêu</option>
                   </select>
                 </div>
 
@@ -261,7 +261,7 @@ export const DailyCardView: React.FC = () => {
               {newOrigin === 'unplanned_goal' && (
                 <div>
                   <label className="text-[11px] text-amber-700 font-bold block mb-1">
-                    Việc này chiếm thời gian của khối nào? (Bị đẩy lùi - Pushed back):
+                    Việc này chiếm thời gian của khối nào? (Bị đẩy lùi):
                   </label>
                   <select
                     value={displacedBlockId}
@@ -416,7 +416,7 @@ export const DailyCardView: React.FC = () => {
 
         <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase text-slate-400">Việc dời (Carried)</span>
+            <span className="text-[11px] font-bold uppercase text-slate-400">Việc đã dời</span>
             <p className="text-2xl font-bold text-amber-600 mt-1">
               {currentItems.filter(i => i.carryCount > 0).length} việc
             </p>
@@ -426,7 +426,7 @@ export const DailyCardView: React.FC = () => {
 
         <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase text-slate-400">Việc ngoài KH (Có MT)</span>
+            <span className="text-[11px] font-bold uppercase text-slate-400">Ngoài kế hoạch (có mục tiêu)</span>
             <p className="text-2xl font-bold text-[#E0401F] mt-1">
               {currentItems.filter(i => i.origin === 'unplanned_goal').length} việc
             </p>

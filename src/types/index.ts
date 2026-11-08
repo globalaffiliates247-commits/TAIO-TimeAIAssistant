@@ -114,6 +114,8 @@ export interface Milestone {
   status: 'pending' | 'completed';
 }
 
+export type GoalProgressType = 'key_result' | 'tasks' | 'time_commitment';
+
 export interface Goal {
   id: string;
   name: string;
@@ -124,6 +126,12 @@ export interface Goal {
   milestones: Milestone[];
   workArea: 'Business' | 'Product' | 'Operations' | 'Personal';
   progressPercent: number;
+  progressType?: GoalProgressType; // B7 v0.3.18/v0.3.19: default 'tasks'
+  keyResultCurrent?: number;
+  keyResultTarget?: number;
+  keyResultUnit?: string;
+  committedHours?: number;
+  newTasksAddedCount?: number;
   color?: string;
   plannedMinutesTotal?: number;
   actualMinutesTotal?: number;
