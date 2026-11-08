@@ -27,6 +27,7 @@ import {
 import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
 import { DataImportSection } from '../features/data-transfer';
+import { AlarmSettingsSection } from '../features/alarm';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -49,6 +50,8 @@ export const ProfileModal: React.FC = () => {
     resetAllUserData,
     importTaioData,
     exportTaioJsonV1,
+    alarmSettings,
+    setAlarmSettings,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'community'>('profile');
@@ -367,6 +370,14 @@ export const ProfileModal: React.FC = () => {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* PRD v0.3.22 B32: Block-Start Alarm Settings */}
+              <div className="pt-2 border-t border-slate-200/80">
+                <AlarmSettingsSection
+                  settings={alarmSettings}
+                  onSettingsChange={setAlarmSettings}
+                />
               </div>
 
               {/* Data Export & Privacy */}

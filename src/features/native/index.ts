@@ -53,6 +53,14 @@ export interface TAIONativePluginInterface {
   }): Promise<{ monitoring: boolean }>;
   stopMonitoringPlace(options: { id: string }): Promise<{ stopped: boolean }>;
   openDeviceTimer(options: { minutes: number; title: string }): Promise<{ opened: boolean }>;
+  scheduleAlarm?(options: {
+    id: string;
+    title: string;
+    startTime: string;
+    timeMinutes: number;
+    soundName?: string;
+  }): Promise<{ ok: boolean; identifier?: string }>;
+  cancelAlarm?(options: { id: string }): Promise<{ ok: boolean }>;
 }
 
 export const TAIONative = registerPlugin<TAIONativePluginInterface>('TAIONative');

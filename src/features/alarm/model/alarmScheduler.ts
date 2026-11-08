@@ -1,0 +1,260 @@
+import { AlarmSettings, ActiveAlarmState, PlatformAlarmCapability, CustomSoundFile } from './alarmTypes';
+import { TimeBlock } from '@/types';
+import { timeToMinutes, getDeviceCalendarDate } from '@/core/clock';
+
+const ALARM_SETTINGS_KEY = 'taio_alarm_settings_v1';
+
+export const DEFAULT_ALARM_SETTINGS: AlarmSettings = {
+  enabled: true,
+  soundType: 'default',
+  vibrate: true,
+  volume: 0.8,
+  snoozeDurationMins: 5,
+};
+
+export function loadAlarmSettings(): AlarmSettings {
+  if (typeof window === 'undefined') return DEFAULT_ALARM_SETTINGS;
+  try {
+    const raw = localStorage.getItem(ALARM_SETTINGS_KEY);
+    if (!raw) return DEFAULT_ALARM_SETTINGS;
+    return { ...DEFAULT_ALARM_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_ALARM_SETTINGS;
+  }
+}
+
+export function saveAlarmSettings(settings: AlarmSettings): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(ALARM_SETTINGS_KEY, JSON.stringify(settings));
+  } catch (err) {
+    console.error('[alarmScheduler] Failed to save alarm settings', err);
+  }
+}
+
+/**
+ * Detect runtime capability for block alarms (PRD B32)
+ */
+export function getPlatformAlarmCapability(): {
+  capability: PlatformAlarmCapability;
+  description: string;
+} {
+  if (typeof window === 'undefined') {
+    return { capability: 'web_unsupported', description: 'Chỉ có trên bản cài đặt' };
+  }
+
+  const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
+  const ua = navigator.userAgent || '';
+  const isIOS = isNative && /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = isNative && /Android/.test(ua);
+
+  if (isIOS) {
+    // Check iOS version for AlarmKit (iOS 26+)
+    const match = ua.match(/OS (\d+)_/);
+    const majorVersion = match ? parseInt(match[1], 10) : 18;
+    if (majorVersion >= 26) {
+      return {
+        capability: 'alarmkit',
+        description: 'Báo thức toàn màn hình chuẩn hệ thống (AlarmKit)',
+      };
+    }
+    return {
+      capability: 'time_sensitive_ios',
+      description: 'Thông báo khẩn cấp có chuông (iOS giới hạn 30 giây)',
+    };
+  }
+
+  if (isAndroid) {
+    return {
+      capability: 'alarm_manager',
+      description: 'Báo thức toàn màn hình (AlarmManager)',
+    };
+  }
+
+  return {
+    capability: 'web_unsupported',
+    description: 'Chỉ có trên bản cài đặt (Web hỗ trợ chuông khi mở app)',
+  };
+}
+
+let activeAudioElement: HTMLAudioElement | null = null;
+let activeAudioContext: AudioContext | null = null;
+let activeOscillatorInterval: any = null;
+
+/**
+ * Plays a pleasant rich alarm chime via Web Audio API (completely offline, zero dependencies).
+ */
+export function playDefaultChime(volume = 0.8): { stop: () => void } {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return { stop: () => {} };
+
+    const ctx = new AudioContextClass();
+    activeAudioContext = ctx;
+
+    const playChimeSequence = () => {
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      const now = ctx.currentTime;
+      // Chime chord: C5 (523Hz), E5 (659Hz), G5 (784Hz), B5 (987Hz)
+      const freqs = [523.25, 659.25, 783.99, 987.77, 1046.5];
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+        gain.gain.setValueAtTime(0, now + idx * 0.12);
+        gain.gain.linearRampToValueAtTime(volume * 0.3, now + idx * 0.12 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 1.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + idx * 0.12);
+        osc.stop(now + idx * 0.12 + 1.3);
+      });
+    };
+
+    playChimeSequence();
+    activeOscillatorInterval = setInterval(playChimeSequence, 2000);
+
+    return {
+      stop: () => {
+        if (activeOscillatorInterval) {
+          clearInterval(activeOscillatorInterval);
+          activeOscillatorInterval = null;
+        }
+        if (activeAudioContext) {
+          try {
+            activeAudioContext.close();
+          } catch {}
+          activeAudioContext = null;
+        }
+      },
+    };
+  } catch (err) {
+    console.error('[alarmScheduler] Failed to play synthetic chime', err);
+    return { stop: () => {} };
+  }
+}
+
+export function stopAllAlarmSounds(): void {
+  if (activeOscillatorInterval) {
+    clearInterval(activeOscillatorInterval);
+    activeOscillatorInterval = null;
+  }
+  if (activeAudioContext) {
+    try {
+      activeAudioContext.close();
+    } catch {}
+    activeAudioContext = null;
+  }
+  if (activeAudioElement) {
+    try {
+      activeAudioElement.pause();
+      activeAudioElement.currentTime = 0;
+    } catch {}
+    activeAudioElement = null;
+  }
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    try {
+      navigator.vibrate(0);
+    } catch {}
+  }
+}
+
+/**
+ * Triggers vibration pattern if supported
+ */
+export function startVibration(): void {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    try {
+      navigator.vibrate([600, 300, 600, 300, 1000]);
+    } catch {}
+  }
+}
+
+export interface SoundTriggerResult {
+  isFallbackDefault: boolean;
+  fallbackReason?: string;
+}
+
+/**
+ * Play selected sound (custom audio file or default chime).
+ * If custom sound fails, immediately fallback to default and report warning (PRD B32).
+ */
+export async function triggerAlarmSound(
+  settings: AlarmSettings
+): Promise<SoundTriggerResult> {
+  stopAllAlarmSounds();
+
+  if (settings.vibrate) {
+    startVibration();
+  }
+
+  // If user selected custom sound
+  if (settings.soundType === 'custom' && settings.customSound) {
+    const sound = settings.customSound;
+    const sourceUrl = sound.dataBase64 || sound.uri;
+
+    if (!sourceUrl) {
+      // Missing file -> fallback default
+      playDefaultChime(settings.volume);
+      return {
+        isFallbackDefault: true,
+        fallbackReason: `Không tìm thấy file âm thanh “${sound.name}” — đã dùng chuông mặc định. Chọn lại?`,
+      };
+    }
+
+    try {
+      const audio = new Audio(sourceUrl);
+      audio.volume = settings.volume;
+      audio.loop = true;
+      activeAudioElement = audio;
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        await playPromise;
+      }
+      return { isFallbackDefault: false };
+    } catch (err) {
+      console.warn('[alarmScheduler] Custom sound playback failed, falling back to default', err);
+      playDefaultChime(settings.volume);
+      return {
+        isFallbackDefault: true,
+        fallbackReason: `Không tìm thấy hoặc không thể mở file âm thanh “${sound.name}” — đã dùng chuông mặc định. Chọn lại?`,
+      };
+    }
+  }
+
+  // Default sound
+  playDefaultChime(settings.volume);
+  return { isFallbackDefault: false };
+}
+
+/**
+ * Schedule next upcoming alarm on native platform if available.
+ */
+export function scheduleNativeBlockAlarm(block: TimeBlock, settings: AlarmSettings): void {
+  if (!settings.enabled) return;
+  if (typeof window === 'undefined') return;
+
+  const nativeBridge = (window as any).TAIONative;
+  if (nativeBridge?.scheduleAlarm) {
+    const minutes = timeToMinutes(block.startTime);
+    try {
+      nativeBridge.scheduleAlarm({
+        id: block.id,
+        title: block.title,
+        startTime: block.startTime,
+        timeMinutes: minutes,
+        soundName: settings.customSound?.name || 'default',
+      });
+    } catch (err) {
+      console.warn('[alarmScheduler] Native bridge scheduleAlarm call failed', err);
+    }
+  }
+}

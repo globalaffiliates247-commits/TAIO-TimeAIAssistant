@@ -24,7 +24,9 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         CAPPluginMethod(name: "scheduleNotification", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "registerGeofence", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "removeGeofence", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "openDeviceTimer", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "openDeviceTimer", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "scheduleAlarm", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "cancelAlarm", returnType: CAPPluginReturnPromise)
     ]
 
     private var db: OpaquePointer?
@@ -410,5 +412,58 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
                 call.resolve(["ok": true, "method": "native-timer-notification", "minutes": minutes])
             }
         }
+    }
+
+    // MARK: - Block-Start Alarm (B32 v0.3.22)
+
+    @objc func scheduleAlarm(_ call: CAPPluginCall) {
+        let blockId = call.getString("id", "alarm-\(Int(Date().timeIntervalSince1970))")
+        let title = call.getString("title", "Khối thời gian TAIO")
+        let startTime = call.getString("startTime", "")
+        let timeMinutes = call.getInt("timeMinutes", 0)
+
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound, .criticalAlert]) { granted, error in
+            guard granted else {
+                call.resolve(["ok": false, "reason": "notification_permission_denied"])
+                return
+            }
+
+            let content = UNMutableNotificationContent()
+            content.title = "⏰ Báo thức bắt đầu khối: \(title)"
+            content.body = "Đã đến giờ thực hiện khối việc (\(startTime)). Hãy mở ứng dụng để tập trung!"
+            content.sound = .defaultCritical
+            if #available(iOS 15.0, *) {
+                content.interruptionLevel = .timeSensitive
+            }
+
+            var dateComponents = DateComponents()
+            dateComponents.hour = timeMinutes / 60
+            dateComponents.minute = timeMinutes % 60
+
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+            let identifier = "taio-alarm-\(blockId)"
+            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+            center.add(request) { err in
+                if let err = err {
+                    call.resolve(["ok": false, "error": err.localizedDescription])
+                } else {
+                    call.resolve([
+                        "ok": true,
+                        "identifier": identifier,
+                        "scheduledFor": "\(dateComponents.hour ?? 0):\(dateComponents.minute ?? 0)"
+                    ])
+                }
+            }
+        }
+    }
+
+    @objc func cancelAlarm(_ call: CAPPluginCall) {
+        let blockId = call.getString("id", "")
+        let center = UNUserNotificationCenter.current()
+        let identifier = "taio-alarm-\(blockId)"
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+        call.resolve(["ok": true, "cancelled": identifier])
     }
 }

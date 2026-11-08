@@ -6,6 +6,11 @@ import { TimeBlock, BlockType } from '../types';
 import { IMPORTANT_NOT_URGENT_BACKLOG } from '../data/mockData';
 import { PriorityMatrix } from './PriorityMatrix';
 import { DailyCardView } from './DailyCardView';
+import {
+  computeBlockStatus,
+  getBlockStatusDisplay,
+  useDeviceClock,
+} from '../core/clock';
 import { 
   Calendar, 
   Clock, 
@@ -28,6 +33,7 @@ const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; 
 
 export const PlanTab: React.FC = () => {
   const { blocks, goals, profile, addNewBlock, openDrilldown } = useApp();
+  const { nowMinutes, todayLabel } = useDeviceClock();
   // B25: Daily Card is the first view
   const [activeView, setActiveView] = useState<'card' | 'timeline' | 'matrix'>('card');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
@@ -199,7 +205,7 @@ export const PlanTab: React.FC = () => {
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#E0401F]" />
-                <span>Dòng thời gian hôm nay</span>
+                <span>Dòng thời gian ({todayLabel})</span>
               </h3>
               <span className="text-xs text-slate-500">
                 Hồ sơ: <strong className="text-slate-900">{profile.title}</strong>
@@ -213,8 +219,10 @@ export const PlanTab: React.FC = () => {
                 .sort((a, b) => a.startTime.localeCompare(b.startTime))
                 .map((block) => {
                 const conf = TYPE_CONFIG[block.type] || TYPE_CONFIG.deep;
-                const isCompleted = block.status === 'done';
-                const isCurrent = block.status === 'in_progress';
+                const computedStatus = computeBlockStatus(block, nowMinutes);
+                const statusDisplay = getBlockStatusDisplay(computedStatus);
+                const isCompleted = computedStatus === 'done';
+                const isCurrent = computedStatus === 'in_progress';
 
                 return (
                   <div
@@ -238,21 +246,9 @@ export const PlanTab: React.FC = () => {
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${conf.bg} ${conf.text} ${conf.border}`}>
                             {conf.label}
                           </span>
-                          {block.status === 'done' && (
-                            <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
-                              <CheckCircle className="w-3.5 h-3.5" /> Đã xong
-                            </span>
-                          )}
-                          {block.status === 'partly_done' && (
-                            <span className="text-[11px] text-amber-600 font-bold flex items-center gap-1">
-                              ● Xong 1 phần
-                            </span>
-                          )}
-                          {block.status === 'in_progress' && (
-                            <span className="text-[11px] text-amber-600 font-extrabold animate-pulse">
-                              ● Đang diễn ra
-                            </span>
-                          )}
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusDisplay.badgeClass}`}>
+                            {statusDisplay.label}
+                          </span>
                         </div>
                         <h4 className={`text-sm sm:text-base font-bold mt-1 ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
                           {block.title}

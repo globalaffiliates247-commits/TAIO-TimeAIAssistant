@@ -3,6 +3,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { PROFILES } from '../data/mockData';
+import { VERSION_LABEL } from '../core/buildInfo';
 import { 
   Clock, 
   Sparkles, 
@@ -207,7 +208,12 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="font-black tracking-tight text-slate-900 text-base">TAIO</span>
               </div>
-              <p className="text-[11px] text-slate-500 -mt-0.5">TAIO.CLUB Time App</p>
+              <div className="flex items-center gap-1.5 -mt-0.5">
+                <p className="text-[11px] text-slate-500">TAIO.CLUB Time App</p>
+                <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200" title={`Phiên bản ứng dụng: ${VERSION_LABEL}`}>
+                  {VERSION_LABEL}
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -20,6 +20,22 @@ import {
   ExportedDayRecord,
   TaioImportSummary
 } from '../features/data-transfer';
+import {
+  AlarmSettings,
+  ActiveAlarmState,
+  loadAlarmSettings,
+  saveAlarmSettings,
+  triggerAlarmSound,
+  stopAllAlarmSounds,
+  AlarmScreen,
+} from '../features/alarm';
+import {
+  getDeviceCalendarDate,
+  getDeviceTimeMinutes,
+  getDeviceTimeString,
+  computeBlockStatus,
+  timeToMinutes,
+} from '../core/clock';
 import { 
   UserProfile, 
   Goal, 
@@ -357,6 +373,12 @@ interface AppContextType {
   resetAllUserData: (deleteServerCopy: boolean) => void;
   hasServerBackupToRestore: boolean;
   resolveServerBackupChoice: (choice: 'restore' | 'fresh') => void;
+  // PRD v0.3.22 B32: Alarm state & settings
+  alarmSettings: AlarmSettings;
+  setAlarmSettings: (s: AlarmSettings) => void;
+  activeAlarmState: ActiveAlarmState;
+  dismissAlarm: () => void;
+  snoozeAlarm: (mins?: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -487,8 +509,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, durationMs);
   };
 
-  // v0.3.1 B25: Daily Card & Work Diary State
-  const todayDateStr = new Date().toISOString().split('T')[0];
+  // v0.3.1 B25 & v0.3.22 B31: Daily Card & Work Diary State (local device calendar date)
+  const todayDateStr = getDeviceCalendarDate();
   const [selectedCardDate, setSelectedCardDate] = useState<string>(todayDateStr);
   const [dailyCardItems, setDailyCardItems] = useState<DailyCardItem[]>(INITIAL_DAILY_CARD_ITEMS);
 
@@ -953,7 +975,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (action === 'tomorrow') {
           const d = new Date(item.date);
           d.setDate(d.getDate() + 1);
-          const tomorrowStr = d.toISOString().split('T')[0];
+          const tomorrowStr = getDeviceCalendarDate(d);
           return {
             ...item,
             date: tomorrowStr,
@@ -971,7 +993,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const generateMarkdownSnapshot = (): string => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getDeviceCalendarDate();
     const exportTime = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
     
     // 1. Header
@@ -1316,8 +1338,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // Active current block
-  const currentBlock = blocks.find(b => b.status === 'in_progress') || blocks.find(b => b.status === 'planned');
+  // Active current block (PRD v0.3.22 B31: dynamically computed based on device clock)
+  const nowMins = getDeviceTimeMinutes();
+  const currentBlock =
+    blocks.find(b => computeBlockStatus(b, nowMins) === 'in_progress') ||
+    blocks.filter(b => computeBlockStatus(b, nowMins) === 'planned').sort((a, b) => a.startTime.localeCompare(b.startTime))[0] ||
+    blocks[0];
+
+  // Sync remaining timer with in-progress block if running
+  useEffect(() => {
+    if (currentBlock && computeBlockStatus(currentBlock, getDeviceTimeMinutes()) === 'in_progress') {
+      const remaining = Math.max(0, timeToMinutes(currentBlock.endTime) - getDeviceTimeMinutes());
+      setTimerMinutesRemaining(remaining);
+    }
+  }, [currentBlock]);
+
+  // PRD v0.3.22 B32: Alarm state & settings
+  const [alarmSettings, setAlarmSettings] = useState<AlarmSettings>(() => loadAlarmSettings());
+  const [activeAlarmState, setActiveAlarmState] = useState<ActiveAlarmState>({ isActive: false });
+  const firedAlarmsRef = useRef<Set<string>>(new Set());
+
+  // Alarm ticker: checks every 15s if device clock matches block start time
+  useEffect(() => {
+    if (!alarmSettings.enabled) return;
+
+    const checkAlarmTrigger = async () => {
+      const currentMinutes = getDeviceTimeMinutes();
+      const todayDate = getDeviceCalendarDate();
+
+      for (const b of blocks) {
+        if (!b.startTime) continue;
+        const startMins = timeToMinutes(b.startTime);
+        const alarmKey = `${todayDate}_${b.id}_${b.startTime}`;
+
+        if (startMins === currentMinutes && !firedAlarmsRef.current.has(alarmKey)) {
+          firedAlarmsRef.current.add(alarmKey);
+          const soundRes = await triggerAlarmSound(alarmSettings);
+          setActiveAlarmState({
+            isActive: true,
+            blockId: b.id,
+            blockTitle: b.title,
+            startTime: b.startTime,
+            soundName: alarmSettings.customSound?.name,
+            isFallbackDefault: soundRes.isFallbackDefault,
+            fallbackReason: soundRes.fallbackReason,
+          });
+          break;
+        }
+      }
+    };
+
+    checkAlarmTrigger();
+    const interval = setInterval(checkAlarmTrigger, 15000);
+    return () => clearInterval(interval);
+  }, [alarmSettings, blocks]);
+
+  const dismissAlarm = () => {
+    stopAllAlarmSounds();
+    setActiveAlarmState({ isActive: false });
+  };
+
+  const snoozeAlarm = (mins: number = 5) => {
+    stopAllAlarmSounds();
+    setActiveAlarmState({ isActive: false });
+    showToast(`Đã hoãn báo thức ${mins} phút`);
+    setTimeout(async () => {
+      const soundRes = await triggerAlarmSound(alarmSettings);
+      setActiveAlarmState({
+        isActive: true,
+        blockTitle: activeAlarmState.blockTitle || 'Đến giờ bắt đầu khối',
+        startTime: getDeviceTimeString(),
+        soundName: alarmSettings.customSound?.name,
+        isFallbackDefault: soundRes.isFallbackDefault,
+        fallbackReason: soundRes.fallbackReason,
+      });
+    }, mins * 60000);
+  };
 
   // Timer countdown ticker
   useEffect(() => {
@@ -1634,12 +1730,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const handleCloseDay = (tomorrowTask: string) => {
+    const actualBedtime = getDeviceTimeString();
+    const actualCalendarDate = getDeviceCalendarDate();
     setDayClosed(true);
     setCloseDayModalOpen(false);
     setCelebrationMsg(
       language === 'vi' 
-        ? `Đã khóa ngày làm việc hôm nay! Việc quan trọng số 1 ngày mai: "${tomorrowTask}". Hãy nghỉ ngơi trọn vẹn!` 
-        : `Day closed! Tomorrow's #1 focus: "${tomorrowTask}". Rest well!`
+        ? `Đã khóa ngày lúc ${actualBedtime} (${actualCalendarDate})! Việc quan trọng số 1 ngày mai: "${tomorrowTask}". Hãy nghỉ ngơi trọn vẹn!` 
+        : `Day closed at ${actualBedtime} (${actualCalendarDate})! Tomorrow's #1 focus: "${tomorrowTask}". Rest well!`
     );
   };
 
@@ -1952,7 +2050,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const exportTaioJsonV1 = () => {
     const jsonContent = generateJsonExportV1();
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getDeviceCalendarDate();
     const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2138,9 +2236,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ignorePassiveSuggestion,
       backfillTime,
       savePlace,
-      togglePlaceLocation
+      togglePlaceLocation,
+      alarmSettings,
+      setAlarmSettings,
+      activeAlarmState,
+      dismissAlarm,
+      snoozeAlarm,
     }}>
       {children}
+      <AlarmScreen
+        alarmState={activeAlarmState}
+        onDismiss={dismissAlarm}
+        onSnooze={snoozeAlarm}
+        onOpenSettings={() => setIsProfileModalOpen(true)}
+      />
     </AppContext.Provider>
   );
 };

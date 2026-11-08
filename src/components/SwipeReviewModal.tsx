@@ -15,6 +15,14 @@ import {
   Calendar
 } from 'lucide-react';
 import { BacklogCard } from '../types';
+import {
+  getTodayLabelWithWeekday,
+  getWeekLabelWithRange,
+  getDeviceTimeMinutes,
+  findNextFreeSlot,
+  timeToMinutes,
+  minutesToTime,
+} from '../core/clock';
 
 const VI_WEEKDAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
@@ -39,7 +47,8 @@ export const SwipeReviewModal: React.FC = () => {
     handleSwipeAction,
     goals,
     blocks,
-    palette
+    palette,
+    profile,
   } = useApp();
 
   const isCool = palette === 'cool';
@@ -140,17 +149,25 @@ export const SwipeReviewModal: React.FC = () => {
     4: 'Không khẩn, không quan trọng (Loại bỏ)',
   };
 
-  const reservedGoalBlock = planGoalId
-    ? blocks.find(b => b.goalId === planGoalId && b.status !== 'done')
-    : undefined;
+  const nowMins = getDeviceTimeMinutes();
+  const freeSlotResult = findNextFreeSlot({
+    durationMins: planDuration,
+    blocks,
+    nowMinutes: nowMins,
+    bedtime: profile?.personalAnchors?.windDownTime || '23:00',
+  });
 
   const suggestedStartTime = showCustomSlotPicker
     ? customStartTime
-    : (reservedGoalBlock ? reservedGoalBlock.startTime : (planGoalId ? '15:00' : '11:15'));
+    : (freeSlotResult.found && freeSlotResult.startTime
+        ? freeSlotResult.startTime
+        : (freeSlotResult.tomorrowEarliest || '08:00'));
 
-  const [sH, sM] = suggestedStartTime.split(':').map(Number);
-  const endTotalMins = (sH || 15) * 60 + (sM || 0) + planDuration;
-  const suggestedEndTime = `${String(Math.floor(endTotalMins / 60) % 24).padStart(2, '0')}:${String(endTotalMins % 60).padStart(2, '0')}`;
+  const suggestedEndTime = showCustomSlotPicker
+    ? minutesToTime(timeToMinutes(customStartTime) + planDuration)
+    : (freeSlotResult.found && freeSlotResult.endTime
+        ? freeSlotResult.endTime
+        : minutesToTime(timeToMinutes(suggestedStartTime) + planDuration));
 
   const submitPlan = () => {
     if (!currentCard) return;
@@ -384,13 +401,18 @@ export const SwipeReviewModal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Step 2: Deadline (B28 v0.3.16: Hôm nay / Tuần này / Chọn ngày / Chưa có) */}
+                  {/* Step 2: Deadline (PRD B31 v0.3.22: Hôm nay kèm thứ ngày / Tuần này kèm dải ngày / Chọn ngày / Chưa có) */}
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
                       2. Hạn chót:
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
-                      {(['Hôm nay', 'Tuần này', 'Chọn ngày', 'Chưa có'] as const).map(chip => {
+                      {[
+                        { mode: 'Hôm nay' as const, label: getTodayLabelWithWeekday() },
+                        { mode: 'Tuần này' as const, label: getWeekLabelWithRange() },
+                        { mode: 'Chọn ngày' as const, label: 'Chọn ngày' },
+                        { mode: 'Chưa có' as const, label: 'Chưa có' },
+                      ].map(({ mode: chip, label }) => {
                         const isSelected = planDeadlineMode === chip;
                         if (chip === 'Chọn ngày') {
                           const displayDateLabel = pickedIsoDate
@@ -431,13 +453,14 @@ export const SwipeReviewModal: React.FC = () => {
                             key={chip}
                             type="button"
                             onClick={() => setPlanDeadlineMode(chip)}
-                            className={`py-1.5 px-2 rounded-lg border font-medium ${
+                            className={`py-1.5 px-2 rounded-lg border font-medium truncate ${
                               isSelected
                                 ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#E0401F] text-white border-[#E0401F]')
                                 : 'bg-white text-slate-700 border-slate-200'
                             }`}
+                            title={label}
                           >
-                            {chip}
+                            <span className="truncate">{label}</span>
                           </button>
                         );
                       })}
@@ -480,10 +503,15 @@ export const SwipeReviewModal: React.FC = () => {
                       <span className="font-bold text-slate-900">
                         {suggestedStartTime} – {suggestedEndTime}{' '}
                         <span className="text-[10px] font-normal text-slate-500">
-                          ({reservedGoalBlock ? 'Trong khối mục tiêu' : (planGoalId ? 'Khung trống kế tiếp' : 'Quỹ dự phòng')})
+                          ({freeSlotResult.found ? 'Khung trống khả dụng' : 'Khung sáng mai'})
                         </span>
                       </span>
                     </div>
+                    {!freeSlotResult.found && !showCustomSlotPicker && (
+                      <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed">
+                        ⚠️ <strong>{freeSlotResult.reason}</strong> trước giờ ngủ. Đã đề xuất khung sớm nhất ngày mai ({freeSlotResult.tomorrowEarliest || '08:00'}) hoặc bấm <strong>"Chọn giờ khác"</strong>.
+                      </div>
+                    )}
                     {showCustomSlotPicker && (
                       <div className="pt-1 flex items-center justify-between gap-2 border-t border-slate-100">
                         <span className="text-[11px] font-semibold text-slate-600">Chọn giờ bắt đầu khác:</span>
