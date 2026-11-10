@@ -70,6 +70,8 @@
 	<string>UIStatusBarStyleDarkContent</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>TAIO Time cần quyền báo thức để đổ chuông khi một khối việc bắt đầu, kể cả khi máy đang để im lặng.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>

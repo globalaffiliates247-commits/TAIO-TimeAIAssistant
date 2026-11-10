@@ -1,234 +1,119 @@
 'use client';
-
-import React, { useState } from 'react';
+// PRD B12 (v0.3.24): shows the user's own social evenings and their next-day cost.
+// Numbers come from socialAuditModel.ts; no sample scenario is ever shown as if it were real.
+import React from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Wine, 
-  Clock, 
-  Activity, 
-  Briefcase, 
-  Heart, 
-  X, 
-  AlertCircle, 
-  ShieldCheck,
-  CheckCircle2,
-  Calendar
-} from 'lucide-react';
+import { Wine, X, CalendarClock } from 'lucide-react';
+import {
+  buildSocialAudit,
+  formatHours,
+  SOCIAL_BUDGET,
+} from '../features/social-audit/socialAuditModel';
 
 export const SocialAuditModal: React.FC = () => {
-  const { socialAuditModalOpen, setSocialAuditModalOpen, profile, setProfile } = useApp();
-  const [userAgeBand, setUserAgeBand] = useState<'<45' | '>=45'>(profile.ageBand || '<45');
-  const [socialDurationHours, setSocialDurationHours] = useState<number>(3.0);
-  const [travelMinutes, setTravelMinutes] = useState<number>(60); // 30m each way
-
+  const { socialAuditModalOpen, setSocialAuditModalOpen, profile, setProfile, interruptions, blocks } = useApp();
   if (!socialAuditModalOpen) return null;
 
-  const totalSocialTimeHours = socialDurationHours + (travelMinutes / 60);
-  const equivalentDeepBlocks = Math.round((totalSocialTimeHours * 60) / profile.focusBlockDurationMins);
+  const ageBand = profile.ageBand || '<45';
+  const audit = buildSocialAudit(interruptions, blocks, profile.focusBlockDurationMins);
+  const close = () => setSocialAuditModalOpen(false);
+  const { latest, nextDay } = audit;
+
+  const workItem = nextDay && nextDay.missedWork.length > 0 && (
+    <CostRow key="work" title="Công việc bị trễ hoặc dời" lines={nextDay.missedWork} />
+  );
+  const relationItem = nextDay && nextDay.movedMeetings.length > 0 && (
+    <CostRow key="rel" title="Hẹn và cam kết bị ảnh hưởng" lines={nextDay.movedMeetings} />
+  );
+  // Spec B12 order: health first for 45+, then work, then relationships. The app has no sleep or
+  // health data yet, so health is not shown (facts only, never inferred) and work/relationships keep their order.
+  const ordered = [workItem, relationItem].filter(Boolean);
 
   return (
     <div className="fixed app-overlay-safe z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto overscroll-contain shadow-2xl p-6 sm:p-7 text-slate-800">
-        
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
-              <Wine className="w-5 h-5" />
-            </div>
+            <div className="p-2 rounded-xl bg-amber-100 text-amber-700"><Wine className="w-5 h-5" /></div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold">Kiểm toán chi phí giao lưu ngoài giờ</h3>
-              <p className="text-xs text-slate-500">Minh bạch cái giá thực tế của hoạt động buổi tối • Không phán xét, không cấm đoán</p>
+              <h3 className="text-base sm:text-lg font-bold">Giao lưu ngoài giờ</h3>
+              <p className="text-xs text-slate-500">Thời gian thật của các buổi tối · không phán xét, không cấm đoán</p>
             </div>
           </div>
-          <button 
-            onClick={() => setSocialAuditModalOpen(false)}
-            className="text-slate-500 hover:text-slate-900"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <button onClick={close} aria-label="Đóng" className="text-slate-500 hover:text-slate-900"><X className="w-5 h-5" /></button>
         </div>
 
-        <div className="space-y-5">
-          
-          {/* Tone Principle Alert */}
-          <div className="p-3.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 leading-relaxed">
-            <p>
-              💡 <strong>Nguyên tắc cốt lõi:</strong> Giọng điệu trung tính, thực tế. Không tô đỏ, không tạo cảm giác tội lỗi, không đạo đức hóa về rượu bia hay đời sống xã hội. Mục tiêu duy nhất là <em>nhận thức rõ ràng và chủ động lựa chọn</em>.
-            </p>
+        {!latest ? (
+          <div className="p-5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 space-y-2">
+            <p className="font-semibold">Chưa có buổi giao lưu nào được ghi nhận.</p>
+            <p>Khi có ai rủ đi, mở thẻ chen ngang và chọn <strong>“Đi, có giờ về”</strong>. App sẽ cộng thời gian di chuyển, nhắc giờ về, và sáng hôm sau cho bạn thấy việc nào bị ảnh hưởng.</p>
           </div>
-
-          {/* User Age Band Config (PRD B12) */}
-          <div className="p-4 rounded-xl bg-white/80 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <label className="text-xs font-bold text-slate-700">Nhóm độ tuổi ưu tiên đánh giá:</label>
-              <p className="text-[11px] text-slate-500">
-                Thứ tự ưu tiên cảnh báo hệ quả sáng hôm sau phụ thuộc vào mốc tuổi (mặc định 45).
-              </p>
+        ) : (
+          <div className="space-y-5">
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-amber-800">Buổi gần nhất{latest.date ? ` · ${latest.date.split('-').reverse().slice(0, 2).join('/')}` : ''}</span>
+                <span className="text-amber-800">Bắt đầu {latest.startTime}{latest.endTime ? ` · hẹn về ${latest.endTime}` : ''}</span>
+              </div>
+              <p className="text-sm text-slate-700">{latest.title}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Stat label="Tổng thời gian" value={formatHours(latest.totalMinutes)} sub={`${formatHours(latest.outMinutes)} ở ngoài + ${formatHours(latest.travelMinutes)} di chuyển`} />
+                <Stat label="Bằng số khối tập trung" value={`${audit.deepBlocksEquivalent} khối`} sub={`mỗi khối ${profile.focusBlockDurationMins} phút`} />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setUserAgeBand('<45')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                  userAgeBand === '<45' 
-                    ? 'bg-indigo-600 border-indigo-500 text-white' 
-                    : 'bg-slate-100 border-slate-300 text-slate-500'
-                }`}
-              >
-                Dưới 45 tuổi
+
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-slate-700">Sáng hôm sau</h4>
+              {!nextDay ? (
+                <p className="text-xs text-slate-500">Sáng hôm sau buổi giao lưu, mục này sẽ hiện những việc buổi sáng bị trễ hoặc dời.</p>
+              ) : ordered.length > 0 ? ordered : (
+                <p className="text-xs text-slate-600">Sáng nay chưa có khối việc nào bị lỡ. Giờ ngủ thật sẽ hiện ở đây khi bạn ghi nhận giờ ngủ.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-5 p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-700 font-semibold flex items-center gap-1.5"><CalendarClock className="w-4 h-4" />Ngân sách giao lưu tuần này</span>
+            <span className="font-bold text-slate-800">{audit.weekCount} / {SOCIAL_BUDGET.eveningsPerWeek} buổi · tối đa {SOCIAL_BUDGET.maxHoursEach} giờ mỗi buổi</span>
+          </div>
+          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+            <div className="bg-amber-500 h-full rounded-full" style={{ width: `${Math.min(100, (audit.weekCount / SOCIAL_BUDGET.eveningsPerWeek) * 100)}%` }} />
+          </div>
+          {audit.weekOverLimit > 0 && (
+            <p className="text-[11px] text-slate-600">{audit.weekOverLimit} buổi tuần này dài hơn {SOCIAL_BUDGET.maxHoursEach} giờ.</p>
+          )}
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-slate-600">
+            <span>Thứ tự ưu tiên theo tuổi:</span>
+            {(['<45', '>=45'] as const).map(b => (
+              <button key={b} type="button" onClick={() => setProfile({ ...profile, ageBand: b })}
+                className={`px-2.5 py-1 rounded-lg border font-semibold ${ageBand === b ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-300 text-slate-600'}`}>
+                {b === '<45' ? 'Dưới 45' : 'Từ 45'}
               </button>
-              <button
-                type="button"
-                onClick={() => setUserAgeBand('>=45')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                  userAgeBand === '>=45' 
-                    ? 'bg-indigo-600 border-indigo-500 text-white' 
-                    : 'bg-slate-100 border-slate-300 text-slate-500'
-                }`}
-              >
-                Từ 45 tuổi trở lên
-              </button>
-            </div>
+            ))}
           </div>
-
-          {/* Simulation Case: Founder Pilot Trigger */}
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">
-                Tình huống thực tế (Founder Pilot Case):
-              </span>
-              <span className="text-[11px] text-amber-400">Giao lưu đột xuất lúc 20:00</span>
-            </div>
-            <p className="text-xs text-slate-700">
-              Nhận cuộc gọi hẹn gặp từ bạn bè lúc 20:00. Thực tế kéo dài <strong>2 giờ tại quán + 1 giờ di chuyển/chuẩn bị</strong>, vượt quá mốc thư giãn nghỉ ngơi 22:00.
-            </p>
-            
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="p-3 rounded-lg bg-white border border-slate-200 text-center">
-                <span className="text-[11px] text-slate-500">Tổng thời gian tiêu tốn</span>
-                <p className="text-lg font-bold text-amber-400 mt-0.5">{totalSocialTimeHours} tiếng</p>
-              </div>
-              <div className="p-3 rounded-lg bg-white border border-slate-200 text-center">
-                <span className="text-[11px] text-slate-500">Quy đổi khối tập trung sâu</span>
-                <p className="text-lg font-bold text-indigo-400 mt-0.5">~{equivalentDeepBlocks} khối ({profile.focusBlockDurationMins}p/khối)</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Next-Day Cost Breakdown by Priority (PRD B12) */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Hệ quả sáng hôm sau (Hiển thị theo thứ tự ưu tiên {userAgeBand === '<45' ? 'Dưới 45 tuổi' : 'Từ 45 tuổi'}):
-            </h4>
-
-            {userAgeBand === '<45' ? (
-              /* Under 45: 1. Work delayed -> 2. Relationships -> 3. Health */
-              <div className="space-y-2">
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    1
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-indigo-700 uppercase">Ưu tiên 1: Công việc bị trễ / dời lại</span>
-                    <p className="text-xs text-slate-700 mt-1">
-                      Sáng nay: Khối tập trung sâu số 1 bắt đầu trễ 50 phút; Báo cáo kế hoạch cho đối tác Minh phải dời sang ngày mai.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    2
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-purple-700 uppercase">Ưu tiên 2: Mối quan hệ & Cam kết bị ảnh hưởng</span>
-                    <p className="text-xs text-slate-700 mt-1">
-                      Họp đồng bộ sáng cùng đội ngũ phải lùi lại 30 phút; buổi chạy bộ cam kết cùng bạn bị hủy.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    3
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-emerald-700 uppercase">Ưu tiên 3: Sức khỏe & Thể lực</span>
-                    <p className="text-xs text-slate-700 mt-1">
-                      Thời lượng ngủ thực tế dưới 6 tiếng; chỉ số năng lượng buổi sáng giảm sút nhẹ.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Over 45: 1. Health -> 2. Work delayed -> 3. Relationships */
-              <div className="space-y-2">
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    1
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-rose-700 uppercase">Ưu tiên 1: Sức khỏe & Thể trạng</span>
-                    <p className="text-xs text-slate-700 mt-1">
-                      Thời lượng ngủ bị hụt mất 1.5 giờ so với nhịp chuẩn; thể trạng và năng lượng phục hồi cần thêm 4 tiếng nghỉ ngơi.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    2
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-indigo-700 uppercase">Ưu tiên 2: Công việc bị dời lịch</span>
-                    <p className="text-xs text-slate-700 mt-1">
-                      Khối xử lý hợp đồng quan trọng sáng nay phải chuyển sang buổi chiều; dời lịch họp khách hàng.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    3
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-purple-700 uppercase">Ưu tiên 3: Cam kết cá nhân</span>
-                    <p className="text-xs text-slate-700 mt-1">
-                      Các buổi tập thể dục buổi sáng bị hoãn lại.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Social Time Budget Tracker */}
-          <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-700 font-semibold">Ngân sách giao lưu tuần (Social Budget):</span>
-              <span className="text-amber-400 font-bold">1 / 2 buổi (Tối đa 3h/buổi)</span>
-            </div>
-            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-              <div className="bg-amber-500 h-full rounded-full" style={{ width: '50%' }} />
-            </div>
-            <p className="text-[11px] text-gray-500">
-              Bạn vẫn còn 1 buổi trong ngân sách tuần này mà không làm xáo trộn tiến độ mục tiêu chính.
-            </p>
-          </div>
-
-          {/* Footer Action */}
-          <div className="pt-2 flex justify-end">
-            <button
-              onClick={() => setSocialAuditModalOpen(false)}
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-md transition-all cursor-pointer"
-            >
-              Đã hiểu & Đóng bảng
-            </button>
-          </div>
-
+          <button onClick={close} className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-xs">Đóng</button>
         </div>
       </div>
     </div>
   );
 };
+
+const Stat: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
+  <div className="p-3 rounded-lg bg-white border border-slate-200 text-center">
+    <span className="text-[11px] text-slate-500">{label}</span>
+    <p className="text-lg font-bold text-slate-900 mt-0.5">{value}</p>
+    <span className="text-[11px] text-slate-500">{sub}</span>
+  </div>
+);
+
+const CostRow: React.FC<{ title: string; lines: string[] }> = ({ title, lines }) => (
+  <div className="p-3.5 rounded-xl bg-white border border-slate-200">
+    <span className="text-xs font-bold text-slate-800">{title}</span>
+    <ul className="mt-1 text-xs text-slate-700 list-disc pl-4">{lines.map(l => <li key={l}>{l}</li>)}</ul>
+  </div>
+);

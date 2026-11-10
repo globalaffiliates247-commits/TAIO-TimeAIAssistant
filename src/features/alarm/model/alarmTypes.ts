@@ -9,7 +9,8 @@ export interface CustomSoundFile {
   uri?: string;         // file path or blob url
   size?: number;
   type?: string;
-  dataBase64?: string;  // persisted in IndexedDB/localStorage for offline playback
+  dataBase64?: string;  // web / in-app playback copy (kept only for small files, see AlarmSettingsSection)
+  nativeSoundName?: string; // v0.3.24: copy imported into the phone (iOS Library/Sounds .caf), used by native alarms
 }
 
 export interface AlarmSettings {

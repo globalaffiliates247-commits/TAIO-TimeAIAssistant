@@ -200,6 +200,12 @@ export async function triggerAlarmSound(
     const sound = settings.customSound;
     const sourceUrl = sound.dataBase64 || sound.uri;
 
+    if (!sourceUrl && sound.nativeSoundName) {
+      // Large file kept only on the phone: the native alarm plays it; in-app we use the chime.
+      playDefaultChime(settings.volume);
+      return { isFallbackDefault: false };
+    }
+
     if (!sourceUrl) {
       // Missing file -> fallback default
       playDefaultChime(settings.volume);
@@ -235,26 +241,4 @@ export async function triggerAlarmSound(
   return { isFallbackDefault: false };
 }
 
-/**
- * Schedule next upcoming alarm on native platform if available.
- */
-export function scheduleNativeBlockAlarm(block: TimeBlock, settings: AlarmSettings): void {
-  if (!settings.enabled) return;
-  if (typeof window === 'undefined') return;
-
-  const nativeBridge = (window as any).TAIONative;
-  if (nativeBridge?.scheduleAlarm) {
-    const minutes = timeToMinutes(block.startTime);
-    try {
-      nativeBridge.scheduleAlarm({
-        id: block.id,
-        title: block.title,
-        startTime: block.startTime,
-        timeMinutes: minutes,
-        soundName: settings.customSound?.name || 'default',
-      });
-    } catch (err) {
-      console.warn('[alarmScheduler] Native bridge scheduleAlarm call failed', err);
-    }
-  }
-}
+// v0.3.24: native scheduling moved to ./nativeAlarmSync.ts (the old window.TAIONative call never reached iOS).

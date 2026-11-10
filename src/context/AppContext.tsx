@@ -28,6 +28,8 @@ import {
   triggerAlarmSound,
   stopAllAlarmSounds,
   AlarmScreen,
+  syncNativeBlockAlarms,
+  NativeAlarmMode,
 } from '../features/alarm';
 import {
   getDeviceCalendarDate,
@@ -895,14 +897,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (target) {
       if (isNativePlatform) {
         if (willBeActive) {
-          TAIONative.startMonitoringPlace({
+          TAIONative.registerGeofence({
             id: target.id,
             name: target.name,
             radiusMeters: target.radiusMeters,
           }).catch(() => {});
           setCelebrationMsg(`Đã bật giám sát địa điểm: Đang ở "${target.name}"! Các quy tắc If-Then tự động sẵn sàng.`);
         } else {
-          TAIONative.stopMonitoringPlace({ id: target.id }).catch(() => {});
+          TAIONative.removeGeofence({ id: target.id }).catch(() => {});
           setCelebrationMsg(`Đã rời khỏi địa điểm "${target.name}".`);
         }
       } else {
@@ -1357,6 +1359,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [alarmSettings, setAlarmSettings] = useState<AlarmSettings>(() => loadAlarmSettings());
   const [activeAlarmState, setActiveAlarmState] = useState<ActiveAlarmState>({ isActive: false });
   const firedAlarmsRef = useRef<Set<string>>(new Set());
+  // v0.3.24: which native path rings the phone ('alarmkit' rings even in the foreground, so the in-app ticker stays quiet)
+  const nativeAlarmModeRef = useRef<NativeAlarmMode>('none');
+  const soundMissingWarnedRef = useRef(false);
+
+  // v0.3.24 B32: schedule native alarms so the phone rings at block start when the app is closed or locked
+  useEffect(() => {
+    let cancelled = false;
+    const sync = async () => {
+      const res = await syncNativeBlockAlarms(blocks, alarmSettings);
+      if (cancelled) return;
+      nativeAlarmModeRef.current = res.mode;
+      if (res.soundMissing && !soundMissingWarnedRef.current && alarmSettings.customSound) {
+        soundMissingWarnedRef.current = true;
+        showToast(`Không tìm thấy file âm thanh “${alarmSettings.customSound.name}” — đã dùng chuông mặc định. Chọn lại trong Cá nhân → Báo thức & âm thanh.`);
+      }
+    };
+    sync();
+    const onVisible = () => { if (document.visibilityState === 'visible') sync(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { cancelled = true; document.removeEventListener('visibilitychange', onVisible); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alarmSettings, blocks]);
 
   // Alarm ticker: checks every 15s if device clock matches block start time
   useEffect(() => {
@@ -1373,6 +1397,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (startMins === currentMinutes && !firedAlarmsRef.current.has(alarmKey)) {
           firedAlarmsRef.current.add(alarmKey);
+          if (nativeAlarmModeRef.current === 'alarmkit') break; // the system alarm is already ringing
           const soundRes = await triggerAlarmSound(alarmSettings);
           setActiveAlarmState({
             isActive: true,
@@ -1477,6 +1502,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       returnPoint: returnPoint || undefined,
       socialEndTime,
       travelBufferMins: decision === 'go_social' ? 30 : undefined,
+      date: getDeviceCalendarDate(), // v0.3.24: needed for the weekly social budget and next-day cost (B12)
       sourcePerson,
       whatType,
       sourceType,

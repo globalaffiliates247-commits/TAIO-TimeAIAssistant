@@ -8,6 +8,22 @@ export interface TAIONativeStorageRow {
   updatedAt: number;
 }
 
+export interface NativeBlockAlarm {
+  id: string;
+  title: string;
+  body: string;
+  fireAt: number; // epoch ms
+}
+
+export interface NativeAlarmScheduleResult {
+  ok: boolean;
+  mode?: 'alarmkit' | 'notification';
+  scheduled?: number;
+  soundMissing?: boolean;
+  alarmKitDenied?: boolean;
+  reason?: string;
+}
+
 export interface TAIONativePluginInterface {
   getCapabilities(): Promise<{
     platform: string;
@@ -20,7 +36,7 @@ export interface TAIONativePluginInterface {
   }>;
   sqliteSetItem(options: { key: string; value: string; updatedAt: number }): Promise<{ ok: boolean }>;
   sqliteGetItem(options: { key: string }): Promise<{ key: string; value: string | null; updatedAt: number }>;
-  sqliteGetAllItems(): Promise<{ items: TAIONativeStorageRow[] }>;
+  sqliteGetAll(): Promise<{ items: TAIONativeStorageRow[] }>;
   sqliteClearAll(): Promise<{ ok: boolean }>;
   startLiveActivity(options: {
     blockId: string;
@@ -29,38 +45,37 @@ export interface TAIONativePluginInterface {
     isCountDown: boolean;
     totalMinutes: number;
     remainingMinutes: number;
-  }): Promise<{ started: boolean; activityId?: string }>;
+  }): Promise<{ ok: boolean; started?: boolean; activityId?: string; error?: string }>;
   updateLiveActivity(options: {
     taskTitle: string;
     goalName: string;
     isCountDown: boolean;
     remainingMinutes: number;
     isPaused: boolean;
-  }): Promise<{ updated: boolean }>;
-  stopLiveActivity(): Promise<{ stopped: boolean }>;
-  scheduleLocalNotification(options: {
+  }): Promise<{ ok: boolean; updated?: boolean }>;
+  stopLiveActivity(): Promise<{ ok: boolean }>;
+  // v0.3.24: names now match the Swift plugin (TAIONativePlugin.swift)
+  scheduleNotification(options: {
     id: string;
     title: string;
     body: string;
     delaySeconds: number;
   }): Promise<{ scheduled: boolean }>;
-  startMonitoringPlace(options: {
+  registerGeofence(options: {
     id: string;
     name: string;
     radiusMeters: number;
     latitude?: number;
     longitude?: number;
-  }): Promise<{ monitoring: boolean }>;
-  stopMonitoringPlace(options: { id: string }): Promise<{ stopped: boolean }>;
+  }): Promise<{ ok: boolean; regionId?: string }>;
+  removeGeofence(options: { id: string }): Promise<{ ok: boolean }>;
   openDeviceTimer(options: { minutes: number; title: string }): Promise<{ opened: boolean }>;
-  scheduleAlarm?(options: {
-    id: string;
-    title: string;
-    startTime: string;
-    timeMinutes: number;
-    soundName?: string;
-  }): Promise<{ ok: boolean; identifier?: string }>;
-  cancelAlarm?(options: { id: string }): Promise<{ ok: boolean }>;
+  // B32 block-start alarms (TAIONativePlugin+Alarm.swift); wrappers in ./alarmBridge.ts
+  importAlarmSound(options: { name: string; dataBase64: string; startSeconds?: number }): Promise<{ ok: boolean; soundName?: string; seconds?: number; error?: string }>;
+  hasAlarmSound(options: { soundName: string }): Promise<{ exists: boolean }>;
+  scheduleBlockAlarms(options: { alarms: NativeBlockAlarm[]; soundName?: string }): Promise<NativeAlarmScheduleResult>;
+  cancelBlockAlarms(): Promise<{ ok: boolean }>;
+  getAlarmCapability(): Promise<{ alarmKit: boolean }>;
 }
 
 export const TAIONative = registerPlugin<TAIONativePluginInterface>('TAIONative');
@@ -136,9 +151,11 @@ export async function startNativeLiveActivity(params: {
   if (!Capacitor.isNativePlatform()) return false;
   try {
     const res = await TAIONative.startLiveActivity(params);
-    return !!res?.started;
-  } catch {
-    return true;
+    if (!res?.ok) console.warn('[native] Live Activity not started:', res?.error);
+    return !!res?.ok;
+  } catch (err) {
+    console.warn('[native] startLiveActivity failed', err);
+    return false;
   }
 }
 
@@ -152,9 +169,9 @@ export async function updateNativeLiveActivity(params: {
   if (!Capacitor.isNativePlatform()) return false;
   try {
     const res = await TAIONative.updateLiveActivity(params);
-    return !!res?.updated;
+    return !!res?.ok;
   } catch {
-    return true;
+    return false;
   }
 }
 
@@ -162,9 +179,9 @@ export async function stopNativeLiveActivity(): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
     const res = await TAIONative.stopLiveActivity();
-    return !!res?.stopped;
+    return !!res?.ok;
   } catch {
-    return true;
+    return false;
   }
 }
 

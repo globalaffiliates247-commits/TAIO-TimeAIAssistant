@@ -19,6 +19,8 @@
 		A10000012FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift */; };
 		A10000032FE993A70072D4E8 /* TAIONativePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000042FE993A70072D4E8 /* TAIONativePlugin.swift */; };
 		A10000052FE993A70072D4E8 /* TAIOViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000062FE993A70072D4E8 /* TAIOViewController.swift */; };
+		A10000072FE993A70072D4E8 /* TAIOAlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000082FE993A70072D4E8 /* TAIOAlarmService.swift */; };
+		A10000092FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000A2FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +37,8 @@
 		A10000022FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOLiveActivityAttributes.swift; sourceTree = "<group>"; };
 		A10000042FE993A70072D4E8 /* TAIONativePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIONativePlugin.swift; sourceTree = "<group>"; };
 		A10000062FE993A70072D4E8 /* TAIOViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOViewController.swift; sourceTree = "<group>"; };
+		A10000082FE993A70072D4E8 /* TAIOAlarmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOAlarmService.swift; sourceTree = "<group>"; };
+		A100000A2FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TAIONativePlugin+Alarm.swift"; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -74,6 +78,8 @@
 				A10000022FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift */,
 				A10000042FE993A70072D4E8 /* TAIONativePlugin.swift */,
 				A10000062FE993A70072D4E8 /* TAIOViewController.swift */,
+				A10000082FE993A70072D4E8 /* TAIOAlarmService.swift */,
+				A100000A2FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -173,6 +179,8 @@
 				A10000012FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift in Sources */,
 				A10000032FE993A70072D4E8 /* TAIONativePlugin.swift in Sources */,
 				A10000052FE993A70072D4E8 /* TAIOViewController.swift in Sources */,
+				A10000072FE993A70072D4E8 /* TAIOAlarmService.swift in Sources */,
+				A10000092FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

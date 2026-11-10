@@ -7,6 +7,10 @@ import {
   stopAllAlarmSounds,
   saveAlarmSettings,
 } from '../model/alarmScheduler';
+import { importNativeAlarmSound } from '../../native/alarmBridge';
+
+// Keep an in-app (web) playback copy only for small files: localStorage holds ~5 MB in total.
+const MAX_WEB_COPY_BYTES = 1_500_000;
 
 interface AlarmSettingsSectionProps {
   settings: AlarmSettings;
@@ -40,13 +44,24 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const base64 = reader.result as string;
+      // v0.3.24: on the installed app, copy the file into the phone so native alarms can play it.
+      let nativeSoundName: string | undefined;
+      if (platformCap.capability !== 'web_unsupported') {
+        const res = await importNativeAlarmSound(file.name, base64);
+        if (!res.ok) {
+          setTestWarning(`Không dùng được file "${file.name}" (${res.error || 'lỗi không rõ'}). Hãy thử file mp3, m4a hoặc wav khác.`);
+          return;
+        }
+        nativeSoundName = res.soundName;
+      }
       const customSound: CustomSoundFile = {
         name: file.name,
         size: file.size,
         type: file.type,
-        dataBase64: base64,
+        dataBase64: !nativeSoundName || file.size <= MAX_WEB_COPY_BYTES ? base64 : undefined,
+        nativeSoundName,
       };
 
       const updated: AlarmSettings = {
