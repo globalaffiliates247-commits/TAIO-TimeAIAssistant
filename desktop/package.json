@@ -1,0 +1,9 @@
+{
+  "name": "taio-time-desktop",
+  "productName": "TAIO Time",
+  "version": "0.3.22",
+  "description": "TAIO.CLUB Time App — macOS desktop shell",
+  "main": "main.js",
+  "private": true,
+  "author": "TAIO.CLUB"
+}
