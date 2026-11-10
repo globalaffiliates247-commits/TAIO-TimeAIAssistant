@@ -7,7 +7,9 @@ extension TAIONativePlugin {
     /// { name, dataBase64, startSeconds? } -> { ok, soundName, seconds } | { ok:false, error }
     @objc func importAlarmSound(_ call: CAPPluginCall) {
         let name = call.getString("name", "sound.m4a")
-        guard let data = call.getString("dataBase64"), !data.isEmpty else {
+        // Capacitor 8: getString needs a default value (no optional overload).
+        let data = call.getString("dataBase64", "")
+        guard !data.isEmpty else {
             call.resolve(["ok": false, "error": "missing_data"])
             return
         }
@@ -30,11 +32,12 @@ extension TAIONativePlugin {
     /// { alarms: [{ id, title, body, fireAt (epoch ms) }], soundName? } -> { ok, mode, scheduled, soundMissing, alarmKitDenied? }
     /// Replaces all previously scheduled TAIO alarms.
     @objc func scheduleBlockAlarms(_ call: CAPPluginCall) {
-        let raw = call.getArray("alarms", JSObject.self) ?? []
+        let raw: [JSObject] = call.getArray("alarms", []).compactMap { $0 as? JSObject }
         let now = Date()
-        let alarms: [TAIOBlockAlarm] = raw.compactMap { item in
-            guard let id = item["id"] as? String,
-                  let ms = (item["fireAt"] as? NSNumber)?.doubleValue else { return nil }
+        let alarms: [TAIOBlockAlarm] = raw.compactMap { (item: JSObject) -> TAIOBlockAlarm? in
+            guard let id = item["id"] as? String else { return nil }
+            let fire = item["fireAt"]
+            guard let ms = (fire as? NSNumber)?.doubleValue ?? (fire as? Double) else { return nil }
             let date = Date(timeIntervalSince1970: ms / 1000)
             guard date > now else { return nil }
             return TAIOBlockAlarm(
@@ -44,7 +47,8 @@ extension TAIONativePlugin {
                 fireAt: date
             )
         }
-        let soundName = call.getString("soundName")
+        let rawSound = call.getString("soundName", "")
+        let soundName: String? = rawSound.isEmpty ? nil : rawSound
         Task {
             let res = await TAIOAlarmService.shared.schedule(alarms, soundName: soundName)
             call.resolve(res)
