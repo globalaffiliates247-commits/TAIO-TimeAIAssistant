@@ -28,6 +28,7 @@ import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
 import { DataImportSection } from '../features/data-transfer';
 import { AlarmSettingsSection } from '../features/alarm';
+import { SyncSection } from '../features/sync/ui/SyncSection';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -532,6 +533,8 @@ export const ProfileModal: React.FC = () => {
             <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
               Dữ liệu
             </h4>
+
+            <SyncSection />
 
             <DataImportSection
               onImport={importTaioData}

@@ -18,8 +18,10 @@ import {
   buildTaioExportV1,
   DayTemplateSlot,
   ExportedDayRecord,
-  TaioImportSummary
+  TaioImportSummary,
+  TaioExportV1,
 } from '../features/data-transfer';
+import { useSyncLoop } from '../features/sync/useSyncLoop';
 import {
   AlarmSettings,
   ActiveAlarmState,
@@ -1997,9 +1999,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(preview.errorMessage || 'File dữ liệu không hợp lệ.', undefined, 'error');
       return null;
     }
+    return applyImportPayload(preview.payload, mode, false);
+  };
 
+  // v0.3.25: shared by file import (B24) and cross-device sync (silent = no toast, no date jump)
+  const applyImportPayload = (
+    payload: TaioExportV1,
+    mode: 'merge' | 'replace',
+    silent: boolean
+  ): TaioImportSummary => {
     const { nextState, summary } = applyTaioImport(
-      preview.payload,
+      payload,
       {
         profile,
         userProfileDetail,
@@ -2031,7 +2041,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDayTemplate(nextState.dayTemplate);
     setImportedDays(nextState.importedDays);
 
-    if (nextState.importedDays.length > 0) {
+    if (!silent && nextState.importedDays.length > 0) {
       const sortedDates = nextState.importedDays.map(d => d.date).sort();
       setSelectedCardDate(sortedDates[sortedDates.length - 1]);
     }
@@ -2049,9 +2059,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     saveDurableState('dayTemplate', nextState.dayTemplate, nowTs);
     saveDurableState('importedDays', nextState.importedDays, nowTs);
 
-    showToast(
-      `Đã nhập dữ liệu (${mode === 'merge' ? 'Gộp' : 'Thay thế'}): thêm +${summary.added}, cập nhật ${summary.updated}, giữ nguyên ${summary.skippedUnchanged}.`
-    );
+    if (!silent) {
+      showToast(
+        `Đã nhập dữ liệu (${mode === 'merge' ? 'Gộp' : 'Thay thế'}): thêm +${summary.added}, cập nhật ${summary.updated}, giữ nguyên ${summary.skippedUnchanged}.`
+      );
+    }
 
     return summary;
   };
@@ -2073,6 +2085,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     return JSON.stringify(exportedObj, null, 2);
   };
+
+  // v0.3.25 B24: cross-device sync (encrypted snapshots via Supabase), see features/sync
+  useSyncLoop(
+    {
+      getPayload: () => JSON.parse(generateJsonExportV1()) as TaioExportV1,
+      applyPayload: (payload, mode) => {
+        const summary = applyImportPayload(payload, mode, true);
+        if (summary.added + summary.updated > 0) showToast(`Đã đồng bộ từ máy khác: thêm ${summary.added}, cập nhật ${summary.updated}.`);
+        return summary;
+      },
+    },
+    [goals, lists, listItems, blocks, dailyCardItems, interruptions, backlogCards, timeLedger, dayTemplate, importedDays]
+  );
 
   const exportTaioJsonV1 = () => {
     const jsonContent = generateJsonExportV1();
