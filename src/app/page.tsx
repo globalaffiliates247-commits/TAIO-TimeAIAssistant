@@ -19,6 +19,7 @@ import { ActionNudgeBanner } from '../components/ActionNudgeBanner';
 import { AppearanceModal } from '../components/AppearanceModal';
 import { AmbientProgressEdge } from '../components/AmbientProgressEdge';
 import { InboxModal } from '../components/InboxModal';
+import { StickyBoard } from '../features/sticky';
 import { MethodLibraryModal } from '../components/MethodLibraryModal';
 import { CoachCardOverlay } from '../components/CoachCardOverlay';
 import { ExportDataModal } from '../components/ExportDataModal';
@@ -200,6 +201,7 @@ const MainAppContent: React.FC = () => {
       <SocialAuditModal />
       <DrilldownSheet />
       <InboxModal />
+      <StickyBoard />
       <MethodLibraryModal />
       <CoachCardOverlay />
       <ExportDataModal />

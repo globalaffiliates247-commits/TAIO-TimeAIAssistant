@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TimeBlock, BlockType } from '../types';
 import { IMPORTANT_NOT_URGENT_BACKLOG } from '../data/mockData';
-import { PriorityMatrix } from './PriorityMatrix';
 import { DailyCardView } from './DailyCardView';
 import {
   computeBlockStatus,
@@ -116,17 +115,6 @@ export const PlanTab: React.FC = () => {
               <Calendar className="w-3.5 h-3.5" />
               <span>Dòng thời gian</span>
             </button>
-            <button
-              onClick={() => setActiveView('matrix')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                activeView === 'matrix' 
-                  ? 'bg-[#E0401F] text-white shadow-sm' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Ma trận ưu tiên</span>
-            </button>
           </div>
 
           <button
@@ -140,7 +128,6 @@ export const PlanTab: React.FC = () => {
       </div>
 
       {activeView === 'card' && <DailyCardView />}
-      {activeView === 'matrix' && <PriorityMatrix />}
       {activeView === 'timeline' && (
         <>
           {/* Weekly Budget Progress */}

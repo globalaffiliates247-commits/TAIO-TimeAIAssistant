@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { openStickyBoard } from '../features/sticky';
+import { getDeviceCalendarDate } from '../core/clock';
 import { PROFILES } from '../data/mockData';
 import { VERSION_LABEL } from '../core/buildInfo';
 import { 
@@ -25,7 +27,8 @@ import {
   Wine,
   Sun,
   Moon,
-  Bell
+  Bell,
+  StickyNote
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -303,6 +306,16 @@ export const Navbar: React.FC = () => {
             <span>Xuất AI</span>
           </button>
 
+          {/* v0.3.26 B34: Sticky quick capture */}
+          <button
+            onClick={() => openStickyBoard(getDeviceCalendarDate())}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#FFF6C2] hover:bg-[#FCEB8E] text-[#6B5E2A] border border-[#F0E3A2] transition-all font-semibold"
+            title="Ghi nhanh (tờ ghi chú)"
+          >
+            <StickyNote className="w-3.5 h-3.5" />
+            <span>Ghi nhanh</span>
+          </button>
+
           {/* Inbox Mini App Button (PRD B20) */}
           <button
             onClick={() => setInboxModalOpen(true)}
@@ -470,6 +483,13 @@ export const Navbar: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 py-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
           <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+            <button
+              onClick={() => { openStickyBoard(getDeviceCalendarDate()); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FFF6C2] border border-[#F0E3A2] font-semibold text-[#6B5E2A]"
+            >
+              <StickyNote className="w-4 h-4" />
+              <span>Ghi nhanh</span>
+            </button>
             <button
               onClick={() => { setInboxModalOpen(true); setMobileMenuOpen(false); }}
               className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"

@@ -187,7 +187,11 @@ interface AppContextType {
     displacedItemId?: string;
     displacedItemTitle?: string;
     displacedMinutes?: number;
-  }) => void;
+    date?: string; // v0.3.26: sticky day sheet writes to a given day
+  }) => string;
+  // v0.3.26 B34: the sticky day sheet edits Thẻ ngày items in place
+  updateDailyCardItem: (id: string, patch: Partial<DailyCardItem>) => void;
+  removeDailyCardItem: (id: string) => void;
   toggleDailyCardItem: (id: string) => void;
   carryOverItem: (id: string, action: 'tomorrow' | 'leave' | 'drop', reason?: string) => void;
 
@@ -938,12 +942,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     displacedItemId?: string;
     displacedItemTitle?: string;
     displacedMinutes?: number;
-  }) => {
+    date?: string;
+  }): string => {
     const goal = goals.find(g => g.id === item.goalId);
     const newItem: DailyCardItem = {
       id: `dc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       text: item.text,
-      date: selectedCardDate,
+      date: item.date || selectedCardDate,
       goalId: item.goalId,
       goalName: goal?.name,
       start: item.start,
@@ -961,13 +966,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       saveDurableState('dailyCardItems', next, Date.now());
       return next;
     });
+    return newItem.id;
+  };
+
+  const updateDailyCardItem = (id: string, patch: Partial<DailyCardItem>) => {
+    setDailyCardItems(prev => {
+      const next = prev.map(it => (it.id === id ? { ...it, ...patch, updatedAt: Date.now() } : it));
+      saveDurableState('dailyCardItems', next, Date.now());
+      return next;
+    });
+  };
+
+  const removeDailyCardItem = (id: string) => {
+    setDailyCardItems(prev => {
+      const next = prev.filter(it => it.id !== id);
+      saveDurableState('dailyCardItems', next, Date.now());
+      return next;
+    });
   };
 
   const toggleDailyCardItem = (id: string) => {
     setDailyCardItems(prev => prev.map(item => {
       if (item.id === id) {
         const nextStatus: ItemStatus = item.status === 'done' ? 'open' : 'done';
-        return { ...item, status: nextStatus };
+        return { ...item, status: nextStatus, updatedAt: Date.now() };
       }
       return item;
     }));
@@ -2235,6 +2257,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedCardDate,
       addDailyCardItem,
       toggleDailyCardItem,
+      updateDailyCardItem,
+      removeDailyCardItem,
       carryOverItem,
       exportModalOpen,
       setExportModalOpen,
