@@ -10,7 +10,8 @@
     "start": "node scripts/serve-static.js",
     "deploy:render": "node scripts/trigger-deploy.js",
     "sync:ios": "npm run build && npx cap sync ios",
-    "open:ios": "npx cap open ios"
+    "open:ios": "npx cap open ios",
+    "build:dmg": "bash scripts/build-mac.sh"
   },
   "dependencies": {
     "@capacitor/cli": "^8.6.0",
