@@ -29,6 +29,7 @@ import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
 import { DataImportSection } from '../features/data-transfer';
 import { AlarmSettingsSection } from '../features/alarm';
 import { SyncSection } from '../features/sync/ui/SyncSection';
+import { PairSection } from '../features/sync/ui/PairSection';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -535,6 +536,9 @@ export const ProfileModal: React.FC = () => {
             </h4>
 
             <SyncSection />
+
+            {/* B35.4 v0.3.27: Device Pairing via 6-char code */}
+            <PairSection />
 
             <DataImportSection
               onImport={importTaioData}
