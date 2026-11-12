@@ -1,0 +1,92 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "done": "Xong",
+    "close": "Đóng",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "copy": "Sao chép",
+    "language": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "loading": "Đang tải...",
+    "success": "Thành công",
+    "error": "Lỗi"
+  },
+  "nav": {
+    "now": "Bây giờ (Now)",
+    "plan": "Kế hoạch (Plan)",
+    "efficiency": "Hiệu quả (Efficiency)",
+    "goals": "Mục tiêu (Goals)",
+    "swipeReview": "Quẹt thẻ nhiệm vụ"
+  },
+  "swipe": {
+    "title": "Quẹt thẻ nhiệm vụ",
+    "flexibleBadge": "Linh động hôm nay",
+    "basketBadge": "Rổ công việc",
+    "postponeTomorrow": "Để mai",
+    "scheduleNow": "Xếp",
+    "done": "Xong",
+    "skip": "Bỏ qua",
+    "completedTitle": "Hoàn thành phiên Quẹt thẻ!",
+    "completedDesc": "Bạn đã duyệt hết các việc Linh động hôm nay và việc trong Rổ.",
+    "flexibleRemaining": "{{count}} việc Linh động hôm nay",
+    "basketRemaining": "{{count}} việc trong Rổ",
+    "toastPostponed": "Đã dời việc sang ngày mai",
+    "toastScheduled": "Đã xếp việc vào khoảng trống phù hợp"
+  },
+  "goals": {
+    "title": "Mục tiêu",
+    "newGoalTitle": "Mục tiêu mới",
+    "inputPlaceholder": "Gõ mục tiêu, ví dụ: Làm 30 clip cho kênh AI trước Tết...",
+    "createBtn": "Tạo mục tiêu",
+    "quickAddHint": "AI tự động nhận diện loại mục tiêu, số lượng và thời hạn khi bạn gõ.",
+    "previewTypeKeyResult": "Kết quả đo được (0/{{target}} {{unit}})",
+    "previewTypeAttendance": "Có mặt đủ thời gian ({{duration}} phút/ngày)",
+    "previewTypeTasks": "Hoàn thành các việc",
+    "previewDeadline": "Hạn chót: {{deadline}}",
+    "toastCreated": "Đã tạo mục tiêu thành công!"
+  },
+  "quotes": {
+    "title": "Cảm hứng & Động lực",
+    "refresh": "Đổi câu khác",
+    "favorite": "Yêu thích câu này",
+    "favorited": "Đã thích",
+    "unfavorite": "Bỏ thích",
+    "addCustom": "Thêm câu của bạn",
+    "customPlaceholder": "Nhập câu truyền cảm hứng của bạn...",
+    "authorPlaceholder": "Tác giả (tùy chọn)",
+    "saveCustom": "Lưu câu",
+    "manageQuotes": "Kho câu truyền động lực",
+    "customBadge": "Câu của bạn",
+    "emptyCustom": "Chưa có câu nào được thêm.",
+    "toastFavorited": "Đã lưu vào danh sách yêu thích ♥",
+    "toastUnfavorited": "Đã bỏ khỏi danh sách yêu thích",
+    "toastAdded": "Đã thêm câu truyền cảm hứng mới!"
+  },
+  "pairing": {
+    "title": "Ghép máy bằng mã 6 ký tự",
+    "subtitle": "Đồng bộ nhanh không cần tài khoản, mã dùng một lần trong 10 phút",
+    "generateCodeBtn": "Tạo mã ghép máy",
+    "enterCodeTitle": "Nhập mã ghép từ máy khác",
+    "codePlaceholder": "Nhập 6 ký tự",
+    "pairBtn": "Kết nối",
+    "yourCodeIs": "Mã ghép của bạn:",
+    "codeExpiresIn": "Hết hạn sau {{minutes}} phút {{seconds}} giây",
+    "expired": "Mã đã hết hạn",
+    "oneTimeNotice": "Mã chỉ dùng được 1 lần và bảo mật đầu-cuối (AES-GCM).",
+    "errorInvalidOrExpired": "Mã ghép không hợp lệ hoặc đã hết hạn. Vui lòng tạo mã mới.",
+    "errorGeneric": "Không thể kết nối. Vui lòng kiểm tra lại mã ghép.",
+    "successConnected": "Ghép máy thành công! Dữ liệu đã được đồng bộ.",
+    "leaveSpace": "Ngắt đồng bộ thiết bị"
+  },
+  "desktop": {
+    "quickNoteTitle": "Ghi nhanh TAIO",
+    "quickNotePlaceholder": "21:30 gọi anh Minh...",
+    "quickNoteHint": "Bấm ⌥⌘N ở bất kỳ đâu để mở cửa sổ này",
+    "trayTimerRunning": "Đồng hồ: {{remaining}}",
+    "trayTimerIdle": "TAIO Time",
+    "noteAdded": "Đã thêm vào Thẻ ngày lúc {{time}}"
+  }
+}

@@ -22,6 +22,7 @@ import {
   TaioExportV1,
 } from '../features/data-transfer';
 import { useSyncLoop } from '../features/sync/useSyncLoop';
+import i18n from '../i18n';
 import {
   AlarmSettings,
   ActiveAlarmState,
@@ -396,6 +397,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isOnboarded, setIsOnboarded] = useState<boolean>(true);
   const [currentTab, setCurrentTab] = useState<AppTab>('now');
   const [language, setLanguage] = useState<'vi' | 'en'>('vi');
+
+  const handleSetLanguage = (lang: 'vi' | 'en') => {
+    setLanguage(lang);
+    i18n.changeLanguage(lang);
+    try {
+      localStorage.setItem('taio_language', lang);
+    } catch (_) {}
+  };
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('taio_language');
+      if (saved === 'vi' || saved === 'en') {
+        setLanguage(saved);
+        i18n.changeLanguage(saved);
+      }
+    } catch (_) {}
+  }, []);
   const [toneLevel, setToneLevel] = useState<ToneLevel>(1);
 
   // v0.12 - v0.20: Appearance & Device Settings (B17)
@@ -2162,7 +2181,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentTab,
       setCurrentTab,
       language,
-      setLanguage,
+      setLanguage: handleSetLanguage,
       toneLevel,
       setToneLevel,
       currentUserRole,

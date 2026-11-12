@@ -14,8 +14,10 @@ import {
   Moon, 
   Sparkles,
   Palette,
-  Check
+  Check,
+  Globe
 } from 'lucide-react';
+import { useT } from '../i18n/useT';
 
 export const AppearanceModal: React.FC = () => {
   const { 
@@ -27,8 +29,10 @@ export const AppearanceModal: React.FC = () => {
     setThemeMode, 
     palette, 
     setPalette,
-    language 
+    language,
+    setLanguage 
   } = useApp();
+  const { t } = useT();
 
   if (!settingsModalOpen) return null;
 
@@ -214,6 +218,47 @@ export const AppearanceModal: React.FC = () => {
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Section 4: Language (PRD E6 / v0.3.27) */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5" />
+              <span>{t('common.language')}</span>
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setLanguage('vi')}
+                className={`p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+                  language === 'vi'
+                    ? 'border-blue-600 bg-blue-50/50 text-blue-900 shadow-xs font-semibold'
+                    : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold">{t('common.vietnamese')}</div>
+                  <div className="text-[10px] text-slate-500">Mặc định tiếng Việt</div>
+                </div>
+                {language === 'vi' && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+                  language === 'en'
+                    ? 'border-blue-600 bg-blue-50/50 text-blue-900 shadow-xs font-semibold'
+                    : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold">{t('common.english')}</div>
+                  <div className="text-[10px] text-slate-500">English locale</div>
+                </div>
+                {language === 'en' && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
+              </button>
             </div>
           </div>
         </div>

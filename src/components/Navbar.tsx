@@ -224,6 +224,14 @@ export const Navbar: React.FC = () => {
         {/* Mobile Action Controls (< md): Quick Palette + Bell + Clean Menu Hamburger */}
         <div className="flex md:hidden items-center gap-1.5 shrink-0">
           <button
+            onClick={() => setLanguage(language === 'vi' ? 'en' : 'vi')}
+            className="px-2 py-1.5 rounded-xl font-bold text-xs border border-slate-200 bg-slate-50 text-slate-700 shadow-xs"
+            title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+          >
+            <span>{language.toUpperCase()}</span>
+          </button>
+
+          <button
             onClick={togglePalette}
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-xs border shadow-xs transition-all ${
               isCool
@@ -266,6 +274,15 @@ export const Navbar: React.FC = () => {
 
         {/* Desktop / Tablet Action Controls (>= md): Full Toolbar */}
         <div className="hidden md:flex items-center gap-1.5 lg:gap-2 text-xs flex-wrap justify-end">
+          {/* Language Switcher (PRD E6 / v0.3.27) */}
+          <button
+            onClick={() => setLanguage(language === 'vi' ? 'en' : 'vi')}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold transition-all border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 shadow-xs"
+            title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+          >
+            <span>🌐 {language.toUpperCase()}</span>
+          </button>
+
           {/* Quick Palette Toggle Button */}
           <button
             onClick={togglePalette}

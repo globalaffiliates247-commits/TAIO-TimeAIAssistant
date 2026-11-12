@@ -1,0 +1,92 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "done": "Done",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "copy": "Copy",
+    "language": "Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error"
+  },
+  "nav": {
+    "now": "Now",
+    "plan": "Plan",
+    "efficiency": "Efficiency",
+    "goals": "Goals",
+    "swipeReview": "Swipe Review"
+  },
+  "swipe": {
+    "title": "Task Swipe Review",
+    "flexibleBadge": "Today's Flexible",
+    "basketBadge": "Inbox / Basket",
+    "postponeTomorrow": "Tomorrow",
+    "scheduleNow": "Schedule",
+    "done": "Done",
+    "skip": "Skip",
+    "completedTitle": "Swipe Review Complete!",
+    "completedDesc": "You reviewed all of today's flexible tasks and basket items.",
+    "flexibleRemaining": "{{count}} today's flexible tasks",
+    "basketRemaining": "{{count}} basket items",
+    "toastPostponed": "Task moved to tomorrow",
+    "toastScheduled": "Task scheduled into available slot"
+  },
+  "goals": {
+    "title": "Goals",
+    "newGoalTitle": "New Goal",
+    "inputPlaceholder": "Type a goal, e.g. Make 30 clips for AI channel before Tet...",
+    "createBtn": "Create Goal",
+    "quickAddHint": "AI automatically parses goal type, target count, and deadline as you type.",
+    "previewTypeKeyResult": "Measurable Result (0/{{target}} {{unit}})",
+    "previewTypeAttendance": "Time Attendance ({{duration}} mins/day)",
+    "previewTypeTasks": "Complete Tasks",
+    "previewDeadline": "Deadline: {{deadline}}",
+    "toastCreated": "Goal created successfully!"
+  },
+  "quotes": {
+    "title": "Inspiration & Motivation",
+    "refresh": "Next Quote",
+    "favorite": "Favorite this quote",
+    "favorited": "Favorited",
+    "unfavorite": "Unfavorite",
+    "addCustom": "Add Your Quote",
+    "customPlaceholder": "Enter your inspirational quote...",
+    "authorPlaceholder": "Author (optional)",
+    "saveCustom": "Save Quote",
+    "manageQuotes": "Motivation Quote Library",
+    "customBadge": "Your Quote",
+    "emptyCustom": "No custom quotes yet.",
+    "toastFavorited": "Saved to favorites ♥",
+    "toastUnfavorited": "Removed from favorites",
+    "toastAdded": "Added new inspirational quote!"
+  },
+  "pairing": {
+    "title": "Pair Devices with 6-Character Code",
+    "subtitle": "Quick accountless sync, one-time code valid for 10 minutes",
+    "generateCodeBtn": "Generate Pairing Code",
+    "enterCodeTitle": "Enter Pairing Code from another device",
+    "codePlaceholder": "Enter 6 characters",
+    "pairBtn": "Connect",
+    "yourCodeIs": "Your pairing code:",
+    "codeExpiresIn": "Expires in {{minutes}}m {{seconds}}s",
+    "expired": "Code expired",
+    "oneTimeNotice": "One-time use only with end-to-end encryption (AES-GCM).",
+    "errorInvalidOrExpired": "Invalid or expired pairing code. Please generate a new one.",
+    "errorGeneric": "Could not connect. Please verify the code and try again.",
+    "successConnected": "Devices paired successfully! Data is now synchronized.",
+    "leaveSpace": "Disconnect Device Sync"
+  },
+  "desktop": {
+    "quickNoteTitle": "TAIO Quick Note",
+    "quickNotePlaceholder": "21:30 call Mr. Minh...",
+    "quickNoteHint": "Press ⌥⌘N anywhere to open this window",
+    "trayTimerRunning": "Timer: {{remaining}}",
+    "trayTimerIdle": "TAIO Time",
+    "noteAdded": "Added to Day Card at {{time}}"
+  }
+}

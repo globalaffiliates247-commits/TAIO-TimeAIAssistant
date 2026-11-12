@@ -16,10 +16,12 @@
     "@capacitor/cli": "^8.6.0",
     "@capacitor/core": "^8.6.0",
     "@capacitor/ios": "^8.6.0",
+    "i18next": "^27.1.1",
     "lucide-react": "^1.60.0",
     "next": "16.4.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-i18next": "^18.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
