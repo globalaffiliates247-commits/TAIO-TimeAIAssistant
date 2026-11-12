@@ -82,6 +82,9 @@
     --color-indigo-700: oklch(45.7% 0.24 277.023);
     --color-indigo-800: oklch(39.8% 0.195 277.366);
     --color-indigo-950: oklch(25.7% 0.09 281.288);
+    --color-violet-50: oklch(96.9% 0.016 293.756);
+    --color-violet-200: oklch(89.4% 0.057 293.283);
+    --color-violet-700: oklch(49.1% 0.27 292.581);
     --color-purple-50: oklch(97.7% 0.014 308.299);
     --color-purple-100: oklch(94.6% 0.033 307.174);
     --color-purple-200: oklch(90.2% 0.063 306.703);
@@ -1430,6 +1433,9 @@
   .border-transparent {
     border-color: transparent;
   }
+  .border-violet-200 {
+    border-color: var(--color-violet-200);
+  }
   .border-white\/10 {
     border-color: color-mix(in srgb, #fff 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1967,6 +1973,9 @@
   .bg-transparent {
     background-color: transparent;
   }
+  .bg-violet-50 {
+    background-color: var(--color-violet-50);
+  }
   .bg-white {
     background-color: var(--color-white);
   }
@@ -2045,6 +2054,10 @@
       background-color: color-mix(in oklab, var(--color-zinc-950) 95%, transparent);
     }
   }
+  .bg-gradient-to-br {
+    --tw-gradient-position: to bottom right in oklab;
+    background-image: linear-gradient(var(--tw-gradient-stops));
+  }
   .bg-gradient-to-r {
     --tw-gradient-position: to right in oklab;
     background-image: linear-gradient(var(--tw-gradient-stops));
@@ -2085,6 +2098,10 @@
     --tw-gradient-from: var(--color-sky-500);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
+  .from-white {
+    --tw-gradient-from: var(--color-white);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
   .via-white {
     --tw-gradient-via: var(--color-white);
     --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
@@ -2112,6 +2129,10 @@
   }
   .to-red-500 {
     --tw-gradient-to: var(--color-red-500);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .to-slate-50 {
+    --tw-gradient-to: var(--color-slate-50);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .to-teal-500 {
@@ -2406,6 +2427,14 @@
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
   }
+  .tracking-\[0\.2em\] {
+    --tw-tracking: 0.2em;
+    letter-spacing: 0.2em;
+  }
+  .tracking-\[0\.3em\] {
+    --tw-tracking: 0.3em;
+    letter-spacing: 0.3em;
+  }
   .tracking-tight {
     --tw-tracking: var(--tracking-tight);
     letter-spacing: var(--tracking-tight);
@@ -2672,6 +2701,9 @@
   }
   .text-teal-700 {
     color: var(--color-teal-700);
+  }
+  .text-violet-700 {
+    color: var(--color-violet-700);
   }
   .text-white {
     color: var(--color-white);
@@ -3295,6 +3327,9 @@
         background-color: color-mix(in oklab, var(--color-rose-50) 80%, transparent);
       }
     }
+    .hover\:bg-rose-100:hover {
+      background-color: var(--color-rose-100);
+    }
     .hover\:bg-rose-200:hover {
       background-color: var(--color-rose-200);
     }
@@ -3415,6 +3450,9 @@
     .hover\:text-rose-100:hover {
       color: var(--color-rose-100);
     }
+    .hover\:text-rose-400:hover {
+      color: var(--color-rose-400);
+    }
     .hover\:text-rose-500:hover {
       color: var(--color-rose-500);
     }
@@ -3459,6 +3497,9 @@
   .focus\:border-\[\#E0401F\]:focus {
     border-color: #E0401F;
   }
+  .focus\:border-blue-400:focus {
+    border-color: var(--color-blue-400);
+  }
   .focus\:border-blue-500:focus {
     border-color: var(--color-blue-500);
   }
@@ -3488,6 +3529,9 @@
   }
   .focus\:ring-\[\#E0401F\]:focus {
     --tw-ring-color: #E0401F;
+  }
+  .focus\:ring-blue-100:focus {
+    --tw-ring-color: var(--color-blue-100);
   }
   .focus\:ring-blue-500\/20:focus {
     --tw-ring-color: color-mix(in srgb, oklch(62.3% 0.214 259.815) 20%, transparent);
