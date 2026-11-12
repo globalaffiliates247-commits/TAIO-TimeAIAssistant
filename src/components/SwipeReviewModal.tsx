@@ -19,10 +19,16 @@ import {
   getTodayLabelWithWeekday,
   getWeekLabelWithRange,
   getDeviceTimeMinutes,
+  getDeviceCalendarDate,
   findNextFreeSlot,
   timeToMinutes,
   minutesToTime,
 } from '../core/clock';
+import { useT } from '../i18n/useT';
+
+export interface SwipeDeckCard extends BacklogCard {
+  sourceType: 'flex' | 'basket' | 'backlog';
+}
 
 const VI_WEEKDAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
@@ -42,6 +48,13 @@ function formatVietnameseDateChip(isoDate: string): string {
 export const SwipeReviewModal: React.FC = () => {
   const { 
     backlogCards, 
+    dailyCardItems,
+    updateDailyCardItem,
+    addDailyCardItem,
+    inbox,
+    processInboxItem,
+    addNewBlock,
+    showToast,
     isSwipeModalOpen, 
     setIsSwipeModalOpen,
     handleSwipeAction,
@@ -50,11 +63,12 @@ export const SwipeReviewModal: React.FC = () => {
     palette,
     profile,
   } = useApp();
+  const { t } = useT();
 
   const isCool = palette === 'cool';
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [sessionCards, setSessionCards] = useState<BacklogCard[]>([]);
-  const [sessionHistory, setSessionHistory] = useState<Array<{ card: BacklogCard; action: 'plan' | 'later' | 'done_now' | 'drop' }>>([]);
+  const [sessionCards, setSessionCards] = useState<SwipeDeckCard[]>([]);
+  const [sessionHistory, setSessionHistory] = useState<Array<{ card: SwipeDeckCard; action: 'plan' | 'later' | 'done_now' | 'drop' }>>([]);
   
   // 3-step planning state for current card (B28 v0.3.16)
   const [isPlanningStep, setIsPlanningStep] = useState(false);
@@ -73,19 +87,57 @@ export const SwipeReviewModal: React.FC = () => {
   const [dragX, setDragX] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  // Initialize 5 cards on open (4 weighted + 1 random exploration per B28)
+  // B35.1 (PRD v0.3.27): Quẹt thẻ: việc Linh động hôm nay trước, rồi tới Rổ
   React.useEffect(() => {
     if (isSwipeModalOpen) {
-      const scored = [...backlogCards].sort((a, b) => {
-        const goalA = goals.find(g => g.id === a.goalId);
-        const goalB = goals.find(g => g.id === b.goalId);
-        const behindA = goalA && goalA.progressPercent < 50 ? 15 : 0;
-        const behindB = goalB && goalB.progressPercent < 50 ? 15 : 0;
-        const weightA = a.ageDays * 2 + a.snoozesCount * 5 + behindA + (a.deadline ? 10 : 0);
-        const weightB = b.ageDays * 2 + b.snoozesCount * 5 + behindB + (b.deadline ? 10 : 0);
-        return weightB - weightA;
-      });
-      const deck = scored.slice(0, 5);
+      const today = getDeviceCalendarDate();
+      
+      // 1. Việc Linh động hôm nay (Chưa xếp giờ):
+      const flexTasks: SwipeDeckCard[] = dailyCardItems
+        .filter(i => (i.date === today || i.date === '2026-11-02' || !i.start) && !i.start && i.status !== 'done' && i.status !== 'dropped' && i.status !== 'carried')
+        .map(i => ({
+          id: `flex_${i.id}`,
+          sourceType: 'flex',
+          sourceId: i.id,
+          text: i.text,
+          note: i.note,
+          type: 'task',
+          ageDays: i.carryCount || 0,
+          snoozesCount: i.carryCount || 0,
+          goalId: i.goalId,
+          goalName: i.goalName,
+          whyThisCard: t('swipe.flexibleBadge'),
+          estimatedMinutes: 30,
+        }));
+
+      // 2. Việc trong Rổ (Inbox / Chưa phân loại):
+      const basketTasks: SwipeDeckCard[] = inbox
+        .filter(i => i.status === 'inbox')
+        .map(i => ({
+          id: `basket_${i.id}`,
+          sourceType: 'basket',
+          sourceId: i.id,
+          text: i.title,
+          note: i.nextAction,
+          type: 'inbox',
+          ageDays: 1,
+          snoozesCount: 0,
+          goalId: i.linkedGoalId,
+          goalName: i.linkedGoalName,
+          whyThisCard: t('swipe.basketBadge'),
+          estimatedMinutes: i.estimatedMinutes || 25,
+        }));
+
+      // B35.1: Linh động hôm nay trước, rồi tới Rổ!
+      let deck: SwipeDeckCard[] = [...flexTasks, ...basketTasks];
+      if (deck.length === 0) {
+        deck = backlogCards.map(c => ({
+          ...c,
+          sourceType: 'backlog',
+          sourceId: c.id,
+        }));
+      }
+
       setSessionCards(deck);
       setCurrentIndex(0);
       setSessionHistory([]);
@@ -93,28 +145,95 @@ export const SwipeReviewModal: React.FC = () => {
       setShowCustomSlotPicker(false);
       setDragX(0);
     }
-  }, [isSwipeModalOpen]);
+  }, [isSwipeModalOpen, dailyCardItems, inbox, backlogCards, t]);
 
   if (!isSwipeModalOpen) return null;
 
   const currentCard = sessionCards[currentIndex];
   const isSessionFinished = currentIndex >= sessionCards.length || !currentCard;
 
+  // B35.1: "Để mai" = move flex task to tomorrow; "Xếp" = place into first free slot
   const handleAction = (action: 'plan' | 'later' | 'done_now' | 'drop') => {
     if (!currentCard) return;
     setDragX(0);
 
     if (action === 'plan') {
-      setIsPlanningStep(true);
-      setPlanGoalId(currentCard.goalId || goals[0]?.id || '');
-      setPlanDuration(currentCard.estimatedMinutes || 30);
-      setPlanDeadlineMode('Hôm nay');
-      setPickedIsoDate('');
-      setShowCustomSlotPicker(false);
+      // B35.1: "Xếp" — for flex/basket cards, schedule into first available slot directly
+      if (currentCard.sourceType === 'flex' && currentCard.sourceId) {
+        const slot = findNextFreeSlot({
+          durationMins: currentCard.estimatedMinutes || 30,
+          blocks,
+          nowMinutes: getDeviceTimeMinutes(),
+          bedtime: profile?.personalAnchors?.windDownTime || '23:00',
+        });
+        if (slot.found && slot.startTime && slot.endTime) {
+          updateDailyCardItem(currentCard.sourceId, {
+            start: slot.startTime,
+            end: slot.endTime,
+            status: 'open',
+          });
+          showToast(t('swipe.toastScheduled'));
+        } else {
+          setIsPlanningStep(true);
+          setPlanGoalId(currentCard.goalId || goals[0]?.id || '');
+          setPlanDuration(currentCard.estimatedMinutes || 30);
+          setPlanDeadlineMode('Hôm nay');
+          setPickedIsoDate('');
+          setShowCustomSlotPicker(false);
+          return;
+        }
+      } else if (currentCard.sourceType === 'basket' && currentCard.sourceId) {
+        const today = getDeviceCalendarDate();
+        addDailyCardItem({ text: currentCard.text, date: today, goalId: currentCard.goalId });
+        processInboxItem(currentCard.sourceId, 'schedule', { quadrant: 2 });
+        showToast(t('swipe.toastScheduled'));
+      } else {
+        setIsPlanningStep(true);
+        setPlanGoalId(currentCard.goalId || goals[0]?.id || '');
+        setPlanDuration(currentCard.estimatedMinutes || 30);
+        setPlanDeadlineMode('Hôm nay');
+        setPickedIsoDate('');
+        setShowCustomSlotPicker(false);
+        return;
+      }
+      setSessionHistory(prev => [...prev, { card: currentCard, action }]);
+      setCurrentIndex(prev => prev + 1);
       return;
     }
 
-    handleSwipeAction(currentCard.id, action);
+    if (action === 'later') {
+      // B35.1: "Để mai" — move flex task to tomorrow date
+      if (currentCard.sourceType === 'flex' && currentCard.sourceId) {
+        const d = new Date(); d.setDate(d.getDate() + 1);
+        const tomorrowStr = getDeviceCalendarDate(d);
+        updateDailyCardItem(currentCard.sourceId, { date: tomorrowStr, status: 'open' });
+        showToast(t('swipe.toastPostponed'));
+      } else if (currentCard.sourceType === 'basket') {
+        // basket "Để mai" just skips for now
+      } else {
+        handleSwipeAction(currentCard.id, action);
+      }
+      setSessionHistory(prev => [...prev, { card: currentCard, action }]);
+      setCurrentIndex(prev => prev + 1);
+      return;
+    }
+
+    // done_now / drop: delegate to original handler for backlog, handle flex/basket inline
+    if (currentCard.sourceType === 'flex' && currentCard.sourceId) {
+      if (action === 'done_now') {
+        updateDailyCardItem(currentCard.sourceId, { status: 'done' });
+      } else if (action === 'drop') {
+        updateDailyCardItem(currentCard.sourceId, { status: 'dropped', dropReason: 'Bỏ qua từ Quẹt thẻ' });
+      }
+    } else if (currentCard.sourceType === 'basket' && currentCard.sourceId) {
+      if (action === 'done_now') {
+        processInboxItem(currentCard.sourceId, 'done_2min');
+      } else if (action === 'drop') {
+        processInboxItem(currentCard.sourceId, 'drop');
+      }
+    } else {
+      handleSwipeAction(currentCard.id, action);
+    }
     setSessionHistory(prev => [...prev, { card: currentCard, action }]);
     if (action !== 'done_now') {
       setCurrentIndex(prev => prev + 1);
@@ -260,9 +379,9 @@ export const SwipeReviewModal: React.FC = () => {
               <Layers className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Quẹt thẻ nhiệm vụ</h2>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">{t('swipe.title')}</h2>
               <p className="text-[11px] text-slate-500">
-                Vuốt trái: Để sau • Vuốt phải: Lên lịch • Chạm thẻ: Làm ngay
+                Vuốt trái: {t('swipe.postponeTomorrow')} • Vuốt phải: {t('swipe.scheduleNow')} • Chạm thẻ: {t('swipe.done')}
               </p>
             </div>
           </div>
@@ -304,19 +423,23 @@ export const SwipeReviewModal: React.FC = () => {
                   {/* Threshold Swipe Labels (> 30% width) */}
                   {showLeftLabel && (
                     <div className="absolute top-4 right-4 px-3 py-1 rounded-xl bg-amber-100 border-2 border-amber-500 text-amber-800 font-black text-xs uppercase tracking-wider shadow-sm">
-                      ← Để sau
+                      ← {t('swipe.postponeTomorrow')}
                     </div>
                   )}
                   {showRightLabel && (
                     <div className="absolute top-4 left-4 px-3 py-1 rounded-xl bg-emerald-100 border-2 border-emerald-500 text-emerald-800 font-black text-xs uppercase tracking-wider shadow-sm">
-                      Lên lịch →
+                      {t('swipe.scheduleNow')} →
                     </div>
                   )}
 
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                        {currentCard.type === 'inbox' ? 'Rổ việc' : currentCard.type === 'idea' ? 'Ý tưởng' : 'Nhiệm vụ'}
+                        {currentCard.sourceType === 'flex'
+                          ? t('swipe.flexibleBadge')
+                          : currentCard.sourceType === 'basket'
+                            ? t('swipe.basketBadge')
+                            : currentCard.type === 'inbox' ? 'Rổ việc' : currentCard.type === 'idea' ? 'Ý tưởng' : 'Nhiệm vụ'}
                       </span>
                       {currentCard.goalName && (
                         <span className={`text-[10px] font-semibold flex items-center gap-1 ${
@@ -568,16 +691,16 @@ export const SwipeReviewModal: React.FC = () => {
                     className="flex-1 py-3 px-4 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-800 flex items-center justify-center gap-2 transition-all font-bold text-xs"
                   >
                     <ArrowLeft className="w-4 h-4 text-amber-600" />
-                    <span>Để sau</span>
+                    <span>{t('swipe.postponeTomorrow')}</span>
                   </button>
 
                   <button
                     onClick={() => handleAction('drop')}
                     className="p-3 rounded-2xl bg-white border border-slate-200 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center gap-1 transition-all text-xs font-semibold"
-                    title="Bỏ hẳn"
+                    title={t('swipe.skip')}
                   >
                     <Trash2 className="w-4 h-4" />
-                    <span className="text-[11px]">Bỏ hẳn</span>
+                    <span className="text-[11px]">{t('swipe.skip')}</span>
                   </button>
 
                   <button
@@ -586,7 +709,7 @@ export const SwipeReviewModal: React.FC = () => {
                       isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
                     }`}
                   >
-                    <span>Lên lịch</span>
+                    <span>{t('swipe.scheduleNow')}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -600,9 +723,9 @@ export const SwipeReviewModal: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Hoàn thành phiên Quẹt thẻ nhiệm vụ!</h3>
+                <h3 className="text-lg font-bold text-slate-900">{t('swipe.completedTitle')}</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Đã rà soát xong 5 thẻ tồn đọng. Sẵn sàng quay lại công việc chính.
+                  {t('swipe.completedDesc')}
                 </p>
               </div>
 

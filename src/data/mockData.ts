@@ -1030,6 +1030,14 @@ export const INITIAL_DAILY_CARD_ITEMS: import('../types').DailyCardItem[] = [
     origin: 'planned',
   },
   {
+    id: 'dc-7',
+    text: 'Đọc tài liệu về Pomodoro và Deep Work cho tuần mới',
+    date: '2026-11-02',
+    status: 'open',
+    carryCount: 1,
+    origin: 'planned',
+  },
+  {
     id: 'dc-6',
     text: 'Xử lý báo giá gấp cho đối tác mới (Phát sinh)',
     date: '2026-11-02',
