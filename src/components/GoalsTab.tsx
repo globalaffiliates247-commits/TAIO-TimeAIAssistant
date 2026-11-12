@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { GoalProgressType } from '../types';
 import { computeGoalMetrics, computeTaskTimeEfficiency } from '../features/goals/goalMetrics';
+import { GoalInput } from '../features/goals/GoalInput';
+import { QuoteCard } from '../features/goals/quotes/QuoteCard';
 import {
   Target,
   CheckCircle2,
@@ -188,6 +190,12 @@ export const GoalsTab: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-12 animate-in fade-in duration-300">
+      {/* B35.2 v0.3.27: Quick Goal Input with NLP */}
+      <GoalInput />
+
+      {/* B35.3 v0.3.27: Motivation Quote Card */}
+      <QuoteCard />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
