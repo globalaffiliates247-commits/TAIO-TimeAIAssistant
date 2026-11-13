@@ -15,7 +15,8 @@ import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 import { LiveClockStrip } from '@/features/quick-entry';
 import { MotivationSticker } from '@/features/motivation';
 import { GoalPicker, findGoalSuggestion } from '@/features/goals';
-import { Clock } from 'lucide-react';
+import { useRowSelection } from './useRowSelection';
+import { Clock, Trash2, Copy, Calendar, X } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -43,6 +44,83 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [pickerItemId, setPickerItemId] = useState<string | null>(null);
   const [hashFilter, setHashFilter] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Multi-row selection & actions (PRD FIX v0.3.32 Part C3)
+  const {
+    selectedIds,
+    selectRow,
+    clearSelection,
+    selectAll,
+    deleteSelected,
+    copySelected,
+    undoToast,
+    handleUndo,
+    handleRowPointerDown,
+    handleRowPointerEnter,
+  } = useRowSelection({
+    items,
+    isEditing: editing !== null,
+    onDeleteItems: toDelete => {
+      toDelete.forEach(it => removeDailyCardItem(it.id));
+    },
+    onRestoreItems: restored => {
+      restored.forEach(it => {
+        addDailyCardItem({
+          text: it.text,
+          date: it.date,
+          start: it.start,
+          end: it.end,
+          goalId: it.goalId,
+          goalName: it.goalName,
+          milestoneId: it.milestoneId,
+          milestoneName: it.milestoneName,
+          status: it.status,
+          extra: it.extra,
+        });
+      });
+    },
+  });
+
+  const handlePasteMultiLine = (e: React.ClipboardEvent<HTMLInputElement>, isFlex: boolean = false) => {
+    const pasted = e.clipboardData.getData('text');
+    if (pasted && pasted.includes('\n')) {
+      e.preventDefault();
+      const rawLines = pasted.split('\n').map(l => l.trim()).filter(Boolean);
+      rawLines.forEach(line => {
+        commitQuickLine(line, day, { addDailyCardItem, goals });
+      });
+      if (isFlex) setFlexDraft('');
+      else setDraft('');
+    }
+  };
+
+  const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const handleTouchStart = (id: string) => {
+    touchTimerRef.current = setTimeout(() => {
+      selectRow(id, false, true);
+    }, 400);
+  };
+  const handleTouchEnd = () => {
+    if (touchTimerRef.current) {
+      clearTimeout(touchTimerRef.current);
+      touchTimerRef.current = null;
+    }
+  };
+
+  const handleCarrySelectedToTomorrow = () => {
+    const d = new Date(day);
+    d.setDate(d.getDate() + 1);
+    const tomorrowStr = d.toISOString().slice(0, 10);
+    const toCarry = items.filter(i => selectedIds.has(i.id));
+    toCarry.forEach(it => {
+      updateDailyCardItem(it.id, {
+        date: tomorrowStr,
+        carryCount: (it.carryCount || 0) + 1,
+        carriedFromId: it.carriedFromId || it.id,
+      });
+    });
+    clearSelection();
+  };
 
   const parsed = parseTimedText(draft);
   const suggested = parsed.time && parsed.rest && !parsed.durationMins ? suggestDuration(parsed.rest, undefined, dailyCardItems) : null;
@@ -311,7 +389,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         const isNowRunning = it.start && it.end && toMins(it.start) <= nowMins && nowMins < toMins(it.end) && it.status !== 'done';
         return (
           <React.Fragment key={it.id}>
-            <div className="flex items-center gap-2">
+            <div
+              onPointerDown={e => handleRowPointerDown(it.id, e)}
+              onPointerEnter={() => handleRowPointerEnter(it.id)}
+              onTouchStart={() => handleTouchStart(it.id)}
+              onTouchEnd={handleTouchEnd}
+              className={`flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
+                selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
+              }`}
+            >
               <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)}
                 className="font-semibold tabular-nums shrink-0" style={{ color: c.ink }}>{it.start}</button>
               {renderText(it)}
@@ -377,6 +463,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         <input
           ref={inputRef} value={draft} placeholder="gõ một dòng… (gõ giờ để xếp lịch)"
           onChange={e => { setDraft(e.target.value); setPill(null); }}
+          onPaste={e => handlePasteMultiLine(e, false)}
           onKeyDown={e => {
             if (e.key === 'Tab' && suggested && pill === null) { e.preventDefault(); setPill(suggested); }
             if (e.key === 'Enter') commitDraft();
@@ -399,7 +486,16 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       {flex.map(it => {
         const est = (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
         return (
-          <div key={it.id} className="group/flex flex items-center gap-2">
+          <div
+            key={it.id}
+            onPointerDown={e => handleRowPointerDown(it.id, e)}
+            onPointerEnter={() => handleRowPointerEnter(it.id)}
+            onTouchStart={() => handleTouchStart(it.id)}
+            onTouchEnd={handleTouchEnd}
+            className={`group/flex flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
+              selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
+            }`}
+          >
             <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
             {renderText(it)}
             {/* PRD FIX v0.3.28 C1: Small clock button to start unscheduled task immediately */}
@@ -427,6 +523,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       <input
         value={flexDraft} placeholder="thêm việc chưa xếp giờ…"
         onChange={e => setFlexDraft(e.target.value)}
+        onPaste={e => handlePasteMultiLine(e, true)}
         onKeyDown={e => {
           if (e.key === 'Enter' && flexDraft.trim()) {
             commitQuickLine(flexDraft, day, { addDailyCardItem, goals });
@@ -440,6 +537,63 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         <span>Tự lưu · {items.length} việc hôm nay</span>
         <span>Còn trống: {fmtDuration(freeTotal)}</span>
       </div>
+
+      {/* 5-second Undo Toast (PRD FIX v0.3.32 C3 #3) */}
+      {undoToast && (
+        <div className="sticky bottom-1 left-0 right-0 mx-auto px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs shadow-lg flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-2 z-40">
+          <span>Đã xóa {undoToast.count} dòng</span>
+          <button
+            type="button"
+            onClick={handleUndo}
+            className="font-bold underline underline-offset-2 text-amber-300 hover:text-amber-200"
+          >
+            Hoàn tác
+          </button>
+        </div>
+      )}
+
+      {/* iPhone Multi-row Selection Action Bar (PRD FIX v0.3.32 C4 #2) */}
+      {selectedIds.size > 0 && (
+        <div className="sticky bottom-1 left-0 right-0 mx-auto p-2 rounded-2xl bg-white border border-slate-300 shadow-xl flex items-center justify-between gap-2 z-40 animate-in fade-in slide-in-from-bottom-3 text-slate-800">
+          <span className="text-xs font-semibold px-1 text-slate-600">
+            {selectedIds.size} việc
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={deleteSelected}
+              className="px-2.5 py-1 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-medium text-xs flex items-center gap-1 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Xóa</span>
+            </button>
+            <button
+              type="button"
+              onClick={copySelected}
+              className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs flex items-center gap-1 transition-colors"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              <span>Chép</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleCarrySelectedToTomorrow}
+              className="px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium text-xs flex items-center gap-1 transition-colors"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Để mai</span>
+            </button>
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 ml-1"
+              title="Bỏ chọn"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
