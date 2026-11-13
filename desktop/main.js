@@ -28,6 +28,7 @@ let currentTimerData = {
   startedAt: 0,
 };
 let clockWindowBounds = null;
+let quickNoteWindowBounds = null;
 let clockIsPinned = true;
 
 function resolveFile(urlPath) {
@@ -79,9 +80,13 @@ function createQuickNoteWindow() {
     return;
   }
 
+  const bounds = quickNoteWindowBounds || { width: 420, height: 180 };
+
   quickNoteWindow = new BrowserWindow({
-    width: 420,
-    height: 180,
+    width: bounds.width,
+    height: bounds.height,
+    x: bounds.x,
+    y: bounds.y,
     minWidth: 300,
     minHeight: 120,
     frame: false,
@@ -93,6 +98,17 @@ function createQuickNoteWindow() {
     backgroundColor: '#ffffff',
     titleBarStyle: 'hidden',
     webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'preload.js') },
+  });
+
+  quickNoteWindow.on('resize', () => {
+    if (quickNoteWindow && !quickNoteWindow.isDestroyed()) {
+      quickNoteWindowBounds = quickNoteWindow.getBounds();
+    }
+  });
+  quickNoteWindow.on('move', () => {
+    if (quickNoteWindow && !quickNoteWindow.isDestroyed()) {
+      quickNoteWindowBounds = quickNoteWindow.getBounds();
+    }
   });
 
   const quickNoteHTML = `
@@ -146,8 +162,8 @@ function createClockWindow() {
   const bounds = clockWindowBounds || { width: 240, height: 150 };
 
   clockWindow = new BrowserWindow({
-    width: 240,
-    height: 150,
+    width: bounds.width,
+    height: bounds.height,
     minWidth: 220,
     minHeight: 140,
     maxWidth: 320,
@@ -164,6 +180,17 @@ function createClockWindow() {
     backgroundColor: '#ffffff',
     titleBarStyle: 'hidden',
     webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'preload.js') },
+  });
+
+  clockWindow.on('resize', () => {
+    if (clockWindow && !clockWindow.isDestroyed()) {
+      clockWindowBounds = clockWindow.getBounds();
+    }
+  });
+  clockWindow.on('move', () => {
+    if (clockWindow && !clockWindow.isDestroyed()) {
+      clockWindowBounds = clockWindow.getBounds();
+    }
   });
 
   const clockHTML = `

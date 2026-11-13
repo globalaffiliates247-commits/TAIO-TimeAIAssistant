@@ -29,6 +29,8 @@ export interface StickyNote {
   open: boolean;          // shown on screen
   x: number;
   y: number;
+  w?: number;
+  h?: number;
   lines: StickyLine[];    // kind 'free' only
   hasMotivationSticker?: boolean; // v0.3.31 B2: "Thêm nhãn động lực"
   updatedAt: number;
