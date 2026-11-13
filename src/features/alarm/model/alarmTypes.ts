@@ -32,6 +32,10 @@ export interface ScheduledAlarm {
   soundUri?: string;
 }
 
+export const ALARM_RING_MAX_MINS = 15;
+export const SNOOZE_PRESETS = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60] as const;
+export type BuiltinChimeType = 'default' | 'gentle' | 'urgent';
+
 export interface ActiveAlarmState {
   isActive: boolean;
   blockId?: string;
@@ -40,4 +44,9 @@ export interface ActiveAlarmState {
   soundName?: string;
   isFallbackDefault?: boolean;
   fallbackReason?: string;
+  // PRD FIX v0.3.30 Part F additions:
+  snoozeCount?: number;
+  ringStartedAt?: number;
+  isAutoStopped?: boolean;
+  currentSoundIndex?: number;
 }

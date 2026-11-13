@@ -224,6 +224,21 @@ export async function openNativeAppSettings(): Promise<boolean> {
   }
 }
 
+export async function scheduleNativeNotification(params: {
+  id: string;
+  title: string;
+  body: string;
+  delaySeconds: number;
+}): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    const res = await TAIONative.scheduleNotification(params);
+    return !!res?.scheduled;
+  } catch {
+    return false;
+  }
+}
+
 export async function openNativeDeviceTimer(minutes: number, title: string): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {

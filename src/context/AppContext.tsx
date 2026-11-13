@@ -9,7 +9,8 @@ import {
 } from '../core/storage/durableStorage';
 import {
   detectRuntimeCapabilities,
-  TAIONative
+  TAIONative,
+  scheduleNativeNotification
 } from '../features/native';
 import { computeGoalMetrics } from '../features/goals/goalMetrics';
 import {
@@ -35,6 +36,7 @@ import {
   saveAlarmSettings,
   triggerAlarmSound,
   stopAllAlarmSounds,
+  stopRingSessionAudio,
   AlarmScreen,
   syncNativeBlockAlarms,
   NativeAlarmMode,
@@ -1450,8 +1452,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!alarmSettings.enabled) return;
 
     const checkAlarmTrigger = async () => {
+      const now = Date.now();
       const currentMinutes = getDeviceTimeMinutes();
       const todayDate = getDeviceCalendarDate();
+
+      // Check scheduled snooze timestamp (spec F2.1.4)
+      let snoozeTargetMs: number | null = null;
+      try {
+        const raw = window.localStorage.getItem('taio_snooze_target_ms');
+        if (raw) snoozeTargetMs = Number(raw);
+      } catch {}
+
+      if (snoozeTargetMs && now >= snoozeTargetMs) {
+        try { window.localStorage.removeItem('taio_snooze_target_ms'); } catch {}
+        let storedTitle = 'Đến giờ bắt đầu khối';
+        let prevCount = 0;
+        try {
+          storedTitle = window.localStorage.getItem('taio_snooze_title') || storedTitle;
+          prevCount = Number(window.localStorage.getItem('taio_snooze_count') || '0');
+        } catch {}
+
+        const soundRes = await triggerAlarmSound(alarmSettings);
+        setActiveAlarmState({
+          isActive: true,
+          blockTitle: storedTitle,
+          startTime: getDeviceTimeString(),
+          soundName: alarmSettings.customSound?.name,
+          isFallbackDefault: soundRes.isFallbackDefault,
+          fallbackReason: soundRes.fallbackReason,
+          snoozeCount: prevCount,
+          ringStartedAt: now,
+          isAutoStopped: false,
+        });
+
+        // System notification on macOS (spec F2.4.1)
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          try {
+            new Notification('TAIO Time Báo thức', {
+              body: `Báo lại: ${storedTitle}`,
+              icon: '/favicon.ico',
+            });
+          } catch {}
+        }
+        return;
+      }
 
       for (const b of scheduleBlocks) {
         if (!b.startTime) continue;
@@ -1470,37 +1514,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             soundName: alarmSettings.customSound?.name,
             isFallbackDefault: soundRes.isFallbackDefault,
             fallbackReason: soundRes.fallbackReason,
+            snoozeCount: 0,
+            ringStartedAt: now,
+            isAutoStopped: false,
           });
+
+          // System notification on macOS (spec F2.4.1)
+          if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            try {
+              new Notification('TAIO Time Báo thức', {
+                body: `Bắt đầu: ${b.title}`,
+                icon: '/favicon.ico',
+              });
+            } catch {}
+          }
           break;
         }
       }
     };
 
     checkAlarmTrigger();
-    const interval = setInterval(checkAlarmTrigger, 15000);
+    const interval = setInterval(checkAlarmTrigger, 10000);
     return () => clearInterval(interval);
   }, [alarmSettings, scheduleBlocks]);
 
   const dismissAlarm = () => {
     stopAllAlarmSounds();
+    stopRingSessionAudio();
+    try {
+      window.localStorage.removeItem('taio_snooze_target_ms');
+      window.localStorage.removeItem('taio_snooze_title');
+      window.localStorage.removeItem('taio_snooze_count');
+    } catch {}
     setActiveAlarmState({ isActive: false });
   };
 
   const snoozeAlarm = (mins: number = 5) => {
     stopAllAlarmSounds();
+    stopRingSessionAudio();
+    const targetMs = Date.now() + mins * 60 * 1000;
+    const nextCount = (activeAlarmState.snoozeCount || 0) + 1;
+    const title = activeAlarmState.blockTitle || 'Đến giờ bắt đầu khối';
+
+    try {
+      window.localStorage.setItem('taio_snooze_target_ms', String(targetMs));
+      window.localStorage.setItem('taio_snooze_title', title);
+      window.localStorage.setItem('taio_snooze_count', String(nextCount));
+    } catch {}
+
+    // On native platform (iPhone), also schedule a local notification
+    if (isNativePlatform) {
+      scheduleNativeNotification({
+        id: `snooze-${Date.now()}`,
+        title: 'Báo thức (Báo lại)',
+        body: title,
+        delaySeconds: mins * 60,
+      });
+    }
+
     setActiveAlarmState({ isActive: false });
     showToast(`Đã hoãn báo thức ${mins} phút`);
-    setTimeout(async () => {
-      const soundRes = await triggerAlarmSound(alarmSettings);
-      setActiveAlarmState({
-        isActive: true,
-        blockTitle: activeAlarmState.blockTitle || 'Đến giờ bắt đầu khối',
-        startTime: getDeviceTimeString(),
-        soundName: alarmSettings.customSound?.name,
-        isFallbackDefault: soundRes.isFallbackDefault,
-        fallbackReason: soundRes.fallbackReason,
-      });
-    }, mins * 60000);
   };
 
   // Timer countdown ticker
@@ -2439,8 +2512,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       {children}
       <AlarmScreen
         alarmState={activeAlarmState}
+        alarmSettings={alarmSettings}
         onDismiss={dismissAlarm}
         onSnooze={snoozeAlarm}
+        onUpdateSettings={patch => setAlarmSettings({ ...alarmSettings, ...patch })}
         onOpenSettings={() => setIsProfileModalOpen(true)}
       />
     </AppContext.Provider>

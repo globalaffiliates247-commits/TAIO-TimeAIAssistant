@@ -1,6 +1,7 @@
 import { AlarmSettings, ActiveAlarmState, PlatformAlarmCapability, CustomSoundFile } from './alarmTypes';
 import { TimeBlock } from '@/types';
 import { timeToMinutes, getDeviceCalendarDate } from '@/core/clock';
+import { playDefaultChime as playChimeFromSession, stopRingSessionAudio } from './ringSession';
 
 const ALARM_SETTINGS_KEY = 'taio_alarm_settings_v1';
 
@@ -81,67 +82,8 @@ let activeAudioElement: HTMLAudioElement | null = null;
 let activeAudioContext: AudioContext | null = null;
 let activeOscillatorInterval: any = null;
 
-/**
- * Plays a pleasant rich alarm chime via Web Audio API (completely offline, zero dependencies).
- */
-export function playDefaultChime(volume = 0.8): { stop: () => void } {
-  try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return { stop: () => {} };
-
-    const ctx = new AudioContextClass();
-    activeAudioContext = ctx;
-
-    const playChimeSequence = () => {
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-      const now = ctx.currentTime;
-      // Chime chord: C5 (523Hz), E5 (659Hz), G5 (784Hz), B5 (987Hz)
-      const freqs = [523.25, 659.25, 783.99, 987.77, 1046.5];
-      freqs.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
-
-        gain.gain.setValueAtTime(0, now + idx * 0.12);
-        gain.gain.linearRampToValueAtTime(volume * 0.3, now + idx * 0.12 + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 1.2);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now + idx * 0.12);
-        osc.stop(now + idx * 0.12 + 1.3);
-      });
-    };
-
-    playChimeSequence();
-    activeOscillatorInterval = setInterval(playChimeSequence, 2000);
-
-    return {
-      stop: () => {
-        if (activeOscillatorInterval) {
-          clearInterval(activeOscillatorInterval);
-          activeOscillatorInterval = null;
-        }
-        if (activeAudioContext) {
-          try {
-            activeAudioContext.close();
-          } catch {}
-          activeAudioContext = null;
-        }
-      },
-    };
-  } catch (err) {
-    console.error('[alarmScheduler] Failed to play synthetic chime', err);
-    return { stop: () => {} };
-  }
-}
-
 export function stopAllAlarmSounds(): void {
+  stopRingSessionAudio();
   if (activeOscillatorInterval) {
     clearInterval(activeOscillatorInterval);
     activeOscillatorInterval = null;
@@ -202,13 +144,13 @@ export async function triggerAlarmSound(
 
     if (!sourceUrl && sound.nativeSoundName) {
       // Large file kept only on the phone: the native alarm plays it; in-app we use the chime.
-      playDefaultChime(settings.volume);
+      playChimeFromSession(settings.volume);
       return { isFallbackDefault: false };
     }
 
     if (!sourceUrl) {
       // Missing file -> fallback default
-      playDefaultChime(settings.volume);
+      playChimeFromSession(settings.volume);
       return {
         isFallbackDefault: true,
         fallbackReason: `Không tìm thấy file âm thanh “${sound.name}” — đã dùng chuông mặc định. Chọn lại?`,
@@ -228,7 +170,7 @@ export async function triggerAlarmSound(
       return { isFallbackDefault: false };
     } catch (err) {
       console.warn('[alarmScheduler] Custom sound playback failed, falling back to default', err);
-      playDefaultChime(settings.volume);
+      playChimeFromSession(settings.volume);
       return {
         isFallbackDefault: true,
         fallbackReason: `Không tìm thấy hoặc không thể mở file âm thanh “${sound.name}” — đã dùng chuông mặc định. Chọn lại?`,
@@ -237,7 +179,7 @@ export async function triggerAlarmSound(
   }
 
   // Default sound
-  playDefaultChime(settings.volume);
+  playChimeFromSession(settings.volume);
   return { isFallbackDefault: false };
 }
 
