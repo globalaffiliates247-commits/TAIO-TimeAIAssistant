@@ -9,16 +9,14 @@ struct TAIOWidgetLiveActivity: Widget {
         ActivityConfiguration(for: TAIOTimerAttributes.self) { context in
             // Lock Screen / Banner UI
             HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .stroke(Color.gray.opacity(0.25), lineWidth: 5)
-                        .frame(width: 48, height: 48)
-                    Circle()
-                        .trim(from: 0, to: 0.72)
-                        .stroke(Color(red: 0.88, green: 0.25, blue: 0.12), style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                        .frame(width: 48, height: 48)
-                }
+                // FIX v0.3.28 C2b: Dynamic ProgressView(timerInterval:) replaces hardcoded 0.72 ring
+                ProgressView(
+                    timerInterval: Date(timeIntervalSince1970: max(1, context.state.startTimestamp))...Date(timeIntervalSince1970: max(context.state.startTimestamp + 1, context.state.targetTimestamp)),
+                    countsDown: context.state.isCountDown
+                )
+                .progressViewStyle(.circular)
+                .tint(Color(red: 0.88, green: 0.25, blue: 0.12))
+                .frame(width: 44, height: 44)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(context.state.taskTitle)

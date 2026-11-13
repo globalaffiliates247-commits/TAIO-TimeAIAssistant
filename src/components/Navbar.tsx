@@ -86,10 +86,44 @@ export const Navbar: React.FC = () => {
           ? { bottom: 0, paddingBottom: 'max(var(--sab, 0px), 8px)' }
           : undefined
       }
-      className={`max-w-6xl mx-auto px-4 sm:px-6 flex border-t border-slate-200 bg-white ${
+      className={`max-w-6xl mx-auto px-4 sm:px-6 flex items-center border-t border-slate-200 bg-white ${
         isFixedBottom ? 'fixed left-0 right-0 z-40 shadow-2xl py-1' : ''
       }`}
     >
+      {/* PRD FIX v0.3.28 B3.2: Quick Note and Clock fixed at start of desktop navigation */}
+      {!isFixedBottom && (
+        <div className="flex items-center gap-1.5 mr-3 pr-3 border-r border-slate-200">
+          <button
+            type="button"
+            onClick={() => openStickyBoard(getDeviceCalendarDate())}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FFF6C2] hover:bg-[#FCEB8E] text-[#6B5E2A] border border-[#F0E3A2] font-bold text-xs shadow-xs transition-all active:scale-95"
+            title={language === 'vi' ? 'Ghi nhanh (tờ ghi chú)' : 'Quick Notes'}
+          >
+            <StickyNote className="w-4 h-4" />
+            <span>{language === 'vi' ? 'Ghi nhanh' : 'Quick Note'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined' && (window as any).taioAPI?.openClockWindow) {
+                (window as any).taioAPI.openClockWindow();
+              } else {
+                openStickyBoard(getDeviceCalendarDate());
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border font-bold text-xs shadow-xs transition-all active:scale-95 ${
+              isCool
+                ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                : 'bg-red-50 hover:bg-red-100 text-[#E0401F] border-red-200'
+            }`}
+            title={language === 'vi' ? 'Mở đồng hồ nổi (⌥⌘T)' : 'Open Clock (⌥⌘T)'}
+          >
+            <Clock className="w-4 h-4" />
+            <span>{language === 'vi' ? 'Đồng hồ' : 'Clock'}</span>
+          </button>
+        </div>
+      )}
+
       {/* Tab 1: Now */}
       <button
         onClick={() => setCurrentTab('now')}
@@ -121,6 +155,23 @@ export const Navbar: React.FC = () => {
         <Calendar className="w-4 h-4" />
         <span>{language === 'vi' ? 'Kế hoạch (Plan)' : 'Plan'}</span>
       </button>
+
+      {/* PRD FIX v0.3.28 B2: Floating center button on iPhone bottom tab bar */}
+      {isFixedBottom && (
+        <div className="flex items-center justify-center px-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => openStickyBoard(getDeviceCalendarDate())}
+            title={language === 'vi' ? 'Ghi nhanh công việc' : 'Quick task note'}
+            aria-label="Ghi nhanh"
+            className={`w-12 h-12 -mt-5 rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white active:scale-90 hover:scale-105 transition-all ${
+              isCool ? 'bg-blue-600 shadow-blue-500/30' : 'bg-[#E0401F] shadow-red-500/30'
+            }`}
+          >
+            <StickyNote className="w-5 h-5 fill-white/20" />
+          </button>
+        </div>
+      )}
 
       {/* Tab 3: Efficiency */}
       <button

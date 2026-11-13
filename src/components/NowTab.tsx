@@ -31,6 +31,7 @@ import {
   Layers,
   Inbox
 } from 'lucide-react';
+import { QuickEntryTiles, QuickLineInput } from '../features/quick-entry';
 
 const ROLE_LABELS: Record<UserRole, { label: string; type: 'work' | 'personal' }> = {
   'decision-maker': { label: 'Người ra quyết định', type: 'work' },
@@ -200,6 +201,10 @@ export const NowTab: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-300">
       
+      {/* PRD FIX v0.3.28 B1 & B3: Quick Entry Tiles and Mac QuickLineInput */}
+      <QuickEntryTiles />
+      <QuickLineInput />
+
       {/* Off-plan Warning Banner (PRD v0.8 B5) */}
       {isOffPlan && (
         <div className="bg-rose-50 border border-rose-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">

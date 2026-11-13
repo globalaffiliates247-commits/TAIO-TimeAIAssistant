@@ -2201,17 +2201,64 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGoals(prev => [...prev, newG]);
   };
 
-  // PRD FIX v0.3.28 A2 #7: Electron Mac Quick Note listener
+  // PRD FIX v0.3.28 A2 #7 & C2: Electron Mac Quick Note & Timer listener
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const bridge = (window as unknown as { taioAPI?: { onQuickNoteReceived?: (cb: (text: string) => void) => void } }).taioAPI;
+    const bridge = (window as unknown as {
+      taioAPI?: {
+        onQuickNoteReceived?: (cb: (text: string) => void) => void;
+        onTimerAction?: (cb: (action: { type: string; minutes?: number }) => void) => void;
+      };
+    }).taioAPI;
+
     if (bridge?.onQuickNoteReceived) {
       bridge.onQuickNoteReceived((text: string) => {
         commitQuickLine(text, getDeviceCalendarDate(), { addDailyCardItem, goals });
         setCelebrationMsg(language === 'vi' ? `✓ Đã ghi nhận: "${text}"` : `✓ Note added: "${text}"`);
       });
     }
-  }, [addDailyCardItem, goals, language]);
+
+    if (bridge?.onTimerAction) {
+      bridge.onTimerAction((action) => {
+        if (!currentBlock) return;
+        if (action.type === 'done') {
+          markTaskDone(currentBlock.id);
+        } else if (action.type === 'extend') {
+          shiftTaskTime(currentBlock.id, action.minutes || 5);
+        }
+      });
+    }
+  }, [addDailyCardItem, goals, language, currentBlock, markTaskDone, shiftTaskTime]);
+
+  // PRD FIX v0.3.28 C2: Sync active timer state with Electron Desktop Clock & Tray
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const bridge = (window as unknown as { taioAPI?: { updateTimer?: (payload: any) => void } }).taioAPI;
+    if (!bridge?.updateTimer) return;
+
+    if (currentBlock && computeBlockStatus(currentBlock, getDeviceTimeMinutes()) === 'in_progress') {
+      const todayStr = getDeviceCalendarDate();
+      const [eh, em] = currentBlock.endTime.split(':').map(Number);
+      const [sh, sm] = currentBlock.startTime.split(':').map(Number);
+      const endsAt = new Date(`${todayStr}T00:00:00`).getTime() + (eh * 60 + em) * 60 * 1000;
+      const startedAt = new Date(`${todayStr}T00:00:00`).getTime() + (sh * 60 + sm) * 60 * 1000;
+      const remainingMins = Math.max(0, timeToMinutes(currentBlock.endTime) - getDeviceTimeMinutes());
+
+      bridge.updateTimer({
+        title: currentBlock.title,
+        endsAt,
+        startedAt,
+        remaining: `${remainingMins}p`,
+      });
+    } else {
+      bridge.updateTimer({
+        title: 'Chưa có việc đang làm',
+        endsAt: 0,
+        startedAt: 0,
+        remaining: '',
+      });
+    }
+  }, [currentBlock]);
 
   return (
     <AppContext.Provider value={{

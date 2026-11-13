@@ -12,6 +12,8 @@ import {
 } from '../model/timeline';
 import { commitQuickLine, matchGoalByTag } from '@/features/tasks';
 import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
+import { LiveClockStrip } from '@/features/quick-entry';
+import { Clock } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -161,6 +163,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   return (
     <div className="flex flex-col gap-2 text-[15px] leading-snug" style={{ color: c.ink }}>
+      {/* PRD FIX v0.3.28 C1: LiveClockStrip at top of DaySheet */}
+      <LiveClockStrip compact />
+
       {leftover.length > 0 && (
         <div className="flex items-center gap-2 text-xs" style={{ color: c.muted }}>
           <span className="flex-1">{leftover.length} việc ngày trước chưa xong</span>
@@ -175,12 +180,18 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         const gap = gapAfter.get(it.id);
         const sug = gap ? suggestForGap(flex, taken, gap.mins, dailyCardItems) : undefined;
         if (sug) taken.add(sug.id);
+        const isNowRunning = it.start && it.end && toMins(it.start) <= nowMins && nowMins < toMins(it.end) && it.status !== 'done';
         return (
           <React.Fragment key={it.id}>
             <div className="flex items-center gap-2">
               <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)}
                 className="font-semibold tabular-nums shrink-0" style={{ color: c.ink }}>{it.start}</button>
               {renderText(it)}
+              {isNowRunning && (
+                <span className="shrink-0 text-[10.5px] px-1.5 py-0.5 rounded bg-black/5 text-slate-500 font-normal select-none">
+                  đang làm
+                </span>
+              )}
               {durationOf(it) && <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>{fmtDuration(durationOf(it)!)}</span>}
               {boundIds.has(it.id) && <span className="shrink-0" title="Đã lên lịch trước"><IconLock color={c.muted} /></span>}
               {overlapIds.has(it.id) && <span className="shrink-0" title="Chồng giờ với việc trước"><IconOverlap color={c.muted} /></span>}
@@ -260,9 +271,23 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       {flex.map(it => {
         const est = (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
         return (
-          <div key={it.id} className="flex items-center gap-2">
+          <div key={it.id} className="group/flex flex items-center gap-2">
             <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
             {renderText(it)}
+            {/* PRD FIX v0.3.28 C1: Small clock button to start unscheduled task immediately */}
+            <button
+              type="button"
+              title="Bắt đầu việc này ngay bây giờ"
+              onClick={() => {
+                const dur = durationForPlacement(it, dailyCardItems) || 30;
+                const startHM = toTime(nowMins);
+                const endHM = toTime(nowMins + dur);
+                updateDailyCardItem(it.id, { start: startHM, end: endHM });
+              }}
+              className="opacity-0 group-hover/flex:opacity-100 hover:opacity-100 focus:opacity-100 p-0.5 rounded hover:bg-black/5 text-slate-400 hover:text-slate-700 transition-opacity shrink-0"
+            >
+              <Clock className="w-3.5 h-3.5" />
+            </button>
             {est && (
               <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>
                 {fmtDuration(est)}
