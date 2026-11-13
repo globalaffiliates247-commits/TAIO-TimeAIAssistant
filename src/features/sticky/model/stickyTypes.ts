@@ -32,6 +32,8 @@ export interface StickyNote {
   w?: number;
   h?: number;
   lines: StickyLine[];    // kind 'free' only
+  content?: string;       // v0.3.32 C2: continuous multi-line text
+  scheduledMap?: Record<string, string>; // maps line token/idx to dailyCardItemId
   hasMotivationSticker?: boolean; // v0.3.31 B2: "Thêm nhãn động lực"
   updatedAt: number;
 }
