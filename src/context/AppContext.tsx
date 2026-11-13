@@ -54,6 +54,17 @@ import {
   saveFreeTimers,
   getFreeTimerElapsedSeconds,
 } from '../features/clock';
+import {
+  isMotionTrackingEnabled,
+  loadUnconfirmedMotionSuggestions,
+  saveUnconfirmedMotionSuggestions,
+  dismissMotionSuggestion,
+  getLastMotionQueryTimestamp,
+  setLastMotionQueryTimestamp,
+  queryMotionSegments,
+  queryPedometer,
+  buildMotionSegments,
+} from '../features/motion';
 import { 
   UserProfile, 
   Goal, 
@@ -203,6 +214,7 @@ interface AppContextType {
     displacedItemTitle?: string;
     displacedMinutes?: number;
     date?: string; // v0.3.26: sticky day sheet writes to a given day
+    status?: ItemStatus;
     extra?: Record<string, unknown>;
   }) => string;
   // v0.3.26 B34: the sticky day sheet edits Thẻ ngày items in place
@@ -283,7 +295,7 @@ interface AppContextType {
   setIsActiveCaptureOpen: (v: boolean) => void;
   savedPlaces: SavedPlace[];
   passiveSuggestions: PassiveTimeSuggestion[];
-  acceptPassiveSuggestion: (id: string) => void;
+  acceptPassiveSuggestion: (id: string, customTitle?: string) => void;
   ignorePassiveSuggestion: (id: string) => void;
   backfillTime: (entry: Omit<BackfillEntry, 'id'>) => void;
   savePlace: (place: SavedPlace) => void;
@@ -981,19 +993,87 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // v0.3.7 B30: Active Capture (Ghi bù & Địa điểm Geofence)
   const [isActiveCaptureOpen, setIsActiveCaptureOpen] = useState<boolean>(false);
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(INITIAL_SAVED_PLACES);
-  const [passiveSuggestions, setPassiveSuggestions] = useState<PassiveTimeSuggestion[]>(INITIAL_PASSIVE_SUGGESTIONS);
+  const [passiveSuggestions, setPassiveSuggestions] = useState<PassiveTimeSuggestion[]>(() => {
+    const localMotion = loadUnconfirmedMotionSuggestions();
+    return [...localMotion, ...INITIAL_PASSIVE_SUGGESTIONS];
+  });
 
-  const acceptPassiveSuggestion = (id: string) => {
+  // PRD FIX v0.3.30 Part B2 & B3: Poll Core Motion on iPhone
+  useEffect(() => {
+    if (!isNativePlatform || !isMotionTrackingEnabled()) return;
+
+    const syncMotion = async () => {
+      try {
+        const nowSec = Math.floor(Date.now() / 1000);
+        const lastQuery = getLastMotionQueryTimestamp();
+        const sevenDaysAgo = nowSec - 7 * 86400;
+        const fromSec = Math.max(sevenDaysAgo, lastQuery > 0 ? lastQuery : nowSec - 86400);
+
+        const rawSegments = await queryMotionSegments(fromSec, nowSec);
+        if (rawSegments.length === 0) return;
+
+        const pedometerRes = await queryPedometer(fromSec, nowSec);
+
+        const completedIntervals = (dailyCardItems || [])
+          .filter(item => item.status === 'done' && item.start && item.end)
+          .map(item => {
+            const [sh, sm] = (item.start || '00:00').split(':').map(Number);
+            const [eh, em] = (item.end || '00:00').split(':').map(Number);
+            const d = new Date();
+            const startD = new Date(d.getFullYear(), d.getMonth(), d.getDate(), sh, sm, 0);
+            const endD = new Date(d.getFullYear(), d.getMonth(), d.getDate(), eh, em, 0);
+            return {
+              startSec: Math.floor(startD.getTime() / 1000),
+              endSec: Math.floor(endD.getTime() / 1000),
+              title: item.text,
+            };
+          });
+
+        const newSuggestions = buildMotionSegments(
+          rawSegments,
+          completedIntervals,
+          () => pedometerRes.steps
+        );
+
+        if (newSuggestions.length > 0) {
+          setPassiveSuggestions(prev => {
+            const existingIds = new Set(prev.map(p => p.id));
+            const fresh = newSuggestions.filter(n => !existingIds.has(n.id));
+            return [...fresh, ...prev];
+          });
+          saveUnconfirmedMotionSuggestions(newSuggestions);
+        }
+
+        setLastMotionQueryTimestamp(nowSec);
+      } catch (err) {
+        console.warn('[AppContext] syncMotion failed', err);
+      }
+    };
+
+    syncMotion();
+    const handleVis = () => { if (document.visibilityState === 'visible') syncMotion(); };
+    document.addEventListener('visibilitychange', handleVis);
+    return () => document.removeEventListener('visibilitychange', handleVis);
+  }, [isNativePlatform, dailyCardItems]);
+
+  const acceptPassiveSuggestion = (id: string, customTitle?: string) => {
     const suggestion = passiveSuggestions.find(s => s.id === id);
     if (!suggestion) return;
 
-    // Add to daily card as unplanned on goal / interruption
+    const title = (customTitle || '').trim() || suggestion.suggestedActivity;
+
+    // Add to daily card as completed task with actualMinutes & steps (spec B3.2)
     addDailyCardItem({
-      text: suggestion.suggestedActivity,
+      text: title,
       goalId: suggestion.goalId,
       origin: suggestion.category === 'travel' ? 'interruption' : 'unplanned_goal',
       start: suggestion.startTime,
       end: suggestion.endTime,
+      status: 'done',
+      extra: {
+        actualMinutes: suggestion.durationMins,
+        steps: suggestion.steps,
+      },
     });
 
     // Add segment to time ledger
@@ -1005,15 +1085,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         end: suggestion.endTime,
         durationMins: suggestion.durationMins,
         category: suggestion.category === 'travel' ? 'interruption' : 'goal_work',
-        label: suggestion.suggestedActivity,
+        label: title,
       }
     ]);
 
     setPassiveSuggestions(prev => prev.map(s => s.id === id ? { ...s, status: 'accepted' } : s));
-    setCelebrationMsg(`Đã xác nhận ghi nhận: "${suggestion.suggestedActivity}" (${suggestion.durationMins} phút)!`);
+    if (suggestion.source === 'motion') {
+      dismissMotionSuggestion(id);
+    }
+    setCelebrationMsg(`Đã ghi vào sổ: "${title}" (${suggestion.durationMins} phút)!`);
   };
 
   const ignorePassiveSuggestion = (id: string) => {
+    const suggestion = passiveSuggestions.find(s => s.id === id);
+    if (suggestion?.source === 'motion') {
+      dismissMotionSuggestion(id);
+    }
     setPassiveSuggestions(prev => prev.map(s => s.id === id ? { ...s, status: 'ignored' } : s));
   };
 
@@ -1106,6 +1193,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     displacedItemTitle?: string;
     displacedMinutes?: number;
     date?: string;
+    status?: ItemStatus;
     extra?: Record<string, unknown>;
   }): string => {
     const goal = goals.find(g => g.id === item.goalId);
@@ -1117,7 +1205,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       goalName: goal?.name,
       start: item.start,
       end: item.end,
-      status: 'open',
+      status: item.status || 'open',
       carryCount: 0,
       origin: item.origin || 'planned',
       displacedItemId: item.displacedItemId,
