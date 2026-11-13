@@ -442,16 +442,16 @@ export const ProfileModal: React.FC = () => {
                 />
               </div>
 
-              {/* PRD FIX v0.3.30 Part D: Cá nhân -> Đồng hồ màn hình khóa & Dynamic Island */}
+              {/* PRD FIX v0.3.30 Part E1: Cá nhân -> Ghim đồng hồ & Hướng dẫn Widget */}
               <div className="pt-2 border-t border-slate-200/80 space-y-3">
                 <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-orange-500" />
-                      <h4 className="text-xs font-bold text-slate-900">Hiện đồng hồ trên màn hình khóa (iPhone)</h4>
+                      <h4 className="text-xs font-bold text-slate-900">Ghim đồng hồ (Màn hình khóa & Live Activity)</h4>
                     </div>
                     <p className="text-[11px] text-slate-500">
-                      Tự động hiện việc đang làm và đếm ngược trên Màn hình khóa & Dynamic Island (Live Activity)
+                      Luôn hiển thị đồng hồ nền theo 3 trạng thái: có việc, khoảng trống, hoặc giờ hiện tại
                     </p>
                   </div>
                   <button
@@ -469,6 +469,19 @@ export const ProfileModal: React.FC = () => {
                       }`}
                     />
                   </button>
+                </div>
+
+                {/* 3-step Widget Guide (spec E1.6) */}
+                <div className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200/60 text-xs text-slate-800 space-y-2">
+                  <p className="font-bold text-orange-800 flex items-center gap-1.5">
+                    <Smartphone className="w-3.5 h-3.5 text-orange-600" />
+                    <span>Cách thêm Widget ra màn hình iPhone:</span>
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-700 leading-relaxed">
+                    <li>Chạm và giữ vùng trống trên Màn hình chính hoặc Màn hình khóa cho tới khi ứng dụng rung.</li>
+                    <li>Chạm nút <strong>+</strong> ở góc trên bên trái, tìm và chọn <strong>TAIO Time</strong>.</li>
+                    <li>Chọn kiểu Widget mong muốn và bấm <strong>Thêm tiện ích (Add Widget)</strong>.</li>
+                  </ol>
                 </div>
               </div>
 

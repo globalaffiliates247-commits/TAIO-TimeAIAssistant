@@ -314,15 +314,42 @@ function createClockWindow() {
       const btnExtend = document.getElementById('btnExtend');
       const btnDone = document.getElementById('btnDone');
 
+      let mode = 'task';
+      let subtitle = '';
+
       function updateUI(data) {
         if (!data) return;
+        mode = data.mode || 'task';
+        subtitle = data.subtitle || '';
         if (data.title) titleEl.innerText = data.title;
         if (data.endsAt) endsAt = data.endsAt;
         if (data.startedAt) startedAt = data.startedAt;
-        tick();
+
+        const bottomBar = document.querySelector('.bottom-bar');
+        const progressTrack = document.querySelector('.progress-track');
+
+        if (mode === 'template_or_current') {
+          titleEl.innerText = 'Hiện tại: ' + (data.title || '');
+          digitsEl.innerText = subtitle || 'TAIO Time';
+          digitsEl.style.fontSize = '15px';
+          if (bottomBar) bottomBar.style.display = 'none';
+          if (progressTrack) progressTrack.style.display = 'none';
+        } else if (mode === 'gap') {
+          titleEl.innerText = 'Trống (' + subtitle + ')';
+          digitsEl.style.fontSize = '24px';
+          if (bottomBar) bottomBar.style.display = 'none';
+          if (progressTrack) progressTrack.style.display = 'block';
+          tick();
+        } else {
+          digitsEl.style.fontSize = '24px';
+          if (bottomBar) bottomBar.style.display = 'flex';
+          if (progressTrack) progressTrack.style.display = 'block';
+          tick();
+        }
       }
 
       function tick() {
+        if (mode === 'template_or_current') return;
         const now = Date.now();
         if (!endsAt || endsAt <= now) {
           digitsEl.innerText = '00:00';

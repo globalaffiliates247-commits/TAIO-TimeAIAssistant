@@ -6,6 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { getDeviceTimeMinutes, timeToMinutes, computeBlockStatus } from '@/core/clock';
 import { Clock, ExternalLink, Sparkles } from 'lucide-react';
 import { startNativeLiveActivity, openNativeAppSettings } from '@/features/native';
+import { clockState } from '@/features/clock';
 import type { TimeBlock } from '@/types';
 
 function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targetTimestamp: number; totalMinutes: number; remainingMinutes: number } {
@@ -35,7 +36,7 @@ function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targe
 }
 
 export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
-  const { scheduleBlocks, goals, language, palette, isNativePlatform, showToast } = useApp();
+  const { scheduleBlocks, dayTemplate, goals, language, palette, isNativePlatform, showToast } = useApp();
   const [nowSec, setNowSec] = useState(() => Date.now());
 
   const isCool = palette === 'cool';
@@ -50,21 +51,7 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
   }, []);
 
   const nowDate = new Date(nowSec);
-  const nowHours = nowDate.getHours();
-  const nowMinutes = nowDate.getMinutes();
-  const nowSeconds = nowDate.getSeconds();
-  const nowMinsExact = nowHours * 60 + nowMinutes + nowSeconds / 60;
-  const nowMins = Math.floor(nowMinsExact);
-
-  const curTimeStr = `${String(nowHours).padStart(2, '0')}:${String(nowMinutes).padStart(2, '0')}:${String(nowSeconds).padStart(2, '0')}`;
-
-  // 1. Current in-progress task
-  const inProgressBlock = scheduleBlocks.find(b => computeBlockStatus(b, nowMins) === 'in_progress');
-
-  // 2. Next planned task
-  const nextPlannedBlock = scheduleBlocks
-    .filter(b => computeBlockStatus(b, nowMins) === 'planned')
-    .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+  const state = clockState(scheduleBlocks, dayTemplate, nowDate);
 
   // Format remaining time string
   const formatSeconds = (sec: number) => {
@@ -76,6 +63,20 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
     }
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
+
+  // Sync with Electron floating window & macOS menu tray across all 3 states (spec E1.3)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).taioAPI?.updateTimer) {
+      (window as any).taioAPI.updateTimer({
+        title: state.title,
+        subtitle: state.subtitle,
+        startedAt: state.startedAt,
+        endsAt: state.endsAt,
+        mode: state.mode,
+        remaining: formatSeconds(state.remainingSeconds),
+      });
+    }
+  }, [state.title, state.subtitle, state.endsAt, state.mode]);
 
   const handleOpenDetachedClock = async () => {
     // 1. macOS Desktop: Open separate floating clock window
@@ -90,16 +91,16 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
         window.localStorage.setItem('taio_lockscreen_clock_enabled', 'true');
       } catch {}
 
-      if (inProgressBlock) {
-        const { startTimestamp, targetTimestamp, totalMinutes, remainingMinutes } = parseBlockTimestamps(inProgressBlock);
-        const linkedGoal = goals.find(g => g.id === inProgressBlock.goalId);
-        const goalName = linkedGoal?.name || inProgressBlock.goalName || 'Mục tiêu chính';
+      if (state.block) {
+        const { startTimestamp, targetTimestamp, totalMinutes, remainingMinutes } = parseBlockTimestamps(state.block);
+        const linkedGoal = goals.find(g => g.id === state.block?.goalId);
+        const goalName = linkedGoal?.name || state.block?.goalName || 'Mục tiêu chính';
 
         const res = await startNativeLiveActivity({
-          blockId: inProgressBlock.id,
-          taskTitle: inProgressBlock.title,
+          blockId: state.block.id,
+          taskTitle: state.block.title,
           goalName,
-          isCountDown: inProgressBlock.taskEndType === 'timebox' || !inProgressBlock.taskEndType,
+          isCountDown: state.block.taskEndType === 'timebox' || !state.block.taskEndType,
           totalMinutes,
           remainingMinutes,
           startTimestamp,
@@ -126,30 +127,27 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
         }
       } else {
         showToast(
-          isVi ? 'Đồng hồ màn hình khóa đã bật (sẽ hiện khi có việc đang chạy)' : 'Lock Screen clock enabled (will show when task is running)'
+          isVi ? 'Đồng hồ màn hình khóa đã bật (sẽ hiện khi có việc)' : 'Lock Screen clock enabled'
         );
       }
       return;
     }
 
     // 3. Web fallback: informative feedback
-    showToast(isVi ? `Đồng hồ hiện tại: ${curTimeStr}` : `Current Clock: ${curTimeStr}`);
+    showToast(isVi ? `Đồng hồ: ${state.title} (${state.subtitle})` : `Clock: ${state.title}`);
   };
 
   let contentNode: React.ReactNode = null;
   let isLiveActive = false;
 
-  if (inProgressBlock) {
+  if (state.mode === 'task') {
     isLiveActive = true;
-    const endMins = timeToMinutes(inProgressBlock.endTime);
-    const diffSec = Math.max(0, Math.floor((endMins - nowMinsExact) * 60));
-    const countdown = formatSeconds(diffSec);
-
+    const countdown = formatSeconds(state.remainingSeconds);
     contentNode = (
       <div className="flex items-center gap-2 overflow-hidden truncate">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-        <span className="font-semibold text-slate-800 truncate" title={inProgressBlock.title}>
-          {inProgressBlock.title}
+        <span className="font-semibold text-slate-800 truncate" title={state.title}>
+          {state.title}
         </span>
         <span className="text-slate-400">·</span>
         <span className="font-mono font-bold text-slate-900 shrink-0">
@@ -157,11 +155,8 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
         </span>
       </div>
     );
-  } else if (nextPlannedBlock) {
-    const nextStartMins = timeToMinutes(nextPlannedBlock.startTime);
-    const diffSec = Math.max(0, Math.floor((nextStartMins - nowMinsExact) * 60));
-    const countdown = formatSeconds(diffSec);
-
+  } else if (state.mode === 'gap') {
+    const countdown = formatSeconds(state.remainingSeconds);
     contentNode = (
       <div className="flex items-center gap-2 overflow-hidden truncate">
         <span className="text-slate-500 font-medium shrink-0">
@@ -169,22 +164,19 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
         </span>
         <span className="text-slate-400">·</span>
         <span className="font-mono font-semibold text-slate-700 shrink-0">
-          {countdown} {isVi ? 'nữa tới:' : 'until:'}
-        </span>
-        <span className="font-medium text-slate-700 truncate" title={nextPlannedBlock.title}>
-          {nextPlannedBlock.title}
+          {countdown} {state.subtitle}
         </span>
       </div>
     );
   } else {
     contentNode = (
-      <div className="flex items-center gap-2 overflow-hidden">
+      <div className="flex items-center gap-2 overflow-hidden truncate">
         <span className="font-mono font-bold text-slate-700 shrink-0">
-          {curTimeStr}
+          {state.title}
         </span>
         <span className="text-slate-400">·</span>
         <span className="text-slate-500 font-medium truncate">
-          {isVi ? 'Chưa có việc có giờ' : 'No timed tasks scheduled'}
+          {state.subtitle}
         </span>
       </div>
     );
