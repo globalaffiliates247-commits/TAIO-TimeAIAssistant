@@ -13,6 +13,7 @@ import {
 import { commitQuickLine, matchGoalByTag } from '@/features/tasks';
 import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 import { LiveClockStrip } from '@/features/quick-entry';
+import { MotivationSticker } from '@/features/motivation';
 import { Clock } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
@@ -165,6 +166,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     <div className="flex flex-col gap-2 text-[15px] leading-snug" style={{ color: c.ink }}>
       {/* PRD FIX v0.3.28 C1: LiveClockStrip at top of DaySheet */}
       <LiveClockStrip compact />
+
+      {/* PRD FEATURE v0.3.31 B1: Motivation Sticker note style at head of "Hôm nay" sheet */}
+      <MotivationSticker slotKey="start_day_sheet" context="start_day" size="note" className="mb-1" />
 
       {leftover.length > 0 && (
         <div className="flex items-center gap-2 text-xs" style={{ color: c.muted }}>

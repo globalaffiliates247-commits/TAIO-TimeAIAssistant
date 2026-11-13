@@ -7,6 +7,7 @@ import { getDeviceTimeMinutes, timeToMinutes, computeBlockStatus } from '@/core/
 import { Clock, ExternalLink, Sparkles } from 'lucide-react';
 import { startNativeLiveActivity, openNativeAppSettings } from '@/features/native';
 import { clockState } from '@/features/clock';
+import { MotivationSticker } from '@/features/motivation';
 import type { TimeBlock } from '@/types';
 
 function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targetTimestamp: number; totalMinutes: number; remainingMinutes: number } {
@@ -246,6 +247,13 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
           <span className="font-mono font-bold text-amber-900 shrink-0">
             {freeTimerRemaining}
           </span>
+        </div>
+      )}
+
+      {/* PRD FEATURE v0.3.31 B3: Motivation sticker line when clock is idle / gap / break */}
+      {state.mode !== 'task' && (
+        <div className="pt-1.5 mt-1 border-t border-slate-200/50" onClick={e => e.stopPropagation()}>
+          <MotivationSticker slotKey="clock_idle" context="break" size="line" />
         </div>
       )}
     </div>
