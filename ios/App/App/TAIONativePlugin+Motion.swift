@@ -23,7 +23,7 @@ extension TAIONativePlugin {
         let toSec = call.getDouble("to", Date().timeIntervalSince1970)
 
         guard fromSec > 0 else {
-            call.reject("Invalid 'from' timestamp")
+            call.resolve(["ok": false, "error": "Invalid 'from' timestamp"])
             return
         }
 
@@ -32,7 +32,7 @@ extension TAIONativePlugin {
 
         TAIOMotionService.shared.queryMotionSegments(from: fromDate, to: toDate) { segments, error in
             if let error = error {
-                call.reject("queryMotionSegments failed: \(error.localizedDescription)")
+                call.resolve(["ok": false, "error": "queryMotionSegments failed: \(error.localizedDescription)"])
                 return
             }
 
@@ -57,7 +57,7 @@ extension TAIONativePlugin {
         let toSec = call.getDouble("to", Date().timeIntervalSince1970)
 
         guard fromSec > 0 else {
-            call.reject("Invalid 'from' timestamp")
+            call.resolve(["ok": false, "error": "Invalid 'from' timestamp"])
             return
         }
 
@@ -66,7 +66,7 @@ extension TAIONativePlugin {
 
         TAIOMotionService.shared.queryPedometer(from: fromDate, to: toDate) { result, error in
             if let error = error {
-                call.reject("queryPedometer failed: \(error.localizedDescription)")
+                call.resolve(["ok": false, "error": "queryPedometer failed: \(error.localizedDescription)"])
                 return
             }
 

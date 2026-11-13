@@ -150,7 +150,7 @@ struct TAIOWidgetEntryView: View {
             }
         }
         .padding(12)
-        .containerBackground(Color.white, for: .widget)
+        .applyWidgetBackground(Color.white)
     }
 
     private var mediumWidgetView: some View {
@@ -199,7 +199,7 @@ struct TAIOWidgetEntryView: View {
             }
         }
         .padding(14)
-        .containerBackground(Color.white, for: .widget)
+        .applyWidgetBackground(Color.white)
     }
 
     #if os(iOS)
@@ -220,7 +220,7 @@ struct TAIOWidgetEntryView: View {
                     .lineLimit(1)
             }
         }
-        .containerBackground(Color.clear, for: .widget)
+        .applyWidgetBackground(Color.clear)
     }
 
     private var accessoryInlineView: some View {
@@ -234,7 +234,7 @@ struct TAIOWidgetEntryView: View {
                 )
             }
         }
-        .containerBackground(Color.clear, for: .widget)
+        .applyWidgetBackground(Color.clear)
     }
     #endif
 
@@ -273,6 +273,21 @@ struct TAIOWidget: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryInline])
         #else
         .supportedFamilies([.systemSmall, .systemMedium])
+        #endif
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func applyWidgetBackground(_ color: Color) -> some View {
+        #if compiler(>=5.9)
+        if #available(iOSApplicationExtension 17.0, *) {
+            self.containerBackground(color, for: .widget)
+        } else {
+            self.background(color)
+        }
+        #else
+        self.background(color)
         #endif
     }
 }

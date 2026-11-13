@@ -251,11 +251,11 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
 
         // FIX v0.3.30 D2.1: Unified units in SECONDS
         let nowSec = Date().timeIntervalSince1970
-        let customStart = call.getDouble("startTimestamp")
-        let customTarget = call.getDouble("targetTimestamp")
+        let customStart = call.getDouble("startTimestamp", 0)
+        let customTarget = call.getDouble("targetTimestamp", 0)
 
-        let startTs = customStart ?? nowSec
-        let targetTs = customTarget ?? (startTs + Double(max(1, remainingMinutes) * 60))
+        let startTs = customStart > 0 ? customStart : nowSec
+        let targetTs = customTarget > 0 ? customTarget : (startTs + Double(max(1, remainingMinutes) * 60))
 
         if #available(iOS 16.1, *) {
             #if canImport(ActivityKit)
@@ -335,11 +335,11 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
 
         // FIX v0.3.30 D2.1: Unified units in SECONDS
         let nowSec = Date().timeIntervalSince1970
-        let customStart = call.getDouble("startTimestamp")
-        let customTarget = call.getDouble("targetTimestamp")
+        let customStart = call.getDouble("startTimestamp", 0)
+        let customTarget = call.getDouble("targetTimestamp", 0)
 
-        let startTs = customStart ?? nowSec
-        let targetTs = customTarget ?? (startTs + Double(max(1, remainingMinutes) * 60))
+        let startTs = customStart > 0 ? customStart : nowSec
+        let targetTs = customTarget > 0 ? customTarget : (startTs + Double(max(1, remainingMinutes) * 60))
 
         if #available(iOS 16.1, *) {
             #if canImport(ActivityKit)
@@ -396,8 +396,9 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
 
     // MARK: - Widget Timeline Sync (v0.3.30 Part E1 Widget)
     @objc func syncWidgetSchedule(_ call: CAPPluginCall) {
-        guard let jsonString = call.getString("scheduleJson") else {
-            call.reject("Missing scheduleJson")
+        let jsonString = call.getString("scheduleJson", "")
+        if jsonString.isEmpty {
+            call.resolve(["ok": false, "error": "Missing scheduleJson"])
             return
         }
 
