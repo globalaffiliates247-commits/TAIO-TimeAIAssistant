@@ -584,6 +584,8 @@ export interface PassiveTimeSuggestion {
   goalName?: string;
   source: 'ai_tool_timestamp' | 'geofence' | 'calendar' | 'motion';
   status: 'pending' | 'accepted' | 'ignored';
+  steps?: number;
+  motionKind?: 'walking' | 'transport';
 }
 
 export interface PlaceRule {
