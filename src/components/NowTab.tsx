@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { UserRole, TaskEndType } from '../types';
+import { UserRole, TaskEndType, DodItem } from '../types';
+import { updateScheduleEntry } from '@/features/tasks';
+import { useT } from '@/i18n/useT';
 import {
   startNativeLiveActivity,
   stopNativeLiveActivity,
@@ -29,7 +31,8 @@ import {
   Calendar,
   Lock,
   Layers,
-  Inbox
+  Inbox,
+  X
 } from 'lucide-react';
 import { QuickEntryTiles, QuickLineInput } from '../features/quick-entry';
 
@@ -81,8 +84,12 @@ export const NowTab: React.FC = () => {
     currentPaletteColors,
     isNativePlatform,
     nativePlatformName,
-    showToast
+    showToast,
+    dailyCardItems,
+    updateDailyCardItem
   } = useApp();
+
+  const { t } = useT();
 
   const isCool = palette === 'cool';
 
@@ -144,10 +151,44 @@ export const NowTab: React.FC = () => {
   // Check overrun for until-done tasks
   const isOverTimeLimit = (currentEndType !== 'timebox') && (elapsedMinutes > userTimeLimit);
 
-  // Quick switch of end type for current block
+  // Acceptance criteria input state
+  const [newDodText, setNewDodText] = useState<string>('');
+
+  // Quick switch of end type for current block (routed via updateScheduleEntry for dc-* support)
   const handleSetEndType = (endType: TaskEndType) => {
     if (!currentBlock) return;
-    setBlocks(prev => prev.map(b => b.id === currentBlock.id ? { ...b, taskEndType: endType } : b));
+    updateScheduleEntry(
+      currentBlock.id,
+      { taskEndType: endType },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+  };
+
+  const handleAddDodItem = (text: string) => {
+    if (!currentBlock || !text.trim()) return;
+    const currentList: DodItem[] = currentBlock.dodChecklist || [];
+    const newItem: DodItem = {
+      id: `dod-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      text: text.trim(),
+      completed: false,
+    };
+    const updated = [...currentList, newItem];
+    updateScheduleEntry(
+      currentBlock.id,
+      { dodChecklist: updated },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+    setNewDodText('');
+  };
+
+  const handleRemoveDodItem = (dodId: string) => {
+    if (!currentBlock) return;
+    const updated = (currentBlock.dodChecklist || []).filter(i => i.id !== dodId);
+    updateScheduleEntry(
+      currentBlock.id,
+      { dodChecklist: updated },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
   };
 
   const handleTimerToggle = () => {
@@ -391,6 +432,65 @@ export const NowTab: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* A3.4: DoD Entry UI — visible only for until_done_* tasks, hidden for timebox */}
+          {currentEndType !== 'timebox' && (
+            <div className="mb-3 p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">
+                  {t('now.dod_input_label', 'Tiêu chí hoàn thành (không bắt buộc)')}
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {(currentBlock?.dodChecklist || []).length} tiêu chí
+                </span>
+              </div>
+
+              {(currentBlock?.dodChecklist || []).length > 0 && (
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {(currentBlock?.dodChecklist || []).map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs text-slate-800"
+                    >
+                      <span className="truncate">{item.text}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDodItem(item.id)}
+                        className="text-slate-500 hover:text-red-500 p-0.5 rounded"
+                        title="Xóa tiêu chí"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={newDodText}
+                  onChange={e => setNewDodText(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddDodItem(newDodText);
+                    }
+                  }}
+                  placeholder={t('now.dod_input_placeholder', 'Mỗi dòng một tiêu chí, Enter để thêm dòng')}
+                  className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50/70 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleAddDodItem(newDodText)}
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Thêm</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/90 p-5 rounded-2xl border border-slate-200 shadow-xs">
             <div>

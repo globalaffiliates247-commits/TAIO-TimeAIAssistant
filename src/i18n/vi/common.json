@@ -88,5 +88,24 @@
     "trayTimerRunning": "Đồng hồ: {{remaining}}",
     "trayTimerIdle": "TAIO Time",
     "noteAdded": "Đã thêm vào Thẻ ngày lúc {{time}}"
+  },
+  "checkin": {
+    "done": "Xong",
+    "continue_later": "Chưa xong: làm tiếp sau",
+    "more_time": "Cần thêm +15 phút",
+    "remind_10m": "Nhắc lại sau 10 phút",
+    "done_despite": "Xong dù chưa đủ tiêu chí",
+    "dod_label": "Tiêu chí hoàn thành",
+    "kicker": "Khung giờ đã kết thúc {{start}} - {{end}} · Còn {{count}} việc chờ",
+    "goal_serving": "Mục tiêu phục vụ: {{goal}}",
+    "next_step_placeholder": "VD: Cần chỉnh xong bảng phân tích số liệu mục 2...",
+    "next_step_label": "Bước kế tiếp cụ thể là gì?",
+    "save_next_step": "Lưu bước kế tiếp & Dừng an toàn",
+    "done_celebration": "🎉 Hoàn thành! Tiến độ mục tiêu đã cập nhật.",
+    "select_all": "Chọn tất cả"
+  },
+  "now": {
+    "dod_input_label": "Tiêu chí hoàn thành (không bắt buộc)",
+    "dod_input_placeholder": "Mỗi dòng một tiêu chí, Enter để thêm dòng"
   }
 }

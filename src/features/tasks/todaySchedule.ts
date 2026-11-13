@@ -26,6 +26,7 @@ export function buildTodaySchedule(
     const end = item.end || toTime(toMins(start) + 30);
     const extra = (item.extra as Record<string, unknown> | undefined) || {};
     const actualMinutes = typeof extra.actualMinutes === 'number' ? extra.actualMinutes : undefined;
+    const taskEndType = (extra.taskEndType as TimeBlock['taskEndType']) || 'timebox';
     const estimateMins = typeof extra.estimateMins === 'number'
       ? extra.estimateMins
       : Math.max(5, (toMins(end) - toMins(start) + 1440) % 1440);
@@ -51,6 +52,8 @@ export function buildTodaySchedule(
       touchTimeMinutes: actualMinutes,
       estimatedMinutes: estimateMins,
       taskSource: 'sticky_day_sheet',
+      taskEndType,
+      dodChecklist: item.dodChecklist,
       extra: item.extra,
     };
   });

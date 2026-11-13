@@ -1737,7 +1737,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         { updateDailyCardItem, setBlocks, dailyCardItems }
       );
-      setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành đúng tiêu chí (Definition of Done)! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed per Definition of Done!');
+      setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed! Goal progress updated.');
       triggerCoachCard('first_dod_done');
       const nextBlock = scheduleBlocks.find((b: TimeBlock) => b.id !== checkInBlock.id && b.status === 'planned');
       if (nextBlock) {

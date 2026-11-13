@@ -88,5 +88,24 @@
     "trayTimerRunning": "Timer: {{remaining}}",
     "trayTimerIdle": "TAIO Time",
     "noteAdded": "Added to Day Card at {{time}}"
+  },
+  "checkin": {
+    "done": "Done",
+    "continue_later": "Not done: continue later",
+    "more_time": "Need +15 more minutes",
+    "remind_10m": "Remind me in 10 minutes",
+    "done_despite": "Done despite unmet criteria",
+    "dod_label": "Completion criteria",
+    "kicker": "Time block ended {{start}} - {{end}} · {{count}} tasks waiting",
+    "goal_serving": "Serving goal: {{goal}}",
+    "next_step_placeholder": "E.g.: Finish analysis table section 2...",
+    "next_step_label": "What is the specific next step?",
+    "save_next_step": "Save next step & Stop safely",
+    "done_celebration": "🎉 Completed! Goal progress updated.",
+    "select_all": "Select all"
+  },
+  "now": {
+    "dod_input_label": "Completion criteria (optional)",
+    "dod_input_placeholder": "One criterion per line, press Enter to add"
   }
 }

@@ -27,6 +27,7 @@ export function updateScheduleEntry(
     if (patch.goalName !== undefined) cardPatch.goalName = patch.goalName;
     if (patch.returnPoint !== undefined) cardPatch.nextStep = patch.returnPoint;
     if (patch.nextStep !== undefined) cardPatch.nextStep = patch.nextStep;
+    if (patch.dodChecklist !== undefined) cardPatch.dodChecklist = patch.dodChecklist;
 
     if (patch.status !== undefined) {
       if (patch.status === 'done') cardPatch.status = 'done';
@@ -35,7 +36,7 @@ export function updateScheduleEntry(
       else cardPatch.status = 'open';
     }
 
-    if (patch.touchTimeMinutes !== undefined || patch.extra !== undefined) {
+    if (patch.touchTimeMinutes !== undefined || patch.taskEndType !== undefined || patch.extra !== undefined) {
       const existing = ctx.dailyCardItems?.find(it => it.id === id);
       const prevExtra = (existing?.extra as Record<string, unknown> | undefined) || {};
       const newExtra: Record<string, unknown> = {
@@ -44,6 +45,9 @@ export function updateScheduleEntry(
       };
       if (patch.touchTimeMinutes !== undefined) {
         newExtra.actualMinutes = patch.touchTimeMinutes;
+      }
+      if (patch.taskEndType !== undefined) {
+        newExtra.taskEndType = patch.taskEndType;
       }
       cardPatch.extra = newExtra;
     }
