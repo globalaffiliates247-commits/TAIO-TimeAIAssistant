@@ -7,6 +7,9 @@ import CoreLocation
 #if canImport(ActivityKit)
 import ActivityKit
 #endif
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 @objc(TAIONativePlugin)
 public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDelegate {
@@ -31,7 +34,9 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         CAPPluginMethod(name: "hasAlarmSound", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "scheduleBlockAlarms", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "cancelBlockAlarms", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "getAlarmCapability", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "getAlarmCapability", returnType: CAPPluginReturnPromise),
+        // v0.3.30 Part E1 Widget Timeline Sync
+        CAPPluginMethod(name: "syncWidgetSchedule", returnType: CAPPluginReturnPromise)
     ]
 
     private var db: OpaquePointer?
@@ -382,6 +387,27 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
             }
             call.resolve(["ok": false, "opened": false])
         }
+    }
+
+    // MARK: - Widget Timeline Sync (v0.3.30 Part E1 Widget)
+    @objc func syncWidgetSchedule(_ call: CAPPluginCall) {
+        guard let jsonString = call.getString("scheduleJson") else {
+            call.reject("Missing scheduleJson")
+            return
+        }
+
+        // Write to App Group shared container or standard defaults
+        let userDefaults = UserDefaults(suiteName: "group.club.taio.timeapp") ?? UserDefaults.standard
+        userDefaults.set(jsonString, forKey: "taio_widget_schedule")
+        userDefaults.synchronize()
+
+        #if canImport(WidgetKit)
+        if #available(iOS 14.0, *) {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+        #endif
+
+        call.resolve(["ok": true, "synced": true])
     }
 
     // MARK: - Local Notifications (E4)

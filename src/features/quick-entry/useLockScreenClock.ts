@@ -5,9 +5,74 @@ import { useApp } from '@/context/AppContext';
 import { 
   startNativeLiveActivity, 
   updateNativeLiveActivity, 
-  stopNativeLiveActivity 
+  stopNativeLiveActivity,
+  syncNativeWidgetSchedule,
+  WidgetScheduleItemData
 } from '@/features/native';
 import { clockState } from '@/features/clock';
+import type { TimeBlock } from '@/types';
+
+function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Date()): WidgetScheduleItemData[] {
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const date = now.getDate();
+
+  const parseToSeconds = (hhmm: string): number => {
+    const [h, m] = (hhmm || '00:00').split(':').map(Number);
+    const d = new Date(year, month, date, h || 0, m || 0, 0);
+    return Math.floor(d.getTime() / 1000);
+  };
+
+  const validBlocks = (blocks || [])
+    .filter(b => b.startTime && b.endTime)
+    .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+  const items: WidgetScheduleItemData[] = [];
+
+  for (let i = 0; i < validBlocks.length; i++) {
+    const b = validBlocks[i];
+    const bStart = parseToSeconds(b.startTime);
+    const bEnd = parseToSeconds(b.endTime);
+
+    // If gap before this block and after previous block
+    if (i > 0) {
+      const prevEnd = parseToSeconds(validBlocks[i - 1].endTime);
+      if (bStart > prevEnd) {
+        items.push({
+          title: 'Trống',
+          subtitle: `Tới "${b.title}"`,
+          startTimestamp: prevEnd,
+          targetTimestamp: bStart,
+          mode: 'gap',
+          isCountDown: true,
+        });
+      }
+    }
+
+    items.push({
+      title: b.title,
+      subtitle: b.goalName || 'Mục tiêu chính',
+      startTimestamp: bStart,
+      targetTimestamp: bEnd,
+      mode: 'task',
+      isCountDown: b.taskEndType === 'timebox' || !b.taskEndType,
+    });
+  }
+
+  if (items.length === 0) {
+    const nowSec = Math.floor(now.getTime() / 1000);
+    items.push({
+      title: 'TAIO Time',
+      subtitle: 'Thời gian trong ngày',
+      startTimestamp: nowSec,
+      targetTimestamp: nowSec + 86400,
+      mode: 'template_or_current',
+      isCountDown: false,
+    });
+  }
+
+  return items;
+}
 
 export function useLockScreenClock() {
   const { scheduleBlocks, dayTemplate, goals, isNativePlatform, freeTimers } = useApp();
@@ -84,6 +149,14 @@ export function useLockScreenClock() {
             lastPayloadRef.current = payloadKey;
           }
         });
+      }
+
+      // PRD FIX v0.3.30 Part E1 (Widget): Sync schedule timeline for Home & Lock Screen Widgets
+      try {
+        const widgetItems = buildWidgetSchedule(scheduleBlocks, dayTemplate, now);
+        syncNativeWidgetSchedule(widgetItems);
+      } catch (err) {
+        console.warn('[useLockScreenClock] Failed to sync widget schedule', err);
       }
     };
 

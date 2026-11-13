@@ -82,6 +82,7 @@ export interface TAIONativePluginInterface {
   scheduleBlockAlarms(options: { alarms: NativeBlockAlarm[]; soundName?: string }): Promise<NativeAlarmScheduleResult>;
   cancelBlockAlarms(): Promise<{ ok: boolean }>;
   getAlarmCapability(): Promise<{ alarmKit: boolean }>;
+  syncWidgetSchedule(options: { scheduleJson: string }): Promise<{ ok: boolean; synced?: boolean }>;
 }
 
 export const TAIONative = registerPlugin<TAIONativePluginInterface>('TAIONative');
@@ -220,6 +221,28 @@ export async function openNativeAppSettings(): Promise<boolean> {
     const res = await TAIONative.openAppSettings();
     return !!res?.opened;
   } catch {
+    return false;
+  }
+}
+
+// PRD FIX v0.3.30 Part E1 (Widget): Sync schedule timeline for Home & Lock Screen Widgets
+export interface WidgetScheduleItemData {
+  title: string;
+  subtitle: string;
+  startTimestamp: number; // In seconds
+  targetTimestamp: number; // In seconds
+  mode: 'task' | 'gap' | 'template_or_current';
+  isCountDown: boolean;
+}
+
+export async function syncNativeWidgetSchedule(entries: WidgetScheduleItemData[]): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    const jsonString = JSON.stringify(entries);
+    const res = await TAIONative.syncWidgetSchedule({ scheduleJson: jsonString });
+    return !!res?.ok;
+  } catch (err) {
+    console.warn('[native] syncWidgetSchedule failed', err);
     return false;
   }
 }
