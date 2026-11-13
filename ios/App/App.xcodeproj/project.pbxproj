@@ -21,9 +21,12 @@
 		A10000052FE993A70072D4E8 /* TAIOViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000062FE993A70072D4E8 /* TAIOViewController.swift */; };
 		A10000072FE993A70072D4E8 /* TAIOAlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000082FE993A70072D4E8 /* TAIOAlarmService.swift */; };
 		A10000092FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000A2FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift */; };
+		A100000B2FE993A70072D4E8 /* TAIOMotionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000C2FE993A70072D4E8 /* TAIOMotionService.swift */; };
+		A100000D2FE993A70072D4E8 /* TAIONativePlugin+Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000E2FE993A70072D4E8 /* TAIONativePlugin+Motion.swift */; };
 		B20000012FE993A70072D4E8 /* TAIOWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000022FE993A70072D4E8 /* TAIOWidgetBundle.swift */; };
 		B20000032FE993A70072D4E8 /* TAIOWidgetLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000042FE993A70072D4E8 /* TAIOWidgetLiveActivity.swift */; };
 		B20000052FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift */; };
+		B200001A2FE993A70072D4E8 /* TAIOWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B200001B2FE993A70072D4E8 /* TAIOWidget.swift */; };
 		B20000082FE993A70072D4E8 /* TAIOWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B20000072FE993A70072D4E8 /* TAIOWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B20000162FE993A70072D4E8 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20000152FE993A70072D4E8 /* WidgetKit.framework */; };
 		B20000182FE993A70072D4E8 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20000172FE993A70072D4E8 /* SwiftUI.framework */; };
@@ -69,9 +72,12 @@
 		A10000062FE993A70072D4E8 /* TAIOViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOViewController.swift; sourceTree = "<group>"; };
 		A10000082FE993A70072D4E8 /* TAIOAlarmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOAlarmService.swift; sourceTree = "<group>"; };
 		A100000A2FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TAIONativePlugin+Alarm.swift"; sourceTree = "<group>"; };
+		A100000C2FE993A70072D4E8 /* TAIOMotionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOMotionService.swift; sourceTree = "<group>"; };
+		A100000E2FE993A70072D4E8 /* TAIONativePlugin+Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TAIONativePlugin+Motion.swift"; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		B20000022FE993A70072D4E8 /* TAIOWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOWidgetBundle.swift; sourceTree = "<group>"; };
 		B20000042FE993A70072D4E8 /* TAIOWidgetLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOWidgetLiveActivity.swift; sourceTree = "<group>"; };
+		B200001B2FE993A70072D4E8 /* TAIOWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TAIOWidget.swift; sourceTree = "<group>"; };
 		B20000062FE993A70072D4E8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B20000072FE993A70072D4E8 /* TAIOWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TAIOWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20000152FE993A70072D4E8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -128,6 +134,8 @@
 				A10000062FE993A70072D4E8 /* TAIOViewController.swift */,
 				A10000082FE993A70072D4E8 /* TAIOAlarmService.swift */,
 				A100000A2FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift */,
+				A100000C2FE993A70072D4E8 /* TAIOMotionService.swift */,
+				A100000E2FE993A70072D4E8 /* TAIONativePlugin+Motion.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -145,6 +153,7 @@
 			children = (
 				B20000022FE993A70072D4E8 /* TAIOWidgetBundle.swift */,
 				B20000042FE993A70072D4E8 /* TAIOWidgetLiveActivity.swift */,
+				B200001B2FE993A70072D4E8 /* TAIOWidget.swift */,
 				B20000062FE993A70072D4E8 /* Info.plist */,
 			);
 			path = TAIOWidgetExtension;
@@ -279,6 +288,8 @@
 				A10000052FE993A70072D4E8 /* TAIOViewController.swift in Sources */,
 				A10000072FE993A70072D4E8 /* TAIOAlarmService.swift in Sources */,
 				A10000092FE993A70072D4E8 /* TAIONativePlugin+Alarm.swift in Sources */,
+				A100000B2FE993A70072D4E8 /* TAIOMotionService.swift in Sources */,
+				A100000D2FE993A70072D4E8 /* TAIONativePlugin+Motion.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,6 +300,7 @@
 				B20000012FE993A70072D4E8 /* TAIOWidgetBundle.swift in Sources */,
 				B20000032FE993A70072D4E8 /* TAIOWidgetLiveActivity.swift in Sources */,
 				B20000052FE993A70072D4E8 /* TAIOLiveActivityAttributes.swift in Sources */,
+				B200001A2FE993A70072D4E8 /* TAIOWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

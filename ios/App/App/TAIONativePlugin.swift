@@ -36,7 +36,12 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         CAPPluginMethod(name: "cancelBlockAlarms", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getAlarmCapability", returnType: CAPPluginReturnPromise),
         // v0.3.30 Part E1 Widget Timeline Sync
-        CAPPluginMethod(name: "syncWidgetSchedule", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "syncWidgetSchedule", returnType: CAPPluginReturnPromise),
+        // v0.3.30 Part B1 Core Motion
+        CAPPluginMethod(name: "getMotionCapability", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "requestMotionPermission", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "queryMotionSegments", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "queryPedometer", returnType: CAPPluginReturnPromise)
     ]
 
     private var db: OpaquePointer?
