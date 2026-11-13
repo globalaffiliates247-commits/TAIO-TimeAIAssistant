@@ -37,6 +37,9 @@ import {
 } from 'lucide-react';
 import { QuickEntryTiles, QuickLineInput } from '../features/quick-entry';
 import { FreeTimerInput, FreeTimerList } from '@/features/clock';
+import { StartDayCard } from '@/features/motivation';
+import { openStickyBoard } from '@/features/sticky';
+import { getDeviceCalendarDate } from '@/core/clock';
 import { MotionPermissionCard, isMotionPermissionCardDismissed } from '@/features/motion';
 import { 
   StepsTile, 
@@ -288,6 +291,9 @@ export const NowTab: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-300">
       
+      {/* PRD FEATURE v0.3.31 Part C: "Bắt đầu ngày" Card */}
+      <StartDayCard onOpenTodaySheet={() => openStickyBoard(getDeviceCalendarDate())} />
+
       {/* PRD FIX v0.3.28 B1 & B3: Quick Entry Tiles and Mac QuickLineInput */}
       <QuickEntryTiles />
       <QuickLineInput />
