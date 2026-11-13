@@ -6,7 +6,8 @@ import {
   Clock, 
   Bookmark, 
   Sparkles, 
-  X 
+  X,
+  Footprints
 } from 'lucide-react';
 import type { TimeBlock } from '@/types';
 import { useT } from '@/i18n/useT';
@@ -74,6 +75,16 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
         )}
 
         <div className={hasGoal ? '' : 'mt-4'} />
+
+        {/* PRD FIX v0.3.30 Part B3.5: Gợi ý nghỉ khi làm việc dài >= 90 phút */}
+        {(checkInBlock.estimatedMinutes || 60) >= 90 && (
+          <div className="mb-3.5 p-3 rounded-2xl bg-amber-50/90 border border-amber-200/80 text-amber-900 text-xs flex items-center gap-2.5">
+            <Footprints className="w-4 h-4 text-amber-600 shrink-0" />
+            <span className="font-medium">
+              Bạn đã ngồi {checkInBlock.estimatedMinutes || 90} phút. Đứng dậy đi lại 5 phút?
+            </span>
+          </div>
+        )}
 
         {/* Action buttons */}
         {!showNextStepForm ? (

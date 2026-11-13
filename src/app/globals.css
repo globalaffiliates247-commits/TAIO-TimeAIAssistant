@@ -27,6 +27,7 @@
     --color-orange-600: oklch(64.6% 0.222 41.116);
     --color-orange-700: oklch(55.3% 0.195 38.402);
     --color-orange-800: oklch(47% 0.157 37.304);
+    --color-orange-900: oklch(40.8% 0.123 38.172);
     --color-orange-950: oklch(26.6% 0.079 36.259);
     --color-amber-50: oklch(98.7% 0.022 95.277);
     --color-amber-100: oklch(96.2% 0.059 95.617);
@@ -569,6 +570,9 @@
   }
   .mb-3 {
     margin-bottom: calc(var(--spacing) * 3);
+  }
+  .mb-3\.5 {
+    margin-bottom: calc(var(--spacing) * 3.5);
   }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
@@ -2897,6 +2901,9 @@
   .text-orange-800 {
     color: var(--color-orange-800);
   }
+  .text-orange-900 {
+    color: var(--color-orange-900);
+  }
   .text-pink-500 {
     color: var(--color-pink-500);
   }
@@ -3394,6 +3401,9 @@
     }
     :is(:where(.group):hover .group-hover\:text-indigo-700) {
       color: var(--color-indigo-700);
+    }
+    :is(:where(.group):hover .group-hover\:text-orange-600) {
+      color: var(--color-orange-600);
     }
     :is(:where(.group):hover .group-hover\:text-orange-950) {
       color: var(--color-orange-950);

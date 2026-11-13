@@ -38,6 +38,12 @@ import {
 import { QuickEntryTiles, QuickLineInput } from '../features/quick-entry';
 import { FreeTimerInput, FreeTimerList } from '@/features/clock';
 import { MotionPermissionCard, isMotionPermissionCardDismissed } from '@/features/motion';
+import { 
+  StepsTile, 
+  getMotionCapability, 
+  isMotionTrackingEnabled, 
+  queryPedometer 
+} from '@/features/motion';
 
 const ROLE_LABELS: Record<UserRole, { label: string; type: 'work' | 'personal' }> = {
   'decision-maker': { label: 'Người ra quyết định', type: 'work' },
@@ -97,6 +103,8 @@ export const NowTab: React.FC = () => {
     finishFreeTimer,
     deleteFreeTimer,
     restartFreeTimer,
+    passiveSuggestions,
+    setIsActiveCaptureOpen,
   } = useApp();
 
   const { t } = useT();
@@ -114,6 +122,34 @@ export const NowTab: React.FC = () => {
   const [elapsedMinutes, setElapsedMinutes] = useState<number>(35);
   const [secondsTick, setSecondsTick] = useState<number>(5);
   const [showOverrunNotice, setShowOverrunNotice] = useState<boolean>(false);
+
+  // PRD FIX v0.3.30 Part B3.3: StepsTile State
+  const [stepsToday, setStepsToday] = useState<number>(0);
+  const [movingMinsToday, setMovingMinsToday] = useState<number>(0);
+  const [hasMotionPermission, setHasMotionPermission] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isNativePlatform || !isMotionTrackingEnabled()) return;
+
+    getMotionCapability().then(async cap => {
+      if (cap.authorizationStatus === 'authorized') {
+        setHasMotionPermission(true);
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const fromSec = Math.floor(startOfDay.getTime() / 1000);
+        const toSec = Math.floor(now.getTime() / 1000);
+        const pedo = await queryPedometer(fromSec, toSec);
+        setStepsToday(pedo.steps);
+        const mins = Math.max(
+          Math.round(pedo.steps / 100),
+          (dailyCardItems || [])
+            .filter(i => (i.extra?.steps as number || 0) > 0)
+            .reduce((sum, curr) => sum + (curr.extra?.actualMinutes as number || 0), 0)
+        );
+        setMovingMinsToday(mins);
+      }
+    });
+  }, [isNativePlatform, dailyCardItems]);
   // B19 v0.3.17: Remembered per user, default on
   const [liveActivityActive, setLiveActivityActive] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -258,7 +294,17 @@ export const NowTab: React.FC = () => {
 
       {/* PRD FIX v0.3.30 Part B4: Core Motion Invitation Card on iPhone */}
       {isNativePlatform && !isMotionPermissionCardDismissed() && (
-        <MotionPermissionCard />
+        <MotionPermissionCard onPermissionChanged={(granted) => setHasMotionPermission(granted)} />
+      )}
+
+      {/* PRD FIX v0.3.30 Part B3.3: StepsTile on iPhone */}
+      {isNativePlatform && hasMotionPermission && isMotionTrackingEnabled() && (
+        <StepsTile
+          stepsToday={stepsToday}
+          movingMinutesToday={movingMinsToday}
+          unconfirmedCount={(passiveSuggestions || []).filter(s => s.status === 'pending' && s.source === 'motion').length}
+          onClick={() => setIsActiveCaptureOpen(true)}
+        />
       )}
 
       {/* Off-plan Warning Banner (PRD v0.8 B5) */}

@@ -13,7 +13,8 @@ import {
   ShieldCheck, 
   RotateCw, 
   Share2, 
-  AlertTriangle 
+  AlertTriangle,
+  Footprints
 } from 'lucide-react';
 
 export const CloseDayModal: React.FC = () => {
@@ -27,7 +28,9 @@ export const CloseDayModal: React.FC = () => {
     dailyCardItems, 
     carryOverItem, 
     setExportModalOpen,
-    palette
+    palette,
+    passiveSuggestions,
+    setIsActiveCaptureOpen,
   } = useApp();
 
   const isCool = palette === 'cool';
@@ -77,6 +80,31 @@ export const CloseDayModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* PRD FIX v0.3.30 Part B3.4: Dấu báo còn đoạn di chuyển chưa ghi */}
+        {(() => {
+          const unconfirmedMotionCount = (passiveSuggestions || []).filter(s => s.status === 'pending' && s.source === 'motion').length;
+          if (unconfirmedMotionCount <= 0) return null;
+          return (
+            <div 
+              onClick={() => {
+                setCloseDayModalOpen(false);
+                setIsActiveCaptureOpen(true);
+              }}
+              className="mb-4 p-3 rounded-2xl bg-orange-50 border border-orange-200/80 text-orange-900 text-xs flex items-center justify-between gap-2 cursor-pointer hover:bg-orange-100 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Footprints className="w-4 h-4 text-orange-600 shrink-0" />
+                <span className="font-semibold">
+                  Còn {unconfirmedMotionCount} đoạn di chuyển chưa ghi
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-orange-600 flex items-center gap-0.5">
+                Xem & Ghi ↗
+              </span>
+            </div>
+          );
+        })()}
 
         <div className="space-y-4">
           

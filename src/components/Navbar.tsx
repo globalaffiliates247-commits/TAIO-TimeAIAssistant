@@ -52,6 +52,7 @@ export const Navbar: React.FC = () => {
     userProfileDetail,
     setIsSwipeModalOpen,
     setIsActiveCaptureOpen,
+    passiveSuggestions,
     palette,
     setPalette,
     currentPaletteColors,
@@ -424,11 +425,20 @@ export const Navbar: React.FC = () => {
           {/* Active Capture & Backfill (PRD B30) */}
           <button
             onClick={() => setIsActiveCaptureOpen(true)}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all font-semibold relative"
             title="Thu thập chủ động & Ghi bù"
           >
             <Clock className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
             <span>Ghi bù</span>
+            {(() => {
+              const count = (passiveSuggestions || []).filter(s => s.status === 'pending' && s.source === 'motion').length;
+              if (count <= 0) return null;
+              return (
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold text-white ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`}>
+                  {count}
+                </span>
+              );
+            })()}
           </button>
 
           {/* Tone of Voice Selector */}
@@ -575,10 +585,21 @@ export const Navbar: React.FC = () => {
 
             <button
               onClick={() => { setIsActiveCaptureOpen(true); setMobileMenuOpen(false); }}
-              className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
+              className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-semibold text-slate-800"
             >
-              <Clock className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
-              <span>Ghi bù thời gian</span>
+              <div className="flex items-center gap-2">
+                <Clock className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <span>Ghi bù thời gian</span>
+              </div>
+              {(() => {
+                const count = (passiveSuggestions || []).filter(s => s.status === 'pending' && s.source === 'motion').length;
+                if (count <= 0) return null;
+                return (
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold text-white ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`}>
+                    {count}
+                  </span>
+                );
+              })()}
             </button>
 
             <button
