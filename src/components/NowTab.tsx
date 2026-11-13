@@ -8,7 +8,8 @@ import { useT } from '@/i18n/useT';
 import {
   startNativeLiveActivity,
   stopNativeLiveActivity,
-  openNativeDeviceTimer
+  openNativeDeviceTimer,
+  openNativeAppSettings
 } from '../features/native';
 import { 
   Clock, 
@@ -611,24 +612,52 @@ export const NowTab: React.FC = () => {
               const isWarning = (currentEndType === 'timebox' && activeMins <= 0) || isOverTimeLimit;
               const strokeColor = isWarning ? '#F59E0B' : (isCool ? '#007AFF' : '#E0401F');
 
-              const handleToggleLockScreenClock = () => {
+              const handleToggleLockScreenClock = async () => {
                 if (!isNativePlatform) return;
                 const next = !liveActivityActive;
-                setLiveActivityActive(next);
+                if (!next) {
+                  setLiveActivityActive(false);
+                  try {
+                    window.localStorage.setItem('taio_lockscreen_clock_enabled', 'false');
+                  } catch {}
+                  await stopNativeLiveActivity();
+                  showToast('Đã tắt đồng hồ trên màn hình khóa');
+                  return;
+                }
+
+                setLiveActivityActive(true);
                 try {
-                  window.localStorage.setItem('taio_lockscreen_clock_enabled', String(next));
+                  window.localStorage.setItem('taio_lockscreen_clock_enabled', 'true');
                 } catch {}
-                if (next) {
-                  startNativeLiveActivity({
-                    blockId: currentBlock?.id || 'now-block',
-                    taskTitle: currentBlock?.title || 'Tập trung sâu',
-                    goalName: linkedGoal?.name || 'Mục tiêu chính',
-                    isCountDown: currentEndType === 'timebox',
-                    totalMinutes: totalTargetMins,
-                    remainingMinutes: activeMins,
-                  });
+
+                const res = await startNativeLiveActivity({
+                  blockId: currentBlock?.id || 'now-block',
+                  taskTitle: currentBlock?.title || 'Tập trung sâu',
+                  goalName: linkedGoal?.name || 'Mục tiêu chính',
+                  isCountDown: currentEndType === 'timebox',
+                  totalMinutes: totalTargetMins,
+                  remainingMinutes: activeMins,
+                });
+
+                if (!res.ok) {
+                  // Reflect real result, not intention (spec D2.5)
+                  setLiveActivityActive(false);
+                  try {
+                    window.localStorage.setItem('taio_lockscreen_clock_enabled', 'false');
+                  } catch {}
+
+                  if (res.error === 'live_activity_disabled_by_user') {
+                    showToast(
+                      'Hoạt động trực tiếp đã bị tắt trong Cài đặt iPhone',
+                      () => { openNativeAppSettings(); },
+                      'error',
+                      'Mở Cài đặt'
+                    );
+                  } else {
+                    showToast(res.message || res.error || 'Không thể bật đồng hồ màn hình khóa', undefined, 'error');
+                  }
                 } else {
-                  stopNativeLiveActivity();
+                  showToast('Đồng hồ đang hiện trên màn hình khóa');
                 }
               };
 

@@ -28,6 +28,7 @@ import { ProfileModal } from '../components/ProfileModal';
 import { SwipeReviewModal } from '../components/SwipeReviewModal';
 import { ReminderQuestionsModal } from '../components/ReminderQuestionsModal';
 import { ActiveCaptureModal } from '../components/ActiveCaptureModal';
+import { useLockScreenClock } from '../features/quick-entry';
 import { Sparkles, X, Smartphone, AlertCircle } from 'lucide-react';
 
 const OrientationHint: React.FC = () => {
@@ -50,6 +51,7 @@ const OrientationHint: React.FC = () => {
 };
 
 const MainAppContent: React.FC = () => {
+  useLockScreenClock();
   const {
     currentTab,
     celebrationMsg,
@@ -59,6 +61,7 @@ const MainAppContent: React.FC = () => {
     toastMsg,
     toastType,
     toastUndoAction,
+    toastActionLabel,
     dismissToast,
     isOnboarded,
     hasServerBackupToRestore,
@@ -120,7 +123,7 @@ const MainAppContent: React.FC = () => {
                   }}
                   className="px-2.5 py-1 rounded-lg bg-[#E0401F] text-white font-bold text-[11px] shrink-0"
                 >
-                  Hoàn tác
+                  {toastActionLabel || 'Hoàn tác'}
                 </button>
               )}
               <button

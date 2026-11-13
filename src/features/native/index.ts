@@ -45,15 +45,21 @@ export interface TAIONativePluginInterface {
     isCountDown: boolean;
     totalMinutes: number;
     remainingMinutes: number;
-  }): Promise<{ ok: boolean; started?: boolean; activityId?: string; error?: string }>;
+    startTimestamp?: number;
+    targetTimestamp?: number;
+  }): Promise<{ ok: boolean; started?: boolean; activityId?: string; error?: string; message?: string }>;
   updateLiveActivity(options: {
     taskTitle: string;
     goalName: string;
     isCountDown: boolean;
     remainingMinutes: number;
     isPaused: boolean;
-  }): Promise<{ ok: boolean; updated?: boolean }>;
+    totalMinutes?: number;
+    startTimestamp?: number;
+    targetTimestamp?: number;
+  }): Promise<{ ok: boolean; updated?: boolean; error?: string; message?: string }>;
   stopLiveActivity(): Promise<{ ok: boolean }>;
+  openAppSettings(): Promise<{ ok?: boolean; opened: boolean }>;
   // v0.3.24: names now match the Swift plugin (TAIONativePlugin.swift)
   scheduleNotification(options: {
     id: string;
@@ -140,6 +146,14 @@ export async function verifyNativeBridgeCapabilities(): Promise<RuntimeCapabilit
   return base;
 }
 
+export interface LiveActivityResult {
+  ok: boolean;
+  started?: boolean;
+  updated?: boolean;
+  error?: string;
+  message?: string;
+}
+
 export async function startNativeLiveActivity(params: {
   blockId: string;
   taskTitle: string;
@@ -147,15 +161,22 @@ export async function startNativeLiveActivity(params: {
   isCountDown: boolean;
   totalMinutes: number;
   remainingMinutes: number;
-}): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false;
+  startTimestamp?: number; // In seconds
+  targetTimestamp?: number; // In seconds
+}): Promise<LiveActivityResult> {
+  if (!Capacitor.isNativePlatform()) return { ok: false, error: 'not_native' };
   try {
     const res = await TAIONative.startLiveActivity(params);
-    if (!res?.ok) console.warn('[native] Live Activity not started:', res?.error);
-    return !!res?.ok;
-  } catch (err) {
+    if (!res?.ok) console.warn('[native] Live Activity not started:', res?.error, res?.message);
+    return {
+      ok: !!res?.ok,
+      started: !!res?.started,
+      error: res?.error,
+      message: res?.message
+    };
+  } catch (err: any) {
     console.warn('[native] startLiveActivity failed', err);
-    return false;
+    return { ok: false, error: 'exception', message: err?.message || String(err) };
   }
 }
 
@@ -165,13 +186,21 @@ export async function updateNativeLiveActivity(params: {
   isCountDown: boolean;
   remainingMinutes: number;
   isPaused: boolean;
-}): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false;
+  totalMinutes?: number;
+  startTimestamp?: number; // In seconds
+  targetTimestamp?: number; // In seconds
+}): Promise<LiveActivityResult> {
+  if (!Capacitor.isNativePlatform()) return { ok: false, error: 'not_native' };
   try {
     const res = await TAIONative.updateLiveActivity(params);
-    return !!res?.ok;
-  } catch {
-    return false;
+    return {
+      ok: !!res?.ok,
+      updated: !!res?.updated,
+      error: res?.error,
+      message: res?.message
+    };
+  } catch (err: any) {
+    return { ok: false, error: 'exception', message: err?.message || String(err) };
   }
 }
 
@@ -180,6 +209,16 @@ export async function stopNativeLiveActivity(): Promise<boolean> {
   try {
     const res = await TAIONative.stopLiveActivity();
     return !!res?.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function openNativeAppSettings(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    const res = await TAIONative.openAppSettings();
+    return !!res?.opened;
   } catch {
     return false;
   }

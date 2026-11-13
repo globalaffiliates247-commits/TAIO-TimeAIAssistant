@@ -22,8 +22,10 @@ import {
   Smartphone,
   Laptop,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
+import { startNativeLiveActivity, stopNativeLiveActivity, openNativeAppSettings } from '../features/native';
 import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
 import { DataImportSection } from '../features/data-transfer';
@@ -54,7 +56,65 @@ export const ProfileModal: React.FC = () => {
     exportTaioJsonV1,
     alarmSettings,
     setAlarmSettings,
+    isNativePlatform,
+    showToast,
+    scheduleBlocks,
+    goals,
   } = useApp();
+
+  const [lockScreenClockEnabled, setLockScreenClockEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('taio_lockscreen_clock_enabled');
+      if (saved !== null) return saved === 'true';
+    }
+    return true;
+  });
+
+  const handleToggleLockScreenClock = async () => {
+    const next = !lockScreenClockEnabled;
+    if (!next) {
+      setLockScreenClockEnabled(false);
+      try { window.localStorage.setItem('taio_lockscreen_clock_enabled', 'false'); } catch {}
+      await stopNativeLiveActivity();
+      showToast('Đã tắt đồng hồ trên màn hình khóa');
+      return;
+    }
+
+    try { window.localStorage.setItem('taio_lockscreen_clock_enabled', 'true'); } catch {}
+    setLockScreenClockEnabled(true);
+
+    if (isNativePlatform) {
+      const inProgress = scheduleBlocks.find(b => b.status === 'in_progress');
+      if (inProgress) {
+        const linkedGoal = goals.find(g => g.id === inProgress.goalId);
+        const res = await startNativeLiveActivity({
+          blockId: inProgress.id,
+          taskTitle: inProgress.title,
+          goalName: linkedGoal?.name || inProgress.goalName || 'Mục tiêu chính',
+          isCountDown: true,
+          totalMinutes: inProgress.estimatedMinutes || 60,
+          remainingMinutes: 30,
+        });
+        if (!res.ok) {
+          // Reflect real result, not intention (spec D2.5)
+          setLockScreenClockEnabled(false);
+          try { window.localStorage.setItem('taio_lockscreen_clock_enabled', 'false'); } catch {}
+          if (res.error === 'live_activity_disabled_by_user') {
+            showToast(
+              'Hoạt động trực tiếp đã bị tắt trong Cài đặt iPhone',
+              () => { openNativeAppSettings(); },
+              'error',
+              'Mở Cài đặt'
+            );
+          } else {
+            showToast(res.message || res.error || 'Không thể bật đồng hồ màn hình khóa', undefined, 'error');
+          }
+          return;
+        }
+      }
+      showToast('Đồng hồ màn hình khóa đã được bật');
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'community'>('profile');
   // B27 v0.3.12: Delete all data confirmation state
@@ -380,6 +440,36 @@ export const ProfileModal: React.FC = () => {
                   settings={alarmSettings}
                   onSettingsChange={setAlarmSettings}
                 />
+              </div>
+
+              {/* PRD FIX v0.3.30 Part D: Cá nhân -> Đồng hồ màn hình khóa & Dynamic Island */}
+              <div className="pt-2 border-t border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-orange-500" />
+                      <h4 className="text-xs font-bold text-slate-900">Hiện đồng hồ trên màn hình khóa (iPhone)</h4>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Tự động hiện việc đang làm và đếm ngược trên Màn hình khóa & Dynamic Island (Live Activity)
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={lockScreenClockEnabled}
+                    onClick={handleToggleLockScreenClock}
+                    className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
+                      lockScreenClockEnabled ? 'bg-[#E0401F]' : 'bg-slate-300'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+                        lockScreenClockEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
 
               {/* Data Export & Privacy */}

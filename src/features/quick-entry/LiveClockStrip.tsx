@@ -5,9 +5,37 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getDeviceTimeMinutes, timeToMinutes, computeBlockStatus } from '@/core/clock';
 import { Clock, ExternalLink, Sparkles } from 'lucide-react';
+import { startNativeLiveActivity, openNativeAppSettings } from '@/features/native';
+import type { TimeBlock } from '@/types';
+
+function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targetTimestamp: number; totalMinutes: number; remainingMinutes: number } {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const date = now.getDate();
+  const nowSec = Math.floor(now.getTime() / 1000);
+
+  const [startH, startM] = (block.startTime || '00:00').split(':').map(Number);
+  const [endH, endM] = (block.endTime || '23:59').split(':').map(Number);
+
+  const startDate = new Date(year, month, date, startH || 0, startM || 0, 0);
+  const endDate = new Date(year, month, date, endH || 0, endM || 0, 0);
+
+  if (endDate.getTime() <= startDate.getTime()) {
+    endDate.setDate(endDate.getDate() + 1);
+  }
+
+  const startTimestamp = Math.floor(startDate.getTime() / 1000);
+  const targetTimestamp = Math.floor(endDate.getTime() / 1000);
+
+  const totalMinutes = Math.max(5, Math.round((targetTimestamp - startTimestamp) / 60));
+  const remainingMinutes = Math.max(1, Math.round((targetTimestamp - nowSec) / 60));
+
+  return { startTimestamp, targetTimestamp, totalMinutes, remainingMinutes };
+}
 
 export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
-  const { scheduleBlocks, language, palette } = useApp();
+  const { scheduleBlocks, goals, language, palette, isNativePlatform, showToast } = useApp();
   const [nowSec, setNowSec] = useState(() => Date.now());
 
   const isCool = palette === 'cool';
@@ -49,10 +77,63 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
-  const handleOpenDetachedClock = () => {
+  const handleOpenDetachedClock = async () => {
+    // 1. macOS Desktop: Open separate floating clock window
     if (typeof window !== 'undefined' && (window as any).taioAPI?.openClockWindow) {
       (window as any).taioAPI.openClockWindow();
+      return;
     }
+
+    // 2. iOS / Native platform: tap on clock strip controls/reports Lock Screen Clock
+    if (isNativePlatform) {
+      try {
+        window.localStorage.setItem('taio_lockscreen_clock_enabled', 'true');
+      } catch {}
+
+      if (inProgressBlock) {
+        const { startTimestamp, targetTimestamp, totalMinutes, remainingMinutes } = parseBlockTimestamps(inProgressBlock);
+        const linkedGoal = goals.find(g => g.id === inProgressBlock.goalId);
+        const goalName = linkedGoal?.name || inProgressBlock.goalName || 'Mục tiêu chính';
+
+        const res = await startNativeLiveActivity({
+          blockId: inProgressBlock.id,
+          taskTitle: inProgressBlock.title,
+          goalName,
+          isCountDown: inProgressBlock.taskEndType === 'timebox' || !inProgressBlock.taskEndType,
+          totalMinutes,
+          remainingMinutes,
+          startTimestamp,
+          targetTimestamp,
+        });
+
+        if (res.ok) {
+          showToast(isVi ? 'Đồng hồ đang hiện trên màn hình khóa' : 'Clock is now active on Lock Screen');
+        } else if (res.error === 'live_activity_disabled_by_user') {
+          showToast(
+            isVi ? 'Hoạt động trực tiếp đã bị tắt trong Cài đặt iPhone' : 'Live Activities disabled in iPhone Settings',
+            () => { openNativeAppSettings(); },
+            'error',
+            isVi ? 'Mở Cài đặt' : 'Settings'
+          );
+        } else if (res.error === 'ios_version_unsupported') {
+          showToast(
+            isVi ? 'Cần iOS 16.1 trở lên để hiện đồng hồ màn hình khóa' : 'Requires iOS 16.1 or later',
+            undefined,
+            'error'
+          );
+        } else {
+          showToast(res.message || res.error || (isVi ? 'Không thể bật đồng hồ' : 'Failed to start clock'), undefined, 'error');
+        }
+      } else {
+        showToast(
+          isVi ? 'Đồng hồ màn hình khóa đã bật (sẽ hiện khi có việc đang chạy)' : 'Lock Screen clock enabled (will show when task is running)'
+        );
+      }
+      return;
+    }
+
+    // 3. Web fallback: informative feedback
+    showToast(isVi ? `Đồng hồ hiện tại: ${curTimeStr}` : `Current Clock: ${curTimeStr}`);
   };
 
   let contentNode: React.ReactNode = null;

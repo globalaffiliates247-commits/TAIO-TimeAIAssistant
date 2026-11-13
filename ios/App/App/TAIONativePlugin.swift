@@ -25,6 +25,7 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         CAPPluginMethod(name: "registerGeofence", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "removeGeofence", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "openDeviceTimer", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "openAppSettings", returnType: CAPPluginReturnPromise),
         // B32 alarms (TAIONativePlugin+Alarm.swift)
         CAPPluginMethod(name: "importAlarmSound", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "hasAlarmSound", returnType: CAPPluginReturnPromise),
@@ -228,7 +229,7 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         }
     }
 
-    // MARK: - ActivityKit Live Activities (E4 & B18)
+    // MARK: - ActivityKit Live Activities (E4 & B18 & FIX v0.3.30 Part D)
 
     @objc func startLiveActivity(_ call: CAPPluginCall) {
         let blockId = call.getString("blockId", "now-block")
@@ -238,21 +239,39 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         let totalMinutes = call.getInt("totalMinutes", 60)
         let remainingMinutes = call.getInt("remainingMinutes", 30)
 
+        // FIX v0.3.30 D2.1: Unified units in SECONDS
+        let nowSec = Date().timeIntervalSince1970
+        let customStart = call.getDouble("startTimestamp")
+        let customTarget = call.getDouble("targetTimestamp")
+
+        let startTs = customStart ?? nowSec
+        let targetTs = customTarget ?? (startTs + Double(max(1, remainingMinutes) * 60))
+
         if #available(iOS 16.1, *) {
             #if canImport(ActivityKit)
+            // Check if Live Activities are enabled in system settings
+            if !ActivityAuthorizationInfo().areActivitiesEnabled {
+                call.resolve([
+                    "ok": false,
+                    "started": false,
+                    "native": true,
+                    "error": "live_activity_disabled_by_user",
+                    "message": "Hoạt động trực tiếp đã bị tắt trong Cài đặt của iPhone. Vui lòng bật lại để hiện đồng hồ trên màn hình khóa."
+                ])
+                return
+            }
+
             Task {
                 for activity in Activity<TAIOTimerAttributes>.activities {
                     await activity.end(dismissalPolicy: .immediate)
                 }
-                let nowTs = Date().timeIntervalSince1970 * 1000.0
-                let targetTs = nowTs + Double(max(1, remainingMinutes) * 60 * 1000)
                 let attributes = TAIOTimerAttributes(blockId: blockId)
                 let state = TAIOTimerAttributes.ContentState(
                     taskTitle: taskTitle,
                     goalName: goalName,
                     isCountDown: isCountDown,
                     targetTimestamp: targetTs,
-                    startTimestamp: nowTs,
+                    startTimestamp: startTs,
                     totalMinutes: totalMinutes,
                     remainingMinutes: remainingMinutes,
                     isPaused: false
@@ -265,14 +284,35 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
                     )
                     call.resolve(["ok": true, "started": true, "activityId": activity.id, "native": true])
                 } catch {
-                    // v0.3.24: report the real failure (e.g. widget extension missing, Live Activities off)
-                    call.resolve(["ok": false, "started": false, "native": true, "error": error.localizedDescription])
+                    call.resolve([
+                        "ok": false,
+                        "started": false,
+                        "native": true,
+                        "error": error.localizedDescription,
+                        "message": error.localizedDescription
+                    ])
                 }
             }
             return
+            #else
+            call.resolve([
+                "ok": false,
+                "started": false,
+                "native": true,
+                "error": "activity_kit_unavailable",
+                "message": "ActivityKit không khả dụng trên thiết bị này."
+            ])
+            return
             #endif
+        } else {
+            call.resolve([
+                "ok": false,
+                "started": false,
+                "native": true,
+                "error": "ios_version_unsupported",
+                "message": "Cần iOS 16.1 trở lên để hiển thị đồng hồ trên màn hình khóa."
+            ])
         }
-        call.resolve(["ok": true, "native": true])
     }
 
     @objc func updateLiveActivity(_ call: CAPPluginCall) {
@@ -283,17 +323,23 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         let remainingMinutes = call.getInt("remainingMinutes", 25)
         let isPaused = call.getBool("isPaused", false)
 
+        // FIX v0.3.30 D2.1: Unified units in SECONDS
+        let nowSec = Date().timeIntervalSince1970
+        let customStart = call.getDouble("startTimestamp")
+        let customTarget = call.getDouble("targetTimestamp")
+
+        let startTs = customStart ?? nowSec
+        let targetTs = customTarget ?? (startTs + Double(max(1, remainingMinutes) * 60))
+
         if #available(iOS 16.1, *) {
             #if canImport(ActivityKit)
             Task {
-                let nowTs = Date().timeIntervalSince1970 * 1000.0
-                let targetTs = nowTs + Double(max(1, remainingMinutes) * 60 * 1000)
                 let state = TAIOTimerAttributes.ContentState(
                     taskTitle: taskTitle,
                     goalName: goalName,
                     isCountDown: isCountDown,
                     targetTimestamp: targetTs,
-                    startTimestamp: nowTs,
+                    startTimestamp: startTs,
                     totalMinutes: totalMinutes,
                     remainingMinutes: remainingMinutes,
                     isPaused: isPaused
@@ -322,6 +368,20 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
             #endif
         }
         call.resolve(["ok": true, "native": true])
+    }
+
+    @objc func openAppSettings(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                if UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url, options: [:]) { success in
+                        call.resolve(["ok": success, "opened": success])
+                    }
+                    return
+                }
+            }
+            call.resolve(["ok": false, "opened": false])
+        }
     }
 
     // MARK: - Local Notifications (E4)

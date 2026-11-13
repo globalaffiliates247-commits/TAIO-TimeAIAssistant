@@ -379,7 +379,8 @@ interface AppContextType {
   toastMsg: string | null;
   toastType: 'confirmation' | 'error';
   toastUndoAction: (() => void) | null;
-  showToast: (msg: string, onUndo?: () => void, type?: 'confirmation' | 'error') => void;
+  toastActionLabel: string | null;
+  showToast: (msg: string, onUndo?: () => void, type?: 'confirmation' | 'error', actionLabel?: string) => void;
   dismissToast: () => void;
   // v0.3.11 B14: Bell notifications (5 most recent)
   notifications: AppNotificationItem[];
@@ -512,14 +513,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'confirmation' | 'error'>('confirmation');
   const [toastUndoAction, setToastUndoAction] = useState<(() => void) | null>(null);
+  const [toastActionLabel, setToastActionLabel] = useState<string | null>(null);
   const dismissToast = () => {
     setToastMsg(null);
     setToastUndoAction(null);
+    setToastActionLabel(null);
   };
-  const showToast = (msg: string, onUndo?: () => void, type: 'confirmation' | 'error' = 'confirmation') => {
+  const showToast = (
+    msg: string, 
+    onUndo?: () => void, 
+    type: 'confirmation' | 'error' = 'confirmation',
+    actionLabel?: string
+  ) => {
     setToastMsg(msg);
     setToastType(type);
     setToastUndoAction(() => onUndo || null);
+    setToastActionLabel(actionLabel || null);
     if (type === 'error') {
       const nowTime = new Date().toTimeString().slice(0, 5);
       setNotifications(prev => [
@@ -2315,6 +2324,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       toastMsg,
       toastType,
       toastUndoAction,
+      toastActionLabel,
       showToast,
       dismissToast,
       notifications,
