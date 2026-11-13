@@ -44,7 +44,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
     const allQuotes = getAllQuotes(serverQuotes, userState.customQuotes);
 
     // Find first active goal to prioritize related quote
-    const activeGoal = (goals || []).find(g => g.status === 'in_progress' || g.status === 'not_started');
+    const activeGoal = (goals || []).find(g => (g.progressPercent ?? 0) < 100);
 
     const recentIds = getRecent7DaysQuoteIds(userState.recentQuoteIds);
     const picked = pickQuote({
@@ -53,7 +53,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
       lang: language,
       favorites: userState.favorites,
       pinnedQuoteId: userState.pinnedQuoteId,
-      activeGoalName: activeGoal?.title,
+      activeGoalName: activeGoal?.name,
       activeGoalId: activeGoal?.id,
       recentQuoteIds: recentIds,
     });

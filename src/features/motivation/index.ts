@@ -5,3 +5,4 @@ export * from './model/motivationStore';
 export * from './ui/MotivationSticker';
 export * from './ui/StartDayCard';
 export * from './ui/MotivationSettingsSection';
+export * from './admin/QuoteAdmin';

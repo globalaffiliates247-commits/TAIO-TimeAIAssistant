@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { QuoteAdmin } from '@/features/motivation';
 import { PROFILES } from '../data/mockData';
 import { 
   Users, 
@@ -52,7 +53,7 @@ const MOCK_USERS: MockUser[] = [
 
 export const AdminPortal: React.FC = () => {
   const { setCurrentTab, openDrilldown, aiSuggestions, handleSuggestionAction } = useApp();
-  const [activeSubTab, setActiveSubTab] = useState<'users' | 'analytics' | 'c6_ai' | 'tone'>('analytics');
+  const [activeSubTab, setActiveSubTab] = useState<'users' | 'analytics' | 'c6_ai' | 'tone' | 'quotes'>('analytics');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [profileFilter, setProfileFilter] = useState<string>('all');
   const [usersList, setUsersList] = useState<MockUser[]>(MOCK_USERS);
@@ -133,6 +134,15 @@ export const AdminPortal: React.FC = () => {
           >
             <Volume2 className="w-3.5 h-3.5" />
             <span>Cấu hình giọng (Tone AI)</span>
+          </button>
+          <button
+            onClick={() => setActiveSubTab('quotes')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              activeSubTab === 'quotes' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Kho câu động lực</span>
           </button>
         </div>
       </div>
@@ -672,6 +682,11 @@ export const AdminPortal: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 5. Motivation Quotes Sub-Tab (PRD FEATURE v0.3.31 Part E) */}
+      {activeSubTab === 'quotes' && (
+        <QuoteAdmin />
       )}
 
     </div>
