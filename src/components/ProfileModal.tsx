@@ -23,9 +23,11 @@ import {
   Laptop,
   Trash2,
   AlertTriangle,
-  Clock
+  Clock,
+  Footprints
 } from 'lucide-react';
 import { startNativeLiveActivity, stopNativeLiveActivity, openNativeAppSettings } from '../features/native';
+import { isMotionTrackingEnabled, setMotionTrackingEnabled, getMotionCapability } from '@/features/motion';
 import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
 import { DataImportSection } from '../features/data-transfer';
@@ -62,6 +64,8 @@ export const ProfileModal: React.FC = () => {
     goals,
   } = useApp();
 
+  const isCool = palette === 'cool';
+
   const [lockScreenClockEnabled, setLockScreenClockEnabled] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = window.localStorage.getItem('taio_lockscreen_clock_enabled');
@@ -69,6 +73,17 @@ export const ProfileModal: React.FC = () => {
     }
     return true;
   });
+
+  const [motionTrackingState, setMotionTrackingState] = useState<boolean>(() => isMotionTrackingEnabled());
+  const [motionAuthStatus, setMotionAuthStatus] = useState<string>('unknown');
+
+  React.useEffect(() => {
+    if (isNativePlatform) {
+      getMotionCapability().then(cap => {
+        setMotionAuthStatus(cap.authorizationStatus);
+      });
+    }
+  }, [isNativePlatform]);
 
   const handleToggleLockScreenClock = async () => {
     const next = !lockScreenClockEnabled;
@@ -483,6 +498,59 @@ export const ProfileModal: React.FC = () => {
                     <li>Chọn kiểu Widget mong muốn và bấm <strong>Thêm tiện ích (Add Widget)</strong>.</li>
                   </ol>
                 </div>
+
+                {/* PRD FIX v0.3.30 Part B4: Tự ghi nhận bằng chuyển động */}
+                {isNativePlatform && (
+                  <div className="pt-2 border-t border-slate-200/80 space-y-2">
+                    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <Footprints className="w-4 h-4 text-orange-500" />
+                          <h4 className="text-xs font-bold text-slate-900">Tự ghi nhận bằng chuyển động</h4>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Đếm bước chân và tự động nhận ra các đoạn đi bộ / di chuyển mà bạn quên ghi
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={motionTrackingState}
+                        onClick={() => {
+                          const next = !motionTrackingState;
+                          setMotionTrackingEnabled(next);
+                          setMotionTrackingState(next);
+                          showToast(next ? 'Đã bật tự ghi nhận chuyển động' : 'Đã tắt và xóa dữ liệu chuyển động thô trên máy');
+                        }}
+                        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
+                          motionTrackingState ? (isCool ? 'bg-[#007AFF]' : 'bg-[#E0401F]') : 'bg-slate-300'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+                            motionTrackingState ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {motionAuthStatus === 'denied' && (
+                      <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-2 text-xs">
+                        <span className="text-amber-800 text-[11px]">
+                          Quyền chuyển động đã bị từ chối trong Cài đặt iPhone.
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => openNativeAppSettings()}
+                          className="px-2.5 py-1 rounded-lg bg-amber-200/70 hover:bg-amber-200 text-amber-900 font-bold text-[11px] shrink-0"
+                        >
+                          Mở Cài đặt
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Data Export & Privacy */}

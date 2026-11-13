@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { QuickEntryTiles, QuickLineInput } from '../features/quick-entry';
 import { FreeTimerInput, FreeTimerList } from '@/features/clock';
+import { MotionPermissionCard, isMotionPermissionCardDismissed } from '@/features/motion';
 
 const ROLE_LABELS: Record<UserRole, { label: string; type: 'work' | 'personal' }> = {
   'decision-maker': { label: 'Người ra quyết định', type: 'work' },
@@ -254,6 +255,11 @@ export const NowTab: React.FC = () => {
       {/* PRD FIX v0.3.28 B1 & B3: Quick Entry Tiles and Mac QuickLineInput */}
       <QuickEntryTiles />
       <QuickLineInput />
+
+      {/* PRD FIX v0.3.30 Part B4: Core Motion Invitation Card on iPhone */}
+      {isNativePlatform && !isMotionPermissionCardDismissed() && (
+        <MotionPermissionCard />
+      )}
 
       {/* Off-plan Warning Banner (PRD v0.8 B5) */}
       {isOffPlan && (
