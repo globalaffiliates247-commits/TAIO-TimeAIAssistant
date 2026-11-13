@@ -30,3 +30,9 @@ export const IconLock = ({ color, size = 13 }: P) => (
 export const IconSpark = ({ color, size = 14 }: P) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color}><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z" /></svg>
 );
+export const IconOverlap = ({ color, size = 13 }: P) => (
+  <svg {...base(size)} stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="12" height="12" rx="2" />
+    <path d="M9 15v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-4" />
+  </svg>
+);

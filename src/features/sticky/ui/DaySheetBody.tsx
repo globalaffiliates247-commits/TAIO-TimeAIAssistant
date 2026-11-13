@@ -1,16 +1,16 @@
 'use client';
-// PRD B34 v0.3.26: "Hôm nay" sheet. Lines are Thẻ ngày items (so they sync and show in Rổ công việc):
+// PRD B34 v0.3.26 / FIX v0.3.28: "Hôm nay" sheet. Lines are Thẻ ngày items (so they sync and show in Rổ công việc):
 // a line that starts with a time is "Có giờ", lines under "Chưa xếp giờ" are "Linh động".
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import type { DailyCardItem } from '@/types';
 import { getDeviceNow } from '@/core/clock';
 import { STICKY_COLORS, StickyNote } from '../model/stickyTypes';
 import {
   findGaps, fmtDuration, nextFreeStart, parseTimedText, priorityOf, suggestDuration,
-  suggestForGap, toMins, toTime, durationOf,
+  suggestForGap, toMins, toTime, durationOf, durationForPlacement, findOverlapItemIds,
 } from '../model/timeline';
-import { IconHourglass, IconLock, IconSpark } from './StickyIcons';
+import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -26,6 +26,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const gaps = findGaps(timed, nowMins);
   const gapAfter = new Map(gaps.map(g => [g.afterId, g]));
   const boundIds = new Set(gaps.map(g => timed.find(t => t.start === g.end)?.id));
+  const overlapIds = useMemo(() => findOverlapItemIds(timed), [timed]);
 
   // Composer for timed lines (prefilled with the next free time after accepting a duration)
   const [draft, setDraft] = useState('');
@@ -43,13 +44,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     const p = parseTimedText(draft);
     if (!p.rest) return;
     if (!p.time) {
-      addDailyCardItem({ text: draft.trim(), date: day, origin: 'planned' });
+      const extra = p.durationMins ? { estimateMins: p.durationMins } : undefined;
+      addDailyCardItem({ text: p.rest, date: day, origin: 'planned', extra });
       setDraft('');
       return;
     }
     const dur = p.durationMins ?? pill ?? undefined;
     const end = dur ? toTime(toMins(p.time) + dur) : undefined;
-    addDailyCardItem({ text: p.rest, date: day, start: p.time, end, origin: 'planned' });
+    const extra = dur ? { estimateMins: dur } : undefined;
+    addDailyCardItem({ text: p.rest, date: day, start: p.time, end, origin: 'planned', extra });
     setPill(null);
     // After a duration is set, the next line starts at the next free time (founder flow, 15:45 -> 16:15)
     setDraft(end ? `${nextFreeStart([...timed, { id: 'new', start: p.time, end } as DailyCardItem], toMins(end))} ` : '');
@@ -60,16 +63,45 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     const p = parseTimedText(editText);
     if (!p.rest) { removeDailyCardItem(it.id); setEditing(null); return; }
     const oldDur = durationOf(it);
-    const dur = p.durationMins ?? oldDur;
+    const existingExtra = (it.extra as Record<string, unknown> | undefined) || {};
+    const oldEst = typeof existingExtra.estimateMins === 'number' ? existingExtra.estimateMins : undefined;
+    const dur = p.durationMins ?? oldDur ?? oldEst;
+
     if (p.time) {
-      updateDailyCardItem(it.id, { text: p.rest, start: p.time, end: dur ? toTime(toMins(p.time) + dur) : undefined });
+      const newExtra = { ...existingExtra };
+      if (dur) newExtra.estimateMins = dur;
+      updateDailyCardItem(it.id, {
+        text: p.rest,
+        start: p.time,
+        end: dur ? toTime(toMins(p.time) + dur) : undefined,
+        extra: newExtra,
+      });
     } else {
-      updateDailyCardItem(it.id, { text: p.rest, start: undefined, end: undefined }); // time removed -> unscheduled
+      // Time removed -> unscheduled
+      const newExtra = { ...existingExtra };
+      if (p.durationMins ?? oldEst) {
+        newExtra.estimateMins = p.durationMins ?? oldEst;
+      } else {
+        delete newExtra.estimateMins;
+      }
+      updateDailyCardItem(it.id, {
+        text: p.rest,
+        start: undefined,
+        end: undefined,
+        extra: newExtra,
+      });
     }
     setEditing(null);
   };
 
-  const lineText = (it: DailyCardItem) => (it.start ? `${it.start} ${it.text}${durationOf(it) ? ` ${durationOf(it)}p` : ''}` : it.text);
+  const lineText = (it: DailyCardItem) => {
+    const est = (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
+    if (it.start) {
+      return `${it.start} ${it.text}${durationOf(it) ? ` ${durationOf(it)}p` : ''}`;
+    }
+    return est ? `${it.text} ${est}p` : it.text;
+  };
+
   const pillStyle: React.CSSProperties = { border: `1px solid ${c.line}`, color: c.muted };
 
   const renderText = (it: DailyCardItem) =>
@@ -108,7 +140,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
       {timed.map(it => {
         const gap = gapAfter.get(it.id);
-        const sug = gap ? suggestForGap(flex, taken) : undefined;
+        const sug = gap ? suggestForGap(flex, taken, gap.mins, dailyCardItems) : undefined;
         if (sug) taken.add(sug.id);
         return (
           <React.Fragment key={it.id}>
@@ -118,6 +150,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               {renderText(it)}
               {durationOf(it) && <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>{fmtDuration(durationOf(it)!)}</span>}
               {boundIds.has(it.id) && <span className="shrink-0" title="Đã lên lịch trước"><IconLock color={c.muted} /></span>}
+              {overlapIds.has(it.id) && <span className="shrink-0" title="Chồng giờ với việc trước"><IconOverlap color={c.muted} /></span>}
             </div>
             {gap && (
               <div className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
@@ -126,17 +159,43 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 <span>trống đến {gap.end} · {fmtDuration(gap.mins)}</span>
               </div>
             )}
-            {gap && sug && (
-              <div className="flex items-center gap-2 text-[13.5px] pl-12" style={{ color: c.ink }}>
-                <IconSpark color={c.muted} />
-                <span className="flex-1 min-w-0">Gợi ý: {sug.text.replace(/#\d\b/, '').trim()} · {fmtDuration(Math.min(gap.mins, suggestDuration(sug.text, sug.goalId, dailyCardItems, gap.mins)))}</span>
-                <button className="underline underline-offset-2 font-semibold text-[12.5px]"
-                  onClick={() => updateDailyCardItem(sug.id, { start: gap.start, end: toTime(toMins(gap.start) + Math.min(gap.mins, suggestDuration(sug.text, sug.goalId, dailyCardItems, gap.mins))) })}>
-                  Xếp vào
-                </button>
-                <button className="text-[12.5px]" style={{ color: c.muted }} onClick={() => setSkipped(new Set([...skipped, sug.id]))}>Khác</button>
-              </div>
-            )}
+            {gap && sug && (() => {
+              const dur = durationForPlacement(sug, dailyCardItems);
+              const fits = dur <= gap.mins;
+              return (
+                <div className="flex items-center gap-2 text-[13.5px] pl-12" style={{ color: c.ink }}>
+                  <IconSpark color={c.muted} />
+                  <span className="flex-1 min-w-0">
+                    Gợi ý: {sug.text.replace(/#\d\b/, '').trim()} · {fits ? fmtDuration(dur) : `cần ${fmtDuration(dur)}, trống ${fmtDuration(gap.mins)}`}
+                  </span>
+                  {fits ? (
+                    <button
+                      className="underline underline-offset-2 font-semibold text-[12.5px]"
+                      onClick={() => updateDailyCardItem(sug.id, {
+                        start: gap.start,
+                        end: toTime(toMins(gap.start) + dur),
+                      })}
+                    >
+                      Xếp vào
+                    </button>
+                  ) : (
+                    <button
+                      className="underline underline-offset-2 font-semibold text-[12.5px]"
+                      onClick={() => updateDailyCardItem(sug.id, {
+                        start: gap.start,
+                        end: gap.end,
+                        nextStep: `Còn lại ${dur - gap.mins}p`,
+                      })}
+                    >
+                      Xếp {gap.mins}p
+                    </button>
+                  )}
+                  <button className="text-[12.5px]" style={{ color: c.muted }} onClick={() => setSkipped(new Set([...skipped, sug.id]))}>
+                    Khác
+                  </button>
+                </div>
+              );
+            })()}
           </React.Fragment>
         );
       })}
@@ -165,16 +224,33 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         <span className="text-[11.5px] font-semibold tracking-wide" style={{ color: c.muted }}>CHƯA XẾP GIỜ · LÀM KHI CÓ HỨNG</span>
         <span className="flex-1 h-px" style={{ background: c.line }} />
       </div>
-      {flex.map(it => (
-        <div key={it.id} className="flex items-center gap-2">
-          <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
-          {renderText(it)}
-        </div>
-      ))}
+      {flex.map(it => {
+        const est = (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
+        return (
+          <div key={it.id} className="flex items-center gap-2">
+            <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
+            {renderText(it)}
+            {est && (
+              <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>
+                {fmtDuration(est)}
+              </span>
+            )}
+          </div>
+        );
+      })}
       <input
         value={flexDraft} placeholder="thêm việc chưa xếp giờ…"
         onChange={e => setFlexDraft(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter' && flexDraft.trim()) { addDailyCardItem({ text: flexDraft.trim(), date: day }); setFlexDraft(''); } }}
+        onKeyDown={e => {
+          if (e.key === 'Enter' && flexDraft.trim()) {
+            const p = parseTimedText(flexDraft);
+            if (p.rest) {
+              const extra = p.durationMins ? { estimateMins: p.durationMins } : undefined;
+              addDailyCardItem({ text: p.rest, date: day, extra });
+              setFlexDraft('');
+            }
+          }
+        }}
         className="bg-transparent outline-none placeholder:opacity-60" style={{ color: c.ink }}
       />
 

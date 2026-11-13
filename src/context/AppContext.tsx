@@ -189,6 +189,7 @@ interface AppContextType {
     displacedItemTitle?: string;
     displacedMinutes?: number;
     date?: string; // v0.3.26: sticky day sheet writes to a given day
+    extra?: Record<string, unknown>;
   }) => string;
   // v0.3.26 B34: the sticky day sheet edits Thẻ ngày items in place
   updateDailyCardItem: (id: string, patch: Partial<DailyCardItem>) => void;
@@ -962,6 +963,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     displacedItemTitle?: string;
     displacedMinutes?: number;
     date?: string;
+    extra?: Record<string, unknown>;
   }): string => {
     const goal = goals.find(g => g.id === item.goalId);
     const newItem: DailyCardItem = {
@@ -978,6 +980,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       displacedItemId: item.displacedItemId,
       displacedItemTitle: item.displacedItemTitle,
       displacedMinutes: item.displacedMinutes,
+      extra: item.extra,
       updatedAt: Date.now(),
     };
     setDailyCardItems(prev => {
