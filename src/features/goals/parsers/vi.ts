@@ -21,7 +21,7 @@ const TIME_PATTERNS = [
   /(mỗi|một)\s*(ngày|tuần|tháng)\s*(\d+)\s*(phút|giờ|tiếng)/i,
 ];
 
-const QUANTITY_PATTERN = /(\d+)\s+(clip|video|bài|bài viết|trang|dòng|cuốn|quyển|km|cây số|lần|buổi|cái|chiếc|sản phẩm|đơn|đơn hàng|khách|người|triệu|tỷ|%)/i;
+const QUANTITY_PATTERN = /(\d+[\.,]?\d*)\s+(clip|video|bài|bài viết|trang|dòng|cuốn|quyển|km|cây số|bước|bước chân|lần|buổi|cái|chiếc|sản phẩm|đơn|đơn hàng|khách|người|triệu|tỷ|%)/i;
 
 const DEADLINE_PATTERNS = [
   // "trước Tết", "trước 31/12", "trước ngày 15"
@@ -37,6 +37,21 @@ const DEADLINE_PATTERNS = [
 
 export function parseViGoal(input: string): ParsedGoal {
   const trimmed = input.trim();
+
+  // PRD FIX v0.3.30 Part B5: Recognize "8000 bước mỗi ngày" / "8000 bước/ngày"
+  const stepMatch = trimmed.match(/^(\d+[\.,]?\d*)\s*(bước|bước chân)\s*(?:mỗi|một|\/)?\s*(ngày)?/i);
+  if (stepMatch) {
+    const rawNum = stepMatch[1].replace(/[\.,]/g, '');
+    const target = parseInt(rawNum, 10);
+    const unit = stepMatch[2];
+    return {
+      type: 'key_result',
+      target,
+      unit,
+      period: 'ngày',
+      title: trimmed,
+    };
+  }
 
   // 1. Try time commitment pattern first
   for (const pat of TIME_PATTERNS) {
@@ -71,7 +86,7 @@ export function parseViGoal(input: string): ParsedGoal {
   // 2. Try quantity / key_result pattern
   const qm = trimmed.match(QUANTITY_PATTERN);
   if (qm) {
-    const target = parseInt(qm[1], 10);
+    const target = parseInt(qm[1].replace(/[\.,]/g, ''), 10);
     const unit = qm[2];
 
     // Extract deadline if present

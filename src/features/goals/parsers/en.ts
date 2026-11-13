@@ -8,7 +8,7 @@ const TIME_PATTERNS = [
   /(every|each|per)\s*(day|week|month)\s*(\d+)\s*(minutes?|mins?|hours?|hrs?)/i,
 ];
 
-const QUANTITY_PATTERN = /(\d+)\s+(clips?|videos?|articles?|posts?|pages?|books?|km|miles?|sessions?|items?|products?|orders?|clients?|customers?|%|dollars?|euros?)/i;
+const QUANTITY_PATTERN = /(\d+[\.,]?\d*)\s+(clips?|videos?|articles?|posts?|pages?|books?|km|miles?|steps?|sessions?|items?|products?|orders?|clients?|customers?|%|dollars?|euros?)/i;
 
 const DEADLINE_PATTERNS = [
   /(before\s+.+)$/i,

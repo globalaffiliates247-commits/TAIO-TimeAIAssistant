@@ -142,11 +142,22 @@ export function computeGoalMetrics(
   let basisText = '';
 
   if (progressType === 'key_result') {
-    const current = Math.max(0, goal.keyResultCurrent ?? 0);
+    let current = Math.max(0, goal.keyResultCurrent ?? 0);
     const target = Math.max(1, goal.keyResultTarget ?? 100);
     const unit = goal.keyResultUnit || 'đơn vị';
+
+    // PRD FIX v0.3.30 Part B5: Auto-track steps goals from Core Motion pedometer
+    const isStepGoal = /bước|step/i.test(unit) || /bước|step/i.test(goal.name);
+    if (isStepGoal) {
+      const stepsFromItems = linkedDailyItems.reduce((acc, it) => {
+        const extra = (it.extra as Record<string, unknown> | undefined) || {};
+        return acc + (typeof extra.steps === 'number' ? extra.steps : 0);
+      }, 0);
+      current = Math.max(current, stepsFromItems);
+    }
+
     progressPercent = Math.min(100, Math.round((current / target) * 100));
-    basisText = `Cơ sở: ${current}/${target} ${unit}`;
+    basisText = `Cơ sở: ${current.toLocaleString('vi-VN')}/${target.toLocaleString('vi-VN')} ${unit}`;
   } else if (progressType === 'time_commitment') {
     const committedHours = Math.max(1, goal.committedHours ?? 20);
     const committedMinutes = committedHours * 60;
