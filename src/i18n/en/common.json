@@ -46,7 +46,16 @@
     "previewTypeAttendance": "Time Attendance ({{duration}} mins/day)",
     "previewTypeTasks": "Complete Tasks",
     "previewDeadline": "Deadline: {{deadline}}",
-    "toastCreated": "Goal created successfully!"
+    "toastCreated": "Goal created successfully!",
+    "attachGoal": "Attach goal",
+    "attachSuggestion": "Attach: {{name}}?",
+    "noGoal": "No goal attached",
+    "newGoal": "+ New goal",
+    "searchPlaceholder": "Search goals...",
+    "enterNewGoalName": "New goal name, Enter to create...",
+    "milestones": "Milestones",
+    "suggestMilestoneCompleted": "All tasks completed. Mark milestone completed?",
+    "markMilestoneDone": "Mark completed"
   },
   "quotes": {
     "title": "Inspiration & Motivation",

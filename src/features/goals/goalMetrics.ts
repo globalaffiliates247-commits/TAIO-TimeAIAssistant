@@ -195,3 +195,36 @@ export function computeGoalMetrics(
     actualDoneMinutes,
   };
 }
+
+// PRD FIX v0.3.32 Part A7: Milestone Progress & Completion Suggestion
+export interface MilestoneProgressInfo {
+  milestoneId: string;
+  totalTasks: number;
+  completedTasks: number;
+  isAllCompleted: boolean;
+  shouldSuggestCompletion: boolean;
+}
+
+export function checkMilestoneTaskProgress(
+  milestoneId: string,
+  milestoneStatus: 'pending' | 'completed',
+  blocks: TimeBlock[],
+  dailyCardItems: DailyCardItem[] = []
+): MilestoneProgressInfo {
+  const mBlocks = blocks.filter(b => b.milestoneId === milestoneId && b.status !== 'dropped' && !b.isTemplateBlock);
+  const bIds = new Set(mBlocks.map(b => b.id));
+  const mItems = dailyCardItems.filter(i => i.milestoneId === milestoneId && i.status !== 'dropped' && !bIds.has(i.id));
+
+  const total = mBlocks.length + mItems.length;
+  const completed = mBlocks.filter(b => b.status === 'done').length + mItems.filter(i => i.status === 'done').length;
+  const isAllCompleted = total > 0 && total === completed;
+  const shouldSuggestCompletion = isAllCompleted && milestoneStatus === 'pending';
+
+  return {
+    milestoneId,
+    totalTasks: total,
+    completedTasks: completed,
+    isAllCompleted,
+    shouldSuggestCompletion,
+  };
+}

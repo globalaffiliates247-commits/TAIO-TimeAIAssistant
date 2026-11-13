@@ -187,6 +187,7 @@ interface AppContextType {
   inboxModalOpen: boolean;
   setInboxModalOpen: (val: boolean) => void;
   addInboxItem: (item: { title: string; source?: 'quick' | 'telegram' | 'voice' | 'meeting_followup'; nextAction?: string; estimatedMinutes?: number; linkedGoalId?: string }) => void;
+  updateInboxItem: (id: string, patch: Partial<InboxItem>) => void;
   processInboxItem: (id: string, action: 'schedule' | 'done_2min' | 'delegate' | 'drop', details?: { quadrant?: 1 | 2 | 3 | 4 }) => void;
 
   // v0.18 - v0.21: 24-Hour Time Ledger
@@ -207,6 +208,9 @@ interface AppContextType {
   addDailyCardItem: (item: { 
     text: string; 
     goalId?: string; 
+    goalName?: string;
+    milestoneId?: string;
+    milestoneName?: string;
     origin?: ItemOrigin; 
     start?: string; 
     end?: string;
@@ -1186,6 +1190,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addDailyCardItem = (item: {
     text: string;
     goalId?: string;
+    goalName?: string;
+    milestoneId?: string;
+    milestoneName?: string;
     origin?: ItemOrigin;
     start?: string;
     end?: string;
@@ -1197,12 +1204,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     extra?: Record<string, unknown>;
   }): string => {
     const goal = goals.find(g => g.id === item.goalId);
+    const milestone = goal?.milestones?.find(m => m.id === item.milestoneId);
     const newItem: DailyCardItem = {
       id: `dc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       text: item.text,
       date: item.date || selectedCardDate,
       goalId: item.goalId,
-      goalName: goal?.name,
+      goalName: item.goalName || goal?.name,
+      milestoneId: item.milestoneId,
+      milestoneName: item.milestoneName || milestone?.name,
       start: item.start,
       end: item.end,
       status: item.status || 'open',
@@ -1999,6 +2009,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     triggerCoachCard('first_inbox');
   };
 
+  const updateInboxItem = (id: string, patch: Partial<InboxItem>) => {
+    setInbox(prev => prev.map(i => i.id === id ? { ...i, ...patch, updatedAt: Date.now() } : i));
+  };
+
   const processInboxItem = (
     id: string, 
     action: 'schedule' | 'done_2min' | 'delegate' | 'drop', 
@@ -2675,6 +2689,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       inboxModalOpen,
       setInboxModalOpen,
       addInboxItem,
+      updateInboxItem,
       processInboxItem,
       timeLedger,
       methodLibraryOpen,

@@ -46,7 +46,16 @@
     "previewTypeAttendance": "Có mặt đủ thời gian ({{duration}} phút/ngày)",
     "previewTypeTasks": "Hoàn thành các việc",
     "previewDeadline": "Hạn chót: {{deadline}}",
-    "toastCreated": "Đã tạo mục tiêu thành công!"
+    "toastCreated": "Đã tạo mục tiêu thành công!",
+    "attachGoal": "Gắn mục tiêu",
+    "attachSuggestion": "Gắn: {{name}}?",
+    "noGoal": "Không gắn mục tiêu",
+    "newGoal": "+ Mục tiêu mới",
+    "searchPlaceholder": "Tìm mục tiêu...",
+    "enterNewGoalName": "Tên mục tiêu mới, Enter để tạo...",
+    "milestones": "Cột mốc",
+    "suggestMilestoneCompleted": "Mọi việc của cột mốc đã xong. Đánh dấu cột mốc hoàn thành?",
+    "markMilestoneDone": "Đánh dấu hoàn thành"
   },
   "quotes": {
     "title": "Cảm hứng & Động lực",

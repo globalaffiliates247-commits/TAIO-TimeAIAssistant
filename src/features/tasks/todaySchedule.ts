@@ -47,6 +47,8 @@ export function buildTodaySchedule(
       status,
       goalId: item.goalId,
       goalName: item.goalName,
+      milestoneId: item.milestoneId,
+      milestoneName: item.milestoneName,
       returnPoint: item.nextStep,
       nextStep: item.nextStep,
       touchTimeMinutes: actualMinutes,

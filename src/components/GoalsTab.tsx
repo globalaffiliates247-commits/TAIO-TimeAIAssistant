@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { GoalProgressType } from '../types';
-import { computeGoalMetrics, computeTaskTimeEfficiency } from '../features/goals/goalMetrics';
+import { computeGoalMetrics, computeTaskTimeEfficiency, checkMilestoneTaskProgress } from '../features/goals/goalMetrics';
 import { GoalInput } from '../features/goals/GoalInput';
 import { MotivationSticker } from '../features/motivation';
 import {
@@ -408,25 +408,46 @@ export const GoalsTab: React.FC = () => {
                 <div className="space-y-1.5">
                   {goal.milestones.map(m => {
                     const isDone = m.status === 'completed';
+                    const mProgress = checkMilestoneTaskProgress(m.id, m.status, blocks, dailyCardItems);
                     return (
-                      <div
-                        key={m.id}
-                        onClick={() => toggleMilestone(goal.id, m.id)}
-                        className={`p-3 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
-                          isDone
-                            ? 'bg-slate-50 border-slate-200 opacity-65'
-                            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <CheckCircle2 className={`w-4 h-4 ${isDone ? 'text-emerald-600' : 'text-slate-400'}`} />
-                          <span className={`text-xs sm:text-sm font-medium ${isDone ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
-                            {m.name}
+                      <div key={m.id} className="space-y-1">
+                        <div
+                          onClick={() => toggleMilestone(goal.id, m.id)}
+                          className={`p-3 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                            isDone
+                              ? 'bg-slate-50 border-slate-200 opacity-65'
+                              : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <CheckCircle2 className={`w-4 h-4 ${isDone ? 'text-emerald-600' : 'text-slate-400'}`} />
+                            <span className={`text-xs sm:text-sm font-medium ${isDone ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+                              {m.name}
+                            </span>
+                            {mProgress.totalTasks > 0 && (
+                              <span className="text-[10.5px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">
+                                {mProgress.completedTasks}/{mProgress.totalTasks} việc
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-slate-500 whitespace-nowrap">
+                            {m.dueDate}
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">
-                          {m.dueDate}
-                        </span>
+
+                        {/* Suggest completion if all tasks done (PRD FIX v0.3.32 A7) */}
+                        {mProgress.shouldSuggestCompletion && (
+                          <div className="mx-2 p-2 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-2 text-xs text-amber-900 animate-in fade-in">
+                            <span>Mọi việc của cột mốc đã xong. Đánh dấu cột mốc hoàn thành?</span>
+                            <button
+                              type="button"
+                              onClick={() => toggleMilestone(goal.id, m.id)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-[11px] shrink-0"
+                            >
+                              Đánh dấu xong
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

@@ -14,6 +14,7 @@ import { commitQuickLine, matchGoalByTag } from '@/features/tasks';
 import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 import { LiveClockStrip } from '@/features/quick-entry';
 import { MotivationSticker } from '@/features/motivation';
+import { GoalPicker, findGoalSuggestion } from '@/features/goals';
 import { Clock } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
@@ -39,6 +40,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [pickerItemId, setPickerItemId] = useState<string | null>(null);
+  const [hashFilter, setHashFilter] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const parsed = parseTimedText(draft);
@@ -67,6 +70,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     // Goal tag detection on edit (FIX v0.3.28 A3)
     let goalId = it.goalId;
     let goalName = it.goalName;
+    let milestoneId = it.milestoneId;
+    let milestoneName = it.milestoneName;
     let text = p.rest;
     const goalTagMatch = text.match(/#([a-zA-Zà-ỹÀ-Ỹ0-9_]+)/g);
     if (goalTagMatch && goals.length) {
@@ -77,6 +82,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         if (matchedGoal) {
           goalId = matchedGoal.id;
           goalName = matchedGoal.name;
+          milestoneId = undefined;
+          milestoneName = undefined;
           text = text.replace(rawTagWithHash, ' ').replace(/\s+/g, ' ').trim();
         }
       }
@@ -94,6 +101,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         text,
         goalId,
         goalName,
+        milestoneId,
+        milestoneName,
         start: p.time,
         end: dur ? toTime(toMins(p.time) + dur) : undefined,
         extra: newExtra,
@@ -110,6 +119,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         text,
         goalId,
         goalName,
+        milestoneId,
+        milestoneName,
         start: undefined,
         end: undefined,
         extra: newExtra,
@@ -128,34 +139,147 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   const pillStyle: React.CSSProperties = { border: `1px solid ${c.line}`, color: c.muted };
 
+  const renderGoalBadge = (it: DailyCardItem, isEditingLine: boolean) => {
+    const hasGoal = !!it.goalId;
+    const sug = !hasGoal ? findGoalSuggestion(isEditingLine ? editText : it.text, goals) : null;
+    const isPickerOpen = pickerItemId === it.id;
+
+    const goalLabel = it.goalName
+      ? `${it.goalName}${it.milestoneName ? ` › ${it.milestoneName}` : ''}`
+      : null;
+
+    return (
+      <div className="relative inline-flex items-center gap-1 shrink-0">
+        {hasGoal ? (
+          <button
+            type="button"
+            onMouseDown={e => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={() => setPickerItemId(isPickerOpen ? null : it.id)}
+            className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium shrink-0 flex items-center gap-1 transition-colors border border-slate-200/60"
+            title="Bấm để đổi hoặc bỏ gắn mục tiêu"
+          >
+            <span className="truncate max-w-[150px]">{goalLabel}</span>
+          </button>
+        ) : sug ? (
+          <div className="inline-flex items-center rounded-md border border-amber-300/80 bg-amber-50/80 text-amber-900 text-[10.5px] overflow-hidden shrink-0">
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); }}
+              onClick={() => {
+                updateDailyCardItem(it.id, {
+                  goalId: sug.goal.id,
+                  goalName: sug.goal.name,
+                  milestoneId: sug.milestone?.id,
+                  milestoneName: sug.milestone?.name,
+                });
+              }}
+              className="px-1.5 py-0.5 font-medium hover:bg-amber-100/80 transition-colors flex items-center gap-1"
+              title={`Gợi ý tự động từ từ khóa "${sug.matchedWord}"`}
+            >
+              <span>Gắn: {sug.goal.name}{sug.milestone ? ` › ${sug.milestone.name}` : ''}?</span>
+            </button>
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); }}
+              onClick={() => setPickerItemId(isPickerOpen ? null : it.id)}
+              className="px-1 py-0.5 border-l border-amber-200/80 hover:bg-amber-100 text-amber-700"
+              title="Chọn mục tiêu khác"
+            >
+              ▾
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onMouseDown={e => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={() => setPickerItemId(isPickerOpen ? null : it.id)}
+            className="text-[10.5px] px-1.5 py-0.5 rounded border border-dashed border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-500 font-normal shrink-0 transition-colors"
+            title="Bấm để gắn mục tiêu hoặc gõ #tên"
+          >
+            Gắn mục tiêu
+          </button>
+        )}
+
+        {isPickerOpen && (
+          <GoalPicker
+            currentGoalId={it.goalId}
+            currentMilestoneId={it.milestoneId}
+            initialSearch={hashFilter}
+            onSelect={(gId, gName, mId, mName) => {
+              let updatedText = isEditingLine ? editText : it.text;
+              if (hashFilter) {
+                updatedText = updatedText.replace(new RegExp(`#${hashFilter}\\b|#${hashFilter}$`), '').trim();
+                if (isEditingLine) setEditText(updatedText);
+              }
+              updateDailyCardItem(it.id, {
+                text: updatedText,
+                goalId: gId,
+                goalName: gName,
+                milestoneId: mId,
+                milestoneName: mName,
+              });
+              setPickerItemId(null);
+              setHashFilter('');
+            }}
+            onClose={() => {
+              setPickerItemId(null);
+              setHashFilter('');
+            }}
+            className="right-0 top-full mt-1"
+          />
+        )}
+      </div>
+    );
+  };
+
   const renderText = (it: DailyCardItem) =>
     editing === it.id ? (
       <div className="flex-1 flex items-center gap-2 min-w-0">
         <input
-          autoFocus value={editText} onChange={e => setEditText(e.target.value)}
-          onBlur={() => saveEdit(it)}
-          onKeyDown={e => { if (e.key === 'Enter') saveEdit(it); if (e.key === 'Escape') setEditing(null); }}
+          autoFocus value={editText}
+          onChange={e => {
+            const val = e.target.value;
+            setEditText(val);
+            const hashMatch = val.match(/#([a-zA-Zà-ỹÀ-Ỹ0-9_-]*)$/);
+            if (hashMatch) {
+              setPickerItemId(it.id);
+              setHashFilter(hashMatch[1]);
+            } else if (pickerItemId === it.id && hashFilter) {
+              setPickerItemId(null);
+              setHashFilter('');
+            }
+          }}
+          onBlur={() => {
+            if (pickerItemId !== it.id) {
+              saveEdit(it);
+            }
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              if (pickerItemId !== it.id) saveEdit(it);
+            }
+            if (e.key === 'Escape') {
+              if (pickerItemId === it.id) {
+                setPickerItemId(null);
+                setHashFilter('');
+              } else {
+                setEditing(null);
+              }
+            }
+          }}
           className="flex-1 bg-transparent outline-none min-w-0" style={{ color: c.ink }}
         />
-        {!it.goalId && (
-          <span className="text-[10.5px] px-1.5 py-0.5 rounded border border-dashed border-slate-300 text-slate-400 select-none shrink-0" title="Gõ #tên_mục_tiêu để gắn">
-            Gắn mục tiêu
-          </span>
-        )}
+        {renderGoalBadge(it, true)}
       </div>
     ) : (
       <span
-        className="flex-1 min-w-0 cursor-text flex items-center flex-wrap gap-1"
+        className="flex-1 min-w-0 cursor-text flex items-center flex-wrap gap-1.5"
         style={{ textDecoration: it.status === 'done' ? 'line-through' : undefined, opacity: it.status === 'done' ? 0.5 : 1 }}
         onClick={() => { setEditing(it.id); setEditText(lineText(it)); }}
       >
         <span>{it.text.replace(/#\d\b/, '').trim()}</span>
         {priorityOf(it.text) < 99 && <span className="text-xs font-semibold" style={{ color: c.muted }}>#{priorityOf(it.text)}</span>}
-        {it.goalName && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium shrink-0">
-            {it.goalName}
-          </span>
-        )}
+        {renderGoalBadge(it, false)}
       </span>
     );
 

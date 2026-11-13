@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getDeviceCalendarDate } from '@/core/clock';
+import { GoalPicker } from '@/features/goals';
 
 const chip = 'h-8 px-3 rounded-full bg-white border border-[#DCD6C6] text-[#4A463A] text-[12.5px] font-medium flex items-center gap-1 hover:bg-[#F7F5EF]';
 
@@ -14,9 +15,10 @@ const Chevron = () => (
 );
 
 export const UnsortedSection: React.FC = () => {
-  const { inbox, addInboxItem, processInboxItem, addDailyCardItem, setIsSwipeModalOpen } = useApp();
+  const { inbox, addInboxItem, updateInboxItem, processInboxItem, addDailyCardItem, setIsSwipeModalOpen } = useApp();
   const pending = inbox.filter(i => i.status === 'inbox');
   const [selected, setSelected] = useState<string | null>(null);
+  const [pickerItemId, setPickerItemId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
 
   return (
@@ -59,8 +61,28 @@ export const UnsortedSection: React.FC = () => {
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs text-[#8E897A] mr-1">Bước tiếp theo:</span>
                     {(it.estimatedMinutes ?? 99) <= 2 && <button className={chip} onClick={() => processInboxItem(it.id, 'done_2min')}>Làm luôn (2 phút)</button>}
-                    <button className={chip} onClick={() => { addDailyCardItem({ text: it.title, date: getDeviceCalendarDate() }); processInboxItem(it.id, 'schedule', { quadrant: 2 }); }}>Đưa vào hôm nay</button>
+                    <button className={chip} onClick={() => { addDailyCardItem({ text: it.title, date: getDeviceCalendarDate(), goalId: it.linkedGoalId, goalName: it.linkedGoalName }); processInboxItem(it.id, 'schedule', { quadrant: 2 }); }}>Đưa vào hôm nay</button>
                     <button className={chip} onClick={() => processInboxItem(it.id, 'schedule', { quadrant: 2 })}>Lên lịch</button>
+                    <div className="relative inline-block">
+                      <button
+                        type="button"
+                        className={chip}
+                        onClick={() => setPickerItemId(pickerItemId === it.id ? null : it.id)}
+                      >
+                        {it.linkedGoalName ? `Mục tiêu: ${it.linkedGoalName}` : 'Gắn mục tiêu'}
+                      </button>
+                      {pickerItemId === it.id && (
+                        <GoalPicker
+                          currentGoalId={it.linkedGoalId}
+                          onSelect={(gId, gName) => {
+                            updateInboxItem(it.id, { linkedGoalId: gId, linkedGoalName: gName });
+                            setPickerItemId(null);
+                          }}
+                          onClose={() => setPickerItemId(null)}
+                          className="left-0 top-full mt-1"
+                        />
+                      )}
+                    </div>
                     <button className={chip} onClick={() => processInboxItem(it.id, 'delegate')}>Giao người khác</button>
                     <button className={chip} onClick={() => processInboxItem(it.id, 'drop')}>Bỏ</button>
                   </div>
