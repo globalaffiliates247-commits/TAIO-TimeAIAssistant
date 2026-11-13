@@ -17,6 +17,7 @@ import {
 } from '../../../types';
 import { PROFILES } from '../../../data/mockData';
 import { toEpochMs } from '../../../core/storage/durableStorage';
+import { loadUserMotivationState, saveUserMotivationState } from '@/features/motivation';
 
 export interface ExportedDayBlockResult {
   id?: string;
@@ -443,6 +444,13 @@ export function applyTaioImport(
       nextProfileDetail.extra = { ...(nextProfileDetail.extra || {}), ...extraUser };
     }
     nextProfileDetail.updatedAt = fileExportedTs;
+  }
+
+  // PRD FEATURE v0.3.31 D2.3: Import Motivation state if present
+  if ((payload as any).motivation) {
+    try {
+      saveUserMotivationState((payload as any).motivation);
+    } catch {}
   }
 
   // 2. Parse Days first so we can also compute cumulative actualMinutes per goal
@@ -1325,5 +1333,6 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
     tasks: exportedTasks,
     dayTemplate: exportedDayTemplate,
     days: exportedDays,
+    motivation: loadUserMotivationState(),
   };
 }

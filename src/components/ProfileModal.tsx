@@ -32,6 +32,7 @@ import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
 import { DataImportSection } from '../features/data-transfer';
 import { AlarmSettingsSection } from '../features/alarm';
+import { MotivationSettingsSection } from '@/features/motivation';
 import { SyncSection } from '../features/sync/ui/SyncSection';
 import { PairSection } from '../features/sync/ui/PairSection';
 
@@ -551,6 +552,9 @@ export const ProfileModal: React.FC = () => {
                     )}
                   </div>
                 )}
+
+                {/* PRD FEATURE v0.3.31: Câu truyền động lực */}
+                <MotivationSettingsSection />
               </div>
 
               {/* Data Export & Privacy */}

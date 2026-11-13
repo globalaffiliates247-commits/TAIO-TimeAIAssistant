@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { STICKY_COLORS, StickyColor, StickyNote } from '../model/stickyTypes';
 import { closeSticky, newFreeSticky, setActiveSticky, updateSticky } from '../model/stickyStore';
 import { IconClose, IconCollapse, IconPin, IconPlus, IconShirt } from './StickyIcons';
+import { Sparkles } from 'lucide-react';
 import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 
@@ -67,6 +68,17 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
           )}
         </div>
         <button className={btn} aria-label={note.collapsed ? 'Mở rộng' : 'Thu gọn'} onClick={() => updateSticky(note.id, { collapsed: !note.collapsed })}><IconCollapse color={c.muted} size={16} /></button>
+        {note.kind === 'free' && (
+          <button
+            className={btn}
+            aria-label={note.hasMotivationSticker ? 'Bỏ nhãn động lực' : 'Thêm nhãn động lực'}
+            title={note.hasMotivationSticker ? 'Bỏ nhãn động lực' : 'Thêm nhãn động lực'}
+            style={note.hasMotivationSticker ? { background: 'rgba(0,0,0,.08)' } : undefined}
+            onClick={() => updateSticky(note.id, { hasMotivationSticker: !note.hasMotivationSticker })}
+          >
+            <Sparkles size={14} color={c.muted} />
+          </button>
+        )}
         <span className="flex-1 text-center text-xs font-bold truncate px-1" style={{ color: c.muted }}>
           {note.kind === 'day' ? dayTitle(note.date!) : note.title}
         </span>

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import type { TimeBlock } from '@/types';
 import { useT } from '@/i18n/useT';
+import { MotivationSticker } from '@/features/motivation';
 
 export interface TimeboxEndCardProps {
   checkInBlock: TimeBlock;
@@ -167,6 +168,8 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
             </div>
           </div>
         )}
+        {/* PRD FEATURE v0.3.31 B4: Motivation line quote */}
+        <MotivationSticker slotKey="task_done" context="done" size="line" className="mt-3" />
       </div>
     </div>
   );

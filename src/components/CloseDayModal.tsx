@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Footprints
 } from 'lucide-react';
+import { MotivationSticker } from '@/features/motivation';
 
 export const CloseDayModal: React.FC = () => {
   const { 
@@ -223,6 +224,9 @@ export const CloseDayModal: React.FC = () => {
               Sau khi khóa ngày, hệ thống sẽ bảo vệ giấc ngủ và nhắc nhở đúng giờ nghỉ ngơi ({profile.personalAnchors.windDownTime}).
             </span>
           </div>
+
+          {/* PRD FEATURE v0.3.31 B6: Motivation card for End of Day */}
+          <MotivationSticker slotKey="close_day" context="end_day" size="card" />
 
           {/* Actions */}
           <div className="pt-2 flex items-center justify-between gap-2">

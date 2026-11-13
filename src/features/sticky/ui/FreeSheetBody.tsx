@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { STICKY_COLORS, StickyNote } from '../model/stickyTypes';
 import { newLineId, updateSticky } from '../model/stickyStore';
+import { MotivationSticker } from '@/features/motivation';
 
 export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -23,6 +24,16 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   return (
     <div className="flex flex-col gap-1.5 text-[15px] leading-snug" style={{ color: c.ink }}>
+      {/* PRD FEATURE v0.3.31 B2: Motivation sticker at top of free sheet */}
+      {note.hasMotivationSticker && (
+        <MotivationSticker
+          slotKey="free_sheet"
+          context="any"
+          size="note"
+          className="mb-1"
+          onHide={() => updateSticky(note.id, { hasMotivationSticker: false })}
+        />
+      )}
       {lines.map((l, i) => (
         <input
           key={l.id}

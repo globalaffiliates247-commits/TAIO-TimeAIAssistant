@@ -10,6 +10,13 @@ import {
   WidgetScheduleItemData
 } from '@/features/native';
 import { clockState } from '@/features/clock';
+import { 
+  loadMotivationSettings, 
+  loadUserMotivationState, 
+  loadServerQuotesCache, 
+  getAllQuotes, 
+  pickQuote 
+} from '@/features/motivation';
 import type { TimeBlock } from '@/types';
 
 function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Date()): WidgetScheduleItemData[] {
@@ -61,9 +68,22 @@ function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Dat
 
   if (items.length === 0) {
     const nowSec = Math.floor(now.getTime() / 1000);
+    // PRD FEATURE v0.3.31 B8: Motivation quote on widget when idle
+    let idleSubtitle = 'Thời gian trong ngày';
+    try {
+      const motSettings = loadMotivationSettings();
+      if (motSettings.enabled && motSettings.slots.widget) {
+        const userState = loadUserMotivationState();
+        const serverQuotes = loadServerQuotesCache();
+        const allQuotes = getAllQuotes(serverQuotes, userState.customQuotes);
+        const q = pickQuote({ quotes: allQuotes, context: 'break', lang: 'vi', favorites: userState.favorites });
+        if (q) idleSubtitle = q.text;
+      }
+    } catch {}
+
     items.push({
       title: 'TAIO Time',
-      subtitle: 'Thời gian trong ngày',
+      subtitle: idleSubtitle,
       startTimestamp: nowSec,
       targetTimestamp: nowSec + 86400,
       mode: 'template_or_current',

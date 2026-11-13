@@ -7,6 +7,7 @@ import { SnoozePicker } from './SnoozePicker';
 import { SoundSwitch } from './SoundSwitch';
 import { playSoundByIndex, stopRingSessionAudio } from '../model/ringSession';
 import { useT } from '@/i18n/useT';
+import { MotivationSticker } from '@/features/motivation';
 
 interface AlarmScreenProps {
   alarmState: ActiveAlarmState;
@@ -144,9 +145,17 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
         </div>
 
         {/* Task Title */}
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-3">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
           {alarmState.blockTitle || 'Đến giờ bắt đầu khối thời gian'}
         </h1>
+
+        {/* PRD FEATURE v0.3.31 B5: Motivation line under task title */}
+        <MotivationSticker
+          slotKey="alarm_start"
+          context="start_task"
+          size="line"
+          className="mb-4 max-w-sm bg-white/5 border-white/10 text-zinc-300"
+        />
 
         {/* Status Line: if stopped after 15 mins, report accurately (spec F2.3) */}
         {isStoppedAfter15Mins ? (
