@@ -293,6 +293,12 @@ function createClockWindow() {
       <div class="time-digits" id="digits">00:00</div>
     </div>
 
+    <!-- PRD FIX v0.3.30 Part E2.4: Free timer row on detached floating clock -->
+    <div id="freeTimerRow" style="display: none; font-size: 11px; color: #b45309; background: #fffbeb; padding: 3px 6px; border-radius: 6px; margin: 2px 0 4px; align-items: center; justify-content: space-between; overflow: hidden; border: 1px solid #fef3c7;">
+      <span id="freeTimerTitle" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;"></span>
+      <span id="freeTimerDigits" style="font-family: monospace; font-weight: 700; margin-left: 4px;"></span>
+    </div>
+
     <div class="progress-track">
       <div class="progress-fill" id="progress"></div>
     </div>
@@ -327,6 +333,17 @@ function createClockWindow() {
 
         const bottomBar = document.querySelector('.bottom-bar');
         const progressTrack = document.querySelector('.progress-track');
+        const freeTimerRow = document.getElementById('freeTimerRow');
+        const freeTimerTitle = document.getElementById('freeTimerTitle');
+        const freeTimerDigits = document.getElementById('freeTimerDigits');
+
+        if (data.freeTimer && freeTimerRow) {
+          freeTimerRow.style.display = 'flex';
+          if (freeTimerTitle) freeTimerTitle.innerText = data.freeTimer.title;
+          if (freeTimerDigits) freeTimerDigits.innerText = data.freeTimer.timeStr;
+        } else if (freeTimerRow) {
+          freeTimerRow.style.display = 'none';
+        }
 
         if (mode === 'template_or_current') {
           titleEl.innerText = 'Hiện tại: ' + (data.title || '');

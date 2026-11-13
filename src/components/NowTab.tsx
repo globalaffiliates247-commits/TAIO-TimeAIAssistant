@@ -36,6 +36,7 @@ import {
   X
 } from 'lucide-react';
 import { QuickEntryTiles, QuickLineInput } from '../features/quick-entry';
+import { FreeTimerInput, FreeTimerList } from '@/features/clock';
 
 const ROLE_LABELS: Record<UserRole, { label: string; type: 'work' | 'personal' }> = {
   'decision-maker': { label: 'Người ra quyết định', type: 'work' },
@@ -87,7 +88,14 @@ export const NowTab: React.FC = () => {
     nativePlatformName,
     showToast,
     dailyCardItems,
-    updateDailyCardItem
+    updateDailyCardItem,
+    freeTimers,
+    addFreeTimer,
+    togglePauseFreeTimer,
+    addFreeTimerSeconds,
+    finishFreeTimer,
+    deleteFreeTimer,
+    restartFreeTimer,
   } = useApp();
 
   const { t } = useT();
@@ -901,6 +909,23 @@ export const NowTab: React.FC = () => {
           )}
         </div>
 
+      </div>
+
+      {/* PRD FIX v0.3.30 Part E2: Free Timers & Standalone Stopwatch */}
+      <div className="space-y-3">
+        <FreeTimerInput
+          activeCount={freeTimers.length}
+          currentTaskTitle={currentBlock?.title}
+          onAddTimer={addFreeTimer}
+        />
+        <FreeTimerList
+          timers={freeTimers}
+          onTogglePause={togglePauseFreeTimer}
+          onAddSeconds={addFreeTimerSeconds}
+          onFinishTimer={finishFreeTimer}
+          onDeleteTimer={deleteFreeTimer}
+          onRestartTimer={restartFreeTimer}
+        />
       </div>
 
       {/* Quick Status Bar with WYSIWYG Drill-down */}

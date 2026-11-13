@@ -36,7 +36,7 @@ function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targe
 }
 
 export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
-  const { scheduleBlocks, dayTemplate, goals, language, palette, isNativePlatform, showToast } = useApp();
+  const { scheduleBlocks, dayTemplate, goals, language, palette, isNativePlatform, showToast, freeTimers } = useApp();
   const [nowSec, setNowSec] = useState(() => Date.now());
 
   const isCool = palette === 'cool';
@@ -64,7 +64,27 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
-  // Sync with Electron floating window & macOS menu tray across all 3 states (spec E1.3)
+  // PRD FIX v0.3.30 Part E2.4: Free timer second line (closest to finish)
+  const activeFreeTimers = (freeTimers || []).filter(t => t.status === 'running');
+  let topFreeTimer: (typeof activeFreeTimers)[0] | null = null;
+  if (activeFreeTimers.length > 0) {
+    const countdowns = activeFreeTimers
+      .filter(t => (t.mode === 'countdown' || t.mode === 'at_time') && t.endsAt)
+      .sort((a, b) => (a.endsAt || 0) - (b.endsAt || 0));
+    if (countdowns.length > 0) {
+      topFreeTimer = countdowns[0];
+    } else {
+      topFreeTimer = activeFreeTimers[0];
+    }
+  }
+
+  const freeTimerRemaining = topFreeTimer
+    ? (topFreeTimer.mode === 'stopwatch'
+        ? formatSeconds(Math.max(0, Math.floor((nowSec - topFreeTimer.startedAt) / 1000)))
+        : formatSeconds(Math.max(0, Math.floor(((topFreeTimer.endsAt || nowSec) - nowSec) / 1000))))
+    : '';
+
+  // Sync with Electron floating window & macOS menu tray across all 3 states + free timer (spec E1.3 & E2.4)
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).taioAPI?.updateTimer) {
       (window as any).taioAPI.updateTimer({
@@ -74,9 +94,14 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
         endsAt: state.endsAt,
         mode: state.mode,
         remaining: formatSeconds(state.remainingSeconds),
+        freeTimer: topFreeTimer ? {
+          title: topFreeTimer.title,
+          timeStr: freeTimerRemaining,
+          mode: topFreeTimer.mode,
+        } : null,
       });
     }
-  }, [state.title, state.subtitle, state.endsAt, state.mode]);
+  }, [state.title, state.subtitle, state.endsAt, state.mode, topFreeTimer?.id, freeTimerRemaining]);
 
   const handleOpenDetachedClock = async () => {
     // 1. macOS Desktop: Open separate floating clock window
@@ -186,7 +211,7 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
     <div
       onClick={handleOpenDetachedClock}
       title={isVi ? 'Bấm để mở đồng hồ nổi rời' : 'Click to detach clock window'}
-      className={`group flex items-center justify-between px-3.5 py-2 rounded-xl text-xs transition-all cursor-pointer select-none border shadow-2xs ${
+      className={`group flex flex-col justify-center px-3.5 py-2 rounded-xl text-xs transition-all cursor-pointer select-none border shadow-2xs ${
         compact ? 'mb-2' : 'mb-3'
       } ${
         isLiveActive
@@ -196,17 +221,33 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
           : 'bg-slate-50/80 border-slate-200/80 hover:bg-slate-100/80'
       }`}
     >
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        <Clock className={`w-3.5 h-3.5 shrink-0 ${isLiveActive ? 'text-emerald-600' : 'text-slate-500'}`} />
-        {contentNode}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <Clock className={`w-3.5 h-3.5 shrink-0 ${isLiveActive ? 'text-emerald-600' : 'text-slate-500'}`} />
+          {contentNode}
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0 ml-2 text-slate-400 group-hover:text-slate-700 transition-colors">
+          <span className="text-[10px] hidden sm:inline font-mono">
+            {isVi ? 'Đồng hồ' : 'Clock'}
+          </span>
+          <ExternalLink className="w-3 h-3" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0 ml-2 text-slate-400 group-hover:text-slate-700 transition-colors">
-        <span className="text-[10px] hidden sm:inline font-mono">
-          {isVi ? 'Đồng hồ' : 'Clock'}
-        </span>
-        <ExternalLink className="w-3 h-3" />
-      </div>
+      {/* PRD FIX v0.3.30 Part E2.4: Free Timer secondary line */}
+      {topFreeTimer && (
+        <div className="flex items-center gap-1.5 pt-1.5 mt-1 border-t border-slate-200/60 text-[11px] text-amber-800 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+          <span className="truncate max-w-[200px]" title={topFreeTimer.title}>
+            {topFreeTimer.title}
+          </span>
+          <span className="text-slate-300">·</span>
+          <span className="font-mono font-bold text-amber-900 shrink-0">
+            {freeTimerRemaining}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

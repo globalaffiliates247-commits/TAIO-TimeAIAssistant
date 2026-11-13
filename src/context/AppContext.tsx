@@ -48,6 +48,12 @@ import {
   computeBlockStatus,
   timeToMinutes,
 } from '../core/clock';
+import {
+  FreeTimer,
+  loadFreeTimers,
+  saveFreeTimers,
+  getFreeTimerElapsedSeconds,
+} from '../features/clock';
 import { 
   UserProfile, 
   Goal, 
@@ -398,6 +404,14 @@ interface AppContextType {
   activeAlarmState: ActiveAlarmState;
   dismissAlarm: () => void;
   snoozeAlarm: (mins?: number) => void;
+  // PRD FIX v0.3.30 Part E2: Free Timers
+  freeTimers: FreeTimer[];
+  addFreeTimer: (timer: FreeTimer) => void;
+  togglePauseFreeTimer: (id: string) => void;
+  addFreeTimerSeconds: (id: string, seconds: number) => void;
+  finishFreeTimer: (timer: FreeTimer, recordToLog: boolean) => void;
+  deleteFreeTimer: (id: string) => void;
+  restartFreeTimer: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -558,6 +572,118 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const todayDateStr = getDeviceCalendarDate();
   const [selectedCardDate, setSelectedCardDate] = useState<string>(todayDateStr);
   const [dailyCardItems, setDailyCardItems] = useState<DailyCardItem[]>(INITIAL_DAILY_CARD_ITEMS);
+
+  // PRD FIX v0.3.30 Part E2: Free Timers State & Operations
+  const [freeTimers, setFreeTimers] = useState<FreeTimer[]>(() => loadFreeTimers());
+
+  useEffect(() => {
+    saveFreeTimers(freeTimers);
+  }, [freeTimers]);
+
+  const addFreeTimer = (timer: FreeTimer) => {
+    setFreeTimers(prev => {
+      if (prev.length >= 3) return prev;
+      return [...prev, timer];
+    });
+
+    if (timer.mode === 'at_time' && timer.atTimeStr) {
+      const todayDate = getDeviceCalendarDate();
+      setDailyCardItems(prev => [
+        {
+          id: `dc-${Date.now()}`,
+          text: timer.title,
+          date: todayDate,
+          start: timer.atTimeStr,
+          status: 'open',
+          carryCount: 0,
+          origin: 'planned',
+        },
+        ...prev,
+      ]);
+      setToastMsg(`Đã thêm lịch nhắc "${timer.title}" lúc ${timer.atTimeStr} vào Thẻ ngày`);
+    } else {
+      setToastMsg(`Đã bắt đầu: ${timer.title}`);
+    }
+  };
+
+  const togglePauseFreeTimer = (id: string) => {
+    setFreeTimers(prev => prev.map(t => {
+      if (t.id !== id) return t;
+      const now = Date.now();
+      if (t.status === 'paused') {
+        const pausedDuration = t.pausedAt ? now - t.pausedAt : 0;
+        const newEndsAt = t.endsAt ? t.endsAt + pausedDuration : undefined;
+        return {
+          ...t,
+          status: 'running',
+          pausedAt: undefined,
+          endsAt: newEndsAt,
+        };
+      } else {
+        return {
+          ...t,
+          status: 'paused',
+          pausedAt: now,
+        };
+      }
+    }));
+  };
+
+  const addFreeTimerSeconds = (id: string, seconds: number) => {
+    setFreeTimers(prev => prev.map(t => {
+      if (t.id !== id) return t;
+      const baseEnds = t.endsAt || Date.now();
+      return {
+        ...t,
+        endsAt: baseEnds + seconds * 1000,
+      };
+    }));
+  };
+
+  const finishFreeTimer = (timer: FreeTimer, recordToLog: boolean) => {
+    const elapsedSec = getFreeTimerElapsedSeconds(timer);
+    const elapsedMins = Math.max(1, Math.round(elapsedSec / 60));
+
+    if (recordToLog) {
+      const todayDate = getDeviceCalendarDate();
+      setDailyCardItems(prev => [
+        {
+          id: `dc-${Date.now()}`,
+          text: timer.title,
+          date: todayDate,
+          status: 'done',
+          carryCount: 0,
+          origin: 'planned',
+          extra: {
+            actualMinutes: elapsedMins,
+          },
+        },
+        ...prev,
+      ]);
+      setToastMsg(`Đã ghi nhận ${elapsedMins} phút vào sổ thời gian`);
+    }
+
+    setFreeTimers(prev => prev.filter(t => t.id !== timer.id));
+  };
+
+  const deleteFreeTimer = (id: string) => {
+    setFreeTimers(prev => prev.filter(t => t.id !== id));
+  };
+
+  const restartFreeTimer = (id: string) => {
+    setFreeTimers(prev => prev.map(t => {
+      if (t.id !== id) return t;
+      const now = Date.now();
+      const dur = t.totalDurationSeconds || 300;
+      return {
+        ...t,
+        status: 'running',
+        startedAt: now,
+        pausedAt: undefined,
+        endsAt: now + dur * 1000,
+      };
+    }));
+  };
 
   // v0.3.2 B26: Mini app Lists ("Danh sách")
   const [lists, setLists] = useState<AppList[]>(INITIAL_LISTS);
@@ -1448,6 +1574,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [alarmSettings, scheduleBlocks]);
 
   // Alarm ticker: checks every 15s if device clock matches block start time
+  // PRD FIX v0.3.30 Part E2.5: Free timer completion check
+  useEffect(() => {
+    const checkFreeTimers = async () => {
+      const now = Date.now();
+      for (const t of freeTimers) {
+        if (t.status === 'running' && t.endsAt && now >= t.endsAt) {
+          const soundRes = await triggerAlarmSound(alarmSettings);
+          setActiveAlarmState({
+            isActive: true,
+            blockTitle: `Hết giờ: ${t.title}`,
+            startTime: getDeviceTimeString(),
+            soundName: alarmSettings.customSound?.name,
+            isFallbackDefault: soundRes.isFallbackDefault,
+            fallbackReason: soundRes.fallbackReason,
+            ringStartedAt: now,
+          });
+          setFreeTimers(prev => prev.map(item => item.id === t.id ? { ...item, status: 'done' } : item));
+          break;
+        }
+      }
+    };
+
+    const interval = setInterval(checkFreeTimers, 2000);
+    return () => clearInterval(interval);
+  }, [freeTimers, alarmSettings]);
+
   useEffect(() => {
     if (!alarmSettings.enabled) return;
 
@@ -2508,6 +2660,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       activeAlarmState,
       dismissAlarm,
       snoozeAlarm,
+      freeTimers,
+      addFreeTimer,
+      togglePauseFreeTimer,
+      addFreeTimerSeconds,
+      finishFreeTimer,
+      deleteFreeTimer,
+      restartFreeTimer,
     }}>
       {children}
       <AlarmScreen

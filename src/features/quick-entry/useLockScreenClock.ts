@@ -10,7 +10,7 @@ import {
 import { clockState } from '@/features/clock';
 
 export function useLockScreenClock() {
-  const { scheduleBlocks, dayTemplate, goals, isNativePlatform } = useApp();
+  const { scheduleBlocks, dayTemplate, goals, isNativePlatform, freeTimers } = useApp();
   const lastRunningBlockIdRef = useRef<string | null>(null);
   const lastPayloadRef = useRef<string>('');
 
@@ -40,7 +40,11 @@ export function useLockScreenClock() {
 
       const blockId = state.block?.id || `anchor-${state.mode}`;
       const taskTitle = state.title;
-      const goalName = state.subtitle;
+      // PRD FIX v0.3.30 Part E2.4: Secondary free timer line on lock screen banner
+      const activeFreeTimers = (freeTimers || []).filter(t => t.status === 'running');
+      const goalName = activeFreeTimers.length > 0
+        ? `${state.subtitle} • ⏱️ ${activeFreeTimers[0].title}`
+        : state.subtitle;
       const startTimestamp = Math.floor(state.startedAt / 1000);
       const targetTimestamp = Math.floor(state.endsAt / 1000);
       const totalMinutes = Math.max(5, Math.round((state.endsAt - state.startedAt) / 60000));
