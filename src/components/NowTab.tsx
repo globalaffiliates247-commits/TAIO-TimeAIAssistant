@@ -52,6 +52,7 @@ export const NowTab: React.FC = () => {
     currentBlock, 
     setBlocks,
     blocks,
+    scheduleBlocks,
     goals, 
     deadlines, 
     interruptions,
@@ -181,12 +182,12 @@ export const NowTab: React.FC = () => {
     }
   };
 
-  // Stats calculation
-  const totalCount = blocks.length;
-  const completedCount = blocks.filter(b => b.status === 'done').length;
-  const deepWorkMinutes = blocks
+  // Stats calculation (FIX v0.3.28 A2: computed from scheduleBlocks)
+  const totalCount = scheduleBlocks.length;
+  const completedCount = scheduleBlocks.filter(b => b.status === 'done').length;
+  const deepWorkMinutes = scheduleBlocks
     .filter(b => b.status === 'done' && b.type === 'deep')
-    .length * profile.focusBlockDurationMins || 150;
+    .reduce((acc, b) => acc + (b.touchTimeMinutes || b.estimatedMinutes || 30), 0) || 150;
 
   const intUsedMins = interruptions
     .filter(i => i.decision === 'do_now')
@@ -775,7 +776,7 @@ export const NowTab: React.FC = () => {
           onClick={() => openDrilldown({
             type: 'tasks',
             title: `${totalCount} việc hôm nay (Khớp 100% với con số)`,
-            subtitle: `${completedCount} đã xong • ${blocks.filter(b => b.status === 'in_progress').length} đang chạy • ${blocks.filter(b => b.status === 'planned').length} chưa đến giờ`,
+            subtitle: `${completedCount} đã xong • ${scheduleBlocks.filter(b => b.status === 'in_progress').length} đang chạy • ${scheduleBlocks.filter(b => b.status === 'planned').length} chưa đến giờ`,
           })}
           className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-xs ${
             isCool 

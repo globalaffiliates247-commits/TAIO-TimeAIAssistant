@@ -31,7 +31,7 @@ const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; 
 };
 
 export const PlanTab: React.FC = () => {
-  const { blocks, goals, profile, addNewBlock, openDrilldown } = useApp();
+  const { blocks, scheduleBlocks, goals, profile, addNewBlock, openDrilldown } = useApp();
   const { nowMinutes, todayLabel } = useDeviceClock();
   // B25: Daily Card is the first view
   const [activeView, setActiveView] = useState<'card' | 'timeline' | 'matrix'>('card');
@@ -199,9 +199,9 @@ export const PlanTab: React.FC = () => {
               </span>
             </div>
 
-            {/* Timeline List */}
+            {/* Timeline List (FIX v0.3.28 A2: reads unified scheduleBlocks) */}
             <div className="space-y-3">
-              {blocks
+              {scheduleBlocks
                 .filter(b => Boolean(b.startTime && b.endTime))
                 .sort((a, b) => a.startTime.localeCompare(b.startTime))
                 .map((block) => {

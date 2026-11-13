@@ -64,6 +64,7 @@ const DONUT_GROUP_ORDER: TimeLedgerCategory[] = [
 export const AchievementsTab: React.FC = () => {
   const { 
     blocks, 
+    scheduleBlocks, 
     goals, 
     dailyCardItems,
     interruptions, 
@@ -114,13 +115,15 @@ export const AchievementsTab: React.FC = () => {
     setExpandedGroups(prev => ({ ...prev, [cat]: !prev[cat] }));
   };
 
-  const completedBlocks = blocks.filter(b => b.status === 'done');
-  const waitingBlocks = blocks.filter(b => b.status === 'unconfirmed' || b.status === 'partly_done');
+  const completedBlocks = scheduleBlocks.filter(b => b.status === 'done');
+  const waitingBlocks = scheduleBlocks.filter(b => b.status === 'unconfirmed' || b.status === 'partly_done');
 
-  // Stats calculation
-  const totalPlannedMins = blocks.length * 60;
-  const doneMins = completedBlocks.length * 60;
-  const deepWorkDoneMins = completedBlocks.filter(b => b.type === 'deep').length * profile.focusBlockDurationMins || 150;
+  // Stats calculation (FIX v0.3.28 A4: actual minutes from scheduleBlocks)
+  const totalPlannedMins = scheduleBlocks.reduce((acc, b) => acc + (b.estimatedMinutes || 30), 0);
+  const doneMins = completedBlocks.reduce((acc, b) => acc + (b.touchTimeMinutes || b.estimatedMinutes || 30), 0);
+  const deepWorkDoneMins = completedBlocks
+    .filter(b => b.type === 'deep')
+    .reduce((acc, b) => acc + (b.touchTimeMinutes || b.estimatedMinutes || 30), 0) || 150;
 
   const intUsedMins = interruptions
     .filter(i => i.decision === 'do_now')
@@ -749,7 +752,7 @@ export const AchievementsTab: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              {blocks.map((b) => {
+              {scheduleBlocks.map((b) => {
                 const taskEff = computeTaskTimeEfficiency(b);
                 const isDone = b.status === 'done';
 
@@ -818,7 +821,7 @@ export const AchievementsTab: React.FC = () => {
 
             <div className="space-y-4 pt-2">
               {goals.map((g) => {
-                const metrics = computeGoalMetrics(g, blocks, dailyCardItems);
+                const metrics = computeGoalMetrics(g, scheduleBlocks, dailyCardItems);
                 const plannedHours = Math.round(g.dailyBudgetMins * (g.horizonDays / 7) / 60);
 
                 return (

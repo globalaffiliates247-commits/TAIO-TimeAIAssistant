@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import {
   saveDurableState,
   loadDurableState,
@@ -23,6 +23,11 @@ import {
 } from '../features/data-transfer';
 import { useSyncLoop } from '../features/sync/useSyncLoop';
 import i18n from '../i18n';
+import {
+  buildTodaySchedule,
+  updateScheduleEntry,
+  commitQuickLine,
+} from '../features/tasks';
 import {
   AlarmSettings,
   ActiveAlarmState,
@@ -152,6 +157,7 @@ interface AppContextType {
   goals: Goal[];
   setGoals: React.Dispatch<React.SetStateAction<Goal[]>>;
   blocks: TimeBlock[];
+  scheduleBlocks: TimeBlock[];
   setBlocks: React.Dispatch<React.SetStateAction<TimeBlock[]>>;
   deadlines: HardDeadline[];
   interruptions: InterruptionRecord[];
@@ -446,7 +452,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [offPlanMinutes, setOffPlanMinutes] = useState<number>(79); // e.g. 1h 19m past wind-down
 
   const [goals, setGoals] = useState<Goal[]>(INITIAL_GOALS);
-  const [blocks, setBlocks] = useState<TimeBlock[]>(INITIAL_BLOCKS);
+  const [blocks, setBlocks] = useState<TimeBlock[]>([]);
   const [deadlines, setDeadlines] = useState<HardDeadline[]>(INITIAL_DEADLINES);
   const [interruptions, setInterruptions] = useState<InterruptionRecord[]>(INITIAL_INTERRUPTIONS);
   const [gaps, setGaps] = useState<UndeclaredGap[]>(INITIAL_GAPS);
@@ -1189,22 +1195,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDrilldown(prev => ({ ...prev, isOpen: false }));
   };
 
-  // 1-tap actions on blocks: Xong, Dời, Bỏ
+  // 1-tap actions on blocks: Xong, Dời, Bỏ (FIX v0.3.28 A2: routed via updateScheduleEntry)
   const markTaskDone = (taskId: string) => {
-    setBlocks(prev => prev.map(b => b.id === taskId ? { ...b, status: 'done' } : b));
+    updateScheduleEntry(taskId, { status: 'done' }, { updateDailyCardItem, setBlocks, dailyCardItems });
     setCelebrationMsg(language === 'vi' ? '🎉 Đã đánh dấu xong! Số lượng hoàn thành cập nhật ngay.' : '🎉 Task marked done!');
   };
 
   const shiftTaskTime = (taskId: string, extraMins = 30) => {
-    setBlocks(prev => prev.map(b => {
-      if (b.id !== taskId) return b;
-      return { ...b, status: 'extended', notes: `Đã dời thêm ${extraMins} phút` };
-    }));
+    updateScheduleEntry(taskId, { status: 'extended', notes: `Đã dời thêm ${extraMins} phút` }, { updateDailyCardItem, setBlocks, dailyCardItems });
     setCelebrationMsg(language === 'vi' ? `Đã dời nhiệm vụ thêm ${extraMins} phút.` : `Task shifted by ${extraMins} mins.`);
   };
 
   const dropTask = (taskId: string) => {
-    setBlocks(prev => prev.map(b => b.id === taskId ? { ...b, status: 'dropped' } : b));
+    updateScheduleEntry(taskId, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems });
     setCelebrationMsg(language === 'vi' ? 'Đã bỏ nhiệm vụ này khỏi trọng tâm hôm nay.' : 'Task dropped cleanly.');
   };
 
@@ -1339,18 +1342,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // v0.11 & v0.3.18/v0.3.19: Priority Matrix Move (B16) — no Q1-Q4 codes on screen
   const moveTaskQuadrant = (taskId: string, targetQuadrant: 1 | 2 | 3 | 4) => {
-    setBlocks(prev => prev.map(b => {
-      if (b.id !== taskId) return b;
-      const isImportant = targetQuadrant === 1 || targetQuadrant === 2;
-      const isUrgent = targetQuadrant === 1 || targetQuadrant === 3;
-      return {
-        ...b,
+    const isImportant = targetQuadrant === 1 || targetQuadrant === 2;
+    const isUrgent = targetQuadrant === 1 || targetQuadrant === 3;
+    updateScheduleEntry(
+      taskId,
+      {
         quadrant: targetQuadrant,
         isImportant,
         isUrgent,
         updatedAt: Date.now(),
-      };
-    }));
+      },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
     const groupNameVi: Record<1 | 2 | 3 | 4, string> = {
       1: 'Khẩn cấp & Quan trọng',
       2: 'Quan trọng, chưa khẩn',
@@ -1386,12 +1389,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // Active current block (PRD v0.3.22 B31: dynamically computed based on device clock)
+  // PRD FIX v0.3.28 A1: Unified schedule blocks (Single source of truth)
+  const scheduleBlocks: TimeBlock[] = useMemo(() => {
+    return buildTodaySchedule(blocks, dailyCardItems, getDeviceCalendarDate());
+  }, [blocks, dailyCardItems]);
+
+  // Active current block (PRD v0.3.22 B31 / v0.3.28 A2: dynamically computed from unified scheduleBlocks)
   const nowMins = getDeviceTimeMinutes();
   const currentBlock =
-    blocks.find(b => computeBlockStatus(b, nowMins) === 'in_progress') ||
-    blocks.filter(b => computeBlockStatus(b, nowMins) === 'planned').sort((a, b) => a.startTime.localeCompare(b.startTime))[0] ||
-    blocks[0];
+    scheduleBlocks.find((b: TimeBlock) => computeBlockStatus(b, nowMins) === 'in_progress') ||
+    scheduleBlocks.filter((b: TimeBlock) => computeBlockStatus(b, nowMins) === 'planned').sort((a: TimeBlock, b: TimeBlock) => a.startTime.localeCompare(b.startTime))[0] ||
+    scheduleBlocks[0];
 
   // Sync remaining timer with in-progress block if running
   useEffect(() => {
@@ -1409,11 +1417,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const nativeAlarmModeRef = useRef<NativeAlarmMode>('none');
   const soundMissingWarnedRef = useRef(false);
 
-  // v0.3.24 B32: schedule native alarms so the phone rings at block start when the app is closed or locked
+  // v0.3.24 B32 / v0.3.28 A2: schedule native alarms so the phone rings at block start from scheduleBlocks
   useEffect(() => {
     let cancelled = false;
     const sync = async () => {
-      const res = await syncNativeBlockAlarms(blocks, alarmSettings);
+      const res = await syncNativeBlockAlarms(scheduleBlocks, alarmSettings);
       if (cancelled) return;
       nativeAlarmModeRef.current = res.mode;
       if (res.soundMissing && !soundMissingWarnedRef.current && alarmSettings.customSound) {
@@ -1426,7 +1434,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     document.addEventListener('visibilitychange', onVisible);
     return () => { cancelled = true; document.removeEventListener('visibilitychange', onVisible); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alarmSettings, blocks]);
+  }, [alarmSettings, scheduleBlocks]);
 
   // Alarm ticker: checks every 15s if device clock matches block start time
   useEffect(() => {
@@ -1436,7 +1444,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const currentMinutes = getDeviceTimeMinutes();
       const todayDate = getDeviceCalendarDate();
 
-      for (const b of blocks) {
+      for (const b of scheduleBlocks) {
         if (!b.startTime) continue;
         const startMins = timeToMinutes(b.startTime);
         const alarmKey = `${todayDate}_${b.id}_${b.startTime}`;
@@ -1462,7 +1470,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     checkAlarmTrigger();
     const interval = setInterval(checkAlarmTrigger, 15000);
     return () => clearInterval(interval);
-  }, [alarmSettings, blocks]);
+  }, [alarmSettings, scheduleBlocks]);
 
   const dismissAlarm = () => {
     stopAllAlarmSounds();
@@ -1563,7 +1571,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (returnPoint) {
       setActiveReturnPoint(returnPoint);
       if (currentBlock) {
-        setBlocks(prev => prev.map(b => b.id === currentBlock.id ? { ...b, returnPoint } : b));
+        updateScheduleEntry(currentBlock.id, { returnPoint }, { updateDailyCardItem, setBlocks, dailyCardItems });
       }
     }
 
@@ -1705,7 +1713,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Check-in answers (v0.20 B9 Anatomy)
+  // Check-in answers (v0.20 B9 Anatomy / FIX v0.3.28 A2 & A4: routed via updateScheduleEntry)
   const handleCheckInAnswer = (
     answer: 'done' | 'continue_later' | 'more_time' | 'remind_10m' | 'stop_here', 
     extraMins = 15,
@@ -1714,28 +1722,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!checkInBlock) return;
 
     if (answer === 'done') {
-      setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { 
-        ...b, 
-        status: 'done', 
-        timeboxEndOutcome: 'done_on_time',
-        touchTimeMinutes: b.estimatedMinutes || 60,
-        cycleTimeMinutes: b.estimatedMinutes || 60,
-        flowEfficiency: 1.0,
-      } : b));
+      const actualMins = checkInBlock.startTime && checkInBlock.endTime
+        ? Math.max(5, (timeToMinutes(checkInBlock.endTime) - timeToMinutes(checkInBlock.startTime) + 1440) % 1440)
+        : (checkInBlock.estimatedMinutes || 30);
+
+      updateScheduleEntry(
+        checkInBlock.id,
+        { 
+          status: 'done', 
+          timeboxEndOutcome: 'done_on_time',
+          touchTimeMinutes: actualMins,
+          cycleTimeMinutes: actualMins,
+          flowEfficiency: 1.0,
+        },
+        { updateDailyCardItem, setBlocks, dailyCardItems }
+      );
       setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành đúng tiêu chí (Definition of Done)! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed per Definition of Done!');
       triggerCoachCard('first_dod_done');
-      const nextBlock = blocks.find(b => b.id !== checkInBlock.id && b.status === 'planned');
+      const nextBlock = scheduleBlocks.find((b: TimeBlock) => b.id !== checkInBlock.id && b.status === 'planned');
       if (nextBlock) {
-        setBlocks(prev => prev.map(b => b.id === nextBlock.id ? { ...b, status: 'in_progress' } : b));
+        updateScheduleEntry(nextBlock.id, { status: 'in_progress' }, { updateDailyCardItem, setBlocks, dailyCardItems });
         setTimerMinutesRemaining(profile.focusBlockDurationMins);
       }
     } else if (answer === 'continue_later' || answer === 'stop_here') {
-      setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { 
-        ...b, 
-        status: 'partly_done',
-        timeboxEndOutcome: 'continue_later',
-        nextStep: nextStep || b.nextStep || 'Làm tiếp bước kế tiếp',
-      } : b));
+      updateScheduleEntry(
+        checkInBlock.id,
+        { 
+          status: 'partly_done',
+          timeboxEndOutcome: 'continue_later',
+          nextStep: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
+          returnPoint: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
+        },
+        { updateDailyCardItem, setBlocks, dailyCardItems }
+      );
       // Auto add residual step to Inbox so mind is clear (Zeigarnik effect reduction)
       if (nextStep) {
         addInboxItem({
@@ -1747,7 +1766,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       setCelebrationMsg(language === 'vi' ? 'Đã lưu bước kế tiếp và đưa vào Rổ việc để tâm trí hoàn toàn thanh thản (Zeigarnik)!' : 'Saved next step cleanly!');
     } else if (answer === 'more_time') {
-      setBlocks(prev => prev.map(b => b.id === checkInBlock.id ? { ...b, status: 'extended' } : b));
+      updateScheduleEntry(
+        checkInBlock.id,
+        { status: 'extended' },
+        { updateDailyCardItem, setBlocks, dailyCardItems }
+      );
       setTimerMinutesRemaining(prev => prev + extraMins);
       setCelebrationMsg(language === 'vi' ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại.` : `Added +${extraMins} minutes.`);
     } else if (answer === 'remind_10m') {
@@ -1876,10 +1899,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (cancelled) return;
 
       if (savedBlocks?.value) {
-        setBlocks(mergeCollectionsByUpdatedAt(savedBlocks.value, INITIAL_BLOCKS));
+        // FIX v0.3.28 A2 #6: Filter out mock blocks b-1..b-9 on upgrade, do not merge with INITIAL_BLOCKS
+        const cleanBlocks = savedBlocks.value.filter(b => !/^b-[1-9]$/.test(b.id));
+        setBlocks(cleanBlocks);
       }
       if (savedDailyCards?.value) {
-        setDailyCardItems(mergeCollectionsByUpdatedAt(savedDailyCards.value, INITIAL_DAILY_CARD_ITEMS));
+        const cleanCards = savedDailyCards.value.filter(c => !/^dc-[1-9]$/.test(c.id));
+        setDailyCardItems(cleanCards);
       }
       if (savedInbox?.value) {
         setInbox(mergeCollectionsByUpdatedAt(savedInbox.value, INITIAL_INBOX));
@@ -1944,7 +1970,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGoals(prev => {
       let changed = false;
       const next = prev.map(g => {
-        const computed = computeGoalMetrics(g, blocks, dailyCardItems);
+        const computed = computeGoalMetrics(g, scheduleBlocks, dailyCardItems);
         if (g.progressPercent !== computed.progressPercent) {
           changed = true;
           return { ...g, progressPercent: computed.progressPercent };
@@ -1953,7 +1979,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       return changed ? next : prev;
     });
-  }, [blocks, dailyCardItems]);
+  }, [scheduleBlocks, dailyCardItems]);
 
   // E5: Persist every state change immediately to durable storage (SQLite + IndexedDB)
   useEffect(() => {
@@ -2175,6 +2201,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGoals(prev => [...prev, newG]);
   };
 
+  // PRD FIX v0.3.28 A2 #7: Electron Mac Quick Note listener
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const bridge = (window as unknown as { taioAPI?: { onQuickNoteReceived?: (cb: (text: string) => void) => void } }).taioAPI;
+    if (bridge?.onQuickNoteReceived) {
+      bridge.onQuickNoteReceived((text: string) => {
+        commitQuickLine(text, getDeviceCalendarDate(), { addDailyCardItem, goals });
+        setCelebrationMsg(language === 'vi' ? `✓ Đã ghi nhận: "${text}"` : `✓ Note added: "${text}"`);
+      });
+    }
+  }, [addDailyCardItem, goals, language]);
+
   return (
     <AppContext.Provider value={{
       profile,
@@ -2196,6 +2234,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       goals,
       setGoals,
       blocks,
+      scheduleBlocks,
       setBlocks,
       deadlines,
       interruptions,

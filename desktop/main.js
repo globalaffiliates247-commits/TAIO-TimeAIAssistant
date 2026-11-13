@@ -46,6 +46,19 @@ function createWindow() {
     return { action: 'deny' };
   });
   mainWindow.on('closed', () => { mainWindow = null; });
+  mainWindow.webContents.on('did-finish-load', () => {
+    flushQuickNoteQueue();
+  });
+}
+
+const quickNoteQueue = [];
+
+function flushQuickNoteQueue() {
+  if (!mainWindow || mainWindow.isDestroyed() || !mainWindow.webContents) return;
+  while (quickNoteQueue.length > 0) {
+    const note = quickNoteQueue.shift();
+    mainWindow.webContents.send('taio-quick-note-received', note);
+  }
 }
 
 // B35.5: Floating Quick Note window (⌥⌘N)
@@ -145,11 +158,12 @@ ipcMain.on('taio-timer-update', (_event, remaining) => {
   updateTrayMenu();
 });
 
-// IPC: receive quick note
+// IPC: receive quick note (FIX v0.3.28 A2: queue if main window closed)
 ipcMain.on('taio-quick-note', (_event, noteText) => {
-  // Forward to main window renderer if open
-  if (mainWindow && !mainWindow.isDestroyed()) {
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isLoading()) {
     mainWindow.webContents.send('taio-quick-note-received', noteText);
+  } else {
+    quickNoteQueue.push(noteText);
   }
 });
 

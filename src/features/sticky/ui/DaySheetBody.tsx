@@ -10,11 +10,12 @@ import {
   findGaps, fmtDuration, nextFreeStart, parseTimedText, priorityOf, suggestDuration,
   suggestForGap, toMins, toTime, durationOf, durationForPlacement, findOverlapItemIds,
 } from '../model/timeline';
+import { commitQuickLine, matchGoalByTag } from '@/features/tasks';
 import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
-  const { dailyCardItems, addDailyCardItem, updateDailyCardItem, removeDailyCardItem, toggleDailyCardItem } = useApp();
+  const { dailyCardItems, addDailyCardItem, updateDailyCardItem, removeDailyCardItem, toggleDailyCardItem, goals } = useApp();
   const day = note.date!;
   const now = getDeviceNow();
   const nowMins = now.getHours() * 60 + now.getMinutes();
@@ -41,27 +42,43 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const suggested = parsed.time && parsed.rest && !parsed.durationMins ? suggestDuration(parsed.rest, undefined, dailyCardItems) : null;
 
   const commitDraft = () => {
+    if (!draft.trim()) return;
     const p = parseTimedText(draft);
-    if (!p.rest) return;
-    if (!p.time) {
-      const extra = p.durationMins ? { estimateMins: p.durationMins } : undefined;
-      addDailyCardItem({ text: p.rest, date: day, origin: 'planned', extra });
-      setDraft('');
-      return;
-    }
-    const dur = p.durationMins ?? pill ?? undefined;
-    const end = dur ? toTime(toMins(p.time) + dur) : undefined;
-    const extra = dur ? { estimateMins: dur } : undefined;
-    addDailyCardItem({ text: p.rest, date: day, start: p.time, end, origin: 'planned', extra });
+    if (!p.rest && !p.time) return;
+
+    // Use unified commitQuickLine (FIX v0.3.28 A1 & A3: handles #goal, time, duration)
+    const createdId = commitQuickLine(draft, day, { addDailyCardItem, goals });
     setPill(null);
+
     // After a duration is set, the next line starts at the next free time (founder flow, 15:45 -> 16:15)
-    setDraft(end ? `${nextFreeStart([...timed, { id: 'new', start: p.time, end } as DailyCardItem], toMins(end))} ` : '');
+    const dur = p.durationMins ?? pill ?? undefined;
+    const end = dur && p.time ? toTime(toMins(p.time) + dur) : undefined;
+    setDraft(end ? `${nextFreeStart([...timed, { id: createdId || 'new', start: p.time, end } as DailyCardItem], toMins(end))} ` : '');
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const saveEdit = (it: DailyCardItem) => {
     const p = parseTimedText(editText);
-    if (!p.rest) { removeDailyCardItem(it.id); setEditing(null); return; }
+    if (!p.rest && !p.time) { removeDailyCardItem(it.id); setEditing(null); return; }
+
+    // Goal tag detection on edit (FIX v0.3.28 A3)
+    let goalId = it.goalId;
+    let goalName = it.goalName;
+    let text = p.rest;
+    const goalTagMatch = text.match(/#([a-zA-Zà-ỹÀ-Ỹ0-9_]+)/g);
+    if (goalTagMatch && goals.length) {
+      for (const rawTagWithHash of goalTagMatch) {
+        const tag = rawTagWithHash.slice(1);
+        if (/^[1-9]$/.test(tag)) continue;
+        const matchedGoal = matchGoalByTag(tag, goals);
+        if (matchedGoal) {
+          goalId = matchedGoal.id;
+          goalName = matchedGoal.name;
+          text = text.replace(rawTagWithHash, ' ').replace(/\s+/g, ' ').trim();
+        }
+      }
+    }
+
     const oldDur = durationOf(it);
     const existingExtra = (it.extra as Record<string, unknown> | undefined) || {};
     const oldEst = typeof existingExtra.estimateMins === 'number' ? existingExtra.estimateMins : undefined;
@@ -71,7 +88,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       const newExtra = { ...existingExtra };
       if (dur) newExtra.estimateMins = dur;
       updateDailyCardItem(it.id, {
-        text: p.rest,
+        text,
+        goalId,
+        goalName,
         start: p.time,
         end: dur ? toTime(toMins(p.time) + dur) : undefined,
         extra: newExtra,
@@ -85,7 +104,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         delete newExtra.estimateMins;
       }
       updateDailyCardItem(it.id, {
-        text: p.rest,
+        text,
+        goalId,
+        goalName,
         start: undefined,
         end: undefined,
         extra: newExtra,
@@ -106,20 +127,32 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   const renderText = (it: DailyCardItem) =>
     editing === it.id ? (
-      <input
-        autoFocus value={editText} onChange={e => setEditText(e.target.value)}
-        onBlur={() => saveEdit(it)}
-        onKeyDown={e => { if (e.key === 'Enter') saveEdit(it); if (e.key === 'Escape') setEditing(null); }}
-        className="flex-1 bg-transparent outline-none min-w-0" style={{ color: c.ink }}
-      />
+      <div className="flex-1 flex items-center gap-2 min-w-0">
+        <input
+          autoFocus value={editText} onChange={e => setEditText(e.target.value)}
+          onBlur={() => saveEdit(it)}
+          onKeyDown={e => { if (e.key === 'Enter') saveEdit(it); if (e.key === 'Escape') setEditing(null); }}
+          className="flex-1 bg-transparent outline-none min-w-0" style={{ color: c.ink }}
+        />
+        {!it.goalId && (
+          <span className="text-[10.5px] px-1.5 py-0.5 rounded border border-dashed border-slate-300 text-slate-400 select-none shrink-0" title="Gõ #tên_mục_tiêu để gắn">
+            Gắn mục tiêu
+          </span>
+        )}
+      </div>
     ) : (
       <span
-        className="flex-1 min-w-0 cursor-text"
+        className="flex-1 min-w-0 cursor-text flex items-center flex-wrap gap-1"
         style={{ textDecoration: it.status === 'done' ? 'line-through' : undefined, opacity: it.status === 'done' ? 0.5 : 1 }}
         onClick={() => { setEditing(it.id); setEditText(lineText(it)); }}
       >
-        {it.text.replace(/#\d\b/, '').trim()}
-        {priorityOf(it.text) < 99 && <span className="ml-1.5 text-xs font-semibold" style={{ color: c.muted }}>#{priorityOf(it.text)}</span>}
+        <span>{it.text.replace(/#\d\b/, '').trim()}</span>
+        {priorityOf(it.text) < 99 && <span className="text-xs font-semibold" style={{ color: c.muted }}>#{priorityOf(it.text)}</span>}
+        {it.goalName && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium shrink-0">
+            {it.goalName}
+          </span>
+        )}
       </span>
     );
 
@@ -243,12 +276,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         onChange={e => setFlexDraft(e.target.value)}
         onKeyDown={e => {
           if (e.key === 'Enter' && flexDraft.trim()) {
-            const p = parseTimedText(flexDraft);
-            if (p.rest) {
-              const extra = p.durationMins ? { estimateMins: p.durationMins } : undefined;
-              addDailyCardItem({ text: p.rest, date: day, extra });
-              setFlexDraft('');
-            }
+            commitQuickLine(flexDraft, day, { addDailyCardItem, goals });
+            setFlexDraft('');
           }
         }}
         className="bg-transparent outline-none placeholder:opacity-60" style={{ color: c.ink }}

@@ -73,10 +73,12 @@ export function computeGoalMetrics(
   const linkedBlocks = blocks.filter(
     (b) => b.goalId === goal.id && b.status !== 'dropped' && !b.isTemplateBlock
   );
+  const blockIds = new Set(linkedBlocks.map((b) => b.id));
   const linkedDailyItems = dailyCardItems.filter(
     (item) =>
       item.goalId === goal.id &&
       item.status !== 'dropped' &&
+      !blockIds.has(item.id) &&
       !linkedBlocks.some((b) => b.title === item.text)
   );
 
@@ -86,16 +88,24 @@ export function computeGoalMetrics(
   const completedTasksCount = completedBlocks.length + completedDaily.length;
   const totalTasksCount = linkedBlocks.length + linkedDailyItems.length;
 
-  // Effort minutes across all linked blocks (actual if done/in_progress) or cumulative imported actualMinutesTotal
-  const blocksEffortMinutes = blocks
-    .filter((b) => b.goalId === goal.id && b.status !== 'dropped')
-    .reduce((acc, b) => {
-      if (b.status === 'done' || b.status === 'in_progress' || b.status === 'partly_done') {
-        return acc + getBlockActualMinutes(b);
-      }
-      return acc;
-    }, 0);
-  const effortMinutes = Math.max(goal.actualMinutesTotal || 0, blocksEffortMinutes);
+  // Effort minutes: actual minutes from schedule blocks + untimed daily card items (counted once per id)
+  const blocksEffortMinutes = linkedBlocks.reduce((acc, b) => {
+    if (b.status === 'done' || b.status === 'in_progress' || b.status === 'partly_done') {
+      return acc + getBlockActualMinutes(b);
+    }
+    return acc;
+  }, 0);
+  const dailyEffortMinutes = linkedDailyItems.reduce((acc, it) => {
+    if (it.status === 'done') {
+      const extra = (it.extra as Record<string, unknown> | undefined) || {};
+      const actual = typeof extra.actualMinutes === 'number'
+        ? extra.actualMinutes
+        : (typeof extra.estimateMins === 'number' ? extra.estimateMins : 30);
+      return acc + actual;
+    }
+    return acc;
+  }, 0);
+  const effortMinutes = Math.max(goal.actualMinutesTotal || 0, blocksEffortMinutes + dailyEffortMinutes);
 
   const effortHours = Math.round((effortMinutes / 60) * 10) / 10;
   const effortText =
