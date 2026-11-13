@@ -1,0 +1,112 @@
+[
+  {
+    "id": "q-en-01",
+    "text": "The key is not to prioritize what's on your schedule, but to schedule your priorities.",
+    "author": "Stephen Covey",
+    "lang": "en",
+    "contexts": ["start_day", "goal"],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-02",
+    "text": "Small daily improvements over time lead to stunning results.",
+    "author": "Robin Sharma",
+    "lang": "en",
+    "contexts": ["end_day", "goal"],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-03",
+    "text": "You don't have to be great to start, but you have to start to be great.",
+    "author": "Zig Ziglar",
+    "lang": "en",
+    "contexts": ["start_task", "goal"],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-04",
+    "text": "Focus on being productive instead of busy.",
+    "author": "Tim Ferriss",
+    "lang": "en",
+    "contexts": ["start_task", "break"],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-05",
+    "text": "The secret of getting ahead is getting started.",
+    "author": "Mark Twain",
+    "lang": "en",
+    "contexts": ["start_task"],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-06",
+    "text": "Time is what we want most, but what we use worst.",
+    "author": "William Penn",
+    "lang": "en",
+    "contexts": ["start_day", "break"],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-07",
+    "text": "Done is better than perfect.",
+    "author": "Sheryl Sandberg",
+    "lang": "en",
+    "contexts": ["done", "goal"],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-08",
+    "text": "It's not about having time, it's about making time.",
+    "author": "",
+    "lang": "en",
+    "contexts": ["start_day", "start_task"],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-09",
+    "text": "Progress, not perfection.",
+    "author": "",
+    "lang": "en",
+    "contexts": ["done", "break"],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-10",
+    "text": "Your future is created by what you do today, not tomorrow.",
+    "author": "Robert Kiyosaki",
+    "lang": "en",
+    "contexts": ["start_day", "goal"],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  }
+]

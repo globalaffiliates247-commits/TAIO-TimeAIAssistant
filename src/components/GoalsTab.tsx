@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { GoalProgressType } from '../types';
 import { computeGoalMetrics, computeTaskTimeEfficiency } from '../features/goals/goalMetrics';
 import { GoalInput } from '../features/goals/GoalInput';
-import { QuoteCard } from '../features/goals/quotes/QuoteCard';
+import { MotivationSticker } from '../features/motivation';
 import {
   Target,
   CheckCircle2,
@@ -193,8 +193,8 @@ export const GoalsTab: React.FC = () => {
       {/* B35.2 v0.3.27: Quick Goal Input with NLP */}
       <GoalInput />
 
-      {/* B35.3 v0.3.27: Motivation Quote Card */}
-      <QuoteCard />
+      {/* B7 v0.3.31: Motivation Sticker Card */}
+      <MotivationSticker slotKey="goals_tab" context="goal" size="card" />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
