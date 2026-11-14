@@ -32,7 +32,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     goals,
     scheduleBlocks,
     setBlocks,
-    setCloseDayModalOpen 
+    setCloseDayModalOpen,
+    language,
+    showToast
   } = useApp();
   const day = note.date!;
   const today = getDeviceCalendarDate();
@@ -101,8 +103,42 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [editing, setEditing] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [pickerItemId, setPickerItemId] = useState<string | null>(null);
+  const [overlapTargetId, setOverlapTargetId] = useState<string | null>(null);
   const [hashFilter, setHashFilter] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // PRD v0.3.33 Part F2.2: Parallel and shift actions for overlapping tasks
+  const handleMakeParallel = (targetItem: DailyCardItem) => {
+    const idx = timed.findIndex(t => t.id === targetItem.id);
+    const prev = idx > 0 ? timed[idx - 1] : null;
+    const parentId = prev ? prev.id : undefined;
+    updateScheduleEntry(
+      targetItem.id,
+      {
+        extra: { ...(targetItem.extra || {}), parallelOf: parentId }
+      },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+    showToast?.(language === 'vi' ? 'Đã chuyển thành việc làm song song!' : 'Marked as parallel task!');
+  };
+
+  const handleShiftAfter = (targetItem: DailyCardItem) => {
+    const idx = timed.findIndex(t => t.id === targetItem.id);
+    const prev = idx > 0 ? timed[idx - 1] : null;
+    if (!prev?.end) return;
+    const dur = durationOf(targetItem) || 30;
+    const newStartMins = toMins(prev.end);
+    const newEndMins = newStartMins + dur;
+    updateScheduleEntry(
+      targetItem.id,
+      {
+        startTime: toTime(newStartMins),
+        endTime: toTime(newEndMins),
+      },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+    showToast?.(language === 'vi' ? `Đã dời việc sau sang ${toTime(newStartMins)}!` : `Shifted to start after at ${toTime(newStartMins)}!`);
+  };
 
   // Multi-row selection & actions (PRD FIX v0.3.32 Part C3)
   const {
@@ -488,6 +524,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         const sug = gap ? suggestForGap(flex, taken, gap.mins, dailyCardItems) : undefined;
         if (sug) taken.add(sug.id);
         const isNowRunning = it.start && it.end && toMins(it.start) <= nowMins && nowMins < toMins(it.end) && it.status !== 'done';
+        const isParallel = Boolean(it.parallelOf || (it.extra as Record<string, unknown> | undefined)?.parallelOf);
         return (
           <React.Fragment key={it.id}>
             <div
@@ -495,10 +532,17 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               onPointerEnter={() => handleRowPointerEnter(it.id)}
               onTouchStart={() => handleTouchStart(it.id)}
               onTouchEnd={handleTouchEnd}
-              className={`group/row flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
+              className={`group/row flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors relative ${
+                isParallel ? 'ml-5 pl-2.5 border-l-2 border-slate-300' : ''
+              } ${
                 selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
               }`}
             >
+              {isParallel && (
+                <span className="shrink-0 text-xs font-mono font-bold text-slate-500" title="Việc làm song song (Làm kèm)">
+                  ∥
+                </span>
+              )}
               <button title="Chạm để đánh dấu xong" onClick={() => handleToggleItem(it)}
                 className="font-semibold tabular-nums shrink-0 cursor-pointer" style={{ color: c.ink }}>{it.start}</button>
               {it.isTemplateBlock && (
@@ -512,7 +556,49 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               )}
               {durationOf(it) && <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>{fmtDuration(durationOf(it)!)}</span>}
               {boundIds.has(it.id) && <span className="shrink-0" title="Đã lên lịch trước"><IconLock color={c.muted} /></span>}
-              {overlapIds.has(it.id) && <span className="shrink-0" title="Chồng giờ với việc trước"><IconOverlap color={c.muted} /></span>}
+              {overlapIds.has(it.id) && (
+                <div className="relative shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOverlapTargetId(overlapTargetId === it.id ? null : it.id);
+                    }}
+                    className="cursor-pointer p-0.5 hover:bg-amber-100 rounded transition-colors"
+                    title="Chồng giờ với việc trước — Bấm để: Làm song song hoặc Dời việc sau"
+                  >
+                    <IconOverlap color={c.muted} />
+                  </button>
+                  {overlapTargetId === it.id && (
+                    <div className="absolute z-30 left-0 top-6 bg-white border border-slate-200 shadow-xl rounded-xl p-1.5 min-w-[140px] text-xs space-y-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMakeParallel(it);
+                          setOverlapTargetId(null);
+                        }}
+                        className="w-full text-left px-2 py-1.5 hover:bg-slate-100 rounded-lg font-semibold text-slate-800 flex items-center gap-1.5"
+                      >
+                        <span className="font-mono font-bold text-slate-500">∥</span>
+                        <span>{language === 'vi' ? 'Làm song song' : 'Run in parallel'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShiftAfter(it);
+                          setOverlapTargetId(null);
+                        }}
+                        className="w-full text-left px-2 py-1.5 hover:bg-slate-100 rounded-lg font-semibold text-slate-800 flex items-center gap-1.5"
+                      >
+                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{language === 'vi' ? 'Dời việc sau' : 'Postpone start'}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               
               {/* Template quick actions */}
               {it.isTemplateBlock && (

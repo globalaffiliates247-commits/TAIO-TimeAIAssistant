@@ -131,9 +131,12 @@ export interface Gap { start: string; end: string; mins: number; afterId?: strin
 /**
  * Free time between timed items of the day (only the part still ahead of `nowMins`).
  * Merges overlapping spans first so long tasks don't leave false phantom gaps.
+ * PRD v0.3.33 Part F2.6: Ignores parallel side tasks.
  */
 export function findGaps(timed: DailyCardItem[], nowMins: number): Gap[] {
-  const sorted = [...timed].filter(t => t.start).sort((a, b) => toMins(a.start!) - toMins(b.start!));
+  const sorted = [...timed]
+    .filter(t => t.start && !t.parallelOf && !t.extra?.parallelOf)
+    .sort((a, b) => toMins(a.start!) - toMins(b.start!));
   if (!sorted.length) return [];
 
   const spans = sorted.map(t => ({
@@ -161,9 +164,11 @@ export function findGaps(timed: DailyCardItem[], nowMins: number): Gap[] {
   return gaps;
 }
 
-/** Identify tasks that start before a previous task has finished (FIX v0.3.28 D2 #7). */
+/** Identify tasks that start before a previous task has finished (FIX v0.3.28 D2 #7, Part F2.6). */
 export function findOverlapItemIds(timed: DailyCardItem[]): Set<string> {
-  const sorted = [...timed].filter(t => t.start).sort((a, b) => toMins(a.start!) - toMins(b.start!));
+  const sorted = [...timed]
+    .filter(t => t.start && !t.parallelOf && !t.extra?.parallelOf)
+    .sort((a, b) => toMins(a.start!) - toMins(b.start!));
   const overlapIds = new Set<string>();
   let maxEndSoFar = -1;
 

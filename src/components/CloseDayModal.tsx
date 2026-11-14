@@ -124,10 +124,29 @@ export const CloseDayModal: React.FC = () => {
         <div className="space-y-4">
           
           {/* Quick Summary Card */}
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
             <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
               {language === 'vi' ? 'Kết quả hôm nay của bạn:' : 'Your results for the day:'}
             </span>
+
+            {/* PRD v0.3.33 Part F1.4 & F3.9: Day close summary line */}
+            {(() => {
+              const targetDayItems = dailyCardItems.filter(i => i.date === targetDate);
+              const totalPlanned = targetDayItems.length || blocks.length;
+              const doneCount = targetDayItems.filter(i => i.status === 'done').length || completedBlocks.length;
+              const droppedCount = targetDayItems.filter(i => i.status === 'dropped').length;
+              const carriedCount = targetDayItems.filter(i => i.status === 'carried').length;
+              return (
+                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 flex items-center justify-between shadow-2xs">
+                  <span>
+                    {language === 'vi'
+                      ? `Đã xếp ${totalPlanned} việc · xong ${doneCount} · bỏ qua ${droppedCount} · dời ${carriedCount}`
+                      : `Planned ${totalPlanned} tasks · done ${doneCount} · dropped ${droppedCount} · migrated ${carriedCount}`}
+                  </span>
+                </div>
+              );
+            })()}
+
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                 <span className="text-slate-500 text-[11px] block">

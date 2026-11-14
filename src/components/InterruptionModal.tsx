@@ -307,6 +307,20 @@ export const InterruptionModal: React.FC = () => {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setDecision('parallel')}
+                  className={`py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all ${
+                    decision === 'parallel'
+                      ? isCool
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-[#E0401F] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span className="font-mono font-black text-xs leading-none">∥</span>
+                  <span>Làm kèm</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setDecision('delegate')}
                   className={`py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all ${
                     decision === 'delegate'
@@ -319,26 +333,13 @@ export const InterruptionModal: React.FC = () => {
                   <Users className="w-3.5 h-3.5" />
                   <span>Nhờ người</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setDecision('decline')}
-                  className={`py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all ${
-                    decision === 'decline'
-                      ? isCool
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[#E0401F] text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <ShieldX className="w-3.5 h-3.5" />
-                  <span>Không làm</span>
-                </button>
               </div>
 
-              {/* Giải thích rõ kết quả theo PRD v0.3.9 */}
+              {/* Giải thích rõ kết quả theo PRD v0.3.9 & v0.3.33 Part F */}
               <p className="text-[11px] text-slate-500 mt-2 px-1">
                 {decision === 'postpone' && '• Cho vào Rổ công việc kèm thông báo 3 giây, lập tức quay lại việc chính.'}
                 {decision === 'do_now' && `• Bật đồng hồ chen ngang, giảm trừ vào quỹ dự phòng hôm nay (${profile.interruptionReserveMins}p).`}
+                {decision === 'parallel' && '• Ghi là việc kèm chạy song song với việc chính hiện tại.'}
                 {decision === 'delegate' && '• Lưu vào Rổ công việc được gán nhãn "chờ người khác" (GTD).'}
                 {decision === 'decline' && '• Từ chối việc ngoài, ghi nhận thời gian tập trung được bảo vệ trọn vẹn.'}
               </p>

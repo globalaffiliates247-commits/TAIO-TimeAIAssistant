@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { GapLabel, TimeLedgerCategory } from '../types';
 import { HabitInsights } from './HabitInsights';
 import { computeGoalMetrics, computeTaskTimeEfficiency } from '../features/goals/goalMetrics';
-import { getDeviceCalendarDate } from '@/core/clock';
+import { getDeviceCalendarDate, timeToMinutes } from '@/core/clock';
 import { 
   Trophy, 
   CheckCircle2, 
@@ -265,6 +265,57 @@ export const AchievementsTab: React.FC = () => {
       {viewMode === 'time' && (
         <div className="space-y-6 animate-in fade-in duration-200">
           
+          {/* PRD v0.3.33 Part F2.4 & F3.7: Dual Time Statistics Banner */}
+          {(() => {
+            const today = getDeviceCalendarDate();
+            // Parallel tasks
+            const parallelItems = dailyCardItems.filter(i => 
+              i.date === today && (i.parallelOf || (i.extra as Record<string, unknown> | undefined)?.parallelOf) && i.status === 'done'
+            );
+            const parallelMinutes = parallelItems.reduce((acc, curr) => {
+              const extraMins = (curr.extra as Record<string, unknown> | undefined)?.actualMinutes as number;
+              if (extraMins) return acc + extraMins;
+              if (curr.start && curr.end) return acc + (timeToMinutes(curr.end) - timeToMinutes(curr.start));
+              return acc + 30;
+            }, 0);
+
+            // Clock work minutes (Peter Drucker ledger goal_work + meeting + planning)
+            const clockWorkMins = (categoryTotals.goal_work || 0) + (categoryTotals.meeting || 0) + (categoryTotals.planning || 0);
+            const totalRecognizedMins = clockWorkMins + parallelMinutes;
+
+            const clockH = Math.floor(clockWorkMins / 60);
+            const clockM = clockWorkMins % 60;
+            const clockStr = `${clockH}g${clockM > 0 ? `${String(clockM).padStart(2, '0')}` : ''}`;
+
+            const parH = Math.floor(parallelMinutes / 60);
+            const parM = parallelMinutes % 60;
+            const parStr = `${parH}g${String(parM).padStart(2, '0')}`;
+
+            const recH = Math.floor(totalRecognizedMins / 60);
+            const recM = totalRecognizedMins % 60;
+            const recStr = `${recH}g${recM > 0 ? `${String(recM).padStart(2, '0')}` : ''}`;
+
+            return (
+              <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm text-slate-900">
+                      Hôm nay: {clockStr} làm việc{parallelMinutes > 0 ? `, trong đó ${parStr} làm song song` : ''}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Thời gian đồng hồ: <strong className="text-slate-800">{clockStr}</strong> (tối đa 24g) · Tổng ghi nhận: <strong className="text-slate-800">{recStr}</strong> (cộng việc kèm)
+                  </p>
+                </div>
+                {parallelMinutes > 0 && (
+                  <span className="px-3 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono text-xs font-bold self-start sm:self-auto">
+                    ∥ {parStr} song song
+                  </span>
+                )}
+              </div>
+            );
+          })()}
+
           {/* 1. 24-Hour Donut (Actual only, 100% = 24h) with Groups / Detail Sunburst Switch */}
           <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

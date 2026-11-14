@@ -300,16 +300,27 @@ export const PlanTab: React.FC = () => {
                       </div>
                     )}
 
-                    <div
-                      className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                        isCurrent 
-                          ? 'border-red-300 bg-red-50/70 ring-1 ring-red-400/40 shadow-xs'
-                          : isCompleted
-                          ? 'border-slate-200 bg-slate-50/70 opacity-70'
-                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-xs'
-                      }`}
-                    >
-                      <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+                    {/* PRD v0.3.33 Part F1.1 & F2.3: Planned has outline border, actual has solid fill. Parallel tasks side-by-side/indented */}
+                    {(() => {
+                      const isParallel = Boolean(block.parallelOf || (block.extra as Record<string, unknown> | undefined)?.parallelOf);
+                      return (
+                        <div
+                          className={`p-4 rounded-2xl transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                            isParallel ? 'ml-6 border-l-4 border-l-indigo-400 pl-3.5 bg-indigo-50/40' : ''
+                          } ${
+                            isCurrent 
+                              ? 'border-2 border-red-400 bg-red-50/80 ring-1 ring-red-400/40 shadow-xs'
+                              : isCompleted
+                              ? 'border border-slate-200 bg-slate-100/90 shadow-2xs' // Thực tế: Nền đặc
+                              : 'border-2 border-dashed border-slate-300 bg-white/60 hover:border-slate-400 shadow-2xs' // Kế hoạch: Nét viền
+                          }`}
+                        >
+                          <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+                            {isParallel && (
+                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                ∥ Song song
+                              </span>
+                            )}
                         {/* Time Badge (clickable to edit time) */}
                         {isEditingTime ? (
                           <div className="flex items-center gap-1 text-xs shrink-0">
@@ -462,9 +473,11 @@ export const PlanTab: React.FC = () => {
                         )}
                       </div>
                     </div>
-                  </React.Fragment>
-                );
-              })}
+                  );
+                })()}
+              </React.Fragment>
+            );
+          })}
             </div>
           </div>
 

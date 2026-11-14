@@ -105,6 +105,7 @@ export interface TimeBlock {
   taskSource?: string;
   carryFrom?: string;
   createdAt?: string;
+  parallelOf?: string; // id of main task if this is a side/parallel task (PRD v0.3.33 Part F)
   extra?: Record<string, unknown>;
 }
 
@@ -158,6 +159,7 @@ export interface Goal {
 export type InterruptionDecision = 
   | 'postpone'    // v0.3.9 B5: Để sau (Mặc định)
   | 'do_now'      // Làm luôn
+  | 'parallel'    // v0.3.33 Part F: Làm kèm (Làm song song với việc chính)
   | 'delegate'    // Nhờ người khác
   | 'decline'     // Không làm
   | 'schedule'    // Lên lịch
@@ -417,6 +419,7 @@ export interface DailyCardItem {
   timeUsedFor?: string;
   movedTo?: string;
   isTemplateBlock?: boolean;
+  parallelOf?: string; // id of main task if this is a side/parallel task (Part F)
   updatedAt?: string | number;
   extra?: Record<string, unknown>;
 }

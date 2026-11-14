@@ -34,6 +34,7 @@ export const NowCurrentCard: React.FC = () => {
     goals, 
     dailyCardItems, 
     updateDailyCardItem, 
+    toggleDailyCardItem,
     setBlocks,
     setCheckInBlock,
     setCheckInModalOpen,
@@ -51,6 +52,7 @@ export const NowCurrentCard: React.FC = () => {
   const { t } = useT();
   const isCool = palette === 'cool';
   const now = new Date();
+  const todayStr = getDeviceCalendarDate(now);
   const nowMins = getDeviceTimeMinutes();
   const state = clockState(scheduleBlocks, dayTemplate, now, language as 'vi' | 'en');
 
@@ -378,10 +380,42 @@ export const NowCurrentCard: React.FC = () => {
         </div>
       )}
 
+      {/* PRD v0.3.33 Part F2.3 & G2.10: Accompanying side task (Việc kèm) */}
+      {(() => {
+        const accompanyingSideTask = dailyCardItems.find(i => 
+          i.date === todayStr &&
+          (i.parallelOf === activeTask?.id || (i.extra as Record<string, unknown> | undefined)?.parallelOf === activeTask?.id) &&
+          i.status === 'open'
+        );
+        if (!accompanyingSideTask) return null;
+        return (
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-mono text-xs font-bold text-slate-500">∥</span>
+              <span className="font-semibold text-slate-800 truncate">
+                {accompanyingSideTask.text}
+              </span>
+              {accompanyingSideTask.start && (
+                <span className="text-[11px] font-mono text-slate-500">
+                  ({accompanyingSideTask.start}–{accompanyingSideTask.end})
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleDailyCardItem(accompanyingSideTask.id)}
+              className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[10.5px] font-semibold transition-colors shrink-0"
+            >
+              {language === 'vi' ? 'Kết thúc việc kèm' : 'End side task'}
+            </button>
+          </div>
+        );
+      })()}
+
       {/* Parallel side task line (Part F) */}
-      {Boolean(activeTask?.extra?.parallelOf) && (
+      {Boolean(activeTask?.extra?.parallelOf || activeTask?.parallelOf) && (
         <div className="text-xs font-semibold text-slate-600 flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
-          <span className="font-mono text-slate-400">||</span>
+          <span className="font-mono text-slate-400">∥</span>
           <span>{language === 'en' ? 'Side task (parallel)' : 'Việc kèm (song song)'}</span>
         </div>
       )}
@@ -570,6 +604,35 @@ export const NowCurrentCard: React.FC = () => {
             <p className="text-xs text-slate-500">
               Việc đã xếp sẽ được trả về trạng thái chưa bắt đầu và không bị tính giờ.
             </p>
+
+            {/* PRD v0.3.33 Part F1.2: Pick from existing journal tasks */}
+            {(() => {
+              const pendingJournalTasks = dailyCardItems.filter(i => 
+                i.date === todayStr && i.status === 'open' && i.id !== activeTask?.id
+              );
+              if (pendingJournalTasks.length === 0) return null;
+              return (
+                <div className="space-y-1">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    {language === 'en' ? 'Or pick from Today Journal:' : 'Hoặc chọn từ Nhật ký hôm nay:'}
+                  </span>
+                  <div className="max-h-36 overflow-y-auto space-y-1">
+                    {pendingJournalTasks.map(t => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => handleStartOtherTask(t.text)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-800 flex items-center justify-between transition-colors"
+                      >
+                        <span className="truncate">{t.text}</span>
+                        {t.start && <span className="font-mono text-[10px] text-slate-400 shrink-0">{t.start}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             <input
               type="text"
               autoFocus

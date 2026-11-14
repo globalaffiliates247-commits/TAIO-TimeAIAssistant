@@ -47,6 +47,7 @@ import {
   getDeviceTimeString,
   computeBlockStatus,
   timeToMinutes,
+  minutesToTime,
 } from '../core/clock';
 import {
   ClosedDayRecord,
@@ -228,6 +229,7 @@ interface AppContextType {
     displacedMinutes?: number;
     date?: string; // v0.3.26: sticky day sheet writes to a given day
     status?: ItemStatus;
+    parallelOf?: string;
     extra?: Record<string, unknown>;
   }) => string;
   // v0.3.26 B34: the sticky day sheet edits Thẻ ngày items in place
@@ -1222,6 +1224,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     displacedMinutes?: number;
     date?: string;
     status?: ItemStatus;
+    parallelOf?: string;
     extra?: Record<string, unknown>;
   }): string => {
     const goal = goals.find(g => g.id === item.goalId);
@@ -1237,6 +1240,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       start: item.start,
       end: item.end,
       status: item.status || 'open',
+      parallelOf: item.parallelOf,
       carryCount: 0,
       origin: item.origin || 'planned',
       displacedItemId: item.displacedItemId,
@@ -1972,6 +1976,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTimerMinutesRemaining(minutes || 15);
       setIsTimerRunning(true);
       showToast(language === 'vi' ? 'Đang chạy đồng hồ việc phát sinh. Giảm trừ vào quỹ dự phòng hôm nay!' : 'Interruption timer active. Deducted from today\'s reserve.');
+    } else if (decision === 'parallel') {
+      // PRD v0.3.33 Part F2.1: Dual-tasking (1 main task + 1 side task maximum)
+      const todayStr = getDeviceCalendarDate();
+      const currentNowMins = getDeviceTimeMinutes();
+      const activeRunningCount = scheduleBlocks.filter(b => computeBlockStatus(b, currentNowMins) === 'in_progress').length;
+      if (activeRunningCount >= 2) {
+        // Third task: user must end one or move to basket
+        const newInboxItem: InboxItem = {
+          id: `inbox-${Date.now()}`,
+          title: title,
+          source: 'quick',
+          createdAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+          nextAction: 'Làm sau (Đã đủ 2 việc song song)',
+          estimatedMinutes: minutes || 15,
+          linkedGoalId: goalId,
+          linkedGoalName: goal?.name,
+          suggestedQuadrant: 2,
+          status: 'inbox',
+        };
+        setInbox(prev => [newInboxItem, ...prev]);
+        showToast(
+          language === 'vi'
+            ? 'Đang có đủ 2 việc chạy cùng lúc (1 chính + 1 kèm). Đã chuyển việc mới vào Rổ!'
+            : 'Already 2 parallel tasks running. New task moved to Basket!'
+        );
+      } else {
+        const startStr = currentBlock?.startTime || getDeviceTimeString();
+        const endMins = currentBlock ? timeToMinutes(currentBlock.endTime) : (currentNowMins + (minutes || 15));
+        const endStr = minutesToTime(endMins);
+        addDailyCardItem({
+          text: title,
+          origin: 'interruption',
+          date: todayStr,
+          start: startStr,
+          end: endStr,
+          goalId,
+          parallelOf: currentBlock?.id,
+          extra: {
+            parallelOf: currentBlock?.id,
+            actualMinutes: minutes || 15,
+            startedAt: Date.now(),
+          },
+        });
+        showToast(
+          language === 'vi'
+            ? `Đã thêm "${title}" làm việc kèm song song với "${currentBlock?.title || 'việc chính'}"!`
+            : `Added "${title}" as parallel side task!`
+        );
+      }
     } else if (decision === 'delegate') {
       const newInboxItem: InboxItem = {
         id: `inbox-${Date.now()}`,

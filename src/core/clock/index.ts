@@ -95,10 +95,14 @@ export function getWeekLabelWithRange(d: Date = getDeviceNow()): string {
  */
 export function computeBlockStatus(
   block: {
+    id?: string;
+    title?: string;
     startTime: string;
     endTime: string;
     status?: BlockStatus;
     timeboxEndOutcome?: string;
+    isTemplateBlock?: boolean;
+    blockKind?: string;
   },
   nowMinutes: number = getDeviceTimeMinutes()
 ): BlockStatus {
@@ -119,7 +123,16 @@ export function computeBlockStatus(
   if (nowMinutes >= start && nowMinutes < end) {
     return 'in_progress';
   }
-  // nowMinutes >= end and not checked in
+
+  // nowMinutes >= end
+  // PRD v0.3.33 Part F1.3: Fixed template blocks (eating, sleeping, commute) auto-complete as done
+  // when timebox ends without prompt (except Day Close ritual)
+  const isTemplate = block.isTemplateBlock || block.blockKind === 'ritual' || block.id === 'b-10';
+  const isCloseDayRitual = block.id === 'b-ritual-close' || (Boolean(block.title) && block.title!.toLowerCase().includes('khép ngày'));
+  if (isTemplate && !isCloseDayRitual) {
+    return 'done';
+  }
+
   return 'unconfirmed';
 }
 
