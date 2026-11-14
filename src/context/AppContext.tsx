@@ -1531,8 +1531,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else if (notif.targetAction === 'open_questions') {
       setIsQuestionsModalOpen(true);
     } else if (notif.targetAction === 'open_checkin') {
-      setCheckInBlock(blocks[0] || null);
-      setCheckInModalOpen(true);
+      const target = (notif.targetBlockId && scheduleBlocks.find(b => b.id === notif.targetBlockId)) || currentBlock || null;
+      if (target) {
+        setCheckInBlock(target);
+        setCheckInModalOpen(true);
+      }
     } else if (notif.targetAction === 'open_swipe') {
       setIsSwipeModalOpen(true);
     } else if (notif.targetAction === 'open_dayclose') {
@@ -1674,12 +1677,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return buildTodaySchedule(blocks, dailyCardItems, getDeviceCalendarDate());
   }, [blocks, dailyCardItems]);
 
-  // Active current block (PRD v0.3.22 B31 / v0.3.28 A2: dynamically computed from unified scheduleBlocks)
+  // Active current block (v0.3.34 Part A2.2):
+  // "Việc hiện tại" chỉ là việc mà giờ hiện tại nằm trong khung (now >= start && now < end),
+  // hoặc việc người dùng đã chủ động bắt đầu. Bỏ hai bước lùi "việc sắp tới gần nhất" và "việc đầu danh sách".
+  // Ở khoảng trống thì không có việc hiện tại (undefined).
   const nowMins = getDeviceTimeMinutes();
-  const currentBlock =
-    scheduleBlocks.find((b: TimeBlock) => computeBlockStatus(b, nowMins) === 'in_progress') ||
-    scheduleBlocks.filter((b: TimeBlock) => computeBlockStatus(b, nowMins) === 'planned').sort((a: TimeBlock, b: TimeBlock) => a.startTime.localeCompare(b.startTime))[0] ||
-    scheduleBlocks[0];
+  const currentBlock: TimeBlock | undefined = scheduleBlocks.find(b => {
+    if (b.status === 'done' || b.status === 'dropped') return false;
+    const extra = (b.extra as Record<string, unknown> | undefined) || {};
+    const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
+    if (manuallyStartedAt && b.status === 'in_progress') {
+      const durationMins = b.estimatedMinutes || 30;
+      const elapsedMins = (Date.now() - manuallyStartedAt) / 60000;
+      if (elapsedMins >= 0 && elapsedMins < durationMins + 120) {
+        return true;
+      }
+    }
+    return computeBlockStatus(b, nowMins) === 'in_progress';
+  });
 
   // Sync remaining timer with in-progress block if running
   useEffect(() => {

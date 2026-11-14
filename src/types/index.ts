@@ -279,6 +279,7 @@ export interface AppNotificationItem {
   ctaLabel: string;
   read: boolean;
   targetAction: 'sleep' | 'start_deep' | 'open_questions' | 'open_checkin' | 'open_swipe' | 'open_dayclose';
+  targetBlockId?: string;
 }
 
 // B15: Habit Insights & Weekly Experiments
