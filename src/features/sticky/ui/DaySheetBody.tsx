@@ -59,6 +59,18 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [expandedSubTaskIds, setExpandedSubTaskIds] = useState<Set<string>>(new Set());
   const [autoFocusSubTaskId, setAutoFocusSubTaskId] = useState<string | null>(null);
 
+  // PRD v0.3.35 Part E3: "Lùi các việc sau" toggle switch (default: true, session-remembered)
+  const [autoShiftAfter, setAutoShiftAfter] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      const saved = sessionStorage.getItem('taio_auto_shift_after');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+  const [postponeTargetId, setPostponeTargetId] = useState<string | null>(null);
+
   const rawDayItems = dailyCardItems.filter(i => i.date === day && i.status !== 'dropped' && i.status !== 'carried');
 
   // Part E3.1: Read unified scheduleBlocks for today, or dailyCardItems for other days
@@ -152,6 +164,18 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       { updateDailyCardItem, setBlocks, dailyCardItems }
     );
     showToast?.(language === 'vi' ? `Đã dời việc sau sang ${toTime(newStartMins)}!` : `Shifted to start after at ${toTime(newStartMins)}!`);
+  };
+
+  // PRD v0.3.35 E2 & E4.5: Postpone fixed template block
+  const handlePostponeTemplateBlock = (templateItem: DailyCardItem, minutes: number) => {
+    if (!templateItem.start || !templateItem.end) return;
+    const newStart = toTime(toMins(templateItem.start) + minutes);
+    const newEnd = toTime(toMins(templateItem.end) + minutes);
+    updateDailyCardItem(templateItem.id, { start: newStart, end: newEnd });
+    if (isToday) {
+      updateScheduleEntry(templateItem.id, { startTime: newStart, endTime: newEnd }, { updateDailyCardItem, setBlocks, dailyCardItems });
+    }
+    showToast?.(language === 'vi' ? `Đã lùi khung "${templateItem.text}" thêm ${minutes}p (${newStart}–${newEnd})` : `Postponed "${templateItem.text}" by ${minutes}m (${newStart}–${newEnd})`);
   };
 
   // v0.3.34 Part B: Instant Start button & Overrun / Replacement Conflict Modal
@@ -389,10 +413,13 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     const existingExtra = (it.extra as Record<string, unknown> | undefined) || {};
     const oldEst = typeof existingExtra.estimateMins === 'number' ? existingExtra.estimateMins : undefined;
     const dur = p.durationMins ?? oldDur ?? oldEst;
+    const oldStartMins = it.start ? toMins(it.start) : null;
+    const newStartMins = p.time ? toMins(p.time) : null;
 
     if (p.time) {
       const newExtra = { ...existingExtra };
       if (dur) newExtra.estimateMins = dur;
+      const newEnd = dur ? toTime(toMins(p.time) + dur) : undefined;
       updateDailyCardItem(it.id, {
         text,
         goalId,
@@ -400,9 +427,41 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         milestoneId,
         milestoneName,
         start: p.time,
-        end: dur ? toTime(toMins(p.time) + dur) : undefined,
+        end: newEnd,
         extra: newExtra,
       });
+
+      // PRD v0.3.35 E3: Auto-shift subsequent tasks if switch is ON
+      if (autoShiftAfter && oldStartMins !== null && newStartMins !== null && oldStartMins !== newStartMins) {
+        const delta = newStartMins - oldStartMins;
+        const subsequentTasks = timed.filter(t => 
+          t.id !== it.id && 
+          t.start && 
+          toMins(t.start) > oldStartMins &&
+          !t.isTemplateBlock &&
+          !boundIds.has(t.id)
+        );
+
+        for (const subTask of subsequentTasks) {
+          if (!subTask.start) continue;
+          const subStartMins = toMins(subTask.start) + delta;
+          const subDur = durationOf(subTask) || 30;
+          const clampedStartMins = Math.max(0, Math.min(23 * 60 + 30, subStartMins));
+          const clampedEndMins = Math.min(23 * 60 + 59, clampedStartMins + subDur);
+          const nextStartStr = toTime(clampedStartMins);
+          const nextEndStr = toTime(clampedEndMins);
+          updateDailyCardItem(subTask.id, {
+            start: nextStartStr,
+            end: nextEndStr,
+          });
+          if (isToday) {
+            updateScheduleEntry(subTask.id, {
+              startTime: nextStartStr,
+              endTime: nextEndStr,
+            }, { updateDailyCardItem, setBlocks, dailyCardItems });
+          }
+        }
+      }
     } else {
       // Time removed -> unscheduled
       const newExtra = { ...existingExtra };
@@ -826,6 +885,42 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               {/* Template quick actions */}
               {it.isTemplateBlock && (
                 <div className="opacity-0 group-hover/row:opacity-100 flex items-center gap-1 text-[11px] shrink-0 transition-opacity">
+                  {/* PRD v0.3.35 E2 & E4.5: "Lùi khung này" for template/fixed block */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPostponeTargetId(postponeTargetId === it.id ? null : it.id);
+                      }}
+                      className="hover:underline text-amber-600 font-semibold cursor-pointer"
+                      title="Lùi khung cố định này"
+                    >
+                      {language === 'vi' ? 'Lùi khung này' : 'Postpone'}
+                    </button>
+                    {postponeTargetId === it.id && (
+                      <div className="absolute z-40 right-0 top-5 bg-white border border-slate-200 shadow-xl rounded-xl p-1.5 min-w-[120px] text-xs space-y-1">
+                        <div className="text-[10px] text-slate-400 font-bold uppercase px-2 py-0.5">
+                          {language === 'vi' ? 'Lùi thêm:' : 'Postpone by:'}
+                        </div>
+                        {[15, 30, 45, 60].map(mins => (
+                          <button
+                            key={mins}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePostponeTemplateBlock(it, mins);
+                              setPostponeTargetId(null);
+                            }}
+                            className="w-full text-left px-2 py-1 hover:bg-slate-100 rounded font-semibold text-slate-700"
+                          >
+                            +{mins}p
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <span>·</span>
                   <button
                     onClick={() => updateScheduleEntry(it.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems })}
                     className="hover:underline text-slate-400 hover:text-slate-600"
@@ -1040,6 +1135,23 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
             {selectedIds.size} việc
           </span>
           <div className="flex items-center gap-1">
+            {/* PRD v0.3.35 E3: "Lùi các việc sau" switch (default: true) */}
+            <label className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer select-none hover:bg-slate-100 transition-colors">
+              <input
+                type="checkbox"
+                checked={autoShiftAfter}
+                onChange={(e) => {
+                  setAutoShiftAfter(e.target.checked);
+                  try {
+                    sessionStorage.setItem('taio_auto_shift_after', String(e.target.checked));
+                  } catch {}
+                }}
+                className="w-3.5 h-3.5 rounded text-orange-600 focus:ring-0 cursor-pointer"
+              />
+              <span className="hidden sm:inline">{language === 'vi' ? 'Lùi các việc sau' : 'Shift subsequent'}</span>
+              <span className="sm:hidden">{language === 'vi' ? 'Lùi sau' : 'Shift'}</span>
+            </label>
+
             {/* PRD v0.3.35 D2.2: "+ Việc con" button on single-row selection */}
             {selectedIds.size === 1 && (
               <button
