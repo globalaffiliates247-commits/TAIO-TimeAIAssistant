@@ -46,6 +46,14 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const nowMins = now.getHours() * 60 + now.getMinutes();
 
   const [showTemplateBlocks, setShowTemplateBlocks] = useState(true);
+  const [isStickerCollapsed, setIsStickerCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return localStorage.getItem('taio_sheet_sticker_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
   const rawDayItems = dailyCardItems.filter(i => i.date === day && i.status !== 'dropped' && i.status !== 'carried');
@@ -607,17 +615,46 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       {/* PRD FIX v0.3.28 C1: LiveClockStrip at top of DaySheet */}
       <LiveClockStrip compact />
 
-      {/* PRD FEATURE v0.3.31 B1: Motivation Sticker note style at head of "Hôm nay" sheet */}
-      <MotivationSticker slotKey="start_day_sheet" context="start_day" size="note" className="mb-1" />
+      {/* PRD FEATURE v0.3.31 B1 / v0.3.35 A3.4: Motivation Sticker at head of "Hôm nay" sheet */}
+      {!isStickerCollapsed && (
+        <MotivationSticker
+          slotKey="start_day_sheet"
+          context="start_day"
+          size="note"
+          className="mb-1"
+          collapsible
+          isCollapsed={false}
+          onToggleCollapse={() => {
+            setIsStickerCollapsed(true);
+            try { localStorage.setItem('taio_sheet_sticker_collapsed', 'true'); } catch {}
+          }}
+        />
+      )}
 
-      {/* Part E3.3: Toggle template blocks */}
-      <div className="flex items-center justify-between text-xs px-1" style={{ color: c.muted }}>
-        <span className="text-[11.5px] font-semibold">
+      {/* Part E3.3 / v0.3.35 A3.4: Summary line (combined with 1-line quote when sticker is collapsed) */}
+      <div className="flex items-center justify-between text-xs px-1 gap-2" style={{ color: c.muted }}>
+        <span className="text-[11.5px] font-semibold shrink-0">
           {timed.length} việc có giờ · {flex.length} linh động
         </span>
+        {isStickerCollapsed && (
+          <div className="flex-1 min-w-0">
+            <MotivationSticker
+              slotKey="start_day_sheet"
+              context="start_day"
+              size="line"
+              collapsible
+              isCollapsed={true}
+              onToggleCollapse={() => {
+                setIsStickerCollapsed(false);
+                try { localStorage.setItem('taio_sheet_sticker_collapsed', 'false'); } catch {}
+              }}
+              className="!py-0.5 !px-1.5 !text-[11px] !border-none !bg-transparent"
+            />
+          </div>
+        )}
         <button
           onClick={() => setShowTemplateBlocks(v => !v)}
-          className="text-[11px] hover:underline cursor-pointer"
+          className="text-[11px] hover:underline cursor-pointer shrink-0"
           style={{ color: c.ink }}
         >
           {showTemplateBlocks ? 'Ẩn khung cố định' : 'Hiện khung cố định'}

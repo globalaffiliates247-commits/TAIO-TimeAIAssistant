@@ -19,7 +19,8 @@ import {
   getAllQuotes,
   getOrPickDailyQuote,
 } from '../model/motivationStore';
-import { RefreshCw, Heart, X } from 'lucide-react';
+import { quoteRegistry } from '../model/quoteRegistry';
+import { RefreshCw, Heart, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface MotivationStickerProps {
   slotKey: keyof MotivationSettings['slots'];
@@ -29,6 +30,9 @@ export interface MotivationStickerProps {
   activeGoalId?: string;
   className?: string;
   onHide?: () => void;
+  collapsible?: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const MotivationSticker: React.FC<MotivationStickerProps> = ({
@@ -39,6 +43,9 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   activeGoalId,
   className = '',
   onHide,
+  collapsible = false,
+  isCollapsed = false,
+  onToggleCollapse,
 }) => {
   const { language, palette } = useApp();
   const { t } = useT();
@@ -72,11 +79,23 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
     setCurrentQuote(res.quote);
     setIsHiddenToday(res.isHiddenToday);
     setUserState(res.updatedState);
+    if (res.quote && !res.isHiddenToday) {
+      quoteRegistry.register(slotKey, res.quote.id);
+    } else {
+      quoteRegistry.unregister(slotKey);
+    }
   }, [slotKey, context, language, allQuotes, userState, activeGoalName, activeGoalId]);
 
   useEffect(() => {
     resolveQuote(false);
   }, [slotKey, context, language]);
+
+  // Clean up active quote registration on unmount
+  useEffect(() => {
+    return () => {
+      quoteRegistry.unregister(slotKey);
+    };
+  }, [slotKey]);
 
   // Action: ↻ Đổi câu khác
   const handleRefresh = (e: React.MouseEvent) => {
@@ -112,6 +131,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
     };
     setUserState(updatedState);
     saveUserMotivationState(updatedState);
+    quoteRegistry.unregister(slotKey);
     setIsHiddenToday(true);
     if (onHide) onHide();
   };
@@ -169,6 +189,15 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           >
             <X size={11} />
           </button>
+          {collapsible && isCollapsed && onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              className="p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+              title={t('common.expand', 'Mở rộng')}
+            >
+              <ChevronDown size={11} />
+            </button>
+          )}
         </div>
 
         {/* Expanded popup if clicked on line */}
@@ -237,6 +266,15 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             >
               <X size={12} />
             </button>
+            {collapsible && !isCollapsed && onToggleCollapse && (
+              <button
+                onClick={onToggleCollapse}
+                className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+                title={t('common.collapse', 'Thu gọn')}
+              >
+                <ChevronUp size={12} />
+              </button>
+            )}
           </div>
         </div>
 

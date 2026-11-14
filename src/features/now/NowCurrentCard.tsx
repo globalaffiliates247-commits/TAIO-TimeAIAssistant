@@ -6,6 +6,7 @@ import { clockState } from '@/features/clock';
 import { updateScheduleEntry } from '@/features/tasks';
 import { NowClockRing } from './NowClockRing';
 import { MotivationSticker } from '@/features/motivation';
+import { quoteRegistry } from '@/features/motivation/model/quoteRegistry';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
 import { findGoalSuggestion, getGoalTargetHours } from '@/features/goals';
@@ -96,6 +97,14 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
   // v0.3.34 Part E1: Task return point editing
   const [isEditingReturnPoint, setIsEditingReturnPoint] = useState(false);
   const [returnPointDraft, setReturnPointDraft] = useState('');
+
+  // v0.3.35 Part A2: Check if StartDayCard is displaying a quote on screen (if so, NowCard hides quote to avoid duplicate)
+  const [hasMorningQuote, setHasMorningQuote] = useState(() => quoteRegistry.isSlotActive('start_day_card'));
+  useEffect(() => {
+    return quoteRegistry.subscribe(() => {
+      setHasMorningQuote(quoteRegistry.isSlotActive('start_day_card'));
+    });
+  }, []);
 
   // v0.3.34 Part E4: Three view modes (remaining, elapsed, goal)
   const [viewMode, setViewMode] = useState<'remaining' | 'elapsed' | 'goal'>(() => {
@@ -489,7 +498,9 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
           </div>
         </div>
 
-        <MotivationSticker slotKey="clock_idle" context="break" size="line" className="pt-2 border-t border-slate-100" />
+        {!hasMorningQuote && (
+          <MotivationSticker slotKey="clock_idle" context="break" size="line" className="pt-2 border-t border-slate-100" />
+        )}
       </div>
     );
   }
@@ -1053,8 +1064,10 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
         </div>
       )}
 
-      {/* Bottom Motivation Quote Line */}
-      <MotivationSticker slotKey="free_sheet" context="start_task" size="line" className="pt-2 border-t border-slate-100" />
+      {/* Bottom Motivation Quote Line (v0.3.35 A2: hidden if StartDayCard has quote) */}
+      {!hasMorningQuote && (
+        <MotivationSticker slotKey="free_sheet" context="start_task" size="line" className="pt-2 border-t border-slate-100" />
+      )}
     </div>
   );
 };

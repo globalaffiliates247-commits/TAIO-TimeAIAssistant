@@ -11,6 +11,7 @@ export interface PickQuoteOptions {
   activeGoalId?: string;
   recentQuoteIds?: string[]; // Quotes shown in last 7 days
   excludeQuoteId?: string;   // For refresh (↻) to avoid picking the current quote again
+  excludeQuoteIds?: string[]; // Quotes currently displayed on other screens/slots (v0.3.35 A3.2)
 }
 
 export function pickQuote(options: PickQuoteOptions): MotivationQuote | null {
@@ -24,16 +25,24 @@ export function pickQuote(options: PickQuoteOptions): MotivationQuote | null {
     activeGoalId,
     recentQuoteIds = [],
     excludeQuoteId,
+    excludeQuoteIds = [],
   } = options;
 
   if (!quotes || quotes.length === 0) return null;
+
+  // Build exclusion set of quotes already active elsewhere
+  const allExcluded = new Set<string>();
+  if (excludeQuoteId) allExcluded.add(excludeQuoteId);
+  for (const id of excludeQuoteIds) {
+    if (id) allExcluded.add(id);
+  }
 
   // Filter active quotes
   const activeQuotes = quotes.filter(q => q.active);
   if (activeQuotes.length === 0) return null;
 
   // 1. Pinned quote takes absolute top priority if valid and not excluded
-  if (pinnedQuoteId && pinnedQuoteId !== excludeQuoteId) {
+  if (pinnedQuoteId && !allExcluded.has(pinnedQuoteId)) {
     const pinned = activeQuotes.find(q => q.id === pinnedQuoteId);
     if (pinned) return pinned;
   }
@@ -67,15 +76,15 @@ export function pickQuote(options: PickQuoteOptions): MotivationQuote | null {
 
   const candidatePool = targetPool.length > 0 ? targetPool : langPool;
 
-  // Filter out recent 7-day quotes and excludeQuoteId if enough candidates remain
-  let available = candidatePool.filter(q => q.id !== excludeQuoteId && !recentQuoteIds.includes(q.id));
+  // Filter out recent 7-day quotes and excluded active quotes
+  let available = candidatePool.filter(q => !allExcluded.has(q.id) && !recentQuoteIds.includes(q.id));
   if (available.length === 0) {
-    // If all candidates were shown in last 7 days, relax 7-day constraint but still avoid excludeQuoteId
-    available = candidatePool.filter(q => q.id !== excludeQuoteId);
+    // If all candidates were shown in last 7 days, relax 7-day constraint but NEVER reuse an active quote
+    available = candidatePool.filter(q => !allExcluded.has(q.id));
   }
   if (available.length === 0) {
-    // If still empty (e.g. pool has only 1 item), use the candidate pool
-    available = candidatePool;
+    // v0.3.35 A4.4: If only 1 valid quote exists and it is already shown elsewhere, return null (stay blank, no duplicate)
+    return null;
   }
 
   // 4. Weight calculation:

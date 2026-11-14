@@ -9,6 +9,7 @@ import {
 import viQuotesRaw from './defaultQuotes.vi.json';
 import enQuotesRaw from './defaultQuotes.en.json';
 import { pickQuote } from './pickQuote';
+import { quoteRegistry } from './quoteRegistry';
 import { getDeviceCalendarDate } from '@/core/clock';
 
 const STORAGE_KEY_USER_MOTIVATION = 'taio_motivation_user_state';
@@ -217,11 +218,16 @@ export function getOrPickDailyQuote(options: {
   // Check if hidden today
   const isHiddenToday = state.hiddenTodaySlots[slotKey] === today;
 
-  // Check if we already have a quote for this slot today and not forceRefresh
+  // Active quotes currently showing on other slots or windows (v0.3.35 A3.2)
+  const activeExcludes = quoteRegistry.getActiveQuoteIds(slotKey);
+
+  // Check if we already have a quote for this slot today and not forceRefresh,
+  // making sure it is not currently active in another slot
   const slotEntry = state.historySlots[slotKey];
-  if (!forceRefresh && slotEntry && slotEntry.date === today) {
+  if (!forceRefresh && slotEntry && slotEntry.date === today && !activeExcludes.includes(slotEntry.quoteId)) {
     const existing = quotes.find(q => q.id === slotEntry.quoteId && q.active);
     if (existing) {
+      quoteRegistry.register(slotKey, existing.id);
       return { quote: existing, isHiddenToday, updatedState: state };
     }
   }
@@ -238,9 +244,11 @@ export function getOrPickDailyQuote(options: {
     activeGoalId,
     recentQuoteIds: recentIds,
     excludeQuoteId: forceRefresh ? slotEntry?.quoteId : undefined,
+    excludeQuoteIds: activeExcludes,
   });
 
   if (picked) {
+    quoteRegistry.register(slotKey, picked.id);
     state.historySlots = {
       ...state.historySlots,
       [slotKey]: { quoteId: picked.id, date: today },

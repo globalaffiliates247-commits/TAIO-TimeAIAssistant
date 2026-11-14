@@ -36,7 +36,10 @@ function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targe
   return { startTimestamp, targetTimestamp, totalMinutes, remainingMinutes };
 }
 
-export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
+export const LiveClockStrip: React.FC<{ compact?: boolean; showQuote?: boolean }> = ({
+  compact = false,
+  showQuote = false,
+}) => {
   const { scheduleBlocks, dayTemplate, goals, language, palette, isNativePlatform, showToast, freeTimers } = useApp();
   const [nowSec, setNowSec] = useState(() => Date.now());
 
@@ -249,8 +252,8 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
         </div>
       )}
 
-      {/* PRD FEATURE v0.3.31 B3: Motivation sticker line when clock is idle / gap / break */}
-      {state.mode !== 'task' && (
+      {/* PRD FEATURE v0.3.31 B3 / v0.3.35 A3: Motivation sticker line only if showQuote=true */}
+      {showQuote && state.mode !== 'task' && (
         <div className="pt-1.5 mt-1 border-t border-slate-200/50" onClick={e => e.stopPropagation()}>
           <MotivationSticker slotKey="clock_idle" context="break" size="line" />
         </div>

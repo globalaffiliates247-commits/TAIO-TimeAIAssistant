@@ -16,6 +16,7 @@ import {
   getRecent7DaysQuoteIds,
 } from '../model/motivationStore';
 import { pickQuote } from '../model/pickQuote';
+import { quoteRegistry } from '../model/quoteRegistry';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { getPreviousDay, isDayClosed } from '@/features/dayclose';
 import { Sparkles, ArrowRight, X, Clock, Plus } from 'lucide-react';
@@ -89,6 +90,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
     const activeGoal = (goals || []).find(g => (g.progressPercent ?? 0) < 100);
 
     const recentIds = getRecent7DaysQuoteIds(userState.recentQuoteIds);
+    const activeExcludes = quoteRegistry.getActiveQuoteIds('start_day_card');
     const picked = pickQuote({
       quotes: allQuotes,
       context: 'start_day',
@@ -98,18 +100,30 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
       activeGoalName: activeGoal?.name,
       activeGoalId: activeGoal?.id,
       recentQuoteIds: recentIds,
+      excludeQuoteIds: activeExcludes,
     });
 
     if (picked) {
       setQuote(picked);
+      quoteRegistry.register('start_day_card', picked.id);
       setVisible(true);
     } else if (hasUnfinishedPrompt || shouldAskMorningTask) {
+      quoteRegistry.unregister('start_day_card');
       setVisible(true);
+    } else {
+      quoteRegistry.unregister('start_day_card');
     }
   }, [language, goals, yesterdayClosed, unfinishedYesterday.length, hasTodayTasks, today]);
 
+  useEffect(() => {
+    return () => {
+      quoteRegistry.unregister('start_day_card');
+    };
+  }, []);
+
   const handleDismiss = () => {
     localStorage.setItem(STORAGE_KEY_START_DAY_SEEN, today);
+    quoteRegistry.unregister('start_day_card');
     setVisible(false);
   };
 
