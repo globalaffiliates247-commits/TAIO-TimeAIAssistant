@@ -10,7 +10,7 @@ import {
   findGaps, fmtDuration, nextFreeStart, parseTimedText, priorityOf, suggestDuration,
   suggestForGap, toMins, toTime, durationOf, durationForPlacement, findOverlapItemIds,
 } from '../model/timeline';
-import { commitQuickLine, matchGoalByTag, SubTaskList } from '@/features/tasks';
+import { commitQuickLine, matchGoalByTag, SubTaskList, formatExtensionHistory } from '@/features/tasks';
 import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 import { LiveClockStrip } from '@/features/quick-entry';
 import { MotivationSticker } from '@/features/motivation';
@@ -836,7 +836,27 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   <Play className="w-3.5 h-3.5 fill-slate-700 stroke-none" />
                 </button>
               ) : null}
-              {durationOf(it) && <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>{fmtDuration(durationOf(it)!)}</span>}
+              {durationOf(it) && (
+                <span
+                  className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center cursor-pointer transition-transform hover:scale-105"
+                  style={pillStyle}
+                  title={formatExtensionHistory(it.extensions, language) || undefined}
+                  onClick={(e) => {
+                    const hist = formatExtensionHistory(it.extensions, language);
+                    if (hist) {
+                      e.stopPropagation();
+                      showToast?.(hist);
+                    }
+                  }}
+                >
+                  {fmtDuration(durationOf(it)!, language as 'vi' | 'en')}
+                  {it.extensions && it.extensions.length > 0 && (
+                    <span className="ml-1 text-[10px] font-bold text-amber-600">
+                      +{it.extensions.reduce((sum, ext) => sum + ext.mins, 0)}p
+                    </span>
+                  )}
+                </span>
+              )}
               {boundIds.has(it.id) && <span className="shrink-0" title="Đã lên lịch trước"><IconLock color={c.muted} /></span>}
               {overlapIds.has(it.id) && (
                 <div className="relative shrink-0">

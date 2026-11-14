@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { clockState } from '@/features/clock';
-import { updateScheduleEntry, commitQuickLine, SubTaskList, getSubTaskProgress } from '@/features/tasks';
+import { updateScheduleEntry, commitQuickLine, SubTaskList, getSubTaskProgress, extendTask, formatExtensionHistory } from '@/features/tasks';
 import { NowClockRing } from './NowClockRing';
 import { MotivationSticker } from '@/features/motivation';
 import { quoteRegistry } from '@/features/motivation/model/quoteRegistry';
@@ -46,6 +46,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
     scheduleBlocks, 
     dayTemplate, 
     goals, 
+    setGoals, 
     dailyCardItems, 
     addDailyCardItem,
     updateDailyCardItem, 
@@ -177,20 +178,22 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
     );
   };
 
-  // Add +5p / +15p (G5.4: updates end time in journal)
+  // PRD v0.3.36 Part B: Unified Task Extension
+  const [showCustomExtend, setShowCustomExtend] = useState(false);
+  const [customExtendMins, setCustomExtendMins] = useState(20);
+
   const handleExtend = (mins: number) => {
     if (!activeTask) return;
-    const curEnd = activeTask.endTime || '00:00';
-    const [h, m] = curEnd.split(':').map(Number);
-    const newTotal = h * 60 + m + mins;
-    const newEnd = `${String(Math.floor((newTotal % 1440) / 60)).padStart(2, '0')}:${String(newTotal % 60).padStart(2, '0')}`;
-    
-    updateScheduleEntry(
-      activeTask.id,
-      { endTime: newEnd },
-      { updateDailyCardItem, setBlocks, dailyCardItems }
-    );
-    showToast?.(language === 'en' ? `Extended +${mins}m on journal` : `Đã thêm +${mins} phút vào nhật ký`);
+    const res = extendTask(activeTask.id, mins, {
+      updateDailyCardItem,
+      setBlocks,
+      dailyCardItems,
+      goals,
+      setGoals,
+    });
+    if (res) {
+      showToast?.(language === 'en' ? `Extended +${mins}m (ends at ${res.newEndTime})` : `Đã thêm +${mins} phút (kết thúc lúc ${res.newEndTime})`);
+    }
   };
 
   // Finish task
@@ -1091,32 +1094,91 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             );
           })()}
 
-          {/* Action buttons (Always +5p, +15p, Finish) */}
-          <div className="flex items-center gap-2">
+          {/* PRD v0.3.36 Part B2.5: Extension history banner */}
+          {activeTask?.extensions && activeTask.extensions.length > 0 && (
+            <div className="text-[11px] text-amber-800 bg-amber-50/80 px-3 py-1.5 rounded-xl border border-amber-200/60 font-medium">
+              {formatExtensionHistory(activeTask.extensions, language)}
+            </div>
+          )}
+
+          {/* Action buttons (PRD v0.3.36 Part B2.3: +5p · +10p · +15p · Chọn… · Finish) */}
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => handleExtend(5)}
-              className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200"
+              className="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200 cursor-pointer"
             >
               +5p
             </button>
             <button
               type="button"
+              onClick={() => handleExtend(10)}
+              className="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200 cursor-pointer"
+            >
+              +10p
+            </button>
+            <button
+              type="button"
               onClick={() => handleExtend(15)}
-              className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200"
+              className="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200 cursor-pointer"
             >
               +15p
             </button>
             <button
               type="button"
+              onClick={() => setShowCustomExtend(v => !v)}
+              className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                showCustomExtend ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+              }`}
+            >
+              {language === 'vi' ? 'Chọn…' : 'Custom…'}
+            </button>
+            <button
+              type="button"
               onClick={handleFinish}
-              className={`flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs shadow-xs transition-all ${
+              className={`flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs shadow-xs transition-all cursor-pointer ${
                 isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
               }`}
             >
               {language === 'en' ? 'Finish' : 'Kết thúc'}
             </button>
           </div>
+
+          {/* Custom extend minutes inline bar */}
+          {showCustomExtend && (
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs animate-in fade-in duration-150">
+              <span className="font-semibold text-slate-700">
+                {language === 'vi' ? 'Số phút gia hạn:' : 'Minutes to add:'}
+              </span>
+              <input
+                type="number"
+                min={1}
+                max={180}
+                value={customExtendMins}
+                onChange={e => setCustomExtendMins(Math.max(1, Number(e.target.value)))}
+                className="w-16 px-2 py-1 rounded-lg border border-slate-300 bg-white font-mono text-center font-bold text-slate-800"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  handleExtend(customExtendMins);
+                  setShowCustomExtend(false);
+                }}
+                className={`px-3 py-1 rounded-lg text-white font-bold text-xs shadow-2xs cursor-pointer ${
+                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+                }`}
+              >
+                {language === 'vi' ? 'Gia hạn' : 'Add'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCustomExtend(false)}
+                className="text-slate-400 hover:text-slate-600 text-xs underline cursor-pointer ml-auto"
+              >
+                {language === 'vi' ? 'Đóng' : 'Close'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

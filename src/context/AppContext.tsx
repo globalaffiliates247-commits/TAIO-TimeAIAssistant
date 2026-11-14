@@ -28,6 +28,7 @@ import {
   buildTodaySchedule,
   updateScheduleEntry,
   commitQuickLine,
+  extendTask,
 } from '../features/tasks';
 import {
   AlarmSettings,
@@ -1529,8 +1530,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const shiftTaskTime = (taskId: string, extraMins = 30) => {
-    updateScheduleEntry(taskId, { status: 'extended', notes: `Đã dời thêm ${extraMins} phút` }, { updateDailyCardItem, setBlocks, dailyCardItems });
-    setCelebrationMsg(language === 'vi' ? `Đã dời nhiệm vụ thêm ${extraMins} phút.` : `Task shifted by ${extraMins} mins.`);
+    const res = extendTask(taskId, extraMins, {
+      updateDailyCardItem,
+      setBlocks,
+      dailyCardItems,
+      goals,
+      setGoals,
+    });
+    setCelebrationMsg(
+      language === 'vi'
+        ? `Đã dời nhiệm vụ thêm ${extraMins} phút (kết thúc lúc ${res?.newEndTime || 'mới'}).`
+        : `Task shifted by ${extraMins} mins.`
+    );
   };
 
   const dropTask = (taskId: string) => {
@@ -2299,13 +2310,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       setCelebrationMsg(language === 'vi' ? 'Đã lưu bước kế tiếp và đưa vào Rổ việc để tâm trí hoàn toàn thanh thản (Zeigarnik)!' : 'Saved next step cleanly!');
     } else if (answer === 'more_time') {
-      updateScheduleEntry(
+      const res = extendTask(
         checkInBlock.id,
-        { status: 'extended' },
-        { updateDailyCardItem, setBlocks, dailyCardItems }
+        extraMins,
+        { updateDailyCardItem, setBlocks, dailyCardItems, goals, setGoals }
       );
       setTimerMinutesRemaining(prev => prev + extraMins);
-      setCelebrationMsg(language === 'vi' ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại.` : `Added +${extraMins} minutes.`);
+      setCelebrationMsg(
+        language === 'vi'
+          ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại (kết thúc lúc ${res?.newEndTime || 'mới'}).`
+          : `Added +${extraMins} minutes.`
+      );
     } else if (answer === 'remind_10m') {
       setCelebrationMsg(language === 'vi' ? 'Sẽ nhắc lại điểm kiểm tra sau 10 phút.' : 'Will remind you in 10 minutes.');
     }
