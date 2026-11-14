@@ -4,3 +4,4 @@ export * from './quickLine';
 export * from './model/subTaskModel';
 export * from './ui/SubTaskList';
 export * from './model/taskExtension';
+export * from './model/taskSnooze';

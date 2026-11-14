@@ -30,11 +30,12 @@ export const CheckInModal: React.FC = () => {
     currentBlock,
     language,
     showToast,
-    setIsProfileModalOpen
+    setIsProfileModalOpen,
+    snoozeBlock,
+    dayCloseOverrides,
   } = useApp();
 
   const [isSnoozePickerOpen, setIsSnoozePickerOpen] = useState(false);
-  const [snoozeCount, setSnoozeCount] = useState(0);
 
   if (!checkInModalOpen || !checkInBlock) return null;
 
@@ -43,37 +44,15 @@ export const CheckInModal: React.FC = () => {
   const waitingCount = waitingTasks.length;
   const estMinutes = Math.max(2, Math.min(15, Math.ceil(waitingCount * 0.7) + 2));
 
+  const isDayClose = checkInBlock.blockKind === 'ritual' || checkInBlock.id === 'b-user-dayclose';
+  const todaySnoozeCount = isDayClose
+    ? (dayCloseOverrides?.[todayStr]?.count || checkInBlock.snoozeCount || 0)
+    : (checkInBlock.snoozeCount || (checkInBlock as any).snoozeHistory?.length || 0);
+
   const handleSnoozeAction = (opt: SnoozeOption) => {
     setIsSnoozePickerOpen(false);
-    setSnoozeCount(prev => prev + 1);
-    const nowMins = getDeviceTimeMinutes();
-
-    let targetTime = '';
-    if (opt.type === 'minutes') {
-      const targetMins = (nowMins + (opt.minutes || 10)) % 1440;
-      targetTime = minutesToTime(targetMins);
-    } else if (opt.type === 'specific_time' && opt.timeStr) {
-      targetTime = opt.timeStr;
-    } else if (opt.type === 'after_task' && currentBlock) {
-      targetTime = currentBlock.endTime;
-    } else if (opt.type === 'tomorrow_morning') {
-      showToast(language === 'vi' ? 'Đã dời nhắc sang sáng mai trong thẻ Bắt đầu ngày.' : 'Snoozed until tomorrow morning routine.');
-      setCheckInModalOpen(false);
-      return;
-    } else if (opt.type === 'drop') {
-      showToast(language === 'vi' ? 'Đã bỏ qua khép ngày hôm nay.' : 'Day wrap-up skipped for today.');
-      setCheckInModalOpen(false);
-      return;
-    } else if (opt.type === 'defer_tomorrow') {
-      showToast(language === 'vi' ? 'Đã dời sang sáng mai.' : 'Deferred to tomorrow.');
-      setCheckInModalOpen(false);
-      return;
-    }
-
-    if (targetTime) {
-      showToast(language === 'vi' ? `Sẽ nhắc lại lúc ${targetTime}.` : `Will remind you at ${targetTime}.`);
-      setCheckInModalOpen(false);
-    }
+    snoozeBlock(checkInBlock.id, opt);
+    setCheckInModalOpen(false);
   };
 
   // Case 1: Ritual Block (v0.3.34 Part A2.3 - A2.6: Khép lại hôm nay)
@@ -139,7 +118,7 @@ export const CheckInModal: React.FC = () => {
               <SnoozePicker
                 isDayClose={true}
                 activeRunningTask={currentBlock}
-                snoozeCount={snoozeCount}
+                snoozeCount={todaySnoozeCount}
                 language={language as 'vi' | 'en'}
                 onSnooze={handleSnoozeAction}
                 onClose={() => setIsSnoozePickerOpen(false)}
@@ -235,6 +214,8 @@ export const CheckInModal: React.FC = () => {
         waitingCount={waitingCount}
         onClose={() => setCheckInModalOpen(false)}
         onAnswer={handleCheckInAnswer}
+        onSnooze={handleSnoozeAction}
+        snoozeCount={todaySnoozeCount}
         onUpdateBlockNotes={handleUpdateBlockNotes}
       />
     );
@@ -246,6 +227,8 @@ export const CheckInModal: React.FC = () => {
       waitingCount={waitingCount}
       onClose={() => setCheckInModalOpen(false)}
       onAnswer={handleCheckInAnswer}
+      onSnooze={handleSnoozeAction}
+      snoozeCount={todaySnoozeCount}
     />
   );
 };

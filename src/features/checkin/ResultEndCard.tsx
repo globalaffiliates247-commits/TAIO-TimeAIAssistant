@@ -13,6 +13,7 @@ import type { TimeBlock, DodItem } from '@/types';
 import { useT } from '@/i18n/useT';
 import { MotivationSticker } from '@/features/motivation';
 import { SnoozePicker, type SnoozeOption } from '@/features/snooze';
+import { timeToMinutes, getDeviceTimeMinutes } from '@/core/clock';
 
 export interface ResultEndCardProps {
   checkInBlock: TimeBlock;
@@ -23,6 +24,8 @@ export interface ResultEndCardProps {
     extraMins?: number,
     nextStep?: string
   ) => void;
+  onSnooze?: (option: SnoozeOption) => void;
+  snoozeCount?: number;
   onUpdateBlockNotes?: (blockId: string, notes: string) => void;
 }
 
@@ -31,6 +34,8 @@ export const ResultEndCard: React.FC<ResultEndCardProps> = ({
   waitingCount,
   onClose,
   onAnswer,
+  onSnooze,
+  snoozeCount = 0,
   onUpdateBlockNotes,
 }) => {
   const { t } = useT();
@@ -218,12 +223,16 @@ export const ResultEndCard: React.FC<ResultEndCardProps> = ({
                 <SnoozePicker
                   taskId={checkInBlock.id}
                   language={t('checkin.snooze', 'Dời…') === 'Dời…' ? 'vi' : 'en'}
+                  snoozeCount={snoozeCount}
                   onSnooze={(opt: SnoozeOption) => {
                     setShowSnoozePicker(false);
-                    if (opt.type === 'minutes') {
+                    if (onSnooze) {
+                      onSnooze(opt);
+                    } else if (opt.type === 'minutes') {
                       onAnswer('remind_10m', opt.minutes || 10);
                     } else if (opt.type === 'specific_time' && opt.timeStr) {
-                      onAnswer('remind_10m', 30);
+                      const diff = Math.max(5, (timeToMinutes(opt.timeStr) - getDeviceTimeMinutes() + 1440) % 1440);
+                      onAnswer('remind_10m', diff);
                     } else if (opt.type === 'drop') {
                       onAnswer('stop_here');
                     } else if (opt.type === 'defer_tomorrow') {

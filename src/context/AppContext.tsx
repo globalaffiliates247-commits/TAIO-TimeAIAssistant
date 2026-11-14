@@ -29,7 +29,9 @@ import {
   updateScheduleEntry,
   commitQuickLine,
   extendTask,
+  snoozeScheduleEntry,
 } from '../features/tasks';
+import type { SnoozeOption } from '../features/snooze';
 import {
   AlarmSettings,
   ActiveAlarmState,
@@ -118,7 +120,8 @@ import {
   BackfillEntry,
   PassiveTimeSuggestion,
   SavedPlace,
-  AppNotificationItem
+  AppNotificationItem,
+  BlockStatus
 } from '../types';
 import { 
   PROFILES, 
@@ -411,8 +414,11 @@ interface AppContextType {
   addGoalWithBackplanning: (goal: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => void;
   deleteGoal: (goalId: string) => void;
   remainingSampleGoals: Goal[];
-  dayCloseConfig: { enabled: boolean; time: string; activeDays: number[] };
-  setDayCloseConfig: (cfg: { enabled: boolean; time: string; activeDays: number[] }) => void;
+  dayCloseConfig: { enabled: boolean; time: string; activeDays: number[]; durationMins?: number };
+  setDayCloseConfig: (cfg: { enabled: boolean; time: string; activeDays: number[]; durationMins?: number }) => void;
+  dayCloseOverrides: Record<string, { time: string; endTime?: string; durationMins?: number; status?: BlockStatus; count?: number; history?: Array<{ from: string; to: string; at: number }> }>;
+  setDayCloseOverrides: React.Dispatch<React.SetStateAction<Record<string, { time: string; endTime?: string; durationMins?: number; status?: BlockStatus; count?: number; history?: Array<{ from: string; to: string; at: number }> }>>>;
+  snoozeBlock: (blockId: string, option: import('@/features/snooze').SnoozeOption) => void;
   dayClosed: boolean;
   closedDays: ClosedDaysMap;
   markDayClosed: (date: string, method?: 'manual' | 'auto') => void;
@@ -551,8 +557,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [closedDays, setClosedDays] = useState<ClosedDaysMap>({});
   const dayClosed = checkIsDayClosed(closedDays, getDeviceCalendarDate());
 
-  // v0.3.34 Part A2.3: User-configurable day-close time and active weekdays
-  const [dayCloseConfig, setDayCloseConfigState] = useState<{ enabled: boolean; time: string; activeDays: number[] }>(() => {
+  // v0.3.34 Part A2.3 & v0.3.36 Part E: User-configurable day-close time, duration, and active weekdays
+  const [dayCloseConfig, setDayCloseConfigState] = useState<{ enabled: boolean; time: string; activeDays: number[]; durationMins?: number }>(() => {
     if (typeof window !== 'undefined') {
       try {
         const saved = window.localStorage.getItem('taio_day_close_config');
@@ -563,15 +569,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       enabled: true,
       time: '21:30',
       activeDays: [1, 2, 3, 4, 5, 6, 0],
+      durationMins: 15,
     };
   });
 
-  const setDayCloseConfig = (cfg: { enabled: boolean; time: string; activeDays: number[] }) => {
+  const setDayCloseConfig = (cfg: { enabled: boolean; time: string; activeDays: number[]; durationMins?: number }) => {
     setDayCloseConfigState(cfg);
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('taio_day_close_config', JSON.stringify(cfg));
     }
     saveDurableState('dayCloseConfig', cfg, Date.now());
+  };
+
+  // PRD v0.3.36 Part D & E: Day close per-date overrides (snoozed time, status, snoozeCount, snoozeHistory)
+  const [dayCloseOverrides, setDayCloseOverridesState] = useState<Record<string, {
+    time: string;
+    endTime?: string;
+    durationMins?: number;
+    status?: BlockStatus;
+    count?: number;
+    history?: Array<{ from: string; to: string; at: number }>;
+  }>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = window.localStorage.getItem('taio_day_close_overrides');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return {};
+  });
+
+  const setDayCloseOverrides = (
+    updater: React.SetStateAction<Record<string, {
+      time: string;
+      endTime?: string;
+      durationMins?: number;
+      status?: BlockStatus;
+      count?: number;
+      history?: Array<{ from: string; to: string; at: number }>;
+    }>>
+  ) => {
+    setDayCloseOverridesState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('taio_day_close_overrides', JSON.stringify(next));
+      }
+      saveDurableState('dayCloseOverrides', next, Date.now());
+      return next;
+    });
   };
 
   const markDayClosed = (date: string, method: 'manual' | 'auto' = 'manual') => {
@@ -580,6 +625,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       saveDurableState('closedDays', next, Date.now());
       return next;
     });
+    setDayCloseOverrides(prev => ({
+      ...prev,
+      [date]: {
+        ...(prev[date] || {}),
+        time: prev[date]?.time || dayCloseConfig.time || '21:30',
+        status: 'done',
+      },
+    }));
   };
   const [celebrationMsg, setCelebrationMsgState] = useState<string | null>(null);
   const setCelebrationMsg = (msg: string | null) => {
@@ -1735,10 +1788,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // PRD FIX v0.3.28 A1 & v0.3.34 A2.3: Unified schedule blocks with configurable day-close
+  // PRD FIX v0.3.28 A1 & v0.3.34 A2.3 & v0.3.36 Part E: Unified schedule blocks with configurable day-close
   const scheduleBlocks: TimeBlock[] = useMemo(() => {
-    return buildTodaySchedule(blocks, dailyCardItems, getDeviceCalendarDate(), dayCloseConfig);
-  }, [blocks, dailyCardItems, dayCloseConfig]);
+    return buildTodaySchedule(blocks, dailyCardItems, getDeviceCalendarDate(), dayCloseConfig, dayCloseOverrides);
+  }, [blocks, dailyCardItems, dayCloseConfig, dayCloseOverrides]);
 
   // Active current block (v0.3.34 Part A2.2):
   // "Việc hiện tại" chỉ là việc mà giờ hiện tại nằm trong khung (now >= start && now < end),
@@ -1922,31 +1975,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveAlarmState({ isActive: false });
   };
 
+  const snoozeBlock = (blockId: string, option: SnoozeOption) => {
+    return snoozeScheduleEntry(blockId, option, {
+      updateDailyCardItem,
+      setBlocks,
+      dailyCardItems,
+      scheduleBlocks,
+      activeRunningTask: currentBlock,
+      dayCloseConfig,
+      dayCloseOverrides,
+      setDayCloseOverrides,
+      scheduleNativeNotification,
+      showToast,
+      language,
+    });
+  };
+
   const snoozeAlarm = (mins: number = 5) => {
     stopAllAlarmSounds();
     stopRingSessionAudio();
-    const targetMs = Date.now() + mins * 60 * 1000;
-    const nextCount = (activeAlarmState.snoozeCount || 0) + 1;
-    const title = activeAlarmState.blockTitle || 'Đến giờ bắt đầu khối';
+    if (activeAlarmState.blockId) {
+      snoozeBlock(activeAlarmState.blockId, { type: 'minutes', minutes: mins });
+    } else {
+      const targetMs = Date.now() + mins * 60 * 1000;
+      const nextCount = (activeAlarmState.snoozeCount || 0) + 1;
+      const title = activeAlarmState.blockTitle || 'Đến giờ bắt đầu khối';
 
-    try {
-      window.localStorage.setItem('taio_snooze_target_ms', String(targetMs));
-      window.localStorage.setItem('taio_snooze_title', title);
-      window.localStorage.setItem('taio_snooze_count', String(nextCount));
-    } catch {}
+      try {
+        window.localStorage.setItem('taio_snooze_target_ms', String(targetMs));
+        window.localStorage.setItem('taio_snooze_title', title);
+        window.localStorage.setItem('taio_snooze_count', String(nextCount));
+      } catch {}
 
-    // On native platform (iPhone), also schedule a local notification
-    if (isNativePlatform) {
-      scheduleNativeNotification({
-        id: `snooze-${Date.now()}`,
-        title: 'Báo thức (Báo lại)',
-        body: title,
-        delaySeconds: mins * 60,
-      });
+      if (isNativePlatform) {
+        scheduleNativeNotification({
+          id: `snooze-${Date.now()}`,
+          title: 'Báo thức (Báo lại)',
+          body: title,
+          delaySeconds: mins * 60,
+        });
+      }
+      showToast(`Đã hoãn báo thức ${mins} phút`);
     }
 
     setActiveAlarmState({ isActive: false });
-    showToast(`Đã hoãn báo thức ${mins} phút`);
   };
 
   // Timer countdown ticker
@@ -1969,7 +2041,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(interval);
   }, [isTimerRunning, timerMinutesRemaining, currentBlock, checkInModalOpen]);
 
-  // v0.3.34 Part A2.3: Automatic reminder for day close at configured time
+  // v0.3.34 Part A2.3 & v0.3.36 Part D-E: Automatic reminder for day close at configured or snoozed time
   const lastDayCloseAlertRef = useRef<string>('');
   useEffect(() => {
     if (!dayCloseConfig.enabled) return;
@@ -1979,34 +2051,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (checkIsDayClosed(closedDays, todayDateStr)) return;
       if (checkInModalOpen || closeDayModalOpen) return;
 
-      const [ch, cm] = (dayCloseConfig.time || '21:30').split(':').map(Number);
+      const todayOverride = dayCloseOverrides?.[todayDateStr];
+      if (todayOverride?.status === 'done' || todayOverride?.status === 'dropped') return;
+
+      const effectiveTime = todayOverride?.time || dayCloseConfig.time || '21:30';
+      const [ch, cm] = effectiveTime.split(':').map(Number);
       const closeTargetMins = (ch || 21) * 60 + (cm || 30);
       const dayOfWeek = new Date().getDay();
       if (!(dayCloseConfig.activeDays || []).includes(dayOfWeek)) return;
 
-      // Fires when nowM is within [closeTargetMins, closeTargetMins + 5] once per day
+      // Fires when nowM is within [closeTargetMins, closeTargetMins + 5]
+      // Alert key incorporates effective time so if user snoozes, it re-alerts at new snoozed time!
+      const alertKey = `${todayDateStr}_${effectiveTime}`;
       if (nowM >= closeTargetMins && nowM < closeTargetMins + 5) {
-        if (lastDayCloseAlertRef.current !== todayDateStr) {
-          lastDayCloseAlertRef.current = todayDateStr;
-          const closeBlock = scheduleBlocks.find(b => b.blockKind === 'ritual') || {
+        if (lastDayCloseAlertRef.current !== alertKey) {
+          lastDayCloseAlertRef.current = alertKey;
+          const dur = todayOverride?.durationMins || dayCloseConfig.durationMins || 15;
+          const closeBlock = scheduleBlocks.find(b => b.id === 'b-user-dayclose') || {
             id: 'b-user-dayclose',
             title: 'Khép lại hôm nay',
-            startTime: dayCloseConfig.time || '21:30',
-            endTime: minutesToTime((closeTargetMins + 15) % 1440),
+            startTime: effectiveTime,
+            endTime: todayOverride?.endTime || minutesToTime((closeTargetMins + dur) % 1440),
             type: 'planning' as const,
             status: 'planned' as const,
             blockKind: 'ritual' as const,
             isTemplateBlock: true,
-            estimatedMinutes: 15,
+            estimatedMinutes: dur,
             ageDays: 1,
+            snoozeCount: todayOverride?.count || 0,
+            snoozeHistory: todayOverride?.history || [],
           };
           setCheckInBlock(closeBlock);
           setCheckInModalOpen(true);
         }
       }
-    }, 30000);
+    }, 10000);
     return () => clearInterval(interval);
-  }, [dayCloseConfig, closedDays, checkInModalOpen, closeDayModalOpen, scheduleBlocks]);
+  }, [dayCloseConfig, dayCloseOverrides, closedDays, checkInModalOpen, closeDayModalOpen, scheduleBlocks]);
 
   // Interruption submission
   const handleInterruptionSubmit = ({
@@ -2282,7 +2363,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           cycleTimeMinutes: actualMins,
           flowEfficiency: 1.0,
         },
-        { updateDailyCardItem, setBlocks, dailyCardItems }
+        { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
       );
       setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed! Goal progress updated.');
       triggerCoachCard('first_dod_done');
@@ -2297,7 +2378,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           nextStep: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
           returnPoint: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
         },
-        { updateDailyCardItem, setBlocks, dailyCardItems }
+        { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
       );
       // Auto add residual step to Inbox so mind is clear (Zeigarnik effect reduction)
       if (nextStep) {
@@ -2322,7 +2403,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : `Added +${extraMins} minutes.`
       );
     } else if (answer === 'remind_10m') {
-      setCelebrationMsg(language === 'vi' ? 'Sẽ nhắc lại điểm kiểm tra sau 10 phút.' : 'Will remind you in 10 minutes.');
+      snoozeBlock(checkInBlock.id, { type: 'minutes', minutes: extraMins || 10 });
     }
 
     setCheckInModalOpen(false);
@@ -2505,16 +2586,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const initialGoalMap = new Map(INITIAL_GOALS.map(g => [g.id, g]));
       const initialCardMap = new Map(INITIAL_DAILY_CARD_ITEMS.map(c => [c.id, c]));
 
-      // FIX v0.3.34 Part A2.1: Purge mock cards dc-1..dc-9, unmodified INITIAL_DAILY_CARD_ITEMS,
-      // and migrated unmodified mock blocks (like b-10 and b-ritual-close)
+      // FIX v0.3.34 Part A2.1 & v0.3.36 Part E: Purge mock cards dc-1..dc-9, unmodified INITIAL_DAILY_CARD_ITEMS,
+      // and migrated mock blocks (like b-10 and b-ritual-close)
       let cards = (savedDailyCards?.value || []).filter(c => {
+        if (c.id === 'dc-migrated-b-ritual-close' || c.id === 'b-ritual-close' || c.text?.includes('Đóng ngày làm việc')) return false;
         const initCard = initialCardMap.get(c.id);
         if (initCard) {
           const isModified = c.text !== initCard.text || c.start !== initCard.start || c.end !== initCard.end;
           if (!isModified) return false;
         }
         if (/^dc-[1-9]$/.test(c.id)) return false;
-        if (c.id === 'dc-migrated-b-10' || c.id === 'dc-migrated-b-ritual-close' || c.id.startsWith('dc-migrated-b-')) {
+        if (c.id === 'dc-migrated-b-10' || c.id.startsWith('dc-migrated-b-')) {
           const origId = c.id.replace('dc-migrated-', '');
           const initB = initialBlockMap.get(origId);
           if (initB) {
@@ -2523,14 +2605,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         }
         if (c.text === 'Dọn dẹp hòm thư và hủy đăng ký các bản tin cũ' && c.start === '20:00') return false;
-        if (c.text === 'Đóng ngày làm việc & Chọn việc quan trọng ngày mai' && c.start === '21:30') return false;
         return true;
       });
 
       if (savedBlocks?.value) {
-        // FIX v0.3.34 Part A2.1: Purge any block matching INITIAL_BLOCKS by ID unless user modified title or time
+        // PRD v0.3.36 Part E: Merge b-ritual-close into dayCloseConfig and eliminate b-ritual-close completely
+        const ritualCloseBlock = savedBlocks.value.find(b => b.id === 'b-ritual-close' || b.title?.includes('Đóng ngày làm việc'));
+        if (ritualCloseBlock) {
+          const start = ritualCloseBlock.startTime || '22:30';
+          const startM = timeToMinutes(start);
+          const endM = ritualCloseBlock.endTime ? timeToMinutes(ritualCloseBlock.endTime) : startM + 15;
+          const dur = Math.max(15, (endM - startM + 1440) % 1440);
+          setDayCloseConfigState(prev => {
+            const next = {
+              ...prev,
+              enabled: true,
+              time: start,
+              durationMins: dur,
+            };
+            if (typeof window !== 'undefined') {
+              window.localStorage.setItem('taio_day_close_config', JSON.stringify(next));
+            }
+            saveDurableState('dayCloseConfig', next, Date.now());
+            return next;
+          });
+        }
+
+        // FIX v0.3.34 Part A2.1 & v0.3.36 Part E: Purge any block matching INITIAL_BLOCKS by ID unless user modified title or time,
+        // and eliminate b-ritual-close so only single b-user-dayclose exists.
         const nowMins = getDeviceTimeMinutes();
         const rawBlocks = savedBlocks.value.filter(b => {
+          if (b.id === 'b-ritual-close' || b.title?.includes('Đóng ngày làm việc')) return false;
           const initB = initialBlockMap.get(b.id);
           if (!initB) return true;
           const isModified = b.title !== initB.title || b.startTime !== initB.startTime || b.endTime !== initB.endTime;
@@ -3097,6 +3202,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       remainingSampleGoals,
       dayCloseConfig,
       setDayCloseConfig,
+      dayCloseOverrides,
+      setDayCloseOverrides,
+      snoozeBlock,
       dayClosed,
       closedDays,
       markDayClosed,
