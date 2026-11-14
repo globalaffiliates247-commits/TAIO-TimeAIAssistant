@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useHighlight } from '@/features/prefs';
 
 export interface NowClockRingProps {
   isCountDown: boolean;
@@ -31,6 +32,7 @@ export const NowClockRing: React.FC<NowClockRingProps> = ({
 
   const colorPrimary = isCool ? '#007aff' : '#E0401F';
   const colorTrack = isCool ? '#e0f2fe' : '#fee2e2';
+  const { highlightStyle } = useHighlight();
 
   return (
     <div 
@@ -65,10 +67,16 @@ export const NowClockRing: React.FC<NowClockRingProps> = ({
 
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-        <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 tabular-nums">
+        <span
+          className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 tabular-nums"
+          style={highlightStyle}
+        >
           {timeText}
         </span>
-        <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 max-w-[110px] truncate mt-0.5">
+        <span
+          className="text-[10px] sm:text-[11px] font-semibold text-slate-500 max-w-[110px] truncate mt-0.5"
+          style={highlightStyle}
+        >
           {subText}
         </span>
       </div>

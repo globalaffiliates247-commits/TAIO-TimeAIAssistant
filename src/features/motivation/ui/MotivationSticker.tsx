@@ -21,6 +21,7 @@ import {
 } from '../model/motivationStore';
 import { quoteRegistry } from '../model/quoteRegistry';
 import { sendQuoteReaction } from '../model/quoteReaction';
+import { useHighlight } from '@/features/prefs';
 import { RefreshCw, Heart, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface MotivationStickerProps {
@@ -51,6 +52,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   const { language, palette } = useApp();
   const { t } = useT();
   const isCool = palette === 'cool';
+  const { highlightStyle } = useHighlight();
 
   const [settings, setSettings] = useState(() => loadMotivationSettings());
   const [userState, setUserState] = useState(() => loadUserMotivationState());
@@ -162,7 +164,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           className="flex-1 cursor-pointer truncate"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <span className="font-normal italic">
+          <span className="font-normal italic" style={highlightStyle}>
             "{currentQuote.text}"
           </span>
           {currentQuote.author && (
@@ -214,7 +216,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             className="absolute left-0 top-full mt-1 z-30 w-full max-w-md p-2.5 rounded-lg bg-white dark:bg-neutral-800 shadow-lg border border-black/10 dark:border-white/10 text-xs text-neutral-800 dark:text-neutral-200"
             onClick={e => e.stopPropagation()}
           >
-            <div className="font-normal italic leading-relaxed">
+            <div className="font-normal italic leading-relaxed" style={highlightStyle}>
               "{currentQuote.text}"
             </div>
             {currentQuote.author && (
@@ -245,6 +247,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
               isExpanded ? '' : 'line-clamp-3'
             }`}
             onClick={() => setIsExpanded(!isExpanded)}
+            style={highlightStyle}
           >
             "{currentQuote.text}"
           </div>
@@ -315,6 +318,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             isExpanded ? '' : 'line-clamp-4'
           }`}
           onClick={() => setIsExpanded(!isExpanded)}
+          style={highlightStyle}
         >
           "{currentQuote.text}"
 

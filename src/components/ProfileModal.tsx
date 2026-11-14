@@ -33,6 +33,7 @@ import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
 import { DataImportSection } from '../features/data-transfer';
 import { AlarmSettingsSection } from '../features/alarm';
 import { MotivationSettingsSection } from '@/features/motivation';
+import { HighlightSettings } from '@/features/prefs';
 import { SyncSection } from '../features/sync/ui/SyncSection';
 import { PairSection } from '../features/sync/ui/PairSection';
 import { VersionLabel } from '@/components/header/VersionLabel';
@@ -453,6 +454,9 @@ export const ProfileModal: React.FC = () => {
                     <span className="text-xs">🇬🇧</span>
                   </button>
                 </div>
+
+                {/* PRD v0.3.35 Part C: Highlight Settings & Preview */}
+                <HighlightSettings />
               </div>
 
               {/* Tone of Voice */}

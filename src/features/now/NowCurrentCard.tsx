@@ -10,6 +10,7 @@ import { quoteRegistry } from '@/features/motivation/model/quoteRegistry';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
 import { findGoalSuggestion, getGoalTargetHours } from '@/features/goals';
+import { useHighlight } from '@/features/prefs';
 import { useT } from '@/i18n/useT';
 import { 
   Pin, 
@@ -65,6 +66,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
 
   const { t } = useT();
   const isCool = palette === 'cool';
+  const { highlightStyle } = useHighlight();
   const now = new Date();
   const todayStr = getDeviceCalendarDate(now);
   const nowMins = getDeviceTimeMinutes();
@@ -514,7 +516,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
       <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-600 tracking-wider uppercase">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-          <span>{language === 'en' ? 'IN PROGRESS' : 'ĐANG LÀM'}</span>
+          <span style={highlightStyle}>{language === 'en' ? 'IN PROGRESS' : 'ĐANG LÀM'}</span>
           {activeTask && (
             <span className="text-slate-400 font-semibold tabular-nums">
               · {activeTask.startTime}–{activeTask.endTime}
@@ -612,7 +614,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
           onClick={() => setDetailOpen(true)}
           className="text-left font-black text-xl sm:text-2xl text-slate-900 hover:text-blue-600 transition-colors flex items-center gap-1.5 group min-w-0"
         >
-          <span className="truncate">{activeTask?.title || state.title}</span>
+          <span className="truncate" style={highlightStyle}>{activeTask?.title || state.title}</span>
           <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 shrink-0 transition-transform group-hover:translate-x-0.5" />
         </button>
 
@@ -859,7 +861,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-slate-800 flex items-center gap-1.5 truncate">
                   <Target className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span className="truncate">{linkedGoal.name}</span>
+                  <span className="truncate" style={highlightStyle}>{linkedGoal.name}</span>
                 </span>
                 <span className="font-bold text-slate-600 tabular-nums">
                   {linkedGoal.progressPercent}%

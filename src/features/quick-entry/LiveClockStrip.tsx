@@ -8,6 +8,7 @@ import { Clock, ExternalLink, Sparkles } from 'lucide-react';
 import { startNativeLiveActivity, openNativeAppSettings } from '@/features/native';
 import { clockState } from '@/features/clock';
 import { MotivationSticker } from '@/features/motivation';
+import { useHighlight } from '@/features/prefs';
 import type { TimeBlock } from '@/types';
 
 function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targetTimestamp: number; totalMinutes: number; remainingMinutes: number } {
@@ -45,6 +46,7 @@ export const LiveClockStrip: React.FC<{ compact?: boolean; showQuote?: boolean }
 
   const isCool = palette === 'cool';
   const isVi = language === 'vi';
+  const { highlightStyle } = useHighlight();
 
   // Live tick every second
   useEffect(() => {
@@ -175,11 +177,11 @@ export const LiveClockStrip: React.FC<{ compact?: boolean; showQuote?: boolean }
     contentNode = (
       <div className="flex items-center gap-2 overflow-hidden truncate">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-        <span className="font-semibold text-slate-800 truncate" title={state.title}>
+        <span className="font-semibold text-slate-800 truncate" title={state.title} style={highlightStyle}>
           {state.title}
         </span>
         <span className="text-slate-400">·</span>
-        <span className="font-mono font-bold text-slate-900 shrink-0">
+        <span className="font-mono font-bold text-slate-900 shrink-0" style={highlightStyle}>
           {countdown}
         </span>
       </div>
@@ -199,7 +201,7 @@ export const LiveClockStrip: React.FC<{ compact?: boolean; showQuote?: boolean }
   } else {
     contentNode = (
       <div className="flex items-center gap-2 overflow-hidden truncate">
-        <span className="font-mono font-bold text-slate-700 shrink-0">
+        <span className="font-mono font-bold text-slate-700 shrink-0" style={highlightStyle}>
           {state.title}
         </span>
         <span className="text-slate-400">·</span>
