@@ -19,7 +19,7 @@ import { useRowSelection } from './useRowSelection';
 import { updateScheduleEntry } from '@/features/tasks';
 import { getPreviousDay } from '@/features/dayclose';
 import { TemplateScheduleModal } from '@/features/schedule-template';
-import { Clock, Trash2, Copy, Calendar, X, RotateCw } from 'lucide-react';
+import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -34,7 +34,10 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     setBlocks,
     setCloseDayModalOpen,
     language,
-    showToast
+    showToast,
+    currentBlock,
+    setCheckInBlock,
+    setCheckInModalOpen,
   } = useApp();
   const day = note.date!;
   const today = getDeviceCalendarDate();
@@ -138,6 +141,115 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       { updateDailyCardItem, setBlocks, dailyCardItems }
     );
     showToast?.(language === 'vi' ? `Đã dời việc sau sang ${toTime(newStartMins)}!` : `Shifted to start after at ${toTime(newStartMins)}!`);
+  };
+
+  // v0.3.34 Part B: Instant Start button & Overrun / Replacement Conflict Modal
+  const [startConflictModal, setStartConflictModal] = useState<{
+    item: DailyCardItem;
+    type: 'overrun' | 'already_running';
+    runningTask?: any;
+    nextTask?: any;
+    overrunMins?: number;
+    gapMins?: number;
+  } | null>(null);
+
+  const handleStartItemNow = (
+    it: DailyCardItem,
+    options?: { fitGap?: boolean; mode?: 'replace' | 'parallel' }
+  ) => {
+    const startHM = toTime(nowMins);
+
+    // 1. Check if another task is running
+    if (!options?.mode && currentBlock && currentBlock.id !== it.id) {
+      setStartConflictModal({
+        item: it,
+        type: 'already_running',
+        runningTask: currentBlock,
+      });
+      return;
+    }
+
+    // 2. Compute duration
+    const estDur = durationOf(it) || (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
+    const upcoming = (scheduleBlocks || [])
+      .filter(b => b.id !== it.id && b.id !== currentBlock?.id && b.status !== 'done' && b.status !== 'dropped' && toMins(b.startTime) > nowMins)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+
+    let dur = 30;
+    const gapMins = upcoming ? (toMins(upcoming.startTime) - nowMins) : undefined;
+
+    if (options?.fitGap && gapMins && gapMins > 0) {
+      dur = gapMins;
+    } else if (estDur) {
+      dur = estDur;
+      if (!options?.fitGap && gapMins && estDur > gapMins && gapMins > 0) {
+        setStartConflictModal({
+          item: it,
+          type: 'overrun',
+          nextTask: upcoming,
+          overrunMins: estDur - gapMins,
+          gapMins,
+        });
+        return;
+      }
+    } else if (gapMins && gapMins > 0) {
+      dur = gapMins;
+    } else {
+      dur = 30;
+    }
+
+    // 3. If replacing current task, pause old task and record return point
+    if (options?.mode === 'replace' && currentBlock) {
+      updateScheduleEntry(
+        currentBlock.id,
+        { returnPoint: currentBlock.title, status: 'planned' },
+        { updateDailyCardItem, setBlocks, dailyCardItems }
+      );
+    }
+
+    // 4. Update started item
+    const endHM = toTime((nowMins + dur) % 1440);
+    const extra = (it.extra as Record<string, unknown> | undefined) || {};
+    const isParallel = options?.mode === 'parallel';
+
+    updateDailyCardItem(it.id, {
+      start: startHM,
+      end: endHM,
+      status: 'open',
+      parallelOf: isParallel && currentBlock ? currentBlock.id : undefined,
+      extra: {
+        ...extra,
+        startedAt: Date.now(),
+        estimateMins: dur,
+        parallelOf: isParallel && currentBlock ? currentBlock.id : undefined,
+      },
+    });
+
+    // 5. Open mini clock on Mac / mobile
+    if (typeof window !== 'undefined') {
+      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void } }).taioAPI;
+      if (bridge?.openClockWindow) {
+        bridge.openClockWindow();
+      }
+    }
+
+    showToast?.(language === 'vi' ? `▶ Bắt đầu "${it.text}" (${dur}p)` : `▶ Started "${it.text}" (${dur}m)`);
+    setStartConflictModal(null);
+  };
+
+  const handleStopRunningItem = (it: DailyCardItem) => {
+    const matchingBlock = (scheduleBlocks || []).find(b => b.id === it.id) || {
+      id: it.id,
+      title: it.text,
+      startTime: it.start || toTime(nowMins),
+      endTime: it.end || toTime(nowMins + 30),
+      type: 'personal' as const,
+      status: 'in_progress' as const,
+      goalId: it.goalId,
+      goalName: it.goalName,
+    };
+    setCheckInBlock(matchingBlock);
+    setCheckInModalOpen(true);
   };
 
   // Multi-row selection & actions (PRD FIX v0.3.32 Part C3)
@@ -571,11 +683,36 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 <span className="shrink-0 text-xs" title="Khung cố định theo lịch mẫu">🔁</span>
               )}
               {renderText(it)}
-              {isNowRunning && (
-                <span className="shrink-0 text-[10.5px] px-1.5 py-0.5 rounded bg-black/5 text-slate-500 font-normal select-none">
-                  đang làm
-                </span>
-              )}
+              {isNowRunning ? (
+                <>
+                  <span className="shrink-0 text-[10.5px] px-1.5 py-0.5 rounded bg-black/5 text-slate-500 font-normal select-none">
+                    đang làm
+                  </span>
+                  <button
+                    type="button"
+                    title={language === 'vi' ? 'Dừng / Kết thúc việc này' : 'Stop / End task'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStopRunningItem(it);
+                    }}
+                    className="p-1 rounded-md bg-rose-100 hover:bg-rose-200 text-rose-700 transition-all shrink-0 cursor-pointer"
+                  >
+                    <Square className="w-3 h-3 fill-rose-700 stroke-none" />
+                  </button>
+                </>
+              ) : (toMins(it.start || '00:00') > nowMins && (selectedIds.has(it.id))) ? (
+                <button
+                  type="button"
+                  title={language === 'vi' ? 'Bắt đầu việc này ngay' : 'Start this task now'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStartItemNow(it);
+                  }}
+                  className="p-1 rounded-md hover:bg-black/10 text-slate-700 transition-all shrink-0 cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 fill-slate-700 stroke-none" />
+                </button>
+              ) : null}
               {durationOf(it) && <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>{fmtDuration(durationOf(it)!)}</span>}
               {boundIds.has(it.id) && <span className="shrink-0" title="Đã lên lịch trước"><IconLock color={c.muted} /></span>}
               {overlapIds.has(it.id) && (
@@ -731,19 +868,17 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           >
             <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
             {renderText(it)}
-            {/* PRD FIX v0.3.28 C1: Small clock button to start unscheduled task immediately */}
+            {/* v0.3.34 Part B: Play button on selected row / hover */}
             <button
               type="button"
-              title="Bắt đầu việc này ngay bây giờ"
-              onClick={() => {
-                const dur = durationForPlacement(it, dailyCardItems) || 30;
-                const startHM = toTime(nowMins);
-                const endHM = toTime(nowMins + dur);
-                updateDailyCardItem(it.id, { start: startHM, end: endHM });
+              title={language === 'vi' ? 'Bắt đầu việc này ngay' : 'Start this task now'}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartItemNow(it);
               }}
-              className="opacity-0 group-hover/flex:opacity-100 hover:opacity-100 focus:opacity-100 p-0.5 rounded hover:bg-black/5 text-slate-400 hover:text-slate-700 transition-opacity shrink-0"
+              className="opacity-0 group-hover/flex:opacity-100 hover:opacity-100 focus:opacity-100 p-1 rounded hover:bg-black/10 text-slate-700 transition-opacity shrink-0 cursor-pointer"
             >
-              <Clock className="w-3.5 h-3.5" />
+              <Play className="w-3.5 h-3.5 fill-slate-700 stroke-none" />
             </button>
             {est && (
               <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>
@@ -824,6 +959,96 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
             >
               <X className="w-3.5 h-3.5" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* v0.3.34 Part B: Overrun Warning & Task Conflict Modal */}
+      {startConflictModal && (
+        <div className="fixed app-overlay-safe z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm shadow-2xl p-5 text-slate-900 space-y-3.5">
+            {startConflictModal.type === 'already_running' ? (
+              <>
+                <div className="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-wide">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <span>{language === 'vi' ? 'Đang có việc chạy' : 'Task in progress'}</span>
+                </div>
+                <div className="text-xs space-y-1 text-slate-700">
+                  <p>
+                    {language === 'vi' ? 'Việc đang làm:' : 'Currently running:'} <strong className="text-slate-900">"{startConflictModal.runningTask?.title}"</strong>
+                  </p>
+                  <p className="text-slate-500">
+                    {language === 'vi' ? 'Bạn muốn chuyển đổi thế nào với' : 'How would you like to handle'} "{startConflictModal.item.text}"?
+                  </p>
+                </div>
+                <div className="space-y-1.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleStartItemNow(startConflictModal.item, { mode: 'replace' })}
+                    className="w-full py-2.5 px-3 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <span>{language === 'vi' ? 'Thay việc đang làm (Tạm dừng việc cũ)' : 'Replace (Pause previous)'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStartItemNow(startConflictModal.item, { mode: 'parallel' })}
+                    className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span className="font-mono font-bold text-slate-500">∥</span>
+                    <span>{language === 'vi' ? 'Làm kèm (Hai việc cùng lúc)' : 'Run together in parallel'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStartConflictModal(null)}
+                    className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
+                  >
+                    {language === 'vi' ? 'Hủy' : 'Cancel'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-wide">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <span>{language === 'vi' ? 'Cảnh báo lấn giờ' : 'Schedule Overrun Warning'}</span>
+                </div>
+                <div className="text-xs space-y-1 text-slate-700">
+                  <p className="font-semibold text-slate-900">
+                    {language === 'vi'
+                      ? `Sẽ lấn ${startConflictModal.overrunMins}p sang: "${startConflictModal.nextTask?.title}"`
+                      : `Will overrun ${startConflictModal.overrunMins}m into: "${startConflictModal.nextTask?.title}"`}
+                  </p>
+                  <p className="text-slate-500 text-[11px]">
+                    {language === 'vi'
+                      ? `Khoảng trống chỉ còn ${startConflictModal.gapMins} phút tới việc tiếp theo.`
+                      : `Only ${startConflictModal.gapMins} minutes remaining before next task.`}
+                  </p>
+                </div>
+                <div className="space-y-1.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleStartItemNow(startConflictModal.item, { fitGap: true })}
+                    className="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <span>{language === 'vi' ? `Cắt cho vừa (${startConflictModal.gapMins}p)` : `Fit to gap (${startConflictModal.gapMins}m)`}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStartItemNow(startConflictModal.item, { fitGap: false })}
+                    className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{language === 'vi' ? 'Vẫn bắt đầu' : 'Start anyway'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStartConflictModal(null)}
+                    className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
+                  >
+                    {language === 'vi' ? 'Hủy' : 'Cancel'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
