@@ -3,6 +3,7 @@
 // encrypt sync key with PBKDF2→AES-GCM derived from 6-char code.
 import { encryptJson, decryptJson, generateSyncCode } from './syncCrypto';
 import { SYNC_URL, SYNC_KEY, SYNC_ENABLED } from './syncConfig';
+import { pushSnapshot, pullSnapshots, forgetDevice } from './syncClient';
 
 const enc = new TextEncoder();
 const PAIR_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
@@ -72,19 +73,38 @@ export async function publishPairing(pairCode: string, syncCode: string): Promis
   const { iv, ciphertext } = await encryptSyncCode(pairCode, syncCode);
   const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-  const res = await fetch(`${SYNC_URL}/rest/v1/rpc/taio_pair_create`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SYNC_KEY,
-      Authorization: `Bearer ${SYNC_KEY}`,
-    },
-    body: JSON.stringify({ p_id: pairId, p_iv: iv, p_cipher: ciphertext, p_expires: expires }),
-  });
+  // 1. Try dedicated taio_pair_create RPC first if available
+  let rpcSuccess = false;
+  try {
+    const res = await fetch(`${SYNC_URL}/rest/v1/rpc/taio_pair_create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SYNC_KEY,
+        ...(SYNC_KEY.startsWith('eyJ') ? { Authorization: `Bearer ${SYNC_KEY}` } : {}),
+      },
+      body: JSON.stringify({ p_id: pairId, p_iv: iv, p_cipher: ciphertext, p_expires: expires }),
+    });
+    if (res.ok) {
+      rpcSuccess = true;
+    }
+  } catch (_) {}
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Pairing publish failed: ${res.status} ${body}`);
+  if (rpcSuccess) return;
+
+  // 2. Seamless fallback using active taio_sync_snapshots table (zero backend migration required)
+  try {
+    const expiresTs = Date.now() + 10 * 60 * 1000;
+    await pushSnapshot({
+      space: pairId,
+      device: 'taio_pairing_slot',
+      name: 'PairingCode',
+      iv,
+      cipher: ciphertext,
+      ts: expiresTs,
+    });
+  } catch (err: any) {
+    throw new Error(`Pairing publish failed: ${err?.message || 'Network error'}`);
   }
 }
 
@@ -94,24 +114,48 @@ export async function claimPairing(pairCode: string): Promise<string | null> {
 
   const pairId = await derivePairId(pairCode);
 
-  const res = await fetch(`${SYNC_URL}/rest/v1/rpc/taio_pair_claim`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SYNC_KEY,
-      Authorization: `Bearer ${SYNC_KEY}`,
-    },
-    body: JSON.stringify({ p_id: pairId }),
-  });
-
-  if (!res.ok) return null;
-  const rows = await res.json();
-  if (!Array.isArray(rows) || rows.length === 0) return null;
-
-  const { iv, ciphertext } = rows[0];
+  // 1. Try dedicated taio_pair_claim RPC first if available
   try {
-    return await decryptSyncCode(pairCode, iv, ciphertext);
+    const res = await fetch(`${SYNC_URL}/rest/v1/rpc/taio_pair_claim`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SYNC_KEY,
+        ...(SYNC_KEY.startsWith('eyJ') ? { Authorization: `Bearer ${SYNC_KEY}` } : {}),
+      },
+      body: JSON.stringify({ p_id: pairId }),
+    });
+
+    if (res.ok) {
+      const rows = await res.json();
+      if (Array.isArray(rows) && rows.length > 0) {
+        const { iv, ciphertext } = rows[0];
+        try {
+          return await decryptSyncCode(pairCode, iv, ciphertext);
+        } catch {
+          return null;
+        }
+      }
+    }
+  } catch (_) {}
+
+  // 2. Seamless fallback using active taio_sync_snapshots table
+  try {
+    const snapshots = await pullSnapshots(pairId, 'claiming_client');
+    const match = snapshots.find(s => s.device_id === 'taio_pairing_slot');
+    if (!match) return null;
+
+    // Check expiration (timestamp stored in client_updated_at)
+    if (match.client_updated_at && match.client_updated_at < Date.now()) {
+      await forgetDevice(pairId, 'taio_pairing_slot').catch(() => {});
+      return null;
+    }
+
+    const decrypted = await decryptSyncCode(pairCode, match.iv, match.ciphertext);
+    // Single-use cleanup: forget pairing slot immediately
+    await forgetDevice(pairId, 'taio_pairing_slot').catch(() => {});
+    return decrypted;
   } catch {
-    return null; // wrong code or tampered data
+    return null;
   }
 }

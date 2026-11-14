@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Bell, Music, Upload, Volume2, Play, Square, Check, AlertCircle, Trash2 } from 'lucide-react';
 import { AlarmSettings, CustomSoundFile } from '../model/alarmTypes';
+import { useApp } from '@/context/AppContext';
 import {
   getPlatformAlarmCapability,
   triggerAlarmSound,
@@ -21,6 +22,9 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
   settings,
   onSettingsChange,
 }) => {
+  const { palette } = useApp();
+  const isCool = palette === 'cool';
+
   const [isPlayingTest, setIsPlayingTest] = useState(false);
   const [testWarning, setTestWarning] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -114,44 +118,52 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
   return (
     <div className="space-y-4">
       {/* Toggle row */}
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700">
+      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+            isCool ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-[#E0401F]'
+          }`}>
             <Bell className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <h4 className="text-xs font-bold text-slate-900">
               Báo thức khi bắt đầu khối
             </h4>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-[11px] text-slate-500">
               Rung và phát chuông khi tới giờ thực hiện khối việc
             </p>
           </div>
         </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={settings.enabled}
-            onChange={(e) => handleToggle(e.target.checked)}
-            className="sr-only peer"
+        <button
+          type="button"
+          role="switch"
+          aria-checked={settings.enabled}
+          onClick={() => handleToggle(!settings.enabled)}
+          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
+            settings.enabled ? (isCool ? 'bg-blue-600' : 'bg-[#E0401F]') : 'bg-slate-300'
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+              settings.enabled ? 'translate-x-5' : 'translate-x-0'
+            }`}
           />
-          <div className="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-        </label>
+        </button>
       </div>
 
       {/* Sound Options */}
       {settings.enabled && (
-        <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 space-y-4">
+        <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 space-y-4">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Âm thanh báo thức
             </label>
             <button
               onClick={handleTestSound}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 isPlayingTest
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-600'
+                  ? 'bg-rose-500 text-white shadow-xs'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs'
               }`}
             >
               {isPlayingTest ? (
@@ -170,7 +182,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
 
           {/* Test sound warning / fallback banner */}
           {testWarning && (
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{testWarning}</span>
             </div>
@@ -181,51 +193,55 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
             <button
               type="button"
               onClick={() => handleSoundTypeChange('default')}
-              className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between ${
+              className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between cursor-pointer ${
                 settings.soundType === 'default'
-                  ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 text-zinc-900 dark:text-zinc-100'
-                  : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 text-zinc-600 dark:text-zinc-400'
+                  ? isCool
+                    ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
+                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                  : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Music className="w-4 h-4 text-amber-500" />
+                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
                 <div>
-                  <div className="text-xs font-semibold">Chuông chuẩn TAIO</div>
-                  <div className="text-[11px] text-zinc-500">Hòa âm êm ái, rõ ràng</div>
+                  <div className="text-xs font-bold text-slate-900">Chuông chuẩn TAIO</div>
+                  <div className="text-[11px] text-slate-500">Hòa âm êm ái, rõ ràng</div>
                 </div>
               </div>
               {settings.soundType === 'default' && (
-                <Check className="w-4 h-4 text-amber-500 shrink-0" />
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
               )}
             </button>
 
             <button
               type="button"
               onClick={() => handleSoundTypeChange('custom')}
-              className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between ${
+              className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between cursor-pointer ${
                 settings.soundType === 'custom'
-                  ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 text-zinc-900 dark:text-zinc-100'
-                  : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 text-zinc-600 dark:text-zinc-400'
+                  ? isCool
+                    ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
+                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                  : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Upload className="w-4 h-4 text-amber-500" />
+                <Upload className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
                 <div className="truncate max-w-[140px]">
-                  <div className="text-xs font-semibold">File của tôi</div>
-                  <div className="text-[11px] text-zinc-500 truncate">
+                  <div className="text-xs font-bold text-slate-900">File của tôi</div>
+                  <div className="text-[11px] text-slate-500 truncate">
                     {settings.customSound?.name || 'Tải file âm thanh...'}
                   </div>
                 </div>
               </div>
               {settings.soundType === 'custom' && (
-                <Check className="w-4 h-4 text-amber-500 shrink-0" />
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
               )}
             </button>
           </div>
 
           {/* Custom sound file selector */}
           {settings.soundType === 'custom' && (
-            <div className="pt-2 border-t border-zinc-200/80 dark:border-zinc-700/80 space-y-2">
+            <div className="pt-2 border-t border-slate-200 space-y-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -235,10 +251,10 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
               />
 
               {settings.customSound ? (
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs">
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 text-xs">
                   <div className="flex items-center gap-2 truncate">
-                    <Music className="w-4 h-4 text-amber-500 shrink-0" />
-                    <span className="font-medium text-zinc-900 dark:text-zinc-200 truncate">
+                    <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+                    <span className="font-semibold text-slate-900 truncate">
                       {settings.customSound.name}
                     </span>
                   </div>
@@ -246,14 +262,14 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-2 py-1 rounded text-[11px] font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                      className={`px-2 py-1 rounded text-[11px] font-semibold ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} hover:underline`}
                     >
                       Đổi file
                     </button>
                     <button
                       type="button"
                       onClick={handleRemoveCustomSound}
-                      className="p-1 rounded text-zinc-400 hover:text-rose-500"
+                      className="p-1 rounded text-slate-400 hover:text-rose-500 transition-colors"
                       title="Xoá file"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -264,9 +280,9 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-3 px-4 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-amber-500 rounded-xl text-center text-xs text-zinc-600 dark:text-zinc-400 transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-xl text-center text-xs text-slate-600 transition-colors flex items-center justify-center gap-2 bg-white"
                 >
-                  <Upload className="w-4 h-4 text-amber-500" />
+                  <Upload className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
                   <span>Chọn file âm thanh từ điện thoại (MP3, M4A, WAV, AAC)</span>
                 </button>
               )}
@@ -274,8 +290,8 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
           )}
 
           {/* Platform Capability Note */}
-          <div className="pt-2 flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+          <div className="pt-2 flex items-center gap-2 text-[11px] text-slate-500">
+            <span className={`w-1.5 h-1.5 rounded-full ${isCool ? 'bg-blue-500' : 'bg-[#E0401F]'} shrink-0`} />
             <span>Nền tảng: {platformCap.description}</span>
           </div>
         </div>
