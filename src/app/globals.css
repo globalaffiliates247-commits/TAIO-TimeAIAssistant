@@ -633,6 +633,9 @@
   .ml-6 {
     margin-left: calc(var(--spacing) * 6);
   }
+  .ml-auto {
+    margin-left: auto;
+  }
   .line-clamp-1 {
     overflow: hidden;
     display: -webkit-box;
@@ -1894,6 +1897,9 @@
   }
   .bg-amber-600 {
     background-color: var(--color-amber-600);
+  }
+  .bg-amber-700 {
+    background-color: var(--color-amber-700);
   }
   .bg-black\/5 {
     background-color: color-mix(in srgb, #000 5%, transparent);
@@ -3945,6 +3951,9 @@
     .hover\:bg-\[\#d03515\]:hover {
       background-color: #d03515;
     }
+    .hover\:bg-amber-50:hover {
+      background-color: var(--color-amber-50);
+    }
     .hover\:bg-amber-50\/80:hover {
       background-color: color-mix(in srgb, oklch(98.7% 0.022 95.277) 80%, transparent);
     }
@@ -3988,6 +3997,9 @@
     }
     .hover\:bg-amber-700:hover {
       background-color: var(--color-amber-700);
+    }
+    .hover\:bg-amber-800:hover {
+      background-color: var(--color-amber-800);
     }
     .hover\:bg-black:hover {
       background-color: var(--color-black);
@@ -4234,6 +4246,9 @@
     }
     .hover\:text-amber-800:hover {
       color: var(--color-amber-800);
+    }
+    .hover\:text-amber-900:hover {
+      color: var(--color-amber-900);
     }
     .hover\:text-blue-600:hover {
       color: var(--color-blue-600);
