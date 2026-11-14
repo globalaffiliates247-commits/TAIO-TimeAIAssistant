@@ -66,6 +66,8 @@ export const ProfileModal: React.FC = () => {
     showToast,
     scheduleBlocks,
     goals,
+    remainingSampleGoals,
+    deleteGoal,
   } = useApp();
 
   const isCool = palette === 'cool';
@@ -746,6 +748,42 @@ export const ProfileModal: React.FC = () => {
               onImport={importTaioData}
               onExportJson={exportTaioJsonV1}
             />
+
+            {/* v0.3.34 Part A2.1: Remaining sample data */}
+            {remainingSampleGoals && remainingSampleGoals.length > 0 && (
+              <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-900">
+                    {language === 'vi' ? 'Dữ liệu mẫu còn lại' : 'Remaining Sample Data'}
+                  </span>
+                  <span className="text-[10px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-medium">
+                    {remainingSampleGoals.length} {language === 'vi' ? 'mục tiêu mẫu' : 'sample goals'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-800 leading-relaxed">
+                  {language === 'vi'
+                    ? 'Các mục tiêu mẫu được giữ lại vì bạn đã chỉnh sửa hoặc có việc đang gắn vào. Bạn có thể xóa nếu không còn dùng.'
+                    : 'Sample goals retained because they were customized or have attached tasks. You can delete them if no longer needed.'}
+                </p>
+                <div className="space-y-1.5 pt-1">
+                  {remainingSampleGoals.map(g => (
+                    <div key={g.id} className="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/80 text-xs">
+                      <div className="min-w-0 pr-2">
+                        <p className="font-semibold text-slate-800 truncate">{g.name}</p>
+                        <p className="text-[10px] text-slate-500">ID: {g.id}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteGoal(g.id)}
+                        className="px-2.5 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors shrink-0"
+                      >
+                        {language === 'vi' ? 'Xóa' : 'Delete'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {!showDeleteConfirm ? (
               <div className="flex items-center justify-between p-3.5 rounded-2xl bg-red-50/60 border border-red-200">

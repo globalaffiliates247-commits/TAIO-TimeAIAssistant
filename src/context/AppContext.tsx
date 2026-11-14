@@ -407,6 +407,8 @@ interface AppContextType {
   handleCloseDay: (tomorrowTask: string, targetDate?: string) => void;
   addNewBlock: (block: Omit<TimeBlock, 'id'>) => void;
   addGoalWithBackplanning: (goal: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => void;
+  deleteGoal: (goalId: string) => void;
+  remainingSampleGoals: Goal[];
   dayClosed: boolean;
   closedDays: ClosedDaysMap;
   markDayClosed: (date: string, method?: 'manual' | 'auto') => void;
@@ -2378,19 +2380,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (cancelled) return;
 
-      let cards = (savedDailyCards?.value || []).filter(c => !/^dc-[1-9]$/.test(c.id));
+      const initialBlockMap = new Map(INITIAL_BLOCKS.map(b => [b.id, b]));
+      const initialGoalMap = new Map(INITIAL_GOALS.map(g => [g.id, g]));
+      const initialCardMap = new Map(INITIAL_DAILY_CARD_ITEMS.map(c => [c.id, c]));
+
+      // FIX v0.3.34 Part A2.1: Purge mock cards dc-1..dc-9, unmodified INITIAL_DAILY_CARD_ITEMS,
+      // and migrated unmodified mock blocks (like b-10 and b-ritual-close)
+      let cards = (savedDailyCards?.value || []).filter(c => {
+        const initCard = initialCardMap.get(c.id);
+        if (initCard) {
+          const isModified = c.text !== initCard.text || c.start !== initCard.start || c.end !== initCard.end;
+          if (!isModified) return false;
+        }
+        if (/^dc-[1-9]$/.test(c.id)) return false;
+        if (c.id === 'dc-migrated-b-10' || c.id === 'dc-migrated-b-ritual-close' || c.id.startsWith('dc-migrated-b-')) {
+          const origId = c.id.replace('dc-migrated-', '');
+          const initB = initialBlockMap.get(origId);
+          if (initB) {
+            const isModified = c.text !== initB.title || c.start !== initB.startTime;
+            if (!isModified) return false;
+          }
+        }
+        if (c.text === 'Dọn dẹp hòm thư và hủy đăng ký các bản tin cũ' && c.start === '20:00') return false;
+        if (c.text === 'Đóng ngày làm việc & Chọn việc quan trọng ngày mai' && c.start === '21:30') return false;
+        return true;
+      });
+
       if (savedBlocks?.value) {
-        // FIX v0.3.28 A2 #6: Filter out mock blocks b-1..b-9 on upgrade
-        // PRD FIX v0.3.33 Part D3 & E3.2: Reset stray in_progress & migrate non-template blocks
+        // FIX v0.3.34 Part A2.1: Purge any block matching INITIAL_BLOCKS by ID unless user modified title or time
         const nowMins = getDeviceTimeMinutes();
-        const rawBlocks = savedBlocks.value.filter(b => !/^b-[1-9]$/.test(b.id));
+        const rawBlocks = savedBlocks.value.filter(b => {
+          const initB = initialBlockMap.get(b.id);
+          if (!initB) return true;
+          const isModified = b.title !== initB.title || b.startTime !== initB.startTime || b.endTime !== initB.endTime;
+          return isModified;
+        });
 
         const templateBlocks: TimeBlock[] = [];
         let didMigrate = false;
         const todayStr = getDeviceCalendarDate();
 
         for (const b of rawBlocks) {
-          const isTemplate = b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-ritual-close';
+          const isTemplate = b.isTemplateBlock || (b.blockKind === 'ritual' && b.id !== 'b-ritual-close');
           if (isTemplate) {
             let cleanB = b;
             if (b.status === 'in_progress') {
@@ -2432,17 +2463,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         setBlocks(templateBlocks);
-        if (didMigrate) {
-          saveDurableState('blocks', templateBlocks, Date.now());
-          saveDurableState('dailyCardItems', cards, Date.now());
-        }
+        saveDurableState('blocks', templateBlocks, Date.now());
+        saveDurableState('dailyCardItems', cards, Date.now());
       }
       setDailyCardItems(cards);
+
       if (savedInbox?.value) {
-        setInbox(mergeCollectionsByUpdatedAt(savedInbox.value, INITIAL_INBOX));
+        const initialInboxMap = new Map(INITIAL_INBOX.map(i => [i.id, i]));
+        const cleanedInbox = savedInbox.value.filter(item => {
+          const init = initialInboxMap.get(item.id);
+          if (!init) return true;
+          return item.title !== init.title || item.estimatedMinutes !== init.estimatedMinutes;
+        });
+        setInbox(cleanedInbox);
       }
+
+      // FIX v0.3.34 Part A2.1: Purge unmodified sample goals without attached user tasks
       if (savedGoals?.value) {
-        setGoals(mergeCollectionsByUpdatedAt(savedGoals.value, INITIAL_GOALS));
+        const rawGoals = savedGoals.value;
+        const cleanedGoals = rawGoals.filter(g => {
+          const initG = initialGoalMap.get(g.id);
+          if (!initG) return true; // user goal
+          const isModified = g.name !== initG.name || g.measurableResult !== initG.measurableResult || g.committedHours !== initG.committedHours;
+          const hasRealTask = cards.some(c => c.goalId === g.id) || (savedInbox?.value || []).some(i => i.linkedGoalId === g.id);
+          return isModified || hasRealTask;
+        });
+        setGoals(cleanedGoals);
+        saveDurableState('goals', cleanedGoals, Date.now());
+      } else {
+        setGoals([]);
       }
       if (savedLists?.value) {
         setLists(mergeCollectionsByUpdatedAt(savedLists.value, INITIAL_LISTS));
@@ -2746,6 +2795,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGoals(prev => [...prev, newG]);
   };
 
+  const deleteGoal = (goalId: string) => {
+    setGoals(prev => {
+      const next = prev.filter(g => g.id !== goalId);
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+    showToast(language === 'vi' ? 'Đã xóa mục tiêu.' : 'Goal deleted.');
+  };
+
+  const remainingSampleGoals = useMemo(() => {
+    const initialGoalIds = new Set(INITIAL_GOALS.map(g => g.id));
+    return goals.filter(g => initialGoalIds.has(g.id));
+  }, [goals]);
+
   // PRD FIX v0.3.28 A2 #7 & C2: Electron Mac Quick Note & Timer listener
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2880,6 +2943,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       handleCloseDay,
       addNewBlock,
       addGoalWithBackplanning,
+      deleteGoal,
+      remainingSampleGoals,
       dayClosed,
       closedDays,
       markDayClosed,
