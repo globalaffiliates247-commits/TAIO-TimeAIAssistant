@@ -182,15 +182,14 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
       </div>
     );
   } else if (state.mode === 'gap') {
-    const countdown = formatSeconds(state.remainingSeconds);
     contentNode = (
       <div className="flex items-center gap-2 overflow-hidden truncate">
         <span className="text-slate-500 font-medium shrink-0">
           {isVi ? 'Trống' : 'Free'}
         </span>
         <span className="text-slate-400">·</span>
-        <span className="font-mono font-semibold text-slate-700 shrink-0">
-          {countdown} {state.subtitle}
+        <span className="font-medium text-slate-700 truncate">
+          {state.subtitle}
         </span>
       </div>
     );

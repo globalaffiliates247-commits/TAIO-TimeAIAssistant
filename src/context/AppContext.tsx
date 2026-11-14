@@ -2075,11 +2075,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed! Goal progress updated.');
       triggerCoachCard('first_dod_done');
-      const nextBlock = scheduleBlocks.find((b: TimeBlock) => b.id !== checkInBlock.id && b.status === 'planned');
-      if (nextBlock) {
-        updateScheduleEntry(nextBlock.id, { status: 'in_progress' }, { updateDailyCardItem, setBlocks, dailyCardItems });
-        setTimerMinutesRemaining(profile.focusBlockDurationMins);
-      }
+      // PRD FIX v0.3.33 Part D1: Do NOT auto-assign 'in_progress' to next block!
+      // Next block only becomes in_progress when its scheduled time window arrives or when started early.
     } else if (answer === 'continue_later' || answer === 'stop_here') {
       updateScheduleEntry(
         checkInBlock.id,
@@ -2236,7 +2233,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (savedBlocks?.value) {
         // FIX v0.3.28 A2 #6: Filter out mock blocks b-1..b-9 on upgrade, do not merge with INITIAL_BLOCKS
-        const cleanBlocks = savedBlocks.value.filter(b => !/^b-[1-9]$/.test(b.id));
+        // PRD FIX v0.3.33 Part D3: Reset stray in_progress status for blocks outside their slot
+        const nowMins = getDeviceTimeMinutes();
+        const cleanBlocks = savedBlocks.value.filter(b => !/^b-[1-9]$/.test(b.id)).map(b => {
+          if (b.status === 'in_progress') {
+            const extra = (b.extra as Record<string, unknown> | undefined) || {};
+            const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
+            if (!manuallyStartedAt && computeBlockStatus(b, nowMins) !== 'in_progress') {
+              return { ...b, status: 'planned' as const };
+            }
+          }
+          return b;
+        });
         setBlocks(cleanBlocks);
       }
       if (savedDailyCards?.value) {

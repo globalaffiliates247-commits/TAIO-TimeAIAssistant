@@ -53,9 +53,19 @@ export function clockState(
   };
 
   // 1. Current in-progress task
+  // PRD FIX v0.3.33 Part D2: A task is considered running when current time is within its frame,
+  // or when explicitly started early (with real startedAt timestamp in extra).
   const inProgressBlock = scheduleBlocks.find(b => {
-    if (b.status === 'in_progress') return true;
     if (b.status === 'done' || b.status === 'dropped') return false;
+    const extra = (b.extra as Record<string, unknown> | undefined) || {};
+    const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
+    if (manuallyStartedAt && b.status === 'in_progress') {
+      const durationMins = b.estimatedMinutes || 30;
+      const elapsedMins = (nowMs - manuallyStartedAt) / 60000;
+      if (elapsedMins >= 0 && elapsedMins < durationMins + 120) {
+        return true;
+      }
+    }
     return computeBlockStatus(b, nowMins) === 'in_progress';
   });
 
@@ -69,12 +79,18 @@ export function clockState(
 
   // Case 1: In a task
   if (inProgressBlock) {
+    const extra = (inProgressBlock.extra as Record<string, unknown> | undefined) || {};
+    const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
+
     const startMins = timeToMinutes(inProgressBlock.startTime);
     const endMins = timeToMinutes(inProgressBlock.endTime);
     const isOvernight = endMins <= startMins;
 
-    const startedAt = helperToTimestamp(inProgressBlock.startTime);
-    const endsAt = helperToTimestamp(inProgressBlock.endTime, isOvernight);
+    const startedAt = manuallyStartedAt || helperToTimestamp(inProgressBlock.startTime);
+    const durMins = inProgressBlock.estimatedMinutes || Math.max(5, (endMins - startMins + 1440) % 1440);
+    const endsAt = manuallyStartedAt
+      ? (manuallyStartedAt + durMins * 60000)
+      : helperToTimestamp(inProgressBlock.endTime, isOvernight);
     const remainingSeconds = Math.max(0, Math.floor((endsAt - nowMs) / 1000));
 
     return {
@@ -101,10 +117,16 @@ export function clockState(
     const remainingSeconds = Math.max(0, Math.floor((endsAt - nowMs) / 1000));
     const startedAt = nowMs;
 
+    const remH = Math.floor(remainingSeconds / 3600);
+    const remM = Math.floor((remainingSeconds % 3600) / 60);
+    const timeFormatted = remH > 0
+      ? (remM > 0 ? `${remH}g${String(remM).padStart(2, '0')}` : `${remH}g`)
+      : `${remM}p`;
+
     return {
       mode: 'gap',
       title: 'Trống',
-      subtitle: `nữa tới: ${nextPlannedBlock.title}`,
+      subtitle: `${timeFormatted} nữa tới: ${nextPlannedBlock.title}`,
       startedAt,
       endsAt,
       remainingSeconds,
