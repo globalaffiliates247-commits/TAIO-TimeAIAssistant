@@ -43,18 +43,23 @@ export function getDeviceCalendarDate(d: Date = getDeviceNow()): string {
 }
 
 const VIETNAMESE_WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+const ENGLISH_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const ENGLISH_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export function getWeekdayShort(d: Date = getDeviceNow()): string {
-  return VIETNAMESE_WEEKDAYS[d.getDay()];
+export function getWeekdayShort(d: Date = getDeviceNow(), lang: 'vi' | 'en' = 'vi'): string {
+  return lang === 'en' ? ENGLISH_WEEKDAYS[d.getDay()] : VIETNAMESE_WEEKDAYS[d.getDay()];
 }
 
 /**
- * e.g. "Hôm nay · T2 9/11"
+ * e.g. "Hôm nay · T2 9/11" or "Today · Mon, Nov 9"
  */
-export function getTodayLabelWithWeekday(d: Date = getDeviceNow()): string {
-  const weekday = getWeekdayShort(d);
+export function getTodayLabelWithWeekday(d: Date = getDeviceNow(), lang: 'vi' | 'en' = 'vi'): string {
+  const weekday = getWeekdayShort(d, lang);
   const day = d.getDate();
   const month = d.getMonth() + 1;
+  if (lang === 'en') {
+    return `Today · ${weekday}, ${ENGLISH_MONTHS[month - 1]} ${day}`;
+  }
   return `Hôm nay · ${weekday} ${day}/${month}`;
 }
 

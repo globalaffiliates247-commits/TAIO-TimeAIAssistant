@@ -31,7 +31,8 @@ export interface ClockStateResult {
 export function clockState(
   scheduleBlocks: TimeBlock[] = [],
   dayTemplate: DayTemplateSlot[] = [],
-  now: Date = new Date()
+  now: Date = new Date(),
+  lang: 'vi' | 'en' = 'vi'
 ): ClockStateResult {
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -96,7 +97,7 @@ export function clockState(
     return {
       mode: 'task',
       title: inProgressBlock.title,
-      subtitle: inProgressBlock.goalName || 'Đang thực hiện',
+      subtitle: inProgressBlock.goalName || (lang === 'en' ? 'In progress' : 'Đang thực hiện'),
       startedAt,
       endsAt,
       remainingSeconds,
@@ -119,14 +120,16 @@ export function clockState(
 
     const remH = Math.floor(remainingSeconds / 3600);
     const remM = Math.floor((remainingSeconds % 3600) / 60);
-    const timeFormatted = remH > 0
-      ? (remM > 0 ? `${remH}g${String(remM).padStart(2, '0')}` : `${remH}g`)
-      : `${remM}p`;
+    const timeFormatted = lang === 'en'
+      ? (remH > 0 ? (remM > 0 ? `${remH}h${String(remM).padStart(2, '0')}` : `${remH}h`) : `${remM}m`)
+      : (remH > 0 ? (remM > 0 ? `${remH}g${String(remM).padStart(2, '0')}` : `${remH}g`) : `${remM}p`);
 
     return {
       mode: 'gap',
-      title: 'Trống',
-      subtitle: `${timeFormatted} nữa tới: ${nextPlannedBlock.title}`,
+      title: lang === 'en' ? 'Free' : 'Trống',
+      subtitle: lang === 'en'
+        ? `${timeFormatted} until: ${nextPlannedBlock.title}`
+        : `${timeFormatted} nữa tới: ${nextPlannedBlock.title}`,
       startedAt,
       endsAt,
       remainingSeconds,
@@ -162,12 +165,16 @@ export function clockState(
 
     const remH = Math.floor(remainingSeconds / 3600);
     const remM = Math.floor((remainingSeconds % 3600) / 60);
-    const timeFormatted = remH > 0 ? `${remH}g${String(remM).padStart(2, '0')}` : `${remM}p`;
+    const timeFormatted = lang === 'en'
+      ? (remH > 0 ? (remM > 0 ? `${remH}h${String(remM).padStart(2, '0')}` : `${remH}h`) : `${remM}m`)
+      : (remH > 0 ? (remM > 0 ? `${remH}g${String(remM).padStart(2, '0')}` : `${remH}g`) : `${remM}p`);
 
     return {
       mode: 'template_or_current',
       title: curTimeStr,
-      subtitle: `còn ${timeFormatted} đến ${nextTemplateSlot.title || 'mốc tiếp theo'}`,
+      subtitle: lang === 'en'
+        ? `${timeFormatted} until ${nextTemplateSlot.title || 'next milestone'}`
+        : `còn ${timeFormatted} đến ${nextTemplateSlot.title || 'mốc tiếp theo'}`,
       startedAt: nowMs,
       endsAt,
       remainingSeconds,
@@ -183,12 +190,16 @@ export function clockState(
   const remainingSeconds = Math.max(0, Math.floor((endsAt - nowMs) / 1000));
   const remH = Math.floor(remainingSeconds / 3600);
   const remM = Math.floor((remainingSeconds % 3600) / 60);
-  const timeFormatted = remH > 0 ? `${remH}g${String(remM).padStart(2, '0')}` : `${remM}p`;
+  const timeFormatted = lang === 'en'
+    ? (remH > 0 ? (remM > 0 ? `${remH}h${String(remM).padStart(2, '0')}` : `${remH}h`) : `${remM}m`)
+    : (remH > 0 ? (remM > 0 ? `${remH}g${String(remM).padStart(2, '0')}` : `${remH}g`) : `${remM}p`);
 
   return {
     mode: 'template_or_current',
     title: curTimeStr,
-    subtitle: `còn ${timeFormatted} đến giờ ngủ`,
+    subtitle: lang === 'en'
+      ? `${timeFormatted} until bedtime`
+      : `còn ${timeFormatted} đến giờ ngủ`,
     startedAt: nowMs,
     endsAt,
     remainingSeconds,

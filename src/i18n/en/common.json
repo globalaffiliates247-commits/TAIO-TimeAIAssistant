@@ -8,11 +8,16 @@
     "edit": "Edit",
     "copy": "Copy",
     "language": "Language",
-    "vietnamese": "Tiếng Việt",
+    "vietnamese": "Vietnamese",
     "english": "English",
     "loading": "Loading...",
     "success": "Success",
-    "error": "Error"
+    "error": "Error",
+    "later": "Later",
+    "continue": "Continue",
+    "add": "Add",
+    "apply": "Apply",
+    "finish": "Finish"
   },
   "nav": {
     "now": "Now",
@@ -21,10 +26,112 @@
     "goals": "Goals",
     "swipeReview": "Swipe Review"
   },
+  "terms": {
+    "todayJournal": "Today's Journal",
+    "note": "Note",
+    "quickNote": "Quick Note",
+    "taskBasket": "Task Basket",
+    "miniClock": "Mini Clock",
+    "pinnedClock": "Pinned Clock",
+    "stopwatches": "Stopwatches",
+    "timeLedger": "Time Ledger",
+    "timetable": "Timetable",
+    "templateSchedule": "Template Schedule",
+    "dailyCard": "Daily Card",
+    "sideTask": "Side Task",
+    "goalFolder": "Goal Folder",
+    "wrapUpDay": "Wrap Up Day",
+    "startTheDay": "Start the Day"
+  },
+  "dayclose": {
+    "wrapUpToday": "Wrap Up Today",
+    "wrapUpDayTitle": "Wrap Up {{day}}",
+    "alreadyClosed": "Day Wrapped Up",
+    "tomorrowTopTask": "What will you do first tomorrow morning?",
+    "morningTopTask": "What will you do first this morning?",
+    "windDownReminder": "Once day is wrapped up, the app will remind you to rest at {{time}}.",
+    "carryToTomorrow": "Tomorrow",
+    "carryToToday": "Today",
+    "leave": "Leave",
+    "drop": "Drop",
+    "summaryCount": "Scheduled {{planned}} tasks · completed {{done}} · skipped {{dropped}} · moved {{carried}}",
+    "subtitle": "2-minute wrap-up • Mindful migration • Prepare next day"
+  },
+  "daysheet": {
+    "titleToday": "Today's Journal · {{date}}",
+    "titleOther": "Journal {{date}}",
+    "openTodayJournal": "Open Today's Journal",
+    "emptyPlaceholder": "What do you want to get done today?",
+    "leftoverYesterday": "You have {{count}} tasks from yesterday waiting",
+    "leftoverOlder": "You have {{count}} tasks from previous days waiting",
+    "continueToday": "Continue Today",
+    "review": "Review",
+    "gapText": "You have {{duration}} free until {{time}}",
+    "showTemplate": "Show template blocks",
+    "hideTemplate": "Hide template blocks",
+    "templateRecurring": "Template Block"
+  },
+  "returnPoint": {
+    "title": "Pick up where you left off",
+    "step": "Next step: {{content}}",
+    "recordHint": "Save where you stopped so you can resume immediately"
+  },
+  "sync": {
+    "title": "Pick up where you left off, across all devices",
+    "subtitle": "Your active tasks, stopwatches, and quick notes stay in sync across Mac and iPhone.",
+    "errorRetry": "Could not sync yet. The app will retry automatically."
+  },
+  "basket": {
+    "title": "Task Basket",
+    "empty": "Task basket is empty. Drop anything you think of right here.",
+    "sec_notes": "NOTES",
+    "sec_classify": "CLASSIFY",
+    "sec_today": "TODAY",
+    "sticky_notes": "Quick Notes",
+    "unsorted": "Unsorted",
+    "priority_folders": "Priority Folders",
+    "timed": "Timed",
+    "flex": "Flexible",
+    "unsorted_desc": "Freshly noted tasks, without estimate, deadline or goal",
+    "swipe_cards": "Swipe {{count}} cards",
+    "quick_placeholder": "Quickly write a task, press Enter to add…",
+    "next_step": "Next step:",
+    "do_now_2min": "Do now (2 mins)",
+    "add_to_today": "Add to today",
+    "schedule": "Schedule",
+    "link_goal": "Link goal",
+    "linked_goal": "Goal: {{goal}}",
+    "delegate": "Delegate",
+    "drop": "Drop",
+    "tap_hint": "Tap a task to see next step.",
+    "today_timed_title": "Today · Timed",
+    "today_flex_title": "Today · Flexible",
+    "today_timed_desc": "Tasks scheduled with specific time slots today",
+    "today_flex_desc": "Tasks planned for today to tackle flexibly",
+    "open_today_journal": "Open Today's Journal",
+    "no_tasks": "No tasks yet.",
+    "sticky_desc": "Write like Sticky Notes. Each line is an item in the Basket.",
+    "new_sheet": "+ New Note",
+    "day_sheet": "Daily note",
+    "lines_count": "{{count}} lines",
+    "pinned": " · pinned"
+  },
+  "timebox": {
+    "endedHeader": "Time is up. Is this finished?",
+    "continueLater": "Not finished, save for later"
+  },
+  "alarm": {
+    "dismiss": "Start Task Now",
+    "snooze_after": "Snooze for {{mins}}m",
+    "stopped_after_15m": "Alarm stopped after 15 mins · rang at {{time}}",
+    "snooze_count": "Snoozed {{count}} times",
+    "change_sound": "Switch Alarm Sound",
+    "missed": "You missed the start time at {{time}}. Start now?"
+  },
   "swipe": {
     "title": "Task Swipe Review",
     "flexibleBadge": "Today's Flexible",
-    "basketBadge": "Inbox / Basket",
+    "basketBadge": "Task Basket",
     "postponeTomorrow": "Tomorrow",
     "scheduleNow": "Schedule",
     "done": "Done",
@@ -96,32 +203,37 @@
     "quickNoteHint": "Press ⌥⌘N anywhere to open this window",
     "trayTimerRunning": "Timer: {{remaining}}",
     "trayTimerIdle": "TAIO Time",
-    "noteAdded": "Added to Day Card at {{time}}"
+    "noteAdded": "Added to Today's Journal at {{time}}"
   },
   "checkin": {
     "done": "Done",
-    "continue_later": "Not done: continue later",
+    "continue_later": "Not finished, save for later",
     "more_time": "Need +15 more minutes",
     "remind_10m": "Remind me in 10 minutes",
     "done_despite": "Done despite unmet criteria",
     "dod_label": "Completion criteria",
-    "kicker": "Time block ended {{start}} - {{end}} · {{count}} tasks waiting",
+    "kicker": "Time is up. Is this finished?",
     "goal_serving": "Serving goal: {{goal}}",
     "next_step_placeholder": "E.g.: Finish analysis table section 2...",
     "next_step_label": "What is the specific next step?",
     "save_next_step": "Save next step & Stop safely",
     "done_celebration": "🎉 Completed! Goal progress updated.",
-    "select_all": "Select all"
+    "select_all": "Select all",
+    "all_criteria_met": "All criteria met ✓",
+    "check_to_complete": "Check items to complete",
+    "sitting_break": "You have been sitting for {{count}} minutes. Stand up and stretch for 5 minutes?",
+    "continue_next_step": "Note next step ↗",
+    "unmet_criteria_prefix": "Unmet criteria: ",
+    "unnamed_step": "Continue task",
+    "return_point_title": "Pick up where you left off",
+    "return_point_next": "Next step: {{step}}"
   },
   "now": {
-    "dod_input_label": "Completion criteria (optional)",
+    "dod_input_label": "Completion criteria",
     "dod_input_placeholder": "One criterion per line, press Enter to add"
   },
-  "alarm": {
-    "dismiss": "Start Task Now",
-    "snooze_after": "Snooze for {{mins}}m",
-    "stopped_after_15m": "Alarm stopped after 15 mins · rang at {{time}}",
-    "snooze_count": "Snoozed {{count}} times",
-    "change_sound": "Switch Alarm Sound"
+  "motivation": {
+    "startDayTitle": "Start the Day",
+    "startDayBtn": "Start"
   }
 }

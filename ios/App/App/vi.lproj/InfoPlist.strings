@@ -1,0 +1,5 @@
+/* InfoPlist.strings (Vietnamese) */
+"NSAlarmKitUsageDescription" = "TAIO Time cần quyền báo thức để đổ chuông khi một khối việc bắt đầu, kể cả khi máy đang để im lặng.";
+"NSLocationWhenInUseUsageDescription" = "TAIO Time sử dụng vị trí trên thiết bị để nhắc việc theo địa điểm khi bạn đến hoặc rời nơi đã lưu.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "TAIO Time sử dụng vùng địa lý trên thiết bị để tự động nhắc việc khi bạn đến hoặc rời địa điểm đã cài đặt.";
+"NSMotionUsageDescription" = "TAIO Time dùng dữ liệu chuyển động để đếm bước chân và gợi ý ghi lại thời gian di chuyển mà bạn quên ghi.";

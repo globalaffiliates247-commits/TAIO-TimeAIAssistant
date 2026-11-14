@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { GoalPicker } from '@/features/goals';
+import { useT } from '@/i18n/useT';
 
 const chip = 'h-8 px-3 rounded-full bg-white border border-[#DCD6C6] text-[#4A463A] text-[12.5px] font-medium flex items-center gap-1 hover:bg-[#F7F5EF]';
 
@@ -16,6 +17,7 @@ const Chevron = () => (
 
 export const UnsortedSection: React.FC = () => {
   const { inbox, addInboxItem, updateInboxItem, processInboxItem, addDailyCardItem, setIsSwipeModalOpen } = useApp();
+  const { t } = useT();
   const pending = inbox.filter(i => i.status === 'inbox');
   const [selected, setSelected] = useState<string | null>(null);
   const [pickerItemId, setPickerItemId] = useState<string | null>(null);
@@ -25,12 +27,12 @@ export const UnsortedSection: React.FC = () => {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-extrabold text-[#2B2A26]">Chưa phân loại</h3>
-          <p className="text-[13px] text-[#6B6658]">Việc vừa ghi, chưa có ước lượng, hạn chót hoặc mục tiêu</p>
+          <h3 className="text-xl font-extrabold text-[#2B2A26]">{t('basket.unsorted', 'Chưa phân loại')}</h3>
+          <p className="text-[13px] text-[#6B6658]">{t('basket.unsorted_desc', 'Việc vừa ghi, chưa có ước lượng, hạn chót hoặc mục tiêu')}</p>
         </div>
         {pending.length > 0 && (
           <button onClick={() => setIsSwipeModalOpen(true)} className="h-10 px-4 rounded-xl bg-[#2B2A26] text-white text-sm font-semibold shrink-0">
-            Quẹt thẻ {pending.length} việc
+            {t('basket.swipe_cards', { count: pending.length, defaultValue: `Quẹt thẻ ${pending.length} việc` })}
           </button>
         )}
       </div>
@@ -39,12 +41,12 @@ export const UnsortedSection: React.FC = () => {
         value={draft}
         onChange={e => setDraft(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { addInboxItem({ title: draft.trim(), source: 'quick' }); setDraft(''); } }}
-        placeholder="Ghi một việc vừa nghĩ ra, Enter để thêm…"
+        placeholder={t('basket.quick_placeholder', 'Ghi một việc vừa nghĩ ra, Enter để thêm…')}
         className="h-11 rounded-xl bg-white border border-[#E8E3D6] px-3.5 text-[15px] text-[#2B2A26] placeholder:text-[#A39E8E] outline-none focus:border-[#B9B29E]"
       />
 
       {pending.length === 0 ? (
-        <p className="text-sm text-[#8E897A] py-6 text-center">Rổ trống. Ý nghĩ mới cứ ghi vào tờ ghi nhanh hoặc ô bên trên.</p>
+        <p className="text-sm text-[#8E897A] py-6 text-center">{t('basket.empty', 'Rổ đang trống. Nghĩ ra việc gì cứ thả vào đây.')}</p>
       ) : (
         <div className="bg-white rounded-2xl border border-[#E8E3D6] overflow-hidden">
           {pending.map((it, idx) => {
@@ -59,17 +61,17 @@ export const UnsortedSection: React.FC = () => {
                 </button>
                 {isSel && (
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs text-[#8E897A] mr-1">Bước tiếp theo:</span>
-                    {(it.estimatedMinutes ?? 99) <= 2 && <button className={chip} onClick={() => processInboxItem(it.id, 'done_2min')}>Làm luôn (2 phút)</button>}
-                    <button className={chip} onClick={() => { addDailyCardItem({ text: it.title, date: getDeviceCalendarDate(), goalId: it.linkedGoalId, goalName: it.linkedGoalName }); processInboxItem(it.id, 'schedule', { quadrant: 2 }); }}>Đưa vào hôm nay</button>
-                    <button className={chip} onClick={() => processInboxItem(it.id, 'schedule', { quadrant: 2 })}>Lên lịch</button>
+                    <span className="text-xs text-[#8E897A] mr-1">{t('basket.next_step', 'Bước tiếp theo:')}</span>
+                    {(it.estimatedMinutes ?? 99) <= 2 && <button className={chip} onClick={() => processInboxItem(it.id, 'done_2min')}>{t('basket.do_now_2min', 'Làm luôn (2 phút)')}</button>}
+                    <button className={chip} onClick={() => { addDailyCardItem({ text: it.title, date: getDeviceCalendarDate(), goalId: it.linkedGoalId, goalName: it.linkedGoalName }); processInboxItem(it.id, 'schedule', { quadrant: 2 }); }}>{t('basket.add_to_today', 'Đưa vào hôm nay')}</button>
+                    <button className={chip} onClick={() => processInboxItem(it.id, 'schedule', { quadrant: 2 })}>{t('basket.schedule', 'Lên lịch')}</button>
                     <div className="relative inline-block">
                       <button
                         type="button"
                         className={chip}
                         onClick={() => setPickerItemId(pickerItemId === it.id ? null : it.id)}
                       >
-                        {it.linkedGoalName ? `Mục tiêu: ${it.linkedGoalName}` : 'Gắn mục tiêu'}
+                        {it.linkedGoalName ? t('basket.linked_goal', { goal: it.linkedGoalName, defaultValue: `Mục tiêu: ${it.linkedGoalName}` }) : t('basket.link_goal', 'Gắn mục tiêu')}
                       </button>
                       {pickerItemId === it.id && (
                         <GoalPicker
@@ -83,8 +85,8 @@ export const UnsortedSection: React.FC = () => {
                         />
                       )}
                     </div>
-                    <button className={chip} onClick={() => processInboxItem(it.id, 'delegate')}>Giao người khác</button>
-                    <button className={chip} onClick={() => processInboxItem(it.id, 'drop')}>Bỏ</button>
+                    <button className={chip} onClick={() => processInboxItem(it.id, 'delegate')}>{t('basket.delegate', 'Giao người khác')}</button>
+                    <button className={chip} onClick={() => processInboxItem(it.id, 'drop')}>{t('basket.drop', 'Bỏ')}</button>
                   </div>
                 )}
               </div>
@@ -92,7 +94,7 @@ export const UnsortedSection: React.FC = () => {
           })}
         </div>
       )}
-      <p className="text-[12.5px] text-[#6B6658] flex items-center gap-2"><Chevron /> Chạm một việc để xem bước tiếp theo.</p>
+      <p className="text-[12.5px] text-[#6B6658] flex items-center gap-2"><Chevron /> {t('basket.tap_hint', 'Chạm một việc để xem bước tiếp theo.')}</p>
     </div>
   );
 };

@@ -41,14 +41,14 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
       <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-orange-500/30 sm:border">
         {/* Kicker */}
         <div className="flex items-center justify-between pb-2 border-b border-slate-100/80 mb-3">
-          <span className="text-xs text-slate-500">
-            {t('checkin.kicker', {
-              start: checkInBlock.startTime,
-              end: checkInBlock.endTime,
-              count: waitingCount,
-              defaultValue: `Khung giờ đã kết thúc ${checkInBlock.startTime} - ${checkInBlock.endTime} · Còn ${waitingCount} việc chờ`,
-            })}
-          </span>
+          <div>
+            <div className="text-xs sm:text-sm font-bold text-slate-800">
+              {t('checkin.kicker', 'Hết giờ rồi. Việc này xong chưa?')}
+            </div>
+            <div className="text-[11px] text-slate-400">
+              {checkInBlock.startTime} - {checkInBlock.endTime} · {waitingCount}
+            </div>
+          </div>
           <button 
             onClick={onClose}
             className="text-slate-500 hover:text-slate-900"
@@ -82,7 +82,7 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
           <div className="mb-3.5 p-3 rounded-2xl bg-amber-50/90 border border-amber-200/80 text-amber-900 text-xs flex items-center gap-2.5">
             <Footprints className="w-4 h-4 text-amber-600 shrink-0" />
             <span className="font-medium">
-              Bạn đã ngồi {checkInBlock.estimatedMinutes || 90} phút. Đứng dậy đi lại 5 phút?
+              {t('checkin.sitting_break', { count: checkInBlock.estimatedMinutes || 90, defaultValue: 'Bạn đã ngồi 90 phút. Đứng dậy đi lại 5 phút?' })}
             </span>
           </div>
         )}
@@ -107,8 +107,8 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
               onClick={() => setShowNextStepForm(true)}
               className="w-full py-3 px-4 rounded-2xl bg-slate-100/80 hover:bg-slate-200 text-slate-800 border border-slate-200/60 text-xs font-semibold flex items-center justify-between transition-all"
             >
-              <span>{t('checkin.continue_later', 'Chưa xong: làm tiếp sau')}</span>
-              <span className="text-[11px] text-orange-500">Ghi bước kế tiếp ↗</span>
+              <span>{t('checkin.continue_later', 'Chưa xong, để dành làm tiếp')}</span>
+              <span className="text-[11px] text-orange-500">{t('checkin.continue_next_step', 'Ghi bước kế tiếp ↗')}</span>
             </button>
 
             {/* Tertiary: +15 minutes & Remind in 10 minutes */}
@@ -144,7 +144,7 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
                 onChange={e => setNextStepInput(e.target.value)}
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
-                    onAnswer('continue_later', 0, nextStepInput || 'Làm tiếp việc dang dở');
+                    onAnswer('continue_later', 0, nextStepInput || t('checkin.unnamed_step', 'Làm tiếp việc dang dở'));
                   }
                 }}
                 placeholder={t('checkin.next_step_placeholder', 'VD: Cần chỉnh xong bảng phân tích số liệu mục 2...')}
@@ -160,7 +160,7 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
                 {t('common.cancel', 'Hủy')}
               </button>
               <button
-                onClick={() => onAnswer('continue_later', 0, nextStepInput || 'Làm tiếp việc dang dở')}
+                onClick={() => onAnswer('continue_later', 0, nextStepInput || t('checkin.unnamed_step', 'Làm tiếp việc dang dở'))}
                 className="flex-1 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md"
               >
                 {t('checkin.save_next_step', 'Lưu bước kế tiếp & Dừng an toàn')}

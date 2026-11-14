@@ -1,0 +1,5 @@
+/* InfoPlist.strings (English) */
+"NSAlarmKitUsageDescription" = "TAIO Time requires alarm permissions to ring when a task block starts, even when the device is silenced.";
+"NSLocationWhenInUseUsageDescription" = "TAIO Time uses device location for location-based task reminders when arriving or departing saved places.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "TAIO Time uses geofencing on-device to automatically remind tasks when you enter or leave designated locations.";
+"NSMotionUsageDescription" = "TAIO Time uses motion data to count steps and suggest logging transit time you may have missed.";

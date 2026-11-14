@@ -10,7 +10,12 @@ export const toTime = (mins: number) => {
   const m = ((Math.round(mins) % 1440) + 1440) % 1440;
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 };
-export const fmtDuration = (mins: number) => {
+export const fmtDuration = (mins: number, lang: 'vi' | 'en' = 'vi') => {
+  if (lang === 'en') {
+    if (mins < 60) return `${mins}m`;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+  }
   if (mins < 60) return `${mins}p`;
   const h = Math.floor(mins / 60), m = mins % 60;
   return m ? `${h}g${String(m).padStart(2, '0')}` : `${h} giờ`;

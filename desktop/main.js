@@ -474,34 +474,47 @@ function createTray() {
   updateTrayMenu();
 }
 
+let currentLang = 'vi';
+
 function updateTrayMenu() {
   if (!tray) return;
   tray.setTitle(timerLabel === 'TAIO Time' ? '' : timerLabel);
   tray.setToolTip(timerLabel);
+  const isEn = currentLang === 'en';
   const contextMenu = Menu.buildFromTemplate([
     { label: timerLabel, enabled: false },
     { type: 'separator' },
-    { label: 'Ghi nhanh (⌥⌘N)', click: createQuickNoteWindow },
-    { label: 'Đồng hồ rời (⌥⌘T)', click: createClockWindow },
-    { label: 'Mở TAIO Time', click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
+    { label: isEn ? 'Quick Note (⌥⌘N)' : 'Ghi nhanh (⌥⌘N)', click: createQuickNoteWindow },
+    { label: isEn ? 'Floating Clock (⌥⌘T)' : 'Đồng hồ rời (⌥⌘T)', click: createClockWindow },
+    { label: isEn ? 'Open TAIO Time' : 'Mở TAIO Time', click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
     { type: 'separator' },
-    { label: 'Thoát', click: () => app.quit() },
+    { label: isEn ? 'Quit' : 'Thoát', click: () => app.quit() },
   ]);
   tray.setContextMenu(contextMenu);
 }
 
-// IPC: receive timer updates from renderer (string or { title, endsAt, startedAt })
+// IPC: receive timer updates from renderer (string or { title, endsAt, startedAt, lang })
 ipcMain.on('taio-timer-update', (_event, payload) => {
   if (typeof payload === 'string') {
     timerLabel = payload || 'TAIO Time';
   } else if (payload && typeof payload === 'object') {
     currentTimerData = { ...currentTimerData, ...payload };
+    if (payload.lang) {
+      currentLang = payload.lang;
+    }
     if (payload.title) {
       timerLabel = `${payload.title} · ${payload.remaining || ''}`.trim();
     }
     syncClockWindowData();
   }
   updateTrayMenu();
+});
+
+ipcMain.on('taio-lang-update', (_event, lang) => {
+  if (lang) {
+    currentLang = lang;
+    updateTrayMenu();
+  }
 });
 
 // IPC: open clock window

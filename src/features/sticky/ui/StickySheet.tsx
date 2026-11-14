@@ -9,12 +9,21 @@ import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
 import { getDeviceCalendarDate } from '@/core/clock';
+import { useApp } from '@/context/AppContext';
 
-const dayTitle = (date: string) => {
+const dayTitle = (date: string, lang: 'vi' | 'en' = 'vi') => {
   const [y, m, d] = date.split('-').map(Number);
   const dateObj = new Date(y, (m || 1) - 1, d || 1);
-  const wd = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'][dateObj.getDay()];
   const today = getDeviceCalendarDate();
+  if (lang === 'en') {
+    const wdEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dateObj.getDay()];
+    const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    if (date === today) {
+      return `Today's Journal · ${wdEn}, ${monthsEn[(m || 1) - 1]} ${d}`;
+    }
+    return `Journal · ${wdEn}, ${monthsEn[(m || 1) - 1]} ${d}`;
+  }
+  const wd = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'][dateObj.getDay()];
   if (date === today) {
     return `Nhật ký hôm nay · ${wd} ${d}/${m}`;
   }
@@ -22,6 +31,7 @@ const dayTitle = (date: string) => {
 };
 
 export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: number }> = ({ note, floating, z }) => {
+  const { language } = useApp();
   const c = STICKY_COLORS[note.color];
   const [palette, setPalette] = useState(false);
   const defaultW = note.kind === 'day' ? 460 : 300;
@@ -170,9 +180,9 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
         <span
           className="flex-1 text-center text-xs font-bold truncate px-1 cursor-default"
           style={{ color: c.muted }}
-          title={note.kind === 'day' ? dayTitle(note.date!) : note.title}
+          title={note.kind === 'day' ? dayTitle(note.date!, language) : note.title}
         >
-          {note.kind === 'day' ? dayTitle(note.date!) : note.title}
+          {note.kind === 'day' ? dayTitle(note.date!, language) : note.title}
         </span>
         <button className={btn} aria-label="Tờ mới" onClick={() => newFreeSticky('pink')}>
           <IconPlus color={c.muted} size={17} />

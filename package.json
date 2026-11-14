@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "build:version": "node scripts/inject-build-version.js",
+    "check:i18n": "node scripts/check-i18n.js",
     "build:css": "node scripts/build-css.js",
-    "dev": "npm run build:version && npm run build:css && next dev --webpack -p 3000",
-    "build": "npm run build:version && npm run build:css && next build --webpack",
+    "dev": "npm run build:version && npm run check:i18n && npm run build:css && next dev --webpack -p 3000",
+    "build": "npm run build:version && npm run check:i18n && npm run build:css && next build --webpack",
     "start": "node scripts/serve-static.js",
     "deploy:render": "node scripts/trigger-deploy.js",
     "sync:ios": "npm run build && npx cap sync ios",

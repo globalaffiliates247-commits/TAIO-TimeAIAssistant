@@ -52,7 +52,7 @@ export const LiveClockStrip: React.FC<{ compact?: boolean }> = ({ compact = fals
   }, []);
 
   const nowDate = new Date(nowSec);
-  const state = clockState(scheduleBlocks, dayTemplate, nowDate);
+  const state = clockState(scheduleBlocks, dayTemplate, nowDate, language);
 
   // Format remaining time string
   const formatSeconds = (sec: number) => {

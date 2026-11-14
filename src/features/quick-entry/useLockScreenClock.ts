@@ -19,7 +19,7 @@ import {
 } from '@/features/motivation';
 import type { TimeBlock } from '@/types';
 
-function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Date()): WidgetScheduleItemData[] {
+function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Date(), lang: 'vi' | 'en' = 'vi'): WidgetScheduleItemData[] {
   const year = now.getFullYear();
   const month = now.getMonth();
   const date = now.getDate();
@@ -46,8 +46,8 @@ function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Dat
       const prevEnd = parseToSeconds(validBlocks[i - 1].endTime);
       if (bStart > prevEnd) {
         items.push({
-          title: 'Trống',
-          subtitle: `Tới "${b.title}"`,
+          title: lang === 'en' ? 'Free' : 'Trống',
+          subtitle: lang === 'en' ? `Until "${b.title}"` : `Tới "${b.title}"`,
           startTimestamp: prevEnd,
           targetTimestamp: bStart,
           mode: 'gap',
@@ -58,7 +58,7 @@ function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Dat
 
     items.push({
       title: b.title,
-      subtitle: b.goalName || 'Mục tiêu chính',
+      subtitle: b.goalName || (lang === 'en' ? 'Main goal' : 'Mục tiêu chính'),
       startTimestamp: bStart,
       targetTimestamp: bEnd,
       mode: 'task',
@@ -69,14 +69,14 @@ function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Dat
   if (items.length === 0) {
     const nowSec = Math.floor(now.getTime() / 1000);
     // PRD FEATURE v0.3.31 B8: Motivation quote on widget when idle
-    let idleSubtitle = 'Thời gian trong ngày';
+    let idleSubtitle = lang === 'en' ? 'Time of day' : 'Thời gian trong ngày';
     try {
       const motSettings = loadMotivationSettings();
       if (motSettings.enabled && motSettings.slots.widget) {
         const userState = loadUserMotivationState();
         const serverQuotes = loadServerQuotesCache();
         const allQuotes = getAllQuotes(serverQuotes, userState.customQuotes);
-        const q = pickQuote({ quotes: allQuotes, context: 'break', lang: 'vi', favorites: userState.favorites });
+        const q = pickQuote({ quotes: allQuotes, context: 'break', lang: lang as 'vi' | 'en', favorites: userState.favorites });
         if (q) idleSubtitle = q.text;
       }
     } catch {}
@@ -95,7 +95,7 @@ function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Dat
 }
 
 export function useLockScreenClock() {
-  const { scheduleBlocks, dayTemplate, goals, isNativePlatform, freeTimers } = useApp();
+  const { scheduleBlocks, dayTemplate, goals, isNativePlatform, freeTimers, language } = useApp();
   const lastRunningBlockIdRef = useRef<string | null>(null);
   const lastPayloadRef = useRef<string>('');
 
@@ -121,7 +121,7 @@ export function useLockScreenClock() {
 
       // Universal 3-state clock calculation (spec E1.1 & E1.4)
       const now = new Date();
-      const state = clockState(scheduleBlocks, dayTemplate, now);
+      const state = clockState(scheduleBlocks, dayTemplate, now, language);
 
       const blockId = state.block?.id || `anchor-${state.mode}`;
       const taskTitle = state.title;
@@ -173,7 +173,7 @@ export function useLockScreenClock() {
 
       // PRD FIX v0.3.30 Part E1 (Widget): Sync schedule timeline for Home & Lock Screen Widgets
       try {
-        const widgetItems = buildWidgetSchedule(scheduleBlocks, dayTemplate, now);
+        const widgetItems = buildWidgetSchedule(scheduleBlocks, dayTemplate, now, language);
         syncNativeWidgetSchedule(widgetItems);
       } catch (err) {
         console.warn('[useLockScreenClock] Failed to sync widget schedule', err);

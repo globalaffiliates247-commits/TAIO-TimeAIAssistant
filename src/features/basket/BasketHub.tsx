@@ -8,25 +8,27 @@ import { useStickyState } from '../sticky';
 import { UnsortedSection } from './UnsortedSection';
 import { TodaySection } from './TodaySection';
 import { StickySection } from './StickySection';
+import { useT } from '@/i18n/useT';
 
 type Section = 'sticky' | 'unsorted' | 'folders' | 'timed' | 'flex';
 
 export const BasketHub: React.FC = () => {
   const { inboxModalOpen, setInboxModalOpen, inbox } = useApp();
   const { notes } = useStickyState();
+  const { t } = useT();
   const [section, setSection] = useState<Section>('unsorted');
   if (!inboxModalOpen) return null;
   const pending = inbox.filter(i => i.status === 'inbox').length;
 
   const groups: { label: string; items: { id: Section; label: string; count?: number; swatch: string }[] }[] = [
-    { label: 'GHI', items: [{ id: 'sticky', label: 'Tờ ghi nhanh', count: notes.length, swatch: '#FCEB8E' }] },
-    { label: 'PHÂN LOẠI', items: [
-      { id: 'unsorted', label: 'Chưa phân loại', count: pending, swatch: '#D8D3C4' },
-      { id: 'folders', label: 'Ngăn ưu tiên', swatch: '#CDEFD6' },
+    { label: t('basket.sec_notes', 'GHI'), items: [{ id: 'sticky', label: t('basket.sticky_notes', 'Tờ ghi nhanh'), count: notes.length, swatch: '#FCEB8E' }] },
+    { label: t('basket.sec_classify', 'PHÂN LOẠI'), items: [
+      { id: 'unsorted', label: t('basket.unsorted', 'Chưa phân loại'), count: pending, swatch: '#D8D3C4' },
+      { id: 'folders', label: t('basket.priority_folders', 'Ngăn ưu tiên'), swatch: '#CDEFD6' },
     ] },
-    { label: 'HÔM NAY', items: [
-      { id: 'timed', label: 'Có giờ', swatch: '#FDE5D2' },
-      { id: 'flex', label: 'Linh động', swatch: '#E2D9F8' },
+    { label: t('basket.sec_today', 'HÔM NAY'), items: [
+      { id: 'timed', label: t('basket.timed', 'Có giờ'), swatch: '#FDE5D2' },
+      { id: 'flex', label: t('basket.flex', 'Linh động'), swatch: '#E2D9F8' },
     ] },
   ];
   const close = () => setInboxModalOpen(false);
@@ -40,8 +42,8 @@ export const BasketHub: React.FC = () => {
             <span className="w-9 h-9 rounded-xl bg-[#FCEB8E] flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B5E2A" strokeWidth="2" strokeLinejoin="round"><path d="M3 13l3-8h12l3 8v6H3z" /><path d="M3 13h5l1 2h6l1-2h5" /></svg>
             </span>
-            <span className="flex-1 text-lg font-extrabold">Rổ công việc</span>
-            <button aria-label="Đóng" onClick={close} className="w-9 h-9 rounded-xl hover:bg-white flex items-center justify-center">
+            <span className="flex-1 text-lg font-extrabold">{t('basket.title', 'Rổ công việc')}</span>
+            <button aria-label={t('common.close', 'Đóng')} onClick={close} className="w-9 h-9 rounded-xl hover:bg-white flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6658" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
           </div>
@@ -61,7 +63,7 @@ export const BasketHub: React.FC = () => {
             ))}
           </div>
           <p className="hidden md:block mt-auto text-[11.5px] leading-relaxed text-[#6B6658] bg-white rounded-xl p-3 shadow-[0_0_0_1px_#E8E3D6]">
-            Tab Kế hoạch giờ chỉ còn Thẻ ngày và Dòng thời gian. Mọi danh sách việc nằm ở đây.
+            {t('basket.empty', 'Rổ đang trống. Nghĩ ra việc gì cứ thả vào đây.')}
           </p>
         </aside>
 
