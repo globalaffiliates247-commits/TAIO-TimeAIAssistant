@@ -30,9 +30,15 @@ create table if not exists public.taio_quotes (
   source text not null default 'taio',
   verified boolean not null default false,
   media jsonb,
+  heart_count integer not null default 0,
+  hide_count integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Thêm cột nếu bảng đã tồn tại từ trước (v0.3.35 Part B4)
+alter table public.taio_quotes add column if not exists heart_count integer not null default 0;
+alter table public.taio_quotes add column if not exists hide_count integer not null default 0;
 
 -- Bật RLS
 alter table public.taio_quotes enable row level security;
@@ -53,3 +59,37 @@ create policy "Admins can manage quotes"
 
 -- Index tối ưu truy vấn theo ngôn ngữ và trạng thái
 create index if not exists idx_taio_quotes_lang_active on public.taio_quotes (lang, active);
+create index if not exists idx_taio_quotes_hearts on public.taio_quotes (heart_count desc);
+create index if not exists idx_taio_quotes_hides on public.taio_quotes (hide_count desc);
+
+-- 3. Hàm nhận tương tác ẩn danh: thả tim / bỏ tim / ẩn câu (PRD v0.3.35 Part B4)
+create or replace function public.taio_quote_react(
+  quote_id text,
+  reaction text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if reaction = 'heart' then
+    update public.taio_quotes
+    set heart_count = coalesce(heart_count, 0) + 1,
+        updated_at = now()
+    where id = quote_id;
+  elsif reaction = 'unheart' then
+    update public.taio_quotes
+    set heart_count = greatest(0, coalesce(heart_count, 0) - 1),
+        updated_at = now()
+    where id = quote_id;
+  elsif reaction = 'hide' then
+    update public.taio_quotes
+    set hide_count = coalesce(hide_count, 0) + 1,
+        updated_at = now()
+    where id = quote_id;
+  end if;
+end;
+$$;
+
+grant execute on function public.taio_quote_react(text, text) to anon, authenticated;
