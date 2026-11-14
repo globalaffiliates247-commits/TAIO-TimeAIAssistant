@@ -16,6 +16,9 @@ cp desktop/main.js "$STAGE/app/"
 if [ -f desktop/preload.js ]; then
   cp desktop/preload.js "$STAGE/app/"
 fi
+if [ -d desktop/clock ]; then
+  cp -R desktop/clock "$STAGE/app/"
+fi
 node -e "const p=require('./desktop/package.json');p.version='$VERSION';require('fs').writeFileSync('$STAGE/app/package.json',JSON.stringify(p,null,2))"
 cp -R out "$STAGE/app/web"
 
