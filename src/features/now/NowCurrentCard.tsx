@@ -31,7 +31,8 @@ import {
   Hourglass,
   Coffee,
   BarChart2,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from 'lucide-react';
 import type { TimeBlock, TaskEndType, DodItem, UserRole } from '@/types';
 
@@ -320,6 +321,142 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
     showToast?.(language === 'vi' ? `✓ Đã ghi nhận đoạn nghỉ ngơi ${unassignedMins}p.` : `✓ Logged ${unassignedMins}m rest break.`);
   };
 
+  // PRD v0.3.36 Part A3: Long-running open task detection & gentle check-in prompt
+  const [dismissedOverdueIds, setDismissedOverdueIds] = useState<Record<string, boolean>>({});
+  const [pickingDoneTimeTaskId, setPickingDoneTimeTaskId] = useState<string | null>(null);
+  const [customDoneTimeInput, setCustomDoneTimeInput] = useState<string>('');
+
+  const overdueOpenTask = React.useMemo(() => {
+    return dailyCardItems.find(item => {
+      if (item.date !== todayStr || item.status !== 'open' || dismissedOverdueIds[item.id]) return false;
+      const extra = (item.extra as Record<string, unknown> | undefined) || {};
+      let sM: number | null = null;
+      if (typeof extra.startedAt === 'number') {
+        const d = new Date(extra.startedAt);
+        sM = d.getHours() * 60 + d.getMinutes();
+      } else if (item.start) {
+        sM = timeToMinutes(item.start);
+      }
+      if (sM === null || sM >= nowMins) return false;
+      const estM = typeof extra.estimateMins === 'number'
+        ? extra.estimateMins
+        : (item.start && item.end ? Math.max(5, (timeToMinutes(item.end) - timeToMinutes(item.start) + 1440) % 1440) : 15);
+      return (sM + estM < nowMins);
+    });
+  }, [dailyCardItems, todayStr, nowMins, dismissedOverdueIds]);
+
+  const handleMarkOverdueDone = (taskId: string, chosenEnd: string) => {
+    updateScheduleEntry(
+      taskId,
+      { status: 'done', endTime: chosenEnd },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+    setPickingDoneTimeTaskId(null);
+    showToast?.(language === 'vi' ? `✓ Đã xong lúc ${chosenEnd}` : `✓ Done at ${chosenEnd}`);
+  };
+
+  const handleKeepDoingOverdue = (task: any) => {
+    setDismissedOverdueIds(prev => ({ ...prev, [task.id]: true }));
+    updateScheduleEntry(
+      task.id,
+      { status: 'in_progress', extra: { ...(task.extra || {}), startedAt: Date.now() } },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+    showToast?.(language === 'vi' ? `Đang tiếp tục "${task.text}"` : `Continuing "${task.text}"`);
+  };
+
+  const renderOverduePrompt = () => {
+    if (!overdueOpenTask) return null;
+    const extra = (overdueOpenTask.extra as Record<string, unknown> | undefined) || {};
+    let sM = overdueOpenTask.start ? timeToMinutes(overdueOpenTask.start) : (8 * 60);
+    if (typeof extra.startedAt === 'number') {
+      const d = new Date(extra.startedAt);
+      sM = d.getHours() * 60 + d.getMinutes();
+    }
+    const estM = typeof extra.estimateMins === 'number' ? extra.estimateMins : 15;
+    const suggestedEnd = minutesToTime((sM + estM) % 1440);
+    const nowTimeStr = minutesToTime(nowMins);
+
+    return (
+      <div className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200/90 text-amber-950 text-xs space-y-2 animate-in fade-in duration-200">
+        <div className="flex items-center gap-2 font-medium">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>
+            {language === 'vi'
+              ? `"${overdueOpenTask.text}" đã chạy quá lâu, đã xong chưa?`
+              : `"${overdueOpenTask.text}" has run past its estimate. Is it finished?`}
+          </span>
+        </div>
+
+        {pickingDoneTimeTaskId === overdueOpenTask.id ? (
+          <div className="pt-1.5 border-t border-amber-200/70 space-y-2">
+            <span className="text-[11px] font-semibold text-amber-800 block">
+              {language === 'vi' ? 'Chọn giờ xong thực tế:' : 'Select actual completion time:'}
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => handleMarkOverdueDone(overdueOpenTask.id, suggestedEnd)}
+                className="py-1 px-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs cursor-pointer shadow-2xs"
+              >
+                {suggestedEnd} ({language === 'vi' ? 'theo ước tính' : 'as estimated'})
+              </button>
+              <button
+                type="button"
+                onClick={() => handleMarkOverdueDone(overdueOpenTask.id, nowTimeStr)}
+                className="py-1 px-2.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-semibold text-xs cursor-pointer"
+              >
+                {nowTimeStr} ({language === 'vi' ? 'vừa xong' : 'just now'})
+              </button>
+              <div className="flex items-center gap-1">
+                <input
+                  type="time"
+                  value={customDoneTimeInput || suggestedEnd}
+                  onChange={e => setCustomDoneTimeInput(e.target.value)}
+                  className="py-0.5 px-2 rounded-lg border border-amber-300 bg-white text-xs font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleMarkOverdueDone(overdueOpenTask.id, customDoneTimeInput || suggestedEnd)}
+                  className="py-1 px-2 rounded-lg bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs cursor-pointer"
+                >
+                  {language === 'vi' ? 'Lưu' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPickingDoneTimeTaskId(null)}
+                  className="text-amber-700 hover:text-amber-900 text-xs underline px-1 cursor-pointer"
+                >
+                  {language === 'vi' ? 'Hủy' : 'Cancel'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 pt-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setPickingDoneTimeTaskId(overdueOpenTask.id);
+                setCustomDoneTimeInput(suggestedEnd);
+              }}
+              className="py-1.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+            >
+              {language === 'vi' ? 'Đã xong lúc…' : 'Done at…'}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleKeepDoingOverdue(overdueOpenTask)}
+              className="py-1.5 px-3 rounded-xl bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 font-semibold text-xs transition-colors cursor-pointer"
+            >
+              {language === 'vi' ? 'Vẫn đang làm' : 'Still working'}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // 1 & 2. GAP / IDLE / TEMPLATE STATE (v0.3.34 Part E7: Unassigned Time Clock)
   if (state.mode === 'gap' || state.mode === 'template_or_current') {
     return (
@@ -365,6 +502,9 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             </button>
           </div>
         </div>
+
+        {/* PRD v0.3.36 Part A3: Overdue check-in prompt */}
+        {renderOverduePrompt()}
 
         {/* Ring Clock for Gap state */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-5 py-1">
@@ -640,6 +780,9 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
           <Pin className={`w-4 h-4 ${isPinned ? 'fill-amber-700' : ''}`} />
         </button>
       </div>
+
+      {/* PRD v0.3.36 Part A3: Overdue check-in prompt */}
+      {renderOverduePrompt()}
 
       {/* PRD v0.3.35 Part D: SubTask Progress Bar & Expandable List */}
       {(() => {
