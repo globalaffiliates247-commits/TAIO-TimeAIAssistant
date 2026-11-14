@@ -9,6 +9,7 @@ import { MotivationSticker } from '@/features/motivation';
 import { quoteRegistry } from '@/features/motivation/model/quoteRegistry';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
+import { computeUnassignedTime } from './unassignedTime';
 import { findGoalSuggestion, getGoalTargetHours } from '@/features/goals';
 import { useHighlight } from '@/features/prefs';
 import { useT } from '@/i18n/useT';
@@ -261,14 +262,21 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
   const goalPercent = Math.min(100, (goalSpentMinutes / (targetHours * 60)) * 100);
   const goalExceededHours = Math.max(0, Math.floor((goalSpentMinutes - targetHours * 60) / 60));
 
-  // v0.3.34 Part E7: Unassigned time calculation for Gap / Idle state
-  const todayDoneItems = dailyCardItems
-    .filter(i => i.date === todayStr && i.status === 'done' && i.end)
-    .sort((a, b) => (b.end || '').localeCompare(a.end || ''));
-  const lastEndMins = todayDoneItems[0] ? timeToMinutes(todayDoneItems[0].end!) : (8 * 60);
-  const unassignedMins = Math.max(0, nowMins - lastEndMins);
+  // PRD v0.3.36 Part A1 & A2: True unassigned / undeclared time calculation via merged intervals
+  const unassignedInfo = React.useMemo(() => {
+    return computeUnassignedTime({
+      dailyCardItems,
+      scheduleBlocks,
+      dayTemplate,
+      todayStr,
+      nowMins,
+      activeTaskId: activeTask?.id,
+    });
+  }, [dailyCardItems, scheduleBlocks, dayTemplate, todayStr, nowMins, activeTask?.id]);
+
+  const unassignedMins = unassignedInfo.elapsedSinceLastDeclaredMins;
   const unassignedSecs = unassignedMins * 60 + now.getSeconds();
-  const unassignedStartStr = todayDoneItems[0]?.end || '08:00';
+  const unassignedStartStr = unassignedInfo.unassignedStartStr;
   const unscheduledOptions = dailyCardItems
     .filter(i => i.date === todayStr && !i.start && i.status === 'open')
     .slice(0, 3);
