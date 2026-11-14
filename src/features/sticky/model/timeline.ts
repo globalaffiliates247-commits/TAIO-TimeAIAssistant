@@ -10,15 +10,10 @@ export const toTime = (mins: number) => {
   const m = ((Math.round(mins) % 1440) + 1440) % 1440;
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 };
+import { formatDuration } from '@/i18n/format';
+
 export const fmtDuration = (mins: number, lang: 'vi' | 'en' = 'vi') => {
-  if (lang === 'en') {
-    if (mins < 60) return `${mins}m`;
-    const h = Math.floor(mins / 60), m = mins % 60;
-    return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
-  }
-  if (mins < 60) return `${mins}p`;
-  const h = Math.floor(mins / 60), m = mins % 60;
-  return m ? `${h}g${String(m).padStart(2, '0')}` : `${h} giờ`;
+  return formatDuration(mins, lang);
 };
 
 /** "15:45 Sửa màn hình", "9h30 họp", "7.15 chạy bộ" -> { time: "15:45", rest: "Sửa màn hình", durationMins } */

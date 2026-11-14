@@ -39,8 +39,10 @@ export function formatTime(
 }
 
 /**
- * Format duration in minutes to localized string
- * e.g. 90m -> '1g30' (vi) or '1h30' (en)
+ * Format duration in minutes to localized string:
+ * - >= 60 mins: '3g22p' (vi) or '3h22m' (en). If remM === 0: '2g' (vi) or '2h' (en).
+ * - < 60 mins: '45p' (vi) or '45m' (en).
+ * (PRD v0.3.36 Part C2.1)
  */
 export function formatDuration(
   minutes: number,
@@ -50,16 +52,48 @@ export function formatDuration(
   const m = Math.max(0, Math.round(minutes));
   const h = Math.floor(m / 60);
   const remM = m % 60;
+  const isVi = lang.startsWith('vi');
 
-  if (lang.startsWith('vi')) {
+  if (format === 'long') {
+    if (isVi) {
+      if (h === 0) return `${remM} phút`;
+      if (remM === 0) return `${h} giờ`;
+      return `${h} giờ ${remM} phút`;
+    } else {
+      if (h === 0) return `${remM} min`;
+      if (remM === 0) return `${h} hr`;
+      return `${h} hr ${remM} min`;
+    }
+  }
+
+  // Short format (PRD v0.3.36 Part C2.1 & C3.1)
+  if (isVi) {
     if (h === 0) return `${remM}p`;
     if (remM === 0) return `${h}g`;
-    return format === 'short' ? `${h}g${remM < 10 ? '0' : ''}${remM}` : `${h} giờ ${remM} phút`;
+    return `${h}g${remM}p`;
   } else {
     if (h === 0) return `${remM}m`;
     if (remM === 0) return `${h}h`;
-    return format === 'short' ? `${h}h${remM < 10 ? '0' : ''}${remM}` : `${h} hr ${remM} min`;
+    return `${h}h${remM}m`;
   }
+}
+
+/**
+ * Format duration in seconds for clock displays:
+ * - >= 3600 secs (>= 60 mins): 'H:MM:SS' (e.g. '3:22:56')
+ * - < 3600 secs (< 60 mins): 'MM:SS' (e.g. '22:56')
+ * (PRD v0.3.36 Part C2.1 & C3.2)
+ */
+export function formatDurationClock(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const remS = s % 60;
+
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, '0')}:${String(remS).padStart(2, '0')}`;
+  }
+  return `${String(m).padStart(2, '0')}:${String(remS).padStart(2, '0')}`;
 }
 
 /**

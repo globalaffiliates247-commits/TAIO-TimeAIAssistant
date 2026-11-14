@@ -9,6 +9,7 @@ import { MotivationSticker } from '@/features/motivation';
 import { quoteRegistry } from '@/features/motivation/model/quoteRegistry';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
+import { formatDuration, formatDurationClock } from '@/i18n/format';
 import { computeUnassignedTime } from './unassignedTime';
 import { findGoalSuggestion, getGoalTargetHours } from '@/features/goals';
 import { useHighlight } from '@/features/prefs';
@@ -232,11 +233,9 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
     showToast?.(language === 'en' ? `Switched to: ${title}` : `Đã chuyển sang: ${title}`);
   };
 
-  // Format countdown / countup
+  // Format countdown / countup (PRD v0.3.36 Part C2.1: H:MM:SS if >= 60m, MM:SS if < 60m)
   const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return formatDurationClock(secs);
   };
 
   const endTypeLabel = 
@@ -521,8 +520,8 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
               viewMode === 'remaining'
                 ? formatTime(unassignedSecs)
                 : viewMode === 'elapsed'
-                ? (state.next ? `${Math.max(0, timeToMinutes(state.next.startTime) - nowMins)}p` : 'Hết việc')
-                : `${Math.floor(unassignedMins / 60)}g${unassignedMins % 60}p`
+                ? (state.next ? formatDuration(Math.max(0, timeToMinutes(state.next.startTime) - nowMins), language) : (language === 'vi' ? 'Hết việc' : 'Done'))
+                : formatDuration(unassignedMins, language)
             }
             subText={
               viewMode === 'remaining'
@@ -543,7 +542,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
                   : (language === 'vi' ? 'Không còn việc có giờ hôm nay' : 'No more scheduled tasks today')}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                {language === 'vi' ? `Tính từ ${unassignedStartStr} (${unassignedMins} phút)` : `Since ${unassignedStartStr} (${unassignedMins} mins)`}
+                {language === 'vi' ? `Tính từ ${unassignedStartStr} (${formatDuration(unassignedMins, language)})` : `Since ${unassignedStartStr} (${formatDuration(unassignedMins, language)})`}
               </p>
             </div>
 
@@ -956,16 +955,16 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             }
             timeText={
               viewMode === 'remaining'
-                ? (isOverrunTime ? (language === 'vi' ? `quá ${overrunMins}p` : `over ${overrunMins}m`) : formatTime(remSec))
+                ? (isOverrunTime ? (language === 'vi' ? `quá ${formatDuration(overrunMins, language)}` : `over ${formatDuration(overrunMins, language)}`) : formatTime(remSec))
                 : viewMode === 'elapsed'
                 ? formatTime(elapsedSec)
-                : `${goalHours}g${goalRemainingMins > 0 ? (goalRemainingMins < 10 ? '0' : '') + goalRemainingMins : ''}`
+                : formatDuration(goalSpentMinutes, language)
             }
             subText={
               viewMode === 'remaining'
-                ? (isOverrunTime ? (language === 'vi' ? 'đã quá hạn' : 'overrun') : `${language === 'vi' ? 'còn lại' : 'remaining'} / ${totalDurationMins}p`)
+                ? (isOverrunTime ? (language === 'vi' ? 'đã quá hạn' : 'overrun') : `${language === 'vi' ? 'còn lại' : 'remaining'} / ${formatDuration(totalDurationMins, language)}`)
                 : viewMode === 'elapsed'
-                ? `${language === 'vi' ? 'đã dùng' : 'elapsed'} / ${totalDurationMins}p`
+                ? `${language === 'vi' ? 'đã dùng' : 'elapsed'} / ${formatDuration(totalDurationMins, language)}`
                 : (targetGoal ? (targetGoal.size ? `/ ${targetHours}g · cỡ ${targetGoal.size}` : `/ ${targetHours}g`) : (language === 'vi' ? 'Chưa gắn mục tiêu' : 'No goal linked'))
             }
             isOverrun={viewMode === 'remaining' && isOverrunTime}

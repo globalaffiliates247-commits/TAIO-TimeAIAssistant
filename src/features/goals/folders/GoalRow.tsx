@@ -6,6 +6,8 @@ import { Goal, TimeBlock } from '@/types';
 import { GoalRowDetail } from './GoalRowDetail';
 import { ChevronRight, ChevronDown, Clock, Calendar } from 'lucide-react';
 import { useT } from '@/i18n/useT';
+import { useApp } from '@/context/AppContext';
+import { formatDuration } from '@/i18n/format';
 
 export interface GoalRowProps {
   goal: Goal;
@@ -25,6 +27,7 @@ export const GoalRow: React.FC<GoalRowProps> = ({
   onOpenDedicatedPage,
 }) => {
   const { t } = useT();
+  const { language } = useApp();
   const pct = Math.max(0, Math.min(100, Math.round(goal.progressPercent || 0)));
 
   return (
@@ -79,9 +82,7 @@ export const GoalRow: React.FC<GoalRowProps> = ({
           <div className="flex items-center gap-1 font-mono text-[11px] text-slate-600 bg-black/5 px-2 py-0.5 rounded-md">
             <Clock className="w-3 h-3 text-slate-400" />
             <span>
-              {todayMinutes > 0
-                ? `${t('terms.today', 'Hôm nay')}: ${todayMinutes}p`
-                : `${t('terms.today', 'Hôm nay')}: 0p`}
+              {`${t('terms.today', 'Hôm nay')}: ${formatDuration(todayMinutes, language)}`}
             </span>
           </div>
         </div>

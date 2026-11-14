@@ -9,6 +9,7 @@ import { startNativeLiveActivity, openNativeAppSettings } from '@/features/nativ
 import { clockState } from '@/features/clock';
 import { MotivationSticker } from '@/features/motivation';
 import { useHighlight } from '@/features/prefs';
+import { formatDurationClock } from '@/i18n/format';
 import type { TimeBlock } from '@/types';
 
 function parseBlockTimestamps(block: TimeBlock): { startTimestamp: number; targetTimestamp: number; totalMinutes: number; remainingMinutes: number } {
@@ -59,15 +60,9 @@ export const LiveClockStrip: React.FC<{ compact?: boolean; showQuote?: boolean }
   const nowDate = new Date(nowSec);
   const state = clockState(scheduleBlocks, dayTemplate, nowDate, language);
 
-  // Format remaining time string
+  // Format remaining time string (PRD v0.3.36 Part C)
   const formatSeconds = (sec: number) => {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    if (h > 0) {
-      return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return formatDurationClock(sec);
   };
 
   // PRD FIX v0.3.30 Part E2.4: Free timer second line (closest to finish)

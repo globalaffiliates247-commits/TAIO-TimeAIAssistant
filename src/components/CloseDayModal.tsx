@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import { MotivationSticker } from '@/features/motivation';
 import { findDayToClose, formatDayCloseTitle } from '@/features/dayclose';
-import { getDeviceCalendarDate } from '@/core/clock';
+import { getDeviceCalendarDate, timeToMinutes } from '@/core/clock';
+import { formatDuration } from '@/i18n/format';
 
 export const CloseDayModal: React.FC = () => {
   const { 
@@ -200,9 +201,23 @@ export const CloseDayModal: React.FC = () => {
                 <span className="text-slate-500 text-[11px] block">
                   {language === 'vi' ? 'Tập trung chất lượng:' : 'Deep focus:'}
                 </span>
-                <p className={`font-extrabold text-sm mt-0.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>
-                  150 {language === 'vi' ? 'phút việc sâu' : 'deep minutes'}
-                </p>
+                {(() => {
+                  const targetDayCards = dailyCardItems.filter(i => i.date === targetDate && i.status === 'done');
+                  const deepMinutes = targetDayCards.reduce((acc, c) => {
+                    const extra = (c.extra as Record<string, unknown> | undefined) || {};
+                    const est = typeof extra.actualMinutes === 'number'
+                      ? extra.actualMinutes
+                      : (typeof extra.estimateMins === 'number'
+                        ? extra.estimateMins
+                        : (c.start && c.end ? (timeToMinutes(c.end) - timeToMinutes(c.start) + 1440) % 1440 : 30));
+                    return acc + est;
+                  }, 0) || 150;
+                  return (
+                    <p className={`font-extrabold text-sm mt-0.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>
+                      {formatDuration(deepMinutes, language)} {language === 'vi' ? 'việc sâu' : 'deep work'}
+                    </p>
+                  );
+                })()}
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { clockState } from '@/features/clock';
 import { getDeviceTimeMinutes, timeToMinutes } from '@/core/clock';
+import { formatDuration, formatDurationClock } from '@/i18n/format';
 import { Clock, Hourglass, Coffee } from 'lucide-react';
 
 export const HeaderClockPill: React.FC = () => {
@@ -26,9 +27,7 @@ export const HeaderClockPill: React.FC = () => {
 
   if (st.mode === 'task' && st.block) {
     IconComponent = Hourglass;
-    const mins = Math.floor(st.remainingSeconds / 60);
-    const secs = st.remainingSeconds % 60;
-    displayText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    displayText = formatDurationClock(st.remainingSeconds);
     fullTitle = `${st.block.title} (${displayText} còn lại)`;
   } else {
     // Idle or gap
@@ -36,7 +35,7 @@ export const HeaderClockPill: React.FC = () => {
     if (st.next) {
       const nextMins = timeToMinutes(st.next.startTime);
       const diff = Math.max(0, nextMins - nowMins);
-      displayText = diff > 60 ? `${Math.floor(diff / 60)}g${diff % 60}p` : `${diff}p`;
+      displayText = formatDuration(diff, language);
       fullTitle = `${language === 'vi' ? 'Trống · Tiếp theo lúc' : 'Free · Next at'} ${st.next.startTime}: ${st.next.title}`;
     } else {
       displayText = language === 'vi' ? 'Trống' : 'Idle';
