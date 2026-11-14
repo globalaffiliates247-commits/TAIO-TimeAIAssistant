@@ -63,6 +63,15 @@ export interface DodItem {
 
 export type BlockKind = 'task' | 'ritual' | 'meeting' | 'personal';
 
+// PRD v0.3.35 Part D: SubTask (việc con)
+export interface SubTask {
+  id: string;        // "st-" + id
+  title: string;
+  done: boolean;
+  note?: string;
+  createdAt: number;
+}
+
 export interface TimeBlock {
   id: string;
   title: string;
@@ -78,6 +87,7 @@ export interface TimeBlock {
   totalSteps?: number;
   returnPoint?: string;
   notes?: string;
+  children?: SubTask[]; // PRD v0.3.35 Part D: Việc con (tối đa 10)
   // B16 Priority Matrix
   quadrant?: 1 | 2 | 3 | 4;
   isImportant?: boolean;
@@ -422,6 +432,7 @@ export interface DailyCardItem {
   movedTo?: string;
   isTemplateBlock?: boolean;
   parallelOf?: string; // id of main task if this is a side/parallel task (Part F)
+  children?: SubTask[]; // PRD v0.3.35 Part D: Việc con (tối đa 10)
   updatedAt?: string | number;
   extra?: Record<string, unknown>;
 }

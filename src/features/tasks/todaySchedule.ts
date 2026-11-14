@@ -93,6 +93,7 @@ export function buildTodaySchedule(
       taskSource: 'sticky_day_sheet',
       taskEndType,
       dodChecklist: item.dodChecklist,
+      children: item.children,
       extra: {
         ...(item.extra || {}),
         typeExplicitlyChosen: Boolean(chosenType),

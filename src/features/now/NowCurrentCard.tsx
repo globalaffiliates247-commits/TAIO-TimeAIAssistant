@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { clockState } from '@/features/clock';
-import { updateScheduleEntry } from '@/features/tasks';
+import { updateScheduleEntry, commitQuickLine, SubTaskList, getSubTaskProgress } from '@/features/tasks';
 import { NowClockRing } from './NowClockRing';
 import { MotivationSticker } from '@/features/motivation';
 import { quoteRegistry } from '@/features/motivation/model/quoteRegistry';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
 import { findGoalSuggestion, getGoalTargetHours } from '@/features/goals';
-import { commitQuickLine } from '@/features/tasks';
 import { useT } from '@/i18n/useT';
 import { 
   Pin, 
@@ -105,6 +104,9 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
       setHasMorningQuote(quoteRegistry.isSlotActive('start_day_card'));
     });
   }, []);
+
+  // PRD v0.3.35 Part D: Show/hide subtasks checklist in NowCurrentCard
+  const [showSubTasks, setShowSubTasks] = useState(false);
 
   // v0.3.34 Part E4: Three view modes (remaining, elapsed, goal)
   const [viewMode, setViewMode] = useState<'remaining' | 'elapsed' | 'goal'>(() => {
@@ -628,6 +630,50 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
           <Pin className={`w-4 h-4 ${isPinned ? 'fill-amber-700' : ''}`} />
         </button>
       </div>
+
+      {/* PRD v0.3.35 Part D: SubTask Progress Bar & Expandable List */}
+      {(() => {
+        const children = activeTask?.children || [];
+        if (children.length === 0) return null;
+        const { done, total, percent } = getSubTaskProgress(children);
+
+        return (
+          <div className="pt-0.5">
+            <button
+              type="button"
+              onClick={() => setShowSubTasks(v => !v)}
+              className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors w-full group/sub cursor-pointer"
+            >
+              <span className="tabular-nums font-bold text-slate-700">
+                {done}/{total} {language === 'en' ? 'subtasks' : 'việc con'}
+              </span>
+              <div className="flex-1 h-1.5 rounded-full bg-slate-100 border border-slate-200/80 overflow-hidden max-w-[120px]">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`}
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <ChevronRight className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${showSubTasks ? 'rotate-90' : ''}`} />
+            </button>
+
+            {showSubTasks && (
+              <div className="mt-2 pt-2 border-t border-slate-100">
+                <SubTaskList
+                  parentId={activeTask!.id}
+                  childrenItems={children}
+                  onUpdateChildren={(newChildren) => {
+                    updateScheduleEntry(
+                      activeTask!.id,
+                      { children: newChildren },
+                      { updateDailyCardItem, setBlocks, dailyCardItems }
+                    );
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* v0.3.34 Part E1: Return Point belongs to each task, dismissable with × and clickable to edit */}
       {(() => {

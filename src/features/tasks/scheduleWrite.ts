@@ -29,6 +29,7 @@ export function updateScheduleEntry(
     if (patch.returnPoint !== undefined) cardPatch.nextStep = patch.returnPoint;
     if (patch.nextStep !== undefined) cardPatch.nextStep = patch.nextStep;
     if (patch.dodChecklist !== undefined) cardPatch.dodChecklist = patch.dodChecklist;
+    if (patch.children !== undefined) cardPatch.children = patch.children;
 
     if (patch.status !== undefined) {
       if (patch.status === 'done') cardPatch.status = 'done';

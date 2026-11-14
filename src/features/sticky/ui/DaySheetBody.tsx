@@ -10,7 +10,7 @@ import {
   findGaps, fmtDuration, nextFreeStart, parseTimedText, priorityOf, suggestDuration,
   suggestForGap, toMins, toTime, durationOf, durationForPlacement, findOverlapItemIds,
 } from '../model/timeline';
-import { commitQuickLine, matchGoalByTag } from '@/features/tasks';
+import { commitQuickLine, matchGoalByTag, SubTaskList } from '@/features/tasks';
 import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 import { LiveClockStrip } from '@/features/quick-entry';
 import { MotivationSticker } from '@/features/motivation';
@@ -19,7 +19,7 @@ import { useRowSelection } from './useRowSelection';
 import { updateScheduleEntry } from '@/features/tasks';
 import { getPreviousDay } from '@/features/dayclose';
 import { TemplateScheduleModal } from '@/features/schedule-template';
-import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight } from 'lucide-react';
+import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight, ChevronRight, Plus } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -55,6 +55,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     }
   });
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  // PRD v0.3.35 Part D: Subtasks expansion and focus state
+  const [expandedSubTaskIds, setExpandedSubTaskIds] = useState<Set<string>>(new Set());
+  const [autoFocusSubTaskId, setAutoFocusSubTaskId] = useState<string | null>(null);
 
   const rawDayItems = dailyCardItems.filter(i => i.date === day && i.status !== 'dropped' && i.status !== 'carried');
 
@@ -571,7 +574,12 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           }}
           onKeyDown={e => {
             if (e.key === 'Enter') {
-              if (pickerItemId !== it.id) saveEdit(it);
+              if (pickerItemId !== it.id) {
+                saveEdit(it);
+                // PRD v0.3.35 D2.1 & D6.1: Enter in task name opens subtask line below
+                setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
+                setAutoFocusSubTaskId(it.id);
+              }
             }
             if (e.key === 'Escape') {
               if (pickerItemId === it.id) {
@@ -714,6 +722,25 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   ∥
                 </span>
               )}
+              {/* PRD v0.3.35 D3: Expand/collapse arrow for subtasks */}
+              {Boolean(it.children?.length || editing === it.id) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedSubTaskIds(prev => {
+                      const next = new Set(prev);
+                      if (next.has(it.id)) next.delete(it.id);
+                      else next.add(it.id);
+                      return next;
+                    });
+                  }}
+                  className="p-0.5 -mr-1 rounded hover:bg-black/10 text-slate-400 hover:text-slate-700 transition-colors shrink-0 cursor-pointer"
+                  title={expandedSubTaskIds.has(it.id) ? (language === 'vi' ? 'Thu gọn việc con' : 'Collapse subtasks') : (language === 'vi' ? 'Mở việc con' : 'Expand subtasks')}
+                >
+                  <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${expandedSubTaskIds.has(it.id) ? 'rotate-90' : ''}`} />
+                </button>
+              )}
               <button title="Chạm để đánh dấu xong" onClick={() => handleToggleItem(it)}
                 className="font-semibold tabular-nums shrink-0 cursor-pointer" style={{ color: c.ink }}>{it.start}</button>
               {it.isTemplateBlock && (
@@ -817,6 +844,23 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 </div>
               )}
             </div>
+
+            {/* PRD v0.3.35 Part D: SubTask list for timed item */}
+            {(expandedSubTaskIds.has(it.id) || autoFocusSubTaskId === it.id) && (
+              <SubTaskList
+                parentId={it.id}
+                childrenItems={it.children}
+                onUpdateChildren={(newChildren) => {
+                  updateDailyCardItem(it.id, { children: newChildren });
+                  if (isToday) {
+                    updateScheduleEntry(it.id, { children: newChildren }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                  }
+                }}
+                autoFocusNew={autoFocusSubTaskId === it.id}
+                onDoneAutoFocus={() => setAutoFocusSubTaskId(null)}
+                className="mb-1"
+              />
+            )}
             {gap && (
               <div className="flex items-center gap-2 text-sm py-0.5" style={{ color: c.muted }}>
                 <span className="font-semibold tabular-nums">{gap.start}</span>
@@ -893,36 +937,68 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       {flex.map(it => {
         const est = (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
         return (
-          <div
-            key={it.id}
-            onPointerDown={e => handleRowPointerDown(it.id, e)}
-            onPointerEnter={() => handleRowPointerEnter(it.id)}
-            onTouchStart={() => handleTouchStart(it.id)}
-            onTouchEnd={handleTouchEnd}
-            className={`group/flex flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
-              selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
-            }`}
-          >
-            <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
-            {renderText(it)}
-            {/* v0.3.34 Part B: Play button on selected row / hover */}
-            <button
-              type="button"
-              title={language === 'vi' ? 'Bắt đầu việc này ngay' : 'Start this task now'}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleStartItemNow(it);
-              }}
-              className="opacity-0 group-hover/flex:opacity-100 hover:opacity-100 focus:opacity-100 p-1 rounded hover:bg-black/10 text-slate-700 transition-opacity shrink-0 cursor-pointer"
+          <React.Fragment key={it.id}>
+            <div
+              onPointerDown={e => handleRowPointerDown(it.id, e)}
+              onPointerEnter={() => handleRowPointerEnter(it.id)}
+              onTouchStart={() => handleTouchStart(it.id)}
+              onTouchEnd={handleTouchEnd}
+              className={`group/flex flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
+                selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
+              }`}
             >
-              <Play className="w-3.5 h-3.5 fill-slate-700 stroke-none" />
-            </button>
-            {est && (
-              <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>
-                {fmtDuration(est)}
-              </span>
+              {/* PRD v0.3.35 D3: Expand/collapse arrow for subtasks */}
+              {Boolean(it.children?.length || editing === it.id) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedSubTaskIds(prev => {
+                      const next = new Set(prev);
+                      if (next.has(it.id)) next.delete(it.id);
+                      else next.add(it.id);
+                      return next;
+                    });
+                  }}
+                  className="p-0.5 -mr-1 rounded hover:bg-black/10 text-slate-400 hover:text-slate-700 transition-colors shrink-0 cursor-pointer"
+                  title={expandedSubTaskIds.has(it.id) ? (language === 'vi' ? 'Thu gọn việc con' : 'Collapse subtasks') : (language === 'vi' ? 'Mở việc con' : 'Expand subtasks')}
+                >
+                  <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${expandedSubTaskIds.has(it.id) ? 'rotate-90' : ''}`} />
+                </button>
+              )}
+              <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
+              {renderText(it)}
+              {/* v0.3.34 Part B: Play button on selected row / hover */}
+              <button
+                type="button"
+                title={language === 'vi' ? 'Bắt đầu việc này ngay' : 'Start this task now'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStartItemNow(it);
+                }}
+                className="opacity-0 group-hover/flex:opacity-100 hover:opacity-100 focus:opacity-100 p-1 rounded hover:bg-black/10 text-slate-700 transition-opacity shrink-0 cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-slate-700 stroke-none" />
+              </button>
+              {est && (
+                <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>
+                  {fmtDuration(est)}
+                </span>
+              )}
+            </div>
+
+            {/* PRD v0.3.35 Part D: SubTask list for flex item */}
+            {(expandedSubTaskIds.has(it.id) || autoFocusSubTaskId === it.id) && (
+              <SubTaskList
+                parentId={it.id}
+                childrenItems={it.children}
+                onUpdateChildren={(newChildren) => updateDailyCardItem(it.id, { children: newChildren })}
+                autoFocusNew={autoFocusSubTaskId === it.id}
+                onDoneAutoFocus={() => setAutoFocusSubTaskId(null)}
+                className="mb-1"
+              />
             )}
-          </div>
+          </React.Fragment>
         );
       })}
       <input
@@ -964,6 +1040,22 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
             {selectedIds.size} việc
           </span>
           <div className="flex items-center gap-1">
+            {/* PRD v0.3.35 D2.2: "+ Việc con" button on single-row selection */}
+            {selectedIds.size === 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const singleId = Array.from(selectedIds)[0];
+                  setExpandedSubTaskIds(prev => new Set(prev).add(singleId));
+                  setAutoFocusSubTaskId(singleId);
+                }}
+                className="px-2.5 py-1 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#E0401F] font-medium text-xs flex items-center gap-1 transition-colors"
+                title={language === 'en' ? 'Add subtask' : 'Thêm việc con'}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{language === 'en' ? '+ Subtask' : '+ Việc con'}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={deleteSelected}
