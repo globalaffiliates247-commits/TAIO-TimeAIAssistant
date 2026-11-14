@@ -2236,19 +2236,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addNewBlock = (blockData: Omit<TimeBlock, 'id'>) => {
     const nowTs = Date.now();
-    const newB: TimeBlock = {
-      ...blockData,
-      id: `b-${nowTs}-${Math.random().toString(36).slice(2, 6)}`,
-      quadrant: blockData.quadrant || (blockData.goalId ? 2 : 4),
-      isImportant: blockData.isImportant ?? !!blockData.goalId,
-      isUrgent: blockData.isUrgent ?? false,
-      estimatedMinutes: blockData.estimatedMinutes || 60,
-      ageDays: 1,
+    if (blockData.isTemplateBlock) {
+      const newB: TimeBlock = {
+        ...blockData,
+        id: `tpl-${nowTs}-${Math.random().toString(36).slice(2, 6)}`,
+        estimatedMinutes: blockData.estimatedMinutes || 60,
+        ageDays: 1,
+        updatedAt: nowTs,
+      };
+      setBlocks(prev => {
+        const next = [...prev, newB];
+        saveDurableState('blocks', next, nowTs);
+        return next;
+      });
+      return;
+    }
+
+    // E3.2: Non-template tasks are unified into dailyCardItems
+    const today = getDeviceCalendarDate();
+    const newCardItem: DailyCardItem = {
+      id: `dc-${nowTs}-${Math.random().toString(36).slice(2, 6)}`,
+      date: today,
+      text: blockData.title,
+      start: blockData.startTime,
+      end: blockData.endTime,
+      status: blockData.status === 'done' ? 'done' : 'open',
+      goalId: blockData.goalId,
+      goalName: blockData.goalName,
+      milestoneId: blockData.milestoneId,
+      milestoneName: blockData.milestoneName,
+      origin: 'planned',
+      carryCount: 0,
+      extra: {
+        ...(blockData.extra || {}),
+        blockType: blockData.type,
+      },
       updatedAt: nowTs,
     };
-    setBlocks(prev => {
-      const next = [...prev, newB];
-      saveDurableState('blocks', next, nowTs);
+    setDailyCardItems(prev => {
+      const next = [newCardItem, ...prev];
+      saveDurableState('dailyCardItems', next, nowTs);
       return next;
     });
   };
@@ -2298,26 +2325,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (cancelled) return;
 
+      let cards = (savedDailyCards?.value || []).filter(c => !/^dc-[1-9]$/.test(c.id));
       if (savedBlocks?.value) {
-        // FIX v0.3.28 A2 #6: Filter out mock blocks b-1..b-9 on upgrade, do not merge with INITIAL_BLOCKS
-        // PRD FIX v0.3.33 Part D3: Reset stray in_progress status for blocks outside their slot
+        // FIX v0.3.28 A2 #6: Filter out mock blocks b-1..b-9 on upgrade
+        // PRD FIX v0.3.33 Part D3 & E3.2: Reset stray in_progress & migrate non-template blocks
         const nowMins = getDeviceTimeMinutes();
-        const cleanBlocks = savedBlocks.value.filter(b => !/^b-[1-9]$/.test(b.id)).map(b => {
-          if (b.status === 'in_progress') {
-            const extra = (b.extra as Record<string, unknown> | undefined) || {};
-            const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
-            if (!manuallyStartedAt && computeBlockStatus(b, nowMins) !== 'in_progress') {
-              return { ...b, status: 'planned' as const };
+        const rawBlocks = savedBlocks.value.filter(b => !/^b-[1-9]$/.test(b.id));
+
+        const templateBlocks: TimeBlock[] = [];
+        let didMigrate = false;
+        const todayStr = getDeviceCalendarDate();
+
+        for (const b of rawBlocks) {
+          const isTemplate = b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-ritual-close';
+          if (isTemplate) {
+            let cleanB = b;
+            if (b.status === 'in_progress') {
+              const extra = (b.extra as Record<string, unknown> | undefined) || {};
+              const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
+              if (!manuallyStartedAt && computeBlockStatus(b, nowMins) !== 'in_progress') {
+                cleanB = { ...b, status: 'planned' as const };
+              }
+            }
+            templateBlocks.push(cleanB);
+          } else {
+            const alreadyExists = cards.some(c => c.text === b.title && c.start === b.startTime);
+            if (!alreadyExists && !b.id.startsWith('dc-')) {
+              didMigrate = true;
+              cards.push({
+                id: `dc-migrated-${b.id}`,
+                date: b.deadline?.slice(0, 10) || todayStr,
+                text: b.title,
+                start: b.startTime,
+                end: b.endTime,
+                status: b.status === 'done' ? 'done' : b.status === 'dropped' ? 'dropped' : 'open',
+                goalId: b.goalId,
+                goalName: b.goalName,
+                milestoneId: b.milestoneId,
+                milestoneName: b.milestoneName,
+                nextStep: b.nextStep || b.returnPoint,
+                carryCount: 0,
+                origin: 'planned',
+                extra: {
+                  ...((b.extra as Record<string, unknown> | undefined) || {}),
+                  blockType: b.type,
+                  actualMinutes: b.touchTimeMinutes,
+                  taskEndType: b.taskEndType,
+                },
+                updatedAt: b.updatedAt || Date.now(),
+              });
             }
           }
-          return b;
-        });
-        setBlocks(cleanBlocks);
+        }
+
+        setBlocks(templateBlocks);
+        if (didMigrate) {
+          saveDurableState('blocks', templateBlocks, Date.now());
+          saveDurableState('dailyCardItems', cards, Date.now());
+        }
       }
-      if (savedDailyCards?.value) {
-        const cleanCards = savedDailyCards.value.filter(c => !/^dc-[1-9]$/.test(c.id));
-        setDailyCardItems(cleanCards);
-      }
+      setDailyCardItems(cards);
       if (savedInbox?.value) {
         setInbox(mergeCollectionsByUpdatedAt(savedInbox.value, INITIAL_INBOX));
       }

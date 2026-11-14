@@ -1,3 +1,4 @@
+// TAIO Time App — PlanTab Component (PRD v0.3.33 Part E)
 'use client';
 
 import React, { useState } from 'react';
@@ -9,6 +10,8 @@ import {
   computeBlockStatus,
   getBlockStatusDisplay,
   useDeviceClock,
+  getDeviceCalendarDate,
+  timeToMinutes,
 } from '../core/clock';
 import { 
   Calendar, 
@@ -19,8 +22,15 @@ import {
   Target, 
   Layers, 
   LayoutGrid,
-  FileText
+  FileText,
+  Trash2,
+  Edit2,
+  Check,
+  X,
+  RotateCw
 } from 'lucide-react';
+import { updateScheduleEntry } from '@/features/tasks';
+import { TemplateScheduleModal } from '@/features/schedule-template';
 
 const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; border: string }> = {
   deep: { label: 'Tập trung sâu', bg: 'bg-rose-500/15', text: 'text-rose-700', border: 'border-rose-500/30' },
@@ -31,47 +41,83 @@ const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; 
 };
 
 export const PlanTab: React.FC = () => {
-  const { blocks, scheduleBlocks, goals, profile, addNewBlock, openDrilldown } = useApp();
+  const { 
+    blocks, 
+    scheduleBlocks, 
+    goals, 
+    profile, 
+    addNewBlock, 
+    addDailyCardItem, 
+    updateDailyCardItem, 
+    setBlocks, 
+    dailyCardItems, 
+    openDrilldown,
+    language 
+  } = useApp();
   const { nowMinutes, todayLabel } = useDeviceClock();
-  // B25: Daily Card is the first view
+
   const [activeView, setActiveView] = useState<'card' | 'timeline' | 'matrix'>('card');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [templateModalOpen, setTemplateModalOpen] = useState<boolean>(false);
+
   const [newTitle, setNewTitle] = useState<string>('');
   const [newType, setNewType] = useState<BlockType>('deep');
   const [newStartTime, setNewStartTime] = useState<string>('16:00');
   const [newEndTime, setNewEndTime] = useState<string>('17:00');
   const [newGoalId, setNewGoalId] = useState<string>(goals[0]?.id || '');
 
+  // Inline edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>('');
+  const [editingTimeId, setEditingTimeId] = useState<string | null>(null);
+  const [editingStart, setEditingStart] = useState<string>('09:00');
+  const [editingEnd, setEditingEnd] = useState<string>('10:00');
+
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
     const goal = goals.find(g => g.id === newGoalId);
-    addNewBlock({
-      title: newTitle,
-      startTime: newStartTime,
-      endTime: newEndTime,
-      type: newType,
-      status: 'planned',
+    
+    // Part E3.2: Unified - adds to dailyCardItems for today
+    addDailyCardItem({
+      text: newTitle.trim(),
+      start: newStartTime,
+      end: newEndTime,
       goalId: newGoalId || undefined,
       goalName: goal ? goal.name : undefined,
+      origin: 'planned',
+      date: getDeviceCalendarDate(),
+      extra: {
+        blockType: newType,
+        typeExplicitlyChosen: true,
+      },
     });
+
     setNewTitle('');
     setShowAddModal(false);
   };
 
   const handleAcceptBacklogItem = (item: typeof IMPORTANT_NOT_URGENT_BACKLOG[0]) => {
     const goal = goals.find(g => g.id === item.goalId);
-    addNewBlock({
-      title: item.title,
-      startTime: '17:30',
-      endTime: '18:15',
-      type: 'deep',
-      status: 'planned',
+    addDailyCardItem({
+      text: item.title,
+      start: '17:30',
+      end: '18:15',
       goalId: item.goalId,
       goalName: goal?.name,
+      origin: 'planned',
+      date: getDeviceCalendarDate(),
+      extra: {
+        blockType: 'deep',
+        typeExplicitlyChosen: true,
+      },
     });
     alert(`Đã đưa "${item.title}" vào lịch hôm nay lúc 17:30!`);
   };
+
+  const sortedBlocks = [...scheduleBlocks]
+    .filter(b => Boolean(b.startTime && b.endTime) && b.status !== 'dropped')
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
@@ -90,7 +136,7 @@ export const PlanTab: React.FC = () => {
           </p>
         </div>
 
-        {/* View Switcher: Daily Card vs Timeline vs Priority Matrix (unnumbered, flat fill, white text on accent per D4/D5) */}
+        {/* View Switcher: Daily Card vs Timeline vs Priority Matrix */}
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-xs">
             <button
@@ -118,11 +164,20 @@ export const PlanTab: React.FC = () => {
           </div>
 
           <button
+            onClick={() => setTemplateModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-xs transition-all"
+            title="Quản lý lịch ngày mẫu cố định"
+          >
+            <RotateCw className="w-3.5 h-3.5 text-slate-500" />
+            <span>Lịch mẫu</span>
+          </button>
+
+          <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold border border-slate-200 shadow-xs transition-all"
           >
             <Plus className="w-4 h-4 text-[#E0401F]" />
-            <span>Thêm khối</span>
+            <span>Thêm việc</span>
           </button>
         </div>
       </div>
@@ -199,68 +254,215 @@ export const PlanTab: React.FC = () => {
               </span>
             </div>
 
-            {/* Timeline List (FIX v0.3.28 A2: reads unified scheduleBlocks) */}
+            {/* Timeline List (Part E3.4: Interactive with inline edit, delete, gaps with +) */}
             <div className="space-y-3">
-              {scheduleBlocks
-                .filter(b => Boolean(b.startTime && b.endTime))
-                .sort((a, b) => a.startTime.localeCompare(b.startTime))
-                .map((block) => {
+              {sortedBlocks.map((block, idx) => {
+                const prevBlock = idx > 0 ? sortedBlocks[idx - 1] : null;
+                const prevEndMins = prevBlock ? timeToMinutes(prevBlock.endTime) : null;
+                const curStartMins = timeToMinutes(block.startTime);
+                const hasGap = prevEndMins !== null && curStartMins > prevEndMins;
+                const gapMins = hasGap ? curStartMins - prevEndMins : 0;
+
+                const isTemplate = block.isTemplateBlock || block.blockKind === 'ritual' || block.id === 'b-10' || block.id === 'b-ritual-close';
                 const conf = TYPE_CONFIG[block.type] || TYPE_CONFIG.deep;
                 const computedStatus = computeBlockStatus(block, nowMinutes);
                 const statusDisplay = getBlockStatusDisplay(computedStatus);
                 const isCompleted = computedStatus === 'done';
                 const isCurrent = computedStatus === 'in_progress';
+                const isEditingTitle = editingId === block.id;
+                const isEditingTime = editingTimeId === block.id;
+
+                const typeExplicitlyChosen = (block.extra as Record<string, unknown> | undefined)?.typeExplicitlyChosen || isTemplate;
 
                 return (
-                  <div
-                    key={block.id}
-                    className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                      isCurrent 
-                        ? 'border-red-300 bg-red-50/70 ring-1 ring-red-400/40 shadow-xs'
-                        : isCompleted
-                        ? 'border-slate-200 bg-slate-50/70 opacity-70'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-xs'
-                    }`}
-                  >
-                    <div className="flex items-start sm:items-center gap-3.5">
-                      {/* Time Badge */}
-                      <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-bold whitespace-nowrap">
-                        {block.startTime} - {block.endTime}
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${conf.bg} ${conf.text} ${conf.border}`}>
-                            {conf.label}
-                          </span>
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusDisplay.badgeClass}`}>
-                            {statusDisplay.label}
+                  <React.Fragment key={block.id}>
+                    {hasGap && (
+                      <div className="p-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <span>
+                            {language === 'vi'
+                              ? `Bạn có ${gapMins >= 60 ? `${Math.floor(gapMins / 60)} giờ ` : ''}${gapMins % 60 ? `${gapMins % 60}p ` : ''}trống đến ${block.startTime}`
+                              : `You have ${gapMins}m free until ${block.startTime}`}
                           </span>
                         </div>
-                        <h4 className={`text-sm sm:text-base font-bold mt-1 ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
-                          {block.title}
-                        </h4>
-                        {block.nextStep && (
-                          <p className="text-xs text-amber-700 font-medium mt-0.5">
-                            Bước kế tiếp: {block.nextStep}
-                          </p>
+                        <button
+                          onClick={() => {
+                            setNewStartTime(prevBlock!.endTime);
+                            setNewEndTime(block.startTime);
+                            setShowAddModal(true);
+                          }}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 shadow-2xs transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-[#E0401F]" />
+                          <span>{language === 'vi' ? 'Xếp việc' : 'Add task'}</span>
+                        </button>
+                      </div>
+                    )}
+
+                    <div
+                      className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        isCurrent 
+                          ? 'border-red-300 bg-red-50/70 ring-1 ring-red-400/40 shadow-xs'
+                          : isCompleted
+                          ? 'border-slate-200 bg-slate-50/70 opacity-70'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-xs'
+                      }`}
+                    >
+                      <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+                        {/* Time Badge (clickable to edit time) */}
+                        {isEditingTime ? (
+                          <div className="flex items-center gap-1 text-xs shrink-0">
+                            <input
+                              type="time"
+                              value={editingStart}
+                              onChange={e => setEditingStart(e.target.value)}
+                              className="px-2 py-1 rounded-lg border border-slate-300 bg-white font-mono text-xs"
+                            />
+                            <span>-</span>
+                            <input
+                              type="time"
+                              value={editingEnd}
+                              onChange={e => setEditingEnd(e.target.value)}
+                              className="px-2 py-1 rounded-lg border border-slate-300 bg-white font-mono text-xs"
+                            />
+                            <button
+                              onClick={() => {
+                                updateScheduleEntry(block.id, { startTime: editingStart, endTime: editingEnd }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                                setEditingTimeId(null);
+                              }}
+                              className="p-1 rounded-md bg-emerald-600 text-white"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setEditingTimeId(null)}
+                              className="p-1 rounded-md text-slate-400 hover:bg-slate-200"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setEditingTimeId(block.id);
+                              setEditingStart(block.startTime);
+                              setEditingEnd(block.endTime);
+                            }}
+                            title="Bấm để đổi giờ"
+                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-mono font-bold whitespace-nowrap transition-colors shrink-0"
+                          >
+                            {block.startTime} - {block.endTime}
+                          </button>
                         )}
-                        {block.goalName && (
-                          <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
-                            <Target className="w-3.5 h-3.5 text-red-400" />
-                            <span>{block.goalName}</span>
-                          </p>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {typeExplicitlyChosen && (
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${conf.bg} ${conf.text} ${conf.border}`}>
+                                {conf.label}
+                              </span>
+                            )}
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusDisplay.badgeClass}`}>
+                              {statusDisplay.label}
+                            </span>
+                            {isTemplate && (
+                              <span className="text-[11px] font-bold text-slate-500 flex items-center gap-0.5 bg-slate-100 px-2 py-0.5 rounded-full" title="Khung cố định theo lịch mẫu">
+                                🔁 Khung cố định
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Title with inline edit */}
+                          {isEditingTitle ? (
+                            <div className="flex items-center gap-2 mt-1">
+                              <input
+                                type="text"
+                                value={editingTitle}
+                                onChange={e => setEditingTitle(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') {
+                                    updateScheduleEntry(block.id, { title: editingTitle.trim() }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                                    setEditingId(null);
+                                  } else if (e.key === 'Escape') {
+                                    setEditingId(null);
+                                  }
+                                }}
+                                className="w-full px-2.5 py-1 rounded-lg border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => {
+                                  updateScheduleEntry(block.id, { title: editingTitle.trim() }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                                  setEditingId(null);
+                                }}
+                                className="p-1 rounded-md bg-emerald-600 text-white"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <h4
+                              onClick={() => {
+                                setEditingId(block.id);
+                                setEditingTitle(block.title);
+                              }}
+                              title="Bấm để sửa tên"
+                              className={`text-sm sm:text-base font-bold mt-1 cursor-pointer hover:underline ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}
+                            >
+                              {block.title}
+                            </h4>
+                          )}
+
+                          {block.nextStep && (
+                            <p className="text-xs text-amber-700 font-medium mt-0.5">
+                              Bước kế tiếp: {block.nextStep}
+                            </p>
+                          )}
+                          {block.goalName && (
+                            <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                              <Target className="w-3.5 h-3.5 text-red-400" />
+                              <span>{block.goalName}</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        {isTemplate ? (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems })}
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition-colors"
+                              title="Bỏ qua khung này cho riêng hôm nay"
+                            >
+                              Bỏ qua hôm nay
+                            </button>
+                            <button
+                              onClick={() => setTemplateModalOpen(true)}
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition-colors"
+                              title="Sửa lịch mẫu"
+                            >
+                              Sửa lịch mẫu
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              if (confirm('Xóa công việc này khỏi lịch?')) {
+                                updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                              }
+                            }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Xóa công việc"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         )}
                       </div>
                     </div>
-
-                    {block.returnPoint && (
-                      <div className="text-xs bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-700 max-w-xs truncate shadow-xs">
-                        <span className="font-bold text-amber-400">Điểm về: </span>
-                        {block.returnPoint}
-                      </div>
-                    )}
-                  </div>
+                  </React.Fragment>
                 );
               })}
             </div>
@@ -304,7 +506,7 @@ export const PlanTab: React.FC = () => {
       {showAddModal && (
         <div className="fixed app-overlay-safe z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-slate-900">
-            <h3 className="text-base font-bold mb-4">Thêm khối thời gian mới</h3>
+            <h3 className="text-base font-bold mb-4">Thêm công việc mới</h3>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Tên công việc</label>
@@ -323,18 +525,20 @@ export const PlanTab: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-500 mb-1">Giờ bắt đầu</label>
                   <input
                     type="time"
+                    required
                     value={newStartTime}
                     onChange={e => setNewStartTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1">Giờ kết thúc</label>
                   <input
                     type="time"
+                    required
                     value={newEndTime}
                     onChange={e => setNewEndTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
                   />
                 </div>
               </div>
@@ -344,41 +548,41 @@ export const PlanTab: React.FC = () => {
                 <select
                   value={newType}
                   onChange={e => setNewType(e.target.value as BlockType)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
                 >
                   <option value="deep">Tập trung sâu</option>
                   <option value="meeting">Họp & Trao đổi</option>
-                  <option value="interruption">Khung dự phòng gián đoạn</option>
-                  <option value="personal">Cá nhân / Nghỉ ngơi</option>
+                  <option value="interruption">Quỹ gián đoạn</option>
+                  <option value="personal">Cá nhân & Nghỉ</option>
                   <option value="planning">Lập kế hoạch</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Phục vụ mục tiêu</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Mục tiêu liên kết (tùy chọn)</label>
                 <select
                   value={newGoalId}
                   onChange={e => setNewGoalId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
                 >
-                  <option value="">Ngoài mục tiêu chính</option>
+                  <option value="">Không gắn mục tiêu</option>
                   {goals.map(g => (
                     <option key={g.id} value={g.id}>{g.name}</option>
                   ))}
                 </select>
               </div>
 
-              <div className="pt-3 flex justify-end gap-2.5">
+              <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-900 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-semibold transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white font-bold text-xs shadow-md"
+                  className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-md transition-all"
                 >
                   Thêm vào lịch
                 </button>
@@ -387,6 +591,12 @@ export const PlanTab: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Template Schedule Modal */}
+      <TemplateScheduleModal
+        isOpen={templateModalOpen}
+        onClose={() => setTemplateModalOpen(false)}
+      />
 
     </div>
   );

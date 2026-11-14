@@ -38,12 +38,15 @@ export function buildTodaySchedule(
       status = 'dropped';
     }
 
+    const chosenType = (extra.blockType as TimeBlock['type']) || undefined;
+    const resolvedType: TimeBlock['type'] = chosenType || (item.goalId ? 'deep' : 'personal');
+
     return {
       id: item.id,
       title: item.text,
       startTime: start,
       endTime: end,
-      type: 'deep',
+      type: resolvedType,
       status,
       goalId: item.goalId,
       goalName: item.goalName,
@@ -56,7 +59,10 @@ export function buildTodaySchedule(
       taskSource: 'sticky_day_sheet',
       taskEndType,
       dodChecklist: item.dodChecklist,
-      extra: item.extra,
+      extra: {
+        ...(item.extra || {}),
+        typeExplicitlyChosen: Boolean(chosenType),
+      },
     };
   });
 

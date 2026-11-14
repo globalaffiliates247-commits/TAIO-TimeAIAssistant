@@ -18,7 +18,8 @@ export function updateScheduleEntry(
   patch: Partial<TimeBlock>,
   ctx: ScheduleWriteContext
 ): void {
-  if (id.startsWith('dc-')) {
+  const isCardItem = id.startsWith('dc-') || ctx.dailyCardItems?.some(it => it.id === id);
+  if (isCardItem) {
     const cardPatch: Partial<DailyCardItem> = {};
     if (patch.title !== undefined) cardPatch.text = patch.title;
     if (patch.startTime !== undefined) cardPatch.start = patch.startTime;
@@ -36,7 +37,7 @@ export function updateScheduleEntry(
       else cardPatch.status = 'open';
     }
 
-    if (patch.touchTimeMinutes !== undefined || patch.taskEndType !== undefined || patch.extra !== undefined) {
+    if (patch.touchTimeMinutes !== undefined || patch.taskEndType !== undefined || patch.extra !== undefined || patch.type !== undefined) {
       const existing = ctx.dailyCardItems?.find(it => it.id === id);
       const prevExtra = (existing?.extra as Record<string, unknown> | undefined) || {};
       const newExtra: Record<string, unknown> = {
@@ -48,6 +49,9 @@ export function updateScheduleEntry(
       }
       if (patch.taskEndType !== undefined) {
         newExtra.taskEndType = patch.taskEndType;
+      }
+      if (patch.type !== undefined) {
+        newExtra.blockType = patch.type;
       }
       cardPatch.extra = newExtra;
     }

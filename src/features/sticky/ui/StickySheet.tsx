@@ -8,11 +8,17 @@ import { Sparkles } from 'lucide-react';
 import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
+import { getDeviceCalendarDate } from '@/core/clock';
 
 const dayTitle = (date: string) => {
-  const d = new Date(`${date}T00:00:00`);
-  const wd = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'][d.getDay()];
-  return `Hôm nay · ${wd} ${d.getDate()}/${d.getMonth() + 1}`;
+  const [y, m, d] = date.split('-').map(Number);
+  const dateObj = new Date(y, (m || 1) - 1, d || 1);
+  const wd = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'][dateObj.getDay()];
+  const today = getDeviceCalendarDate();
+  if (date === today) {
+    return `Nhật ký hôm nay · ${wd} ${d}/${m}`;
+  }
+  return `Nhật ký ${wd} ${d}/${m}`;
 };
 
 export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: number }> = ({ note, floating, z }) => {

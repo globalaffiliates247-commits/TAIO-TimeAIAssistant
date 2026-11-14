@@ -16,18 +16,77 @@ import { LiveClockStrip } from '@/features/quick-entry';
 import { MotivationSticker } from '@/features/motivation';
 import { GoalPicker, findGoalSuggestion } from '@/features/goals';
 import { useRowSelection } from './useRowSelection';
-import { Clock, Trash2, Copy, Calendar, X } from 'lucide-react';
+import { updateScheduleEntry } from '@/features/tasks';
+import { getPreviousDay } from '@/features/dayclose';
+import { TemplateScheduleModal } from '@/features/schedule-template';
+import { Clock, Trash2, Copy, Calendar, X, RotateCw } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
-  const { dailyCardItems, addDailyCardItem, updateDailyCardItem, removeDailyCardItem, toggleDailyCardItem, goals } = useApp();
+  const { 
+    dailyCardItems, 
+    addDailyCardItem, 
+    updateDailyCardItem, 
+    removeDailyCardItem, 
+    toggleDailyCardItem, 
+    goals,
+    scheduleBlocks,
+    setBlocks,
+    setCloseDayModalOpen 
+  } = useApp();
   const day = note.date!;
+  const today = getDeviceCalendarDate();
+  const isToday = day === today;
   const now = getDeviceNow();
   const nowMins = now.getHours() * 60 + now.getMinutes();
 
-  const items = dailyCardItems.filter(i => i.date === day && i.status !== 'dropped' && i.status !== 'carried');
-  const timed = items.filter(i => i.start).sort((a, b) => toMins(a.start!) - toMins(b.start!));
-  const flex = items.filter(i => !i.start).reverse(); // oldest first, in the order they were written
+  const [showTemplateBlocks, setShowTemplateBlocks] = useState(true);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+
+  const rawDayItems = dailyCardItems.filter(i => i.date === day && i.status !== 'dropped' && i.status !== 'carried');
+
+  // Part E3.1: Read unified scheduleBlocks for today, or dailyCardItems for other days
+  const timed = useMemo(() => {
+    if (isToday && scheduleBlocks) {
+      return scheduleBlocks
+        .filter(b => Boolean(b.startTime && b.endTime) && b.status !== 'dropped')
+        .filter(b => {
+          if (!showTemplateBlocks && (b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-ritual-close')) {
+            return false;
+          }
+          return true;
+        })
+        .map(b => {
+          const isTemplate = Boolean(b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-ritual-close');
+          return {
+            id: b.id,
+            text: b.title,
+            start: b.startTime,
+            end: b.endTime,
+            date: day,
+            status: b.status === 'done' ? ('done' as const) : ('open' as const),
+            carryCount: 0,
+            origin: 'planned' as const,
+            goalId: b.goalId,
+            goalName: b.goalName,
+            milestoneId: b.milestoneId,
+            milestoneName: b.milestoneName,
+            nextStep: b.nextStep,
+            isTemplateBlock: isTemplate,
+            extra: b.extra,
+          } as DailyCardItem & { isTemplateBlock?: boolean };
+        })
+        .sort((a, b) => toMins(a.start!) - toMins(b.start!));
+    }
+    return rawDayItems.filter(i => i.start).sort((a, b) => toMins(a.start!) - toMins(b.start!));
+  }, [isToday, scheduleBlocks, showTemplateBlocks, rawDayItems, day]);
+
+  const items = useMemo(() => {
+    const flexItems = rawDayItems.filter(i => !i.start);
+    return [...timed, ...flexItems];
+  }, [timed, rawDayItems]);
+
+  const flex = rawDayItems.filter(i => !i.start).reverse(); // oldest first, in the order they were written
   const leftover = dailyCardItems.filter(i => i.date < day && i.status === 'open');
   const gaps = findGaps(timed, nowMins);
   const gapAfter = new Map(gaps.map(g => [g.afterId, g]));
@@ -364,6 +423,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const taken = new Set<string>(skipped);
   const freeTotal = gaps.reduce((s, g) => s + g.mins, 0);
 
+  const handleToggleItem = (it: DailyCardItem & { isTemplateBlock?: boolean }) => {
+    if (it.isTemplateBlock) {
+      const nextStatus = it.status === 'done' ? 'planned' : 'done';
+      updateScheduleEntry(it.id, { status: nextStatus }, { updateDailyCardItem, setBlocks, dailyCardItems });
+    } else {
+      toggleDailyCardItem(it.id);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2 text-[15px] leading-snug" style={{ color: c.ink }}>
       {/* PRD FIX v0.3.28 C1: LiveClockStrip at top of DaySheet */}
@@ -372,15 +440,48 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       {/* PRD FEATURE v0.3.31 B1: Motivation Sticker note style at head of "Hôm nay" sheet */}
       <MotivationSticker slotKey="start_day_sheet" context="start_day" size="note" className="mb-1" />
 
-      {leftover.length > 0 && (
-        <div className="flex items-center gap-2 text-xs" style={{ color: c.muted }}>
-          <span className="flex-1">{leftover.length} việc ngày trước chưa xong</span>
-          <button className="underline underline-offset-2 font-semibold" style={{ color: c.ink }}
-            onClick={() => leftover.forEach(i => updateDailyCardItem(i.id, { date: day, carryCount: i.carryCount + 1, carriedFromId: i.carriedFromId || i.id }))}>
-            Chuyển sang hôm nay
-          </button>
-        </div>
-      )}
+      {/* Part E3.3: Toggle template blocks */}
+      <div className="flex items-center justify-between text-xs px-1" style={{ color: c.muted }}>
+        <span className="text-[11.5px] font-semibold">
+          {timed.length} việc có giờ · {flex.length} linh động
+        </span>
+        <button
+          onClick={() => setShowTemplateBlocks(v => !v)}
+          className="text-[11px] hover:underline cursor-pointer"
+          style={{ color: c.ink }}
+        >
+          {showTemplateBlocks ? 'Ẩn khung cố định' : 'Hiện khung cố định'}
+        </button>
+      </div>
+
+      {/* Part A2 #4: Leftover tasks wording */}
+      {leftover.length > 0 && (() => {
+        const yesterday = getPreviousDay(day);
+        const onlyYesterday = leftover.every(i => i.date === yesterday);
+        const label = onlyYesterday
+          ? `Còn ${leftover.length} việc từ hôm qua đang chờ bạn`
+          : `Còn ${leftover.length} việc từ những ngày trước đang chờ bạn`;
+        return (
+          <div className="flex items-center gap-2 text-xs py-1" style={{ color: c.muted }}>
+            <span className="flex-1 font-medium">{label}</span>
+            <button
+              className="underline underline-offset-2 font-semibold cursor-pointer"
+              style={{ color: c.ink }}
+              onClick={() => leftover.forEach(i => updateDailyCardItem(i.id, { date: day, carryCount: (i.carryCount || 0) + 1, carriedFromId: i.carriedFromId || i.id }))}
+            >
+              Làm tiếp hôm nay
+            </button>
+            <span>·</span>
+            <button
+              className="underline underline-offset-2 font-semibold cursor-pointer"
+              style={{ color: c.ink }}
+              onClick={() => setCloseDayModalOpen(true)}
+            >
+              Xem lại
+            </button>
+          </div>
+        );
+      })()}
 
       {timed.map(it => {
         const gap = gapAfter.get(it.id);
@@ -394,12 +495,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               onPointerEnter={() => handleRowPointerEnter(it.id)}
               onTouchStart={() => handleTouchStart(it.id)}
               onTouchEnd={handleTouchEnd}
-              className={`flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
+              className={`group/row flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
                 selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
               }`}
             >
-              <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)}
-                className="font-semibold tabular-nums shrink-0" style={{ color: c.ink }}>{it.start}</button>
+              <button title="Chạm để đánh dấu xong" onClick={() => handleToggleItem(it)}
+                className="font-semibold tabular-nums shrink-0 cursor-pointer" style={{ color: c.ink }}>{it.start}</button>
+              {it.isTemplateBlock && (
+                <span className="shrink-0 text-xs" title="Khung cố định theo lịch mẫu">🔁</span>
+              )}
               {renderText(it)}
               {isNowRunning && (
                 <span className="shrink-0 text-[10.5px] px-1.5 py-0.5 rounded bg-black/5 text-slate-500 font-normal select-none">
@@ -409,12 +513,33 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               {durationOf(it) && <span className="shrink-0 h-5 px-2 rounded-full text-[11.5px] font-medium flex items-center" style={pillStyle}>{fmtDuration(durationOf(it)!)}</span>}
               {boundIds.has(it.id) && <span className="shrink-0" title="Đã lên lịch trước"><IconLock color={c.muted} /></span>}
               {overlapIds.has(it.id) && <span className="shrink-0" title="Chồng giờ với việc trước"><IconOverlap color={c.muted} /></span>}
+              
+              {/* Template quick actions */}
+              {it.isTemplateBlock && (
+                <div className="opacity-0 group-hover/row:opacity-100 flex items-center gap-1 text-[11px] shrink-0 transition-opacity">
+                  <button
+                    onClick={() => updateScheduleEntry(it.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems })}
+                    className="hover:underline text-slate-400 hover:text-slate-600"
+                    title="Bỏ qua khung này hôm nay"
+                  >
+                    Bỏ qua
+                  </button>
+                  <span>·</span>
+                  <button
+                    onClick={() => setTemplateModalOpen(true)}
+                    className="hover:underline text-slate-400 hover:text-slate-600"
+                    title="Sửa lịch ngày mẫu"
+                  >
+                    Sửa mẫu
+                  </button>
+                </div>
+              )}
             </div>
             {gap && (
-              <div className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
+              <div className="flex items-center gap-2 text-sm py-0.5" style={{ color: c.muted }}>
                 <span className="font-semibold tabular-nums">{gap.start}</span>
                 <IconHourglass color={c.muted} />
-                <span>trống đến {gap.end} · {fmtDuration(gap.mins)}</span>
+                <span>Bạn có {fmtDuration(gap.mins)} trống đến {gap.end}</span>
               </div>
             )}
             {gap && sug && (() => {
@@ -461,7 +586,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       {/* composer */}
       <div className="flex items-center gap-2 flex-wrap">
         <input
-          ref={inputRef} value={draft} placeholder="gõ một dòng… (gõ giờ để xếp lịch)"
+          ref={inputRef} value={draft} placeholder="Hôm nay bạn muốn làm xong điều gì?"
           onChange={e => { setDraft(e.target.value); setPill(null); }}
           onPaste={e => handlePasteMultiLine(e, false)}
           onKeyDown={e => {
@@ -594,6 +719,11 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           </div>
         </div>
       )}
+
+      <TemplateScheduleModal
+        isOpen={templateModalOpen}
+        onClose={() => setTemplateModalOpen(false)}
+      />
     </div>
   );
 };

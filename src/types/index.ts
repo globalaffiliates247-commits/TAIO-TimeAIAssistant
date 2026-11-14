@@ -416,6 +416,7 @@ export interface DailyCardItem {
   nextStep?: string;
   timeUsedFor?: string;
   movedTo?: string;
+  isTemplateBlock?: boolean;
   updatedAt?: string | number;
   extra?: Record<string, unknown>;
 }

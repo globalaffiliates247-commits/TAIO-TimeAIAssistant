@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { DeviceLook, ThemeMode, ColorPalette } from '../types';
 import { PALETTES } from '../data/mockData';
@@ -15,9 +15,11 @@ import {
   Sparkles,
   Palette,
   Check,
-  Globe
+  Globe,
+  RotateCw
 } from 'lucide-react';
 import { useT } from '../i18n/useT';
+import { TemplateScheduleModal } from '@/features/schedule-template';
 
 export const AppearanceModal: React.FC = () => {
   const { 
@@ -33,6 +35,7 @@ export const AppearanceModal: React.FC = () => {
     setLanguage 
   } = useApp();
   const { t } = useT();
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
   if (!settingsModalOpen) return null;
 
@@ -261,7 +264,31 @@ export const AppearanceModal: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Lịch ngày mẫu (PRD v0.3.33 E3.6) */}
+          <div className="pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <RotateCw className="w-3.5 h-3.5 text-[#E0401F]" />
+                <span>{language === 'vi' ? 'Lịch ngày mẫu' : 'Daily Template Schedule'}</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setTemplateModalOpen(true)}
+                className="text-xs text-[#E0401F] font-bold hover:underline flex items-center gap-1"
+              >
+                <span>{language === 'vi' ? 'Quản lý lịch mẫu ↗' : 'Manage Templates ↗'}</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              {language === 'vi' 
+                ? 'Xem và chỉnh sửa các khung lặp lại cố định như giờ ăn, giờ ngủ, dọn dẹp hòm thư và khép ngày.'
+                : 'Review and customize recurring template slots like meals, sleep, inbox cleanup, and day-close ritual.'}
+            </p>
+          </div>
         </div>
+
+        <TemplateScheduleModal isOpen={templateModalOpen} onClose={() => setTemplateModalOpen(false)} />
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-slate-200 bg-white/50 flex justify-end">
