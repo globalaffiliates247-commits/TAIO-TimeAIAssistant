@@ -232,6 +232,8 @@
     "continue_later": "Not finished, save for later",
     "more_time": "Need +15 more minutes",
     "remind_10m": "Remind me in 10 minutes",
+    "snooze": "Snooze…",
+    "wrap_up_now": "Wrap up now",
     "done_despite": "Done despite unmet criteria",
     "dod_label": "Completion criteria",
     "kicker": "Time is up. Is this finished?",

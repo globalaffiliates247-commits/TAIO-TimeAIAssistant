@@ -15,7 +15,9 @@ import {
   RotateCw, 
   Share2, 
   AlertTriangle,
-  Footprints
+  Footprints,
+  Zap,
+  ListChecks
 } from 'lucide-react';
 import { MotivationSticker } from '@/features/motivation';
 import { findDayToClose, formatDayCloseTitle } from '@/features/dayclose';
@@ -43,6 +45,7 @@ export const CloseDayModal: React.FC = () => {
 
   const [tomorrowTask, setTomorrowTask] = useState<string>('');
   const [selectedGoalId, setSelectedGoalId] = useState<string>(goals[0]?.id || '');
+  const [closeMethod, setCloseMethod] = useState<'quick' | 'step_by_step'>('quick');
 
   if (!closeDayModalOpen) return null;
 
@@ -59,6 +62,15 @@ export const CloseDayModal: React.FC = () => {
 
   const onConfirmClose = () => {
     handleCloseDay(tomorrowTask, targetDate);
+  };
+
+  const handleQuickClose = () => {
+    // v0.3.34 Part A2.5: Fast 1-tap close
+    for (const item of pendingCardItems) {
+      carryOverItem(item.id, isPastDay ? 'today' : 'tomorrow');
+    }
+    const finalFirstTask = tomorrowTask.trim() || (pendingCardItems[0]?.text || '');
+    handleCloseDay(finalFirstTask, targetDate);
   };
 
   return (
@@ -81,8 +93,8 @@ export const CloseDayModal: React.FC = () => {
               </div>
               <p className="text-xs text-slate-500">
                 {language === 'vi' 
-                  ? 'Quy trình 2 phút • Dời việc có chủ đích • Chuẩn bị ngày mới' 
-                  : '2-minute wrap-up • Mindful migration • Prepare next day'}
+                  ? 'Xem lại việc còn dở và chọn việc đầu tiên cho sáng mai, để tối nay nghỉ cho thảnh thơi.' 
+                  : 'Review open tasks and pick the first one for tomorrow, so you can relax tonight.'}
               </p>
             </div>
           </div>
@@ -91,6 +103,34 @@ export const CloseDayModal: React.FC = () => {
             className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* v0.3.34 Part A2.5: Two ways to close day: Khép nhanh vs Xem từng việc */}
+        <div className="flex p-1 rounded-2xl bg-slate-100 border border-slate-200/80 mb-4 text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => setCloseMethod('quick')}
+            className={`flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              closeMethod === 'quick'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Zap className={`w-3.5 h-3.5 ${closeMethod === 'quick' ? 'text-amber-600' : ''}`} />
+            <span>{language === 'vi' ? 'Khép nhanh (1 chạm)' : 'Fast Close (1-tap)'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setCloseMethod('step_by_step')}
+            className={`flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              closeMethod === 'step_by_step'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <ListChecks className={`w-3.5 h-3.5 ${closeMethod === 'step_by_step' ? 'text-blue-600' : ''}`} />
+            <span>{language === 'vi' ? 'Xem từng việc' : 'Review step-by-step'}</span>
           </button>
         </div>
 
@@ -180,64 +220,93 @@ export const CloseDayModal: React.FC = () => {
             </p>
           </div>
 
-          {/* Carry-over (Migration) for uncompleted items (Part B2 #5) */}
-          {pendingCardItems.length > 0 && (
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <RotateCw className="w-3.5 h-3.5 text-amber-600" />
-                  <span>
-                    {isPastDay
-                      ? (language === 'vi' ? 'Dời việc chưa xong sang hôm nay:' : 'Carry over remaining tasks to today:')
-                      : (language === 'vi' ? 'Dời việc còn lại sang ngày mai (Bullet Journal Migration):' : 'Carry over remaining tasks to tomorrow:')}
-                  </span>
-                </label>
-                <span className="text-[10px] text-slate-500 font-medium">
-                  {pendingCardItems.length} {language === 'vi' ? 'việc chưa gạch' : 'remaining'}
+          {/* v0.3.34 Part A2.5: Fast 1-tap close vs Step-by-step Review */}
+          {closeMethod === 'quick' ? (
+            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 space-y-3.5 shadow-xs">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-600" />
+                <span className="font-bold text-xs text-amber-950 uppercase tracking-wide">
+                  {language === 'vi' ? 'Khép nhanh một chạm' : 'One-Tap Fast Wrap-Up'}
                 </span>
               </div>
-
-              <div className="space-y-2">
-                {pendingCardItems.map((item) => (
-                  <div key={item.id} className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs shadow-xs">
-                    <span className="text-slate-800 font-medium truncate flex-1">{item.text}</span>
-                    <div className="flex items-center gap-1 shrink-0">
-                      {isPastDay ? (
-                        <button
-                          onClick={() => carryOverItem(item.id, 'today')}
-                          className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 font-semibold text-[10px] transition-colors"
-                          title={language === 'vi' ? 'Dời sang thẻ hôm nay' : 'Carry to today'}
-                        >
-                          {language === 'vi' ? 'Hôm nay' : 'Today'}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => carryOverItem(item.id, 'tomorrow')}
-                          className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 font-semibold text-[10px] transition-colors"
-                          title={language === 'vi' ? 'Dời sang thẻ ngày mai' : 'Carry to tomorrow'}
-                        >
-                          {language === 'vi' ? 'Ngày mai' : 'Tomorrow'}
-                        </button>
-                      )}
-                      <button
-                        onClick={() => carryOverItem(item.id, 'leave')}
-                        className="px-2 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-[10px] transition-colors"
-                        title={language === 'vi' ? 'Để lại thẻ này' : 'Leave on this day'}
-                      >
-                        {language === 'vi' ? 'Để lại' : 'Leave'}
-                      </button>
-                      <button
-                        onClick={() => carryOverItem(item.id, 'drop')}
-                        className="px-2 py-1 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 text-[10px] transition-colors"
-                        title={language === 'vi' ? 'Bỏ qua' : 'Drop'}
-                      >
-                        {language === 'vi' ? 'Bỏ' : 'Drop'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="text-xs text-amber-900/90 leading-relaxed">
+                {language === 'vi'
+                  ? `Toàn bộ ${pendingCardItems.length} việc còn dở sẽ được tự động dời sang ${isPastDay ? 'hôm nay' : 'ngày mai'}. Bạn có thể thảnh thơi nghỉ ngơi tối nay.`
+                  : `All ${pendingCardItems.length} open tasks will be automatically migrated to ${isPastDay ? 'today' : 'tomorrow'}.`}
+              </p>
+              <button
+                type="button"
+                onClick={handleQuickClose}
+                className="w-full py-3 px-4 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]"
+              >
+                <span>
+                  {isPastDay
+                    ? (language === 'vi' ? 'Khép nhanh & Dời sang hôm nay' : 'Fast Close & Move to Today')
+                    : (language === 'vi' ? 'Khép nhanh & Dời sang ngày mai' : 'Fast Close & Move to Tomorrow')}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
+          ) : (
+            /* Carry-over (Migration) for uncompleted items (Part B2 #5) */
+            pendingCardItems.length > 0 && (
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <RotateCw className="w-3.5 h-3.5 text-amber-600" />
+                    <span>
+                      {isPastDay
+                        ? (language === 'vi' ? 'Dời việc chưa xong sang hôm nay:' : 'Carry over remaining tasks to today:')
+                        : (language === 'vi' ? 'Dời việc còn lại sang ngày mai (Bullet Journal Migration):' : 'Carry over remaining tasks to tomorrow:')}
+                    </span>
+                  </label>
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    {pendingCardItems.length} {language === 'vi' ? 'việc chưa gạch' : 'remaining'}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {pendingCardItems.map((item) => (
+                    <div key={item.id} className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs shadow-xs">
+                      <span className="text-slate-800 font-medium truncate flex-1">{item.text}</span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {isPastDay ? (
+                          <button
+                            onClick={() => carryOverItem(item.id, 'today')}
+                            className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 font-semibold text-[10px] transition-colors"
+                            title={language === 'vi' ? 'Dời sang thẻ hôm nay' : 'Carry to today'}
+                          >
+                            {language === 'vi' ? 'Hôm nay' : 'Today'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => carryOverItem(item.id, 'tomorrow')}
+                            className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 font-semibold text-[10px] transition-colors"
+                            title={language === 'vi' ? 'Dời sang thẻ ngày mai' : 'Carry to tomorrow'}
+                          >
+                            {language === 'vi' ? 'Ngày mai' : 'Tomorrow'}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => carryOverItem(item.id, 'leave')}
+                          className="px-2 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-[10px] transition-colors"
+                          title={language === 'vi' ? 'Để lại thẻ này' : 'Leave on this day'}
+                        >
+                          {language === 'vi' ? 'Để lại' : 'Leave'}
+                        </button>
+                        <button
+                          onClick={() => carryOverItem(item.id, 'drop')}
+                          className="px-2 py-1 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 text-[10px] transition-colors"
+                          title={language === 'vi' ? 'Bỏ qua' : 'Drop'}
+                        >
+                          {language === 'vi' ? 'Bỏ' : 'Drop'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {/* Tomorrow / Morning's Top Task (Part A2 #10) */}

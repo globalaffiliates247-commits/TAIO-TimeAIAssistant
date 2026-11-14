@@ -11,10 +11,44 @@ import { toMins, toTime } from '@/features/sticky/model/timeline';
 export function buildTodaySchedule(
   blocks: TimeBlock[] = [],
   dailyCardItems: DailyCardItem[] = [],
-  today: string
+  today: string,
+  dayCloseConfig?: { enabled: boolean; time: string; activeDays: number[] }
 ): TimeBlock[] {
   // 1. Existing template blocks and user blocks from blocks array (excluding any old dc- blocks)
   const baseBlocks = (blocks || []).filter(b => !b.id.startsWith('dc-'));
+
+  // v0.3.34 Part A2.3: Synthesize day-close template block from user configuration if enabled
+  if (dayCloseConfig && dayCloseConfig.enabled) {
+    const [y, m, d] = (today || '').split('-').map(Number);
+    const dayDate = (y && m && d) ? new Date(y, m - 1, d) : new Date();
+    const dayOfWeek = dayDate.getDay();
+    if ((dayCloseConfig.activeDays || []).includes(dayOfWeek)) {
+      const hasCloseBlock = baseBlocks.some(b => 
+        b.blockKind === 'ritual' && 
+        (b.id === 'b-user-dayclose' || b.title.includes('Khép') || b.title.includes('Wrap') || b.title.includes('Đóng ngày'))
+      );
+      if (!hasCloseBlock) {
+        const closeTime = dayCloseConfig.time || '21:30';
+        const [ch, cm] = closeTime.split(':').map(Number);
+        const endMins = ((ch || 21) * 60 + (cm || 30) + 15) % 1440;
+        const endH = String(Math.floor(endMins / 60)).padStart(2, '0');
+        const endM = String(endMins % 60).padStart(2, '0');
+        baseBlocks.push({
+          id: 'b-user-dayclose',
+          title: 'Khép lại hôm nay',
+          startTime: closeTime,
+          endTime: `${endH}:${endM}`,
+          type: 'planning',
+          status: 'planned',
+          isTemplateBlock: true,
+          blockKind: 'ritual',
+          estimatedMinutes: 15,
+          ageDays: 1,
+          taskSource: 'template_schedule',
+        });
+      }
+    }
+  }
 
   // 2. Map today's timed daily card items to TimeBlock
   const todayItems = (dailyCardItems || []).filter(

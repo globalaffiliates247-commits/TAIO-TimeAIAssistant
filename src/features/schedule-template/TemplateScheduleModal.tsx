@@ -14,7 +14,8 @@ import {
   Edit3, 
   RotateCw, 
   Check, 
-  AlertCircle 
+  AlertCircle,
+  Moon
 } from 'lucide-react';
 
 export interface TemplateScheduleModalProps {
@@ -23,7 +24,7 @@ export interface TemplateScheduleModalProps {
 }
 
 export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ isOpen, onClose }) => {
-  const { blocks, setBlocks, language, palette } = useApp();
+  const { blocks, setBlocks, language, palette, dayCloseConfig, setDayCloseConfig } = useApp();
   const isCool = palette === 'cool';
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
   if (!isOpen) return null;
 
   const templateBlocks = (blocks || []).filter(
-    b => b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-ritual-close'
+    b => b.isTemplateBlock || b.blockKind === 'ritual'
   ).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const handleDelete = (id: string) => {
@@ -130,6 +131,81 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* v0.3.34 Part A2.3: Configurable Day-Close slot */}
+        <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/90 space-y-3 mb-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Moon className="w-4 h-4 text-amber-700" />
+              <span className="text-xs font-bold text-amber-950">
+                {language === 'vi' ? 'Khép ngày (Daily Wrap-Up)' : 'Daily Wrap-Up'}
+              </span>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={dayCloseConfig.enabled}
+                onChange={e => setDayCloseConfig({ ...dayCloseConfig, enabled: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+            </label>
+          </div>
+
+          {dayCloseConfig.enabled && (
+            <div className="space-y-2.5 pt-1 border-t border-amber-200/60 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-amber-900 font-medium text-[11px]">
+                  {language === 'vi' ? 'Giờ nhắc khép ngày:' : 'Reminder time:'}
+                </span>
+                <input
+                  type="time"
+                  value={dayCloseConfig.time}
+                  onChange={e => setDayCloseConfig({ ...dayCloseConfig, time: e.target.value })}
+                  className="px-2.5 py-1 rounded-lg border border-amber-300 bg-white font-mono text-xs text-slate-800 font-bold focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <span className="text-amber-900 font-medium text-[11px] block mb-1.5">
+                  {language === 'vi' ? 'Các ngày áp dụng:' : 'Active days:'}
+                </span>
+                <div className="flex items-center gap-1">
+                  {[
+                    { label: 'T2', day: 1 },
+                    { label: 'T3', day: 2 },
+                    { label: 'T4', day: 3 },
+                    { label: 'T5', day: 4 },
+                    { label: 'T6', day: 5 },
+                    { label: 'T7', day: 6 },
+                    { label: 'CN', day: 0 },
+                  ].map(({ label, day }) => {
+                    const isActive = dayCloseConfig.activeDays.includes(day);
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => {
+                          const nextDays = isActive
+                            ? dayCloseConfig.activeDays.filter(d => d !== day)
+                            : [...dayCloseConfig.activeDays, day];
+                          setDayCloseConfig({ ...dayCloseConfig, activeDays: nextDays });
+                        }}
+                        className={`flex-1 py-1 rounded-lg text-center font-bold text-[10px] transition-colors border ${
+                          isActive
+                            ? 'bg-amber-600 text-white border-amber-700'
+                            : 'bg-white text-slate-500 border-amber-200/80 hover:bg-amber-100/50'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* List of template blocks */}

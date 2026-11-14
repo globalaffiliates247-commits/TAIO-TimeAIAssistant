@@ -1,15 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   CalendarCheck,
   ArrowRight,
   Inbox,
-  X 
+  X,
+  Clock,
+  Settings
 } from 'lucide-react';
 import { TimeboxEndCard, ResultEndCard } from '@/features/checkin';
+import { SnoozePicker, type SnoozeOption } from '@/features/snooze';
 import { updateScheduleEntry } from '@/features/tasks';
+import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
 
 export const CheckInModal: React.FC = () => {
   const { 
@@ -22,57 +26,145 @@ export const CheckInModal: React.FC = () => {
     updateDailyCardItem,
     setBlocks,
     setCloseDayModalOpen,
-    setInboxModalOpen
+    setInboxModalOpen,
+    currentBlock,
+    language,
+    showToast,
+    setIsProfileModalOpen
   } = useApp();
+
+  const [isSnoozePickerOpen, setIsSnoozePickerOpen] = useState(false);
+  const [snoozeCount, setSnoozeCount] = useState(0);
 
   if (!checkInModalOpen || !checkInBlock) return null;
 
-  const waitingCount = blocks.filter(b => b.id !== checkInBlock.id && b.status === 'planned').length;
+  const todayStr = getDeviceCalendarDate();
+  const waitingTasks = dailyCardItems.filter(i => i.date === todayStr && i.status === 'open');
+  const waitingCount = waitingTasks.length;
+  const estMinutes = Math.max(2, Math.min(15, Math.ceil(waitingCount * 0.7) + 2));
 
-  // Case 1: Ritual Block (PRD v0.20 B9 - Ritual card: e.g. Close the Day)
+  const handleSnoozeAction = (opt: SnoozeOption) => {
+    setIsSnoozePickerOpen(false);
+    setSnoozeCount(prev => prev + 1);
+    const nowMins = getDeviceTimeMinutes();
+
+    let targetTime = '';
+    if (opt.type === 'minutes') {
+      const targetMins = (nowMins + (opt.minutes || 10)) % 1440;
+      targetTime = minutesToTime(targetMins);
+    } else if (opt.type === 'specific_time' && opt.timeStr) {
+      targetTime = opt.timeStr;
+    } else if (opt.type === 'after_task' && currentBlock) {
+      targetTime = currentBlock.endTime;
+    } else if (opt.type === 'tomorrow_morning') {
+      showToast(language === 'vi' ? 'Đã dời nhắc sang sáng mai trong thẻ Bắt đầu ngày.' : 'Snoozed until tomorrow morning routine.');
+      setCheckInModalOpen(false);
+      return;
+    } else if (opt.type === 'drop') {
+      showToast(language === 'vi' ? 'Đã bỏ qua khép ngày hôm nay.' : 'Day wrap-up skipped for today.');
+      setCheckInModalOpen(false);
+      return;
+    } else if (opt.type === 'defer_tomorrow') {
+      showToast(language === 'vi' ? 'Đã dời sang sáng mai.' : 'Deferred to tomorrow.');
+      setCheckInModalOpen(false);
+      return;
+    }
+
+    if (targetTime) {
+      showToast(language === 'vi' ? `Sẽ nhắc lại lúc ${targetTime}.` : `Will remind you at ${targetTime}.`);
+      setCheckInModalOpen(false);
+    }
+  };
+
+  // Case 1: Ritual Block (v0.3.34 Part A2.3 - A2.6: Khép lại hôm nay)
   if (checkInBlock.blockKind === 'ritual') {
     return (
       <div className="fixed app-bottom-sheet-safe z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
-        <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-orange-500/30 sm:border">
+        <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-orange-500/30 sm:border relative">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600 flex items-center gap-1.5">
               <CalendarCheck className="w-4 h-4" />
-              <span>Nghi thức cuối ngày (Daily Ritual)</span>
+              <span>{language === 'vi' ? 'Khép lại hôm nay' : 'Wrap up today'}</span>
             </span>
-            <button onClick={() => setCheckInModalOpen(false)} className="text-slate-500 hover:text-slate-900">
+            <button 
+              onClick={() => {
+                setCheckInModalOpen(false);
+                setIsSnoozePickerOpen(false);
+              }} 
+              className="text-slate-400 hover:text-slate-700 transition-colors"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           <div className="space-y-3 mb-6">
-            <h3 className="text-xl font-bold text-slate-900">Đến giờ Đóng ngày (2 phút)</h3>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">
+                  {language === 'vi' ? 'Đến giờ khép lại hôm nay' : 'Time to wrap up today'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {language === 'vi' 
+                    ? `khoảng ${estMinutes} phút · ${waitingCount} việc đang chờ` 
+                    : `approx ${estMinutes} mins · ${waitingCount} open tasks`}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setCheckInModalOpen(false);
+                  setIsProfileModalOpen(true);
+                }}
+                className="text-[11px] text-amber-700 hover:text-amber-800 font-semibold hover:underline shrink-0"
+                title="Cài đặt giờ khép ngày"
+              >
+                {language === 'vi' ? 'Đổi giờ nhắc khép ngày' : 'Change time'}
+              </button>
+            </div>
+
             <p className="text-xs text-slate-700 leading-relaxed">
-              Khóa tổng kết hôm nay, xác nhận các việc chờ, và chọn một nhiệm vụ quan trọng số 1 cho ngày mai để thảnh thơi nghỉ ngơi.
+              {language === 'vi'
+                ? 'Xem lại việc còn dở và chọn việc đầu tiên cho sáng mai, để tối nay nghỉ cho thảnh thơi.'
+                : 'Review open tasks and pick the first one for tomorrow, so you can relax tonight.'}
             </p>
+
             <div className="p-3 rounded-2xl bg-slate-100/60 border border-slate-200/60 text-xs text-slate-700 flex items-center justify-between">
-              <span>Đã hoàn thành: <strong>{blocks.filter(b => b.status === 'done').length} việc</strong></span>
-              <span>Việc còn chờ: <strong>{waitingCount} việc</strong></span>
+              <span>{language === 'vi' ? 'Đã hoàn thành:' : 'Done:'} <strong>{dailyCardItems.filter(i => i.date === todayStr && i.status === 'done').length} việc</strong></span>
+              <span>{language === 'vi' ? 'Việc còn chờ:' : 'Waiting:'} <strong>{waitingCount} việc</strong></span>
             </div>
           </div>
 
-          <div className="flex gap-2.5">
-            <button
-              onClick={() => {
-                setCheckInModalOpen(false);
-                setCloseDayModalOpen(true);
-              }}
-              className="flex-1 py-3 px-4 rounded-2xl bg-[#E0401F] hover:bg-[#c93517] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2"
-            >
-              <span>Mở Đóng ngày (2 phút)</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => handleCheckInAnswer('remind_10m')}
-              className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
-            >
-              Nhắc lại sau 10 phút
-            </button>
-          </div>
+          {isSnoozePickerOpen ? (
+            <div className="mb-4">
+              <SnoozePicker
+                isDayClose={true}
+                activeRunningTask={currentBlock}
+                snoozeCount={snoozeCount}
+                language={language as 'vi' | 'en'}
+                onSnooze={handleSnoozeAction}
+                onClose={() => setIsSnoozePickerOpen(false)}
+              />
+            </div>
+          ) : (
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => {
+                  setCheckInModalOpen(false);
+                  setCloseDayModalOpen(true);
+                }}
+                className="flex-1 py-3 px-4 rounded-2xl bg-[#E0401F] hover:bg-[#c93517] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-colors"
+              >
+                <span>{language === 'vi' ? 'Khép ngày bây giờ' : 'Wrap up now'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setIsSnoozePickerOpen(true)}
+                className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+              >
+                {language === 'vi' ? 'Dời…' : 'Snooze…'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

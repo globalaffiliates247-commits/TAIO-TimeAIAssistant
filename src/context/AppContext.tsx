@@ -409,6 +409,8 @@ interface AppContextType {
   addGoalWithBackplanning: (goal: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => void;
   deleteGoal: (goalId: string) => void;
   remainingSampleGoals: Goal[];
+  dayCloseConfig: { enabled: boolean; time: string; activeDays: number[] };
+  setDayCloseConfig: (cfg: { enabled: boolean; time: string; activeDays: number[] }) => void;
   dayClosed: boolean;
   closedDays: ClosedDaysMap;
   markDayClosed: (date: string, method?: 'manual' | 'auto') => void;
@@ -546,6 +548,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [closedDays, setClosedDays] = useState<ClosedDaysMap>({});
   const dayClosed = checkIsDayClosed(closedDays, getDeviceCalendarDate());
+
+  // v0.3.34 Part A2.3: User-configurable day-close time and active weekdays
+  const [dayCloseConfig, setDayCloseConfigState] = useState<{ enabled: boolean; time: string; activeDays: number[] }>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = window.localStorage.getItem('taio_day_close_config');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return {
+      enabled: true,
+      time: '21:30',
+      activeDays: [1, 2, 3, 4, 5, 6, 0],
+    };
+  });
+
+  const setDayCloseConfig = (cfg: { enabled: boolean; time: string; activeDays: number[] }) => {
+    setDayCloseConfigState(cfg);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('taio_day_close_config', JSON.stringify(cfg));
+    }
+    saveDurableState('dayCloseConfig', cfg, Date.now());
+  };
 
   const markDayClosed = (date: string, method: 'manual' | 'auto' = 'manual') => {
     setClosedDays(prev => {
@@ -1671,10 +1696,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // PRD FIX v0.3.28 A1: Unified schedule blocks (Single source of truth)
+  // PRD FIX v0.3.28 A1 & v0.3.34 A2.3: Unified schedule blocks with configurable day-close
   const scheduleBlocks: TimeBlock[] = useMemo(() => {
-    return buildTodaySchedule(blocks, dailyCardItems, getDeviceCalendarDate());
-  }, [blocks, dailyCardItems]);
+    return buildTodaySchedule(blocks, dailyCardItems, getDeviceCalendarDate(), dayCloseConfig);
+  }, [blocks, dailyCardItems, dayCloseConfig]);
 
   // Active current block (v0.3.34 Part A2.2):
   // "Việc hiện tại" chỉ là việc mà giờ hiện tại nằm trong khung (now >= start && now < end),
@@ -1904,6 +1929,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, timerMinutesRemaining, currentBlock, checkInModalOpen]);
+
+  // v0.3.34 Part A2.3: Automatic reminder for day close at configured time
+  const lastDayCloseAlertRef = useRef<string>('');
+  useEffect(() => {
+    if (!dayCloseConfig.enabled) return;
+    const interval = setInterval(() => {
+      const nowM = getDeviceTimeMinutes();
+      const todayDateStr = getDeviceCalendarDate();
+      if (checkIsDayClosed(closedDays, todayDateStr)) return;
+      if (checkInModalOpen || closeDayModalOpen) return;
+
+      const [ch, cm] = (dayCloseConfig.time || '21:30').split(':').map(Number);
+      const closeTargetMins = (ch || 21) * 60 + (cm || 30);
+      const dayOfWeek = new Date().getDay();
+      if (!(dayCloseConfig.activeDays || []).includes(dayOfWeek)) return;
+
+      // Fires when nowM is within [closeTargetMins, closeTargetMins + 5] once per day
+      if (nowM >= closeTargetMins && nowM < closeTargetMins + 5) {
+        if (lastDayCloseAlertRef.current !== todayDateStr) {
+          lastDayCloseAlertRef.current = todayDateStr;
+          const closeBlock = scheduleBlocks.find(b => b.blockKind === 'ritual') || {
+            id: 'b-user-dayclose',
+            title: 'Khép lại hôm nay',
+            startTime: dayCloseConfig.time || '21:30',
+            endTime: minutesToTime((closeTargetMins + 15) % 1440),
+            type: 'planning' as const,
+            status: 'planned' as const,
+            blockKind: 'ritual' as const,
+            isTemplateBlock: true,
+            estimatedMinutes: 15,
+            ageDays: 1,
+          };
+          setCheckInBlock(closeBlock);
+          setCheckInModalOpen(true);
+        }
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [dayCloseConfig, closedDays, checkInModalOpen, closeDayModalOpen, scheduleBlocks]);
 
   // Interruption submission
   const handleInterruptionSubmit = ({
@@ -2959,6 +3023,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addGoalWithBackplanning,
       deleteGoal,
       remainingSampleGoals,
+      dayCloseConfig,
+      setDayCloseConfig,
       dayClosed,
       closedDays,
       markDayClosed,

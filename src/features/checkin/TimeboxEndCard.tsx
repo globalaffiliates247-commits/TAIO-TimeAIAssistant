@@ -12,6 +12,7 @@ import {
 import type { TimeBlock } from '@/types';
 import { useT } from '@/i18n/useT';
 import { MotivationSticker } from '@/features/motivation';
+import { SnoozePicker, type SnoozeOption } from '@/features/snooze';
 
 export interface TimeboxEndCardProps {
   checkInBlock: TimeBlock;
@@ -33,6 +34,7 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
   const { t } = useT();
   const [showNextStepForm, setShowNextStepForm] = useState<boolean>(false);
   const [nextStepInput, setNextStepInput] = useState<string>('');
+  const [showSnoozePicker, setShowSnoozePicker] = useState<boolean>(false);
 
   const hasGoal = Boolean(checkInBlock.goalName && checkInBlock.goalName.trim() && checkInBlock.goalName !== 'Ngoài mục tiêu chính');
 
@@ -122,12 +124,35 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
               </button>
 
               <button
-                onClick={() => onAnswer('remind_10m')}
+                type="button"
+                onClick={() => setShowSnoozePicker(!showSnoozePicker)}
                 className="px-3 py-2.5 text-xs text-slate-500 hover:text-slate-900 hover:underline transition-all"
               >
-                {t('checkin.remind_10m', 'Nhắc lại sau 10 phút')}
+                {t('checkin.snooze', 'Dời…')}
               </button>
             </div>
+
+            {showSnoozePicker && (
+              <div className="pt-2">
+                <SnoozePicker
+                  taskId={checkInBlock.id}
+                  language={t('checkin.snooze', 'Dời…') === 'Dời…' ? 'vi' : 'en'}
+                  onSnooze={(opt: SnoozeOption) => {
+                    setShowSnoozePicker(false);
+                    if (opt.type === 'minutes') {
+                      onAnswer('remind_10m', opt.minutes || 10);
+                    } else if (opt.type === 'specific_time' && opt.timeStr) {
+                      onAnswer('remind_10m', 30);
+                    } else if (opt.type === 'drop') {
+                      onAnswer('stop_here');
+                    } else if (opt.type === 'defer_tomorrow') {
+                      onAnswer('continue_later', 0, 'Để ngày mai làm tiếp');
+                    }
+                  }}
+                  onClose={() => setShowSnoozePicker(false)}
+                />
+              </div>
+            )}
           </div>
         ) : (
           /* Form for "Continue later" (Zeigarnik Effect Reduction) */
