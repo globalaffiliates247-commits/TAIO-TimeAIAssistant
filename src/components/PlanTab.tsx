@@ -263,9 +263,9 @@ export const PlanTab: React.FC = () => {
                 const hasGap = prevEndMins !== null && curStartMins > prevEndMins;
                 const gapMins = hasGap ? curStartMins - prevEndMins : 0;
 
-                const isTemplate = block.isTemplateBlock || block.blockKind === 'ritual' || block.id === 'b-10' || block.id === 'b-ritual-close';
+                const isTemplate = block.isTemplateBlock || block.blockKind === 'ritual' || block.id === 'b-10' || block.id === 'b-user-dayclose' || block.id === 'b-ritual-close';
                 const conf = TYPE_CONFIG[block.type] || TYPE_CONFIG.deep;
-                const computedStatus = computeBlockStatus(block, nowMinutes);
+                const computedStatus = computeBlockStatus(block, nowMinutes, getDeviceCalendarDate());
                 const statusDisplay = getBlockStatusDisplay(computedStatus);
                 const isCompleted = computedStatus === 'done';
                 const isCurrent = computedStatus === 'in_progress';

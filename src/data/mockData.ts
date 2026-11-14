@@ -401,23 +401,6 @@ export const INITIAL_BLOCKS: TimeBlock[] = [
     ageDays: 12,
     blockKind: 'personal',
   },
-  {
-    id: 'b-ritual-close',
-    title: 'Đóng ngày làm việc & Chọn việc quan trọng ngày mai',
-    startTime: '21:30',
-    endTime: '21:32',
-    type: 'planning',
-    status: 'planned',
-    goalId: 'g-3',
-    goalName: 'Tối ưu thể lực & Duy trì năng lượng làm việc',
-    quadrant: 2,
-    isImportant: true,
-    isUrgent: false,
-    estimatedMinutes: 15,
-    ageDays: 1,
-    deadline: 'Hôm nay 21:30',
-    blockKind: 'ritual',
-  },
 ];
 
 export const INITIAL_DEADLINES: HardDeadline[] = [

@@ -12,37 +12,59 @@ export function buildTodaySchedule(
   blocks: TimeBlock[] = [],
   dailyCardItems: DailyCardItem[] = [],
   today: string,
-  dayCloseConfig?: { enabled: boolean; time: string; activeDays: number[] }
+  dayCloseConfig?: { enabled: boolean; time: string; activeDays: number[]; durationMins?: number },
+  dayCloseOverrides?: Record<string, { time: string; endTime?: string; durationMins?: number; status?: import('@/types').BlockStatus; count?: number; history?: Array<{ from: string; to: string; at: number }> }>
 ): TimeBlock[] {
-  // 1. Existing template blocks and user blocks from blocks array (excluding any old dc- blocks)
-  const baseBlocks = (blocks || []).filter(b => !b.id.startsWith('dc-'));
+  // 1. Existing template blocks and user blocks from blocks array (excluding old dc- blocks and purged mock b-ritual-close)
+  const baseBlocks = (blocks || [])
+    .filter(b => !b.id.startsWith('dc-') && b.id !== 'b-ritual-close')
+    .map(b => {
+      // Apply today's daily override if present for recurring template blocks
+      if ((b.isTemplateBlock || b.blockKind === 'ritual') && b.dailyOverrides && b.dailyOverrides[today]) {
+        const ov = b.dailyOverrides[today];
+        return {
+          ...b,
+          startTime: ov.startTime || b.startTime,
+          endTime: ov.endTime || b.endTime,
+          status: ov.status || b.status,
+          statusDate: today,
+        };
+      }
+      return b;
+    });
 
-  // v0.3.34 Part A2.3: Synthesize day-close template block from user configuration if enabled
+  // v0.3.34 Part A2.3 & v0.3.36 Part E: Single synthesized Day Close block from user configuration
   if (dayCloseConfig && dayCloseConfig.enabled) {
     const [y, m, d] = (today || '').split('-').map(Number);
     const dayDate = (y && m && d) ? new Date(y, m - 1, d) : new Date();
     const dayOfWeek = dayDate.getDay();
     if ((dayCloseConfig.activeDays || []).includes(dayOfWeek)) {
-      const hasCloseBlock = baseBlocks.some(b => 
-        b.blockKind === 'ritual' && 
-        (b.id === 'b-user-dayclose' || b.title.includes('Khép') || b.title.includes('Wrap') || b.title.includes('Đóng ngày'))
-      );
+      // PRD v0.3.36 Part E2.3: Only match exact b-user-dayclose; eliminate title string heuristic
+      const hasCloseBlock = baseBlocks.some(b => b.id === 'b-user-dayclose');
       if (!hasCloseBlock) {
-        const closeTime = dayCloseConfig.time || '21:30';
+        const todayOverride = dayCloseOverrides?.[today];
+        const closeTime = todayOverride?.time || dayCloseConfig.time || '21:30';
+        const dur = todayOverride?.durationMins || dayCloseConfig.durationMins || 15;
         const [ch, cm] = closeTime.split(':').map(Number);
-        const endMins = ((ch || 21) * 60 + (cm || 30) + 15) % 1440;
+        const endMins = ((ch || 21) * 60 + (cm || 30) + dur) % 1440;
         const endH = String(Math.floor(endMins / 60)).padStart(2, '0');
         const endM = String(endMins % 60).padStart(2, '0');
+        const effectiveStatus = todayOverride?.status || 'planned';
         baseBlocks.push({
           id: 'b-user-dayclose',
           title: 'Khép lại hôm nay',
           startTime: closeTime,
-          endTime: `${endH}:${endM}`,
+          endTime: todayOverride?.endTime || `${endH}:${endM}`,
           type: 'planning',
-          status: 'planned',
+          status: effectiveStatus,
+          statusDate: today,
+          dailyStatus: {
+            [today]: { status: effectiveStatus },
+          },
+          dailyOverrides: todayOverride ? { [today]: { ...todayOverride, status: effectiveStatus } } : undefined,
           isTemplateBlock: true,
           blockKind: 'ritual',
-          estimatedMinutes: 15,
+          estimatedMinutes: dur,
           ageDays: 1,
           taskSource: 'template_schedule',
         });

@@ -103,15 +103,51 @@ export function computeBlockStatus(
     timeboxEndOutcome?: string;
     isTemplateBlock?: boolean;
     blockKind?: string;
+    statusDate?: string;
+    dailyStatus?: Record<string, { status: BlockStatus; outcome?: string }>;
+    dailyOverrides?: Record<string, { startTime?: string; endTime?: string; status?: BlockStatus; outcome?: string }>;
   },
-  nowMinutes: number = getDeviceTimeMinutes()
+  nowMinutes: number = getDeviceTimeMinutes(),
+  currentDate: string = getDeviceCalendarDate()
 ): BlockStatus {
+  const isTemplateOrRitual = Boolean(
+    block.isTemplateBlock || 
+    block.blockKind === 'ritual' || 
+    block.id === 'b-user-dayclose' || 
+    block.id === 'b-ritual-close' || 
+    block.id === 'b-10'
+  );
+
+  let effectiveStatus = block.status;
+  let effectiveOutcome = block.timeboxEndOutcome;
+
+  // PRD v0.3.36 Part E: Template blocks and rituals have per-date status.
+  // Stored done/dropped status from yesterday must NOT carry over to today.
+  if (isTemplateOrRitual) {
+    if (block.dailyOverrides && block.dailyOverrides[currentDate]?.status) {
+      effectiveStatus = block.dailyOverrides[currentDate].status;
+      effectiveOutcome = block.dailyOverrides[currentDate].outcome;
+    } else if (block.dailyStatus && block.dailyStatus[currentDate]) {
+      effectiveStatus = block.dailyStatus[currentDate].status;
+      effectiveOutcome = block.dailyStatus[currentDate].outcome;
+    } else if (block.statusDate) {
+      if (block.statusDate !== currentDate) {
+        effectiveStatus = 'planned';
+        effectiveOutcome = undefined;
+      }
+    } else {
+      // Legacy template block with no statusDate (e.g. b-ritual-close with status: 'done' from prior session)
+      effectiveStatus = 'planned';
+      effectiveOutcome = undefined;
+    }
+  }
+
   // If user explicitly checked in, respect user outcome
-  if (block.timeboxEndOutcome === 'done_on_time' || block.timeboxEndOutcome === 'done_over_time') {
+  if (effectiveOutcome === 'done_on_time' || effectiveOutcome === 'done_over_time') {
     return 'done';
   }
-  if (block.status === 'done' || block.status === 'partly_done' || block.status === 'dropped') {
-    return block.status;
+  if (effectiveStatus === 'done' || effectiveStatus === 'partly_done' || effectiveStatus === 'dropped') {
+    return effectiveStatus;
   }
 
   const start = timeToMinutes(block.startTime);
@@ -125,11 +161,14 @@ export function computeBlockStatus(
   }
 
   // nowMinutes >= end
-  // PRD v0.3.33 Part F1.3: Fixed template blocks (eating, sleeping, commute) auto-complete as done
-  // when timebox ends without prompt (except Day Close ritual)
-  const isTemplate = block.isTemplateBlock || block.blockKind === 'ritual' || block.id === 'b-10';
-  const isCloseDayRitual = block.id === 'b-ritual-close' || (Boolean(block.title) && block.title!.toLowerCase().includes('khép ngày'));
-  if (isTemplate && !isCloseDayRitual) {
+  // PRD v0.3.33 Part F1.3 / v0.3.36 Part E: Fixed template blocks (eating, sleeping, commute)
+  // auto-complete as done when timebox ends without prompt, EXCEPT Day Close ritual
+  const isCloseDayRitual = 
+    block.id === 'b-user-dayclose' || 
+    block.id === 'b-ritual-close' || 
+    (Boolean(block.title) && (block.title!.toLowerCase().includes('khép') || block.title!.toLowerCase().includes('đóng ngày')));
+
+  if (isTemplateOrRitual && !isCloseDayRitual) {
     return 'done';
   }
 

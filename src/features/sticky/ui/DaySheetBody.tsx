@@ -4,7 +4,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import type { DailyCardItem } from '@/types';
-import { getDeviceNow, getDeviceCalendarDate } from '@/core/clock';
+import { getDeviceNow, getDeviceCalendarDate, getDeviceTimeMinutes, computeBlockStatus } from '@/core/clock';
 import { STICKY_COLORS, StickyNote } from '../model/stickyTypes';
 import {
   findGaps, fmtDuration, nextFreeStart, parseTimedText, priorityOf, suggestDuration,
@@ -79,20 +79,22 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       return scheduleBlocks
         .filter(b => Boolean(b.startTime && b.endTime) && b.status !== 'dropped')
         .filter(b => {
-          if (!showTemplateBlocks && (b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-ritual-close')) {
+          if (!showTemplateBlocks && (b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-user-dayclose' || b.id === 'b-ritual-close')) {
             return false;
           }
           return true;
         })
         .map(b => {
-          const isTemplate = Boolean(b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-ritual-close');
+          const isTemplate = Boolean(b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-user-dayclose' || b.id === 'b-ritual-close');
+          const computed = computeBlockStatus(b, getDeviceTimeMinutes(), day);
+          const isDone = computed === 'done';
           return {
             id: b.id,
             text: b.title,
             start: b.startTime,
             end: b.endTime,
             date: day,
-            status: b.status === 'done' ? ('done' as const) : ('open' as const),
+            status: isDone ? ('done' as const) : ('open' as const),
             carryCount: 0,
             origin: 'planned' as const,
             goalId: b.goalId,
