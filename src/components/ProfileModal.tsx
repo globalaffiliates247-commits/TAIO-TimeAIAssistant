@@ -35,6 +35,7 @@ import { AlarmSettingsSection } from '../features/alarm';
 import { MotivationSettingsSection } from '@/features/motivation';
 import { SyncSection } from '../features/sync/ui/SyncSection';
 import { PairSection } from '../features/sync/ui/PairSection';
+import { VersionLabel } from '@/components/header/VersionLabel';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -44,6 +45,8 @@ export const ProfileModal: React.FC = () => {
     updateUserProfileDetail,
     profile,
     setProfile,
+    language,
+    setLanguage,
     deviceLook,
     setDeviceLook,
     themeMode,
@@ -422,6 +425,30 @@ export const ProfileModal: React.FC = () => {
                   >
                     <span>Gam màu Mát (Cool Blue #007aff)</span>
                     <span className="w-3.5 h-3.5 rounded-full bg-[#007aff]" />
+                  </button>
+                </div>
+
+                {/* Language Switcher (Part C1.5) */}
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('vi')}
+                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
+                      language === 'vi' ? 'bg-amber-50 border-amber-500 text-slate-900 font-bold' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                    }`}
+                  >
+                    <span>Tiếng Việt</span>
+                    <span className="text-xs">🇻🇳</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('en')}
+                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
+                      language === 'en' ? 'bg-amber-50 border-amber-500 text-slate-900 font-bold' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                    }`}
+                  >
+                    <span>English</span>
+                    <span className="text-xs">🇬🇧</span>
                   </button>
                 </div>
               </div>
@@ -829,6 +856,11 @@ export const ProfileModal: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Version label at bottom of Cá nhân (Part C1.3) */}
+            <div className="pt-6 border-t border-slate-100">
+              <VersionLabel placement="inline" />
+            </div>
           </div>
         </div>
       </div>
