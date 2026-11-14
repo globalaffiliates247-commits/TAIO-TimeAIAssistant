@@ -4,6 +4,8 @@ import {
   AppList,
   ListItem,
   DailyCardItem,
+  ItemStatus,
+  ItemOrigin,
   InterruptionRecord,
   UserProfileDetail,
   UserProfile,
@@ -20,6 +22,7 @@ import { getDeviceCalendarDate } from '@/core/clock';
 import { PROFILES } from '../../../data/mockData';
 import { toEpochMs } from '../../../core/storage/durableStorage';
 import { loadUserMotivationState, saveUserMotivationState } from '@/features/motivation';
+import { loadTombstones, mergeTombstones, type Tombstone } from './tombstones';
 
 export interface ExportedDayBlockResult {
   id?: string;
@@ -104,6 +107,9 @@ export interface TaioExportV1 {
   tasks?: Array<Record<string, unknown>>;
   dayTemplate?: Array<Record<string, unknown>>;
   days?: Array<Record<string, unknown>>;
+  journalItems?: Array<Record<string, unknown>>;
+  deletedItems?: Array<{ id: string; deletedAt: number }>;
+  todayJournalSummary?: { date: string; count: number; hash: string };
   notes?: string[];
   [key: string]: unknown;
 }
@@ -418,12 +424,20 @@ export function applyTaioImport(
   let nextLists: AppList[] = mode === 'replace' ? [] : [...currentState.lists];
   let nextListItems: ListItem[] = mode === 'replace' ? [] : [...currentState.listItems];
   let nextBlocks: TimeBlock[] = mode === 'replace' ? [] : [...currentState.blocks];
-  let nextDailyCards: DailyCardItem[] = mode === 'replace' ? [] : [...currentState.dailyCardItems];
+  // PRD v0.3.36 Part F2.5: If replace mode but payload lacks journalItems, retain local cards
+  let nextDailyCards: DailyCardItem[] = mode === 'replace'
+    ? (Array.isArray(payload.journalItems) ? [] : [...currentState.dailyCardItems])
+    : [...currentState.dailyCardItems];
   let nextInterruptions: InterruptionRecord[] = mode === 'replace' ? [] : [...currentState.interruptions];
   let nextBacklogCards: BacklogCard[] = mode === 'replace' ? [] : [...currentState.backlogCards];
   let nextDayTemplate: DayTemplateSlot[] = mode === 'replace' ? [] : [...currentState.dayTemplate];
   let nextImportedDays: ExportedDayRecord[] = mode === 'replace' ? [] : [...currentState.importedDays];
   let nextClosedDays: ClosedDaysMap = mode === 'replace' ? {} : { ...(currentState.closedDays || {}) };
+
+  // Merge incoming tombstones (PRD v0.3.36 Part F2.3)
+  if (Array.isArray(payload.deletedItems)) {
+    mergeTombstones(payload.deletedItems as Tombstone[]);
+  }
 
   if (payload.closedDays && typeof payload.closedDays === 'object') {
     if (mode === 'replace') nextClosedDays = {};
@@ -864,9 +878,9 @@ export function applyTaioImport(
       const taskBlock: TimeBlock = {
         id: tId,
         title: tTitle,
-        startTime: '',
-        endTime: '',
-        type: gId ? 'deep' : 'interruption',
+        startTime: typeof rawTask.startTime === 'string' ? rawTask.startTime : '',
+        endTime: typeof rawTask.endTime === 'string' ? rawTask.endTime : '',
+        type: (rawTask.type as any) || (gId ? 'deep' : 'interruption'),
         status: rawTask.status === 'done' ? 'done' : rawTask.status === 'dropped' ? 'dropped' : 'planned',
         goalId: gId,
         goalName: gId ? goalNameMap.get(gId) : undefined,
@@ -881,7 +895,8 @@ export function applyTaioImport(
         taskSource: typeof rawTask.source === 'string' ? rawTask.source : 'matrix',
         carryFrom: typeof rawTask.carryFrom === 'string' ? rawTask.carryFrom : undefined,
         createdAt: createdAtStr,
-        isTemplateBlock: false,
+        isTemplateBlock: Boolean(rawTask.isTemplateBlock),
+        blockKind: typeof rawTask.blockKind === 'string' ? (rawTask.blockKind as any) : undefined,
         updatedAt: tTs,
         extra: {
           ...(extractExtra(rawTask, [
@@ -1114,6 +1129,70 @@ export function applyTaioImport(
     }
   }
 
+  // 7b. Journal Items (DailyCardItems) - PRD v0.3.36 Part F: Synchronize journal across devices
+  const journalCounters = { added: 0, updated: 0, skipped: 0 };
+  if (Array.isArray(payload.journalItems)) {
+    const tombstones = loadTombstones();
+    const tombstoneMap = new Map(tombstones.map(t => [t.id, t.deletedAt]));
+
+    for (const rawJ of payload.journalItems) {
+      if (!rawJ || typeof rawJ !== 'object') continue;
+      const jObj = rawJ as Record<string, unknown>;
+      if (typeof jObj.id !== 'string' || typeof jObj.text !== 'string') continue;
+
+      const incomingTs = toEpochMs(jObj.updatedAt as string | number | undefined) || fileExportedTs;
+      const delAt = tombstoneMap.get(jObj.id);
+      if (delAt && incomingTs <= delAt) {
+        // Was deleted on this or another device
+        continue;
+      }
+
+      const cardItem: DailyCardItem = {
+        id: jObj.id,
+        text: jObj.text,
+        date: typeof jObj.date === 'string' ? jObj.date : getDeviceCalendarDate(),
+        start: typeof jObj.start === 'string' ? jObj.start : undefined,
+        end: typeof jObj.end === 'string' ? jObj.end : undefined,
+        status: (['open', 'done', 'carried', 'left', 'dropped'].includes(jObj.status as string)
+          ? jObj.status
+          : 'open') as ItemStatus,
+        goalId: typeof jObj.goalId === 'string' ? jObj.goalId : undefined,
+        goalName: typeof jObj.goalName === 'string' ? jObj.goalName : undefined,
+        milestoneId: typeof jObj.milestoneId === 'string' ? jObj.milestoneId : undefined,
+        milestoneName: typeof jObj.milestoneName === 'string' ? jObj.milestoneName : undefined,
+        carriedFromId: typeof jObj.carriedFromId === 'string' ? jObj.carriedFromId : undefined,
+        carryCount: typeof jObj.carryCount === 'number' ? jObj.carryCount : 0,
+        origin: (['planned', 'basket', 'unplanned_goal', 'unplanned_outside'].includes(jObj.origin as string)
+          ? jObj.origin
+          : 'planned') as ItemOrigin,
+        note: typeof jObj.note === 'string' ? jObj.note : undefined,
+        nextStep: typeof jObj.nextStep === 'string' ? jObj.nextStep : undefined,
+        timeUsedFor: typeof jObj.timeUsedFor === 'string' ? jObj.timeUsedFor : undefined,
+        movedTo: typeof jObj.movedTo === 'string' ? jObj.movedTo : undefined,
+        isTemplateBlock: Boolean(jObj.isTemplateBlock),
+        parallelOf: typeof jObj.parallelOf === 'string' ? jObj.parallelOf : undefined,
+        children: Array.isArray(jObj.children) ? (jObj.children as any) : undefined,
+        extensions: Array.isArray(jObj.extensions) ? (jObj.extensions as any) : undefined,
+        snoozeCount: typeof jObj.snoozeCount === 'number' ? jObj.snoozeCount : undefined,
+        snoozeHistory: Array.isArray(jObj.snoozeHistory) ? (jObj.snoozeHistory as any) : undefined,
+        updatedAt: incomingTs,
+        extra: jObj.extra && typeof jObj.extra === 'object' ? (jObj.extra as Record<string, unknown>) : undefined,
+      };
+
+      nextDailyCards = mergeItemById(nextDailyCards, cardItem, incomingTs, mode, journalCounters);
+    }
+  }
+
+  // Purge any cards deleted by tombstones (PRD v0.3.36 Part F2.3)
+  const activeTombstones = loadTombstones();
+  if (activeTombstones.length > 0) {
+    const tombstoneMap = new Map(activeTombstones.map(t => [t.id, t.deletedAt]));
+    nextDailyCards = nextDailyCards.filter(c => {
+      const delAt = tombstoneMap.get(c.id);
+      return !delAt || toEpochMs(c.updatedAt) > delAt;
+    });
+  }
+
   // 8. Rebuild 24-hour TimeLedger from dayTemplate if dayTemplate was provided
   let nextTimeLedger = currentState.timeLedger;
   if (nextDayTemplate.length > 0) {
@@ -1148,7 +1227,8 @@ export function applyTaioImport(
     breakdown.lists.added +
     breakdown.tasks.added +
     breakdown.dayTemplate.added +
-    breakdown.days.added;
+    breakdown.days.added +
+    journalCounters.added;
 
   const totalUpdated =
     breakdown.goals.updated +
@@ -1156,7 +1236,8 @@ export function applyTaioImport(
     breakdown.lists.updated +
     breakdown.tasks.updated +
     breakdown.dayTemplate.updated +
-    breakdown.days.updated;
+    breakdown.days.updated +
+    journalCounters.updated;
 
   const totalSkipped =
     breakdown.goals.skipped +
@@ -1164,7 +1245,8 @@ export function applyTaioImport(
     breakdown.lists.skipped +
     breakdown.tasks.skipped +
     breakdown.dayTemplate.skipped +
-    breakdown.days.skipped;
+    breakdown.days.skipped +
+    journalCounters.skipped;
 
   return {
     nextState: {
@@ -1264,7 +1346,8 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
       };
     });
 
-  const matrixTasks = state.blocks.filter(b => !b.isTemplateBlock);
+  // PRD v0.3.36 Part F2.4: Export all blocks including template & fixed blocks (except purged b-ritual-close)
+  const matrixTasks = (state.blocks || []).filter(b => b.id !== 'b-ritual-close');
   const exportedTasks = matrixTasks.map(t => {
     const rawEst = t.extra && 'rawEstimateMin' in t.extra ? t.extra.rawEstimateMin : t.estimatedMinutes ?? null;
     const cleanExtra = { ...(t.extra || {}) };
@@ -1277,6 +1360,11 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
       ...cleanExtra,
       id: t.id,
       title: t.title,
+      startTime: t.startTime || '',
+      endTime: t.endTime || '',
+      isTemplateBlock: t.isTemplateBlock || false,
+      blockKind: t.blockKind || null,
+      type: t.type || 'deep',
       goalId: t.goalId || null,
       estimateMin: rawEst,
       deadline: t.deadline || null,
@@ -1286,8 +1374,53 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
       source: t.taskSource || 'matrix',
       ...(t.notes ? { note: t.notes } : {}),
       ...(t.carryFrom ? { carryFrom: t.carryFrom } : {}),
+      updatedAt: t.updatedAt || Date.now(),
     };
   });
+
+  // PRD v0.3.36 Part F2.1: Export full journal items (dailyCardItems)
+  const exportedJournalItems = (state.dailyCardItems || []).map(item => ({
+    id: item.id,
+    text: item.text,
+    date: item.date,
+    start: item.start || null,
+    end: item.end || null,
+    status: item.status,
+    goalId: item.goalId || null,
+    goalName: item.goalName || null,
+    milestoneId: item.milestoneId || null,
+    milestoneName: item.milestoneName || null,
+    carriedFromId: item.carriedFromId || null,
+    carryCount: item.carryCount || 0,
+    origin: item.origin || 'planned',
+    note: item.note || null,
+    nextStep: item.nextStep || null,
+    timeUsedFor: item.timeUsedFor || null,
+    movedTo: item.movedTo || null,
+    isTemplateBlock: item.isTemplateBlock || false,
+    parallelOf: item.parallelOf || null,
+    children: item.children || null,
+    extensions: item.extensions || null,
+    snoozeCount: item.snoozeCount || 0,
+    snoozeHistory: item.snoozeHistory || null,
+    updatedAt: item.updatedAt || Date.now(),
+    extra: item.extra || null,
+  }));
+
+  // PRD v0.3.36 Part F2.7: Verification hash of today's journal
+  const todayStr = getDeviceCalendarDate();
+  const todayCards = (state.dailyCardItems || []).filter(c => c.date === todayStr);
+  const hashInput = todayCards.map(c => `${c.id}:${c.status}:${c.text}`).sort().join('|');
+  let todayHash = 0x811c9dc5;
+  for (let i = 0; i < hashInput.length; i++) {
+    todayHash ^= hashInput.charCodeAt(i);
+    todayHash = Math.imul(todayHash, 0x01000193);
+  }
+  const todayJournalSummary = {
+    date: todayStr,
+    count: todayCards.length,
+    hash: (todayHash >>> 0).toString(16),
+  };
 
   const exportedDayTemplate = state.dayTemplate.map(slot => ({
     ...(slot.extra || {}),
@@ -1348,6 +1481,9 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
     dayTemplate: exportedDayTemplate,
     days: exportedDays,
     closedDays: state.closedDays || {},
+    journalItems: exportedJournalItems,
+    deletedItems: loadTombstones(),
+    todayJournalSummary,
     motivation: loadUserMotivationState(),
   };
 }

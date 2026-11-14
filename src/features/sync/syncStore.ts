@@ -18,6 +18,9 @@ export interface SyncStatus {
   state: 'off' | 'idle' | 'syncing' | 'error';
   message?: string;
   lastSyncAt?: number;
+  sentJournal?: number;
+  receivedJournal?: number;
+  isMismatched?: boolean;
 }
 
 function defaultName(): string {

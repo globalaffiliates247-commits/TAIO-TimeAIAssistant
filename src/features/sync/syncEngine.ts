@@ -22,6 +22,8 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
   running = true;
   setSyncStatus({ state: 'syncing', lastSyncAt: undefined });
   let applied = false;
+  let receivedJournalCount = 0;
+  let isMismatched = false;
   try {
     // 0. Record local edits made since the last round (their time = now), so a pull cannot overwrite them
     if (!s.joinPending) stampPayload(deps.getPayload());
@@ -31,6 +33,8 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
     const seen = { ...s.seen };
     const sorted = [...rows].sort((a, b) => a.client_updated_at - b.client_updated_at);
     const newest = sorted[sorted.length - 1];
+    let latestRemoteSummary: { date: string; count: number; hash: string } | undefined;
+
     for (const row of sorted) {
       const replace = !!s.joinPending && row === newest;
       if (!replace && (seen[row.device_id] ?? 0) >= row.client_updated_at) continue;
@@ -40,8 +44,17 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
       } catch {
         throw new Error('Không giải mã được dữ liệu từ máy khác. Kiểm tra lại mã đồng bộ.');
       }
+      if (payload.todayJournalSummary && typeof payload.todayJournalSummary === 'object') {
+        latestRemoteSummary = payload.todayJournalSummary;
+      }
       const summary = deps.applyPayload(replace ? payload : dropOlderThanLocal(payload), replace ? 'replace' : 'merge');
-      if (summary && (replace || summary.added + summary.updated > 0)) applied = true;
+      if (summary) {
+        if (replace || summary.added + summary.updated > 0) applied = true;
+        const jBreakdown = (summary.breakdown as any)?.journalItems;
+        if (jBreakdown) {
+          receivedJournalCount += (jBreakdown.added || 0) + (jBreakdown.updated || 0);
+        }
+      }
       seen[row.device_id] = row.client_updated_at;
     }
     updateSyncSettings({
@@ -50,9 +63,21 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
       devices: rows.map(r => ({ id: r.device_id, name: r.device_name || 'Thiết bị', ts: r.client_updated_at })),
     });
 
+    const currentLocalPayload = deps.getPayload();
+    const sentJournalCount = currentLocalPayload.journalItems?.length || 0;
+
+    // Check verification hash (PRD v0.3.36 Part F2.7)
+    if (latestRemoteSummary && currentLocalPayload.todayJournalSummary) {
+      if (latestRemoteSummary.date === currentLocalPayload.todayJournalSummary.date) {
+        if (latestRemoteSummary.hash !== currentLocalPayload.todayJournalSummary.hash) {
+          isMismatched = true;
+        }
+      }
+    }
+
     // 2. Push (skipped right after applying remote data: React state updates on the next render)
     if (!applied) {
-      const stamped = stampPayload(deps.getPayload());
+      const stamped = stampPayload(currentLocalPayload);
       const fp = payloadFingerprint(stamped);
       if (fp !== getSyncSettings().lastPushHash) {
         const { iv, ciphertext } = await encryptJson(s.code, stamped);
@@ -60,7 +85,13 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
         updateSyncSettings({ lastPushHash: fp });
       }
     }
-    setSyncStatus({ state: 'idle', lastSyncAt: Date.now() });
+    setSyncStatus({
+      state: 'idle',
+      lastSyncAt: Date.now(),
+      sentJournal: sentJournalCount,
+      receivedJournal: receivedJournalCount,
+      isMismatched,
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const offline = /Failed to fetch|NetworkError|Load failed/i.test(msg);

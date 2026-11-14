@@ -76,11 +76,23 @@ export const SyncSection: React.FC = () => {
     <div className={card}>
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-bold text-slate-900">Đồng bộ giữa các máy · đang bật</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-xs font-bold text-slate-900">Đồng bộ giữa các máy · đang bật</p>
+            {status.isMismatched && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-300">
+                ● Hai máy chưa khớp
+              </span>
+            )}
+          </div>
           <p className="text-[11px] text-slate-600">
             {status.state === 'syncing' ? 'Đang đồng bộ…'
               : status.state === 'error' ? status.message
               : `Lần gần nhất: ${timeAgo(status.lastSyncAt)}`}
+            {typeof status.sentJournal === 'number' && typeof status.receivedJournal === 'number' && (
+              <span className="block text-[10px] text-slate-500 mt-0.5">
+                Đã gửi {status.sentJournal} việc nhật ký, nhận {status.receivedJournal}
+              </span>
+            )}
           </p>
         </div>
         <button className={btn} onClick={() => requestSyncNow()} aria-label="Đồng bộ ngay">

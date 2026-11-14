@@ -21,6 +21,7 @@ import {
   ExportedDayRecord,
   TaioImportSummary,
   TaioExportV1,
+  recordTombstone,
 } from '../features/data-transfer';
 import { useSyncLoop } from '../features/sync/useSyncLoop';
 import i18n from '../i18n';
@@ -1360,6 +1361,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const removeDailyCardItem = (id: string) => {
+    recordTombstone(id);
     setDailyCardItems(prev => {
       const next = prev.filter(it => it.id !== id);
       saveDurableState('dailyCardItems', next, Date.now());
