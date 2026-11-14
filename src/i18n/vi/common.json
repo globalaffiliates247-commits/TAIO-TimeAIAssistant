@@ -234,6 +234,25 @@
   },
   "motivation": {
     "startDayTitle": "Bắt đầu ngày",
-    "startDayBtn": "Bắt đầu"
+    "startDayBtn": "Bắt đầu",
+    "masterTitle": "Câu truyền động lực",
+    "enabledToast": "Đã bật câu truyền động lực",
+    "disabledToast": "Đã tắt câu truyền động lực",
+    "slot_clock_idle": "Trên đồng hồ",
+    "slot_clock_idle_desc": "Hiện 1 dòng câu động lực trên đồng hồ mini và đồng hồ lúc trống",
+    "slot_free_sheet": "Trên thẻ Đang làm",
+    "slot_free_sheet_desc": "Hiện 1 dòng câu động lực dưới thẻ việc đang làm ở màn Lúc này",
+    "slot_start_day_sheet": "Đầu tờ Ghi nhanh \"Hôm nay\"",
+    "slot_start_day_sheet_desc": "Dán nhãn câu động lực ở đầu tờ ghi chú hôm nay",
+    "slot_close_day": "Thẻ tổng kết khi Chốt ngày",
+    "slot_close_day_desc": "Hiện thẻ câu truyền cảm hứng khi kết thúc ngày",
+    "slot_goals_tab": "Tab Mục tiêu & Lộ trình",
+    "slot_goals_tab_desc": "Hiện thẻ câu động lực đầu danh sách mục tiêu",
+    "slot_task_done": "Thẻ hết giờ khi bấm Xong",
+    "slot_task_done_desc": "Một câu ghi nhận ngắn khi hoàn thành việc",
+    "slot_alarm_start": "Màn hình chuông báo đầu khung",
+    "slot_alarm_start_desc": "Hiện dòng nhắc nhở dưới tên việc khi chuông reo",
+    "slot_widget": "Widget & Màn hình khóa iPhone",
+    "slot_widget_desc": "Hiện câu khi không có việc đang đếm ngược"
   }
 }

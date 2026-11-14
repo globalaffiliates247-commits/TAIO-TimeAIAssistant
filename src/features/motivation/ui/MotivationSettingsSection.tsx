@@ -45,14 +45,19 @@ export const MotivationSettingsSection: React.FC = () => {
 
   const slotLabels: { key: keyof MotivationSettings['slots']; label: string; desc: string }[] = [
     {
+      key: 'clock_idle',
+      label: t('motivation.slot_clock_idle', 'Trên đồng hồ'),
+      desc: t('motivation.slot_clock_idle_desc', 'Hiện 1 dòng câu động lực trên đồng hồ mini và đồng hồ lúc trống'),
+    },
+    {
+      key: 'free_sheet',
+      label: t('motivation.slot_free_sheet', 'Trên thẻ Đang làm'),
+      desc: t('motivation.slot_free_sheet_desc', 'Hiện 1 dòng câu động lực dưới thẻ việc đang làm ở màn Lúc này'),
+    },
+    {
       key: 'start_day_sheet',
       label: t('motivation.slot_start_day_sheet', 'Đầu tờ Ghi nhanh "Hôm nay"'),
       desc: t('motivation.slot_start_day_sheet_desc', 'Dán nhãn câu động lực ở đầu tờ ghi chú hôm nay'),
-    },
-    {
-      key: 'clock_idle',
-      label: t('motivation.slot_clock_idle', 'Đồng hồ khi ở trạng thái "Trống" hoặc hết việc'),
-      desc: t('motivation.slot_clock_idle_desc', 'Hiện 1 dòng câu gợi ý khi không có việc đang chạy'),
     },
     {
       key: 'close_day',
@@ -73,11 +78,6 @@ export const MotivationSettingsSection: React.FC = () => {
       key: 'alarm_start',
       label: t('motivation.slot_alarm_start', 'Màn hình chuông báo đầu khung'),
       desc: t('motivation.slot_alarm_start_desc', 'Hiện dòng nhắc nhở dưới tên việc khi chuông reo'),
-    },
-    {
-      key: 'free_sheet',
-      label: t('motivation.slot_free_sheet', 'Tờ ghi chú tự do'),
-      desc: t('motivation.slot_free_sheet_desc', 'Cho phép gắn nhãn động lực đầu tờ tự do'),
     },
     {
       key: 'widget',

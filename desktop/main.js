@@ -151,7 +151,7 @@ function createQuickNoteWindow() {
   quickNoteWindow.on('closed', () => { quickNoteWindow = null; });
 }
 
-// PRD FIX v0.3.28 C2: Frameless Clock Window (⌥⌘T)
+// PRD FIX v0.3.33 Part I: Frameless Dual-View Floating Clock (⌥⌘T)
 function createClockWindow() {
   if (clockWindow && !clockWindow.isDestroyed()) {
     clockWindow.show();
@@ -159,15 +159,15 @@ function createClockWindow() {
     return;
   }
 
-  const bounds = clockWindowBounds || { width: 240, height: 150 };
+  const bounds = clockWindowBounds || { width: 260, height: 140 };
 
   clockWindow = new BrowserWindow({
     width: bounds.width,
     height: bounds.height,
-    minWidth: 220,
-    minHeight: 140,
-    maxWidth: 320,
-    maxHeight: 200,
+    minWidth: 180,
+    minHeight: 110,
+    maxWidth: 420,
+    maxHeight: 420,
     x: bounds.x,
     y: bounds.y,
     frame: false,
@@ -177,285 +177,46 @@ function createClockWindow() {
     skipTaskbar: true,
     show: false,
     transparent: false,
-    backgroundColor: '#ffffff',
-    titleBarStyle: 'hidden',
-    webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'preload.js') },
+    backgroundColor: "#ffffff",
+    webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, "preload.js") },
   });
 
-  clockWindow.on('resize', () => {
+  // macOS: hide traffic lights to prevent covering app buttons and title (Part I1.1 / I2.1)
+  if (process.platform === "darwin" && typeof clockWindow.setWindowButtonVisibility === "function") {
+    clockWindow.setWindowButtonVisibility(false);
+  }
+
+  clockWindow.on("resize", () => {
     if (clockWindow && !clockWindow.isDestroyed()) {
       clockWindowBounds = clockWindow.getBounds();
     }
   });
-  clockWindow.on('move', () => {
+  clockWindow.on("move", () => {
     if (clockWindow && !clockWindow.isDestroyed()) {
       clockWindowBounds = clockWindow.getBounds();
     }
   });
 
-  const clockHTML = `
-  <!DOCTYPE html>
-  <html><head><meta charset="utf-8">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-      background: #ffffff;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 10px 14px 12px 14px;
-      -webkit-app-region: drag;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 20px;
-    }
-    .actions-top {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      -webkit-app-region: no-drag;
-    }
-    .icon-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 11px;
-      color: #64748b;
-      padding: 2px 4px;
-      border-radius: 6px;
-      line-height: 1;
-    }
-    .icon-btn:hover { background: #f1f5f9; color: #0f172a; }
-    .icon-btn.active { color: #e0401f; font-weight: 700; }
-    .task-title {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #1e293b;
-      text-align: center;
-      line-height: 1.25;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin: 2px 0;
-      padding: 0 4px;
-    }
-    .timer-display {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin: 2px 0;
-    }
-    .time-digits {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', monospace;
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #0f172a;
-    }
-    .progress-track {
-      width: 100%;
-      height: 3px;
-      background: #f1f5f9;
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 6px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: #e0401f;
-      width: 100%;
-      transition: width 1s linear;
-    }
-    .bottom-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      -webkit-app-region: no-drag;
-    }
-    .btn {
-      flex: 1;
-      height: 26px;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #334155;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-    .btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
-    .btn.primary {
-      background: #e0401f;
-      color: #ffffff;
-      border: none;
-    }
-    .btn.primary:hover { background: #c83618; }
-  </style></head><body>
-    <div class="header">
-      <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">TAIO Clock</div>
-      <div class="actions-top">
-        <button id="pinBtn" class="icon-btn active" title="Ghim luôn nổi trên cùng">📌</button>
-        <button class="icon-btn" onclick="window.close()" title="Đóng">&times;</button>
-      </div>
-    </div>
+  // Load external clean HTML file (Part I2.5)
+  clockWindow.loadFile(path.join(__dirname, "clock/clock.html"));
 
-    <div class="task-title" id="title">Chưa có việc đang làm</div>
-
-    <div class="timer-display">
-      <div class="time-digits" id="digits">00:00</div>
-    </div>
-
-    <!-- PRD FIX v0.3.30 Part E2.4: Free timer row on detached floating clock -->
-    <div id="freeTimerRow" style="display: none; font-size: 11px; color: #b45309; background: #fffbeb; padding: 3px 6px; border-radius: 6px; margin: 2px 0 4px; align-items: center; justify-content: space-between; overflow: hidden; border: 1px solid #fef3c7;">
-      <span id="freeTimerTitle" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;"></span>
-      <span id="freeTimerDigits" style="font-family: monospace; font-weight: 700; margin-left: 4px;"></span>
-    </div>
-
-    <div class="progress-track">
-      <div class="progress-fill" id="progress"></div>
-    </div>
-
-    <div class="bottom-bar">
-      <button class="btn" id="btnExtend">+5p</button>
-      <button class="btn primary" id="btnDone">✓ Xong</button>
-    </div>
-
-    <script>
-      let endsAt = 0;
-      let startedAt = 0;
-      let isPinned = true;
-
-      const titleEl = document.getElementById('title');
-      const digitsEl = document.getElementById('digits');
-      const progressEl = document.getElementById('progress');
-      const pinBtn = document.getElementById('pinBtn');
-      const btnExtend = document.getElementById('btnExtend');
-      const btnDone = document.getElementById('btnDone');
-
-      let mode = 'task';
-      let subtitle = '';
-
-      function updateUI(data) {
-        if (!data) return;
-        mode = data.mode || 'task';
-        subtitle = data.subtitle || '';
-        if (data.title) titleEl.innerText = data.title;
-        if (data.endsAt) endsAt = data.endsAt;
-        if (data.startedAt) startedAt = data.startedAt;
-
-        const bottomBar = document.querySelector('.bottom-bar');
-        const progressTrack = document.querySelector('.progress-track');
-        const freeTimerRow = document.getElementById('freeTimerRow');
-        const freeTimerTitle = document.getElementById('freeTimerTitle');
-        const freeTimerDigits = document.getElementById('freeTimerDigits');
-
-        if (data.freeTimer && freeTimerRow) {
-          freeTimerRow.style.display = 'flex';
-          if (freeTimerTitle) freeTimerTitle.innerText = data.freeTimer.title;
-          if (freeTimerDigits) freeTimerDigits.innerText = data.freeTimer.timeStr;
-        } else if (freeTimerRow) {
-          freeTimerRow.style.display = 'none';
-        }
-
-        if (mode === 'template_or_current') {
-          titleEl.innerText = 'Hiện tại: ' + (data.title || '');
-          digitsEl.innerText = subtitle || 'TAIO Time';
-          digitsEl.style.fontSize = '15px';
-          if (bottomBar) bottomBar.style.display = 'none';
-          if (progressTrack) progressTrack.style.display = 'none';
-        } else if (mode === 'gap') {
-          titleEl.innerText = 'Trống (' + subtitle + ')';
-          digitsEl.style.fontSize = '24px';
-          if (bottomBar) bottomBar.style.display = 'none';
-          if (progressTrack) progressTrack.style.display = 'block';
-          tick();
-        } else {
-          digitsEl.style.fontSize = '24px';
-          if (bottomBar) bottomBar.style.display = 'flex';
-          if (progressTrack) progressTrack.style.display = 'block';
-          tick();
-        }
-      }
-
-      function tick() {
-        if (mode === 'template_or_current') return;
-        const now = Date.now();
-        if (!endsAt || endsAt <= now) {
-          digitsEl.innerText = '00:00';
-          progressEl.style.width = '0%';
-          return;
-        }
-        const diffSec = Math.max(0, Math.floor((endsAt - now) / 1000));
-        const h = Math.floor(diffSec / 3600);
-        const m = Math.floor((diffSec % 3600) / 60);
-        const s = diffSec % 60;
-        if (h > 0) {
-          digitsEl.innerText = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        } else {
-          digitsEl.innerText = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        }
-
-        if (startedAt && endsAt > startedAt) {
-          const pct = Math.max(0, Math.min(100, ((endsAt - now) / (endsAt - startedAt)) * 100));
-          progressEl.style.width = pct + '%';
-        }
-      }
-
-      setInterval(tick, 1000);
-
-      // Listen for window state or timer sync
-      window.addEventListener('message', (e) => {
-        if (e.data && e.data.type === 'sync') updateUI(e.data.payload);
-      });
-
-      pinBtn.addEventListener('click', () => {
-        isPinned = !isPinned;
-        pinBtn.classList.toggle('active', isPinned);
-        if (window.taioAPI && window.taioAPI.sendTimerAction) {
-          window.taioAPI.sendTimerAction({ type: 'toggle-pin', pinned: isPinned });
-        }
-      });
-
-      btnExtend.addEventListener('click', () => {
-        if (window.taioAPI && window.taioAPI.sendTimerAction) {
-          window.taioAPI.sendTimerAction({ type: 'extend', minutes: 5 });
-        }
-      });
-
-      btnDone.addEventListener('click', () => {
-        if (window.taioAPI && window.taioAPI.sendTimerAction) {
-          window.taioAPI.sendTimerAction({ type: 'done' });
-        }
-      });
-    </script>
-  </body></html>`;
-
-  clockWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(clockHTML));
-  clockWindow.once('ready-to-show', () => {
+  clockWindow.once("ready-to-show", () => {
     clockWindow.show();
     syncClockWindowData();
   });
 
-  clockWindow.on('moved', () => {
-    if (clockWindow) clockWindowBounds = clockWindow.getBounds();
-  });
-  clockWindow.on('closed', () => { clockWindow = null; });
+  clockWindow.on("closed", () => { clockWindow = null; });
 }
+
+ipcMain.on("taio-open-today-journal", (_event, taskId) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.show();
+    mainWindow.focus();
+    mainWindow.webContents.send("taio-open-today-journal", taskId);
+  } else {
+    createQuickNoteWindow();
+  }
+});
 
 function syncClockWindowData() {
   if (!clockWindow || clockWindow.isDestroyed() || !clockWindow.webContents) return;

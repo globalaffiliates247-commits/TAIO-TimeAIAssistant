@@ -234,6 +234,25 @@
   },
   "motivation": {
     "startDayTitle": "Start the Day",
-    "startDayBtn": "Start"
+    "startDayBtn": "Start",
+    "masterTitle": "Motivational Quotes",
+    "enabledToast": "Motivational quotes enabled",
+    "disabledToast": "Motivational quotes disabled",
+    "slot_clock_idle": "On Mini Clock",
+    "slot_clock_idle_desc": "Display 1 motivational quote line on mini clock and when idle",
+    "slot_free_sheet": "On Current Task Card",
+    "slot_free_sheet_desc": "Display 1 motivational quote line below current task in Now tab",
+    "slot_start_day_sheet": "Header of Today Journal",
+    "slot_start_day_sheet_desc": "Affix a quote label on top of Today's Journal",
+    "slot_close_day": "Day-Close Summary Card",
+    "slot_close_day_desc": "Display inspirational quote when closing the day",
+    "slot_goals_tab": "Goals & Milestones Tab",
+    "slot_goals_tab_desc": "Show motivational banner above active goals",
+    "slot_task_done": "Task Completion Card",
+    "slot_task_done_desc": "Short acknowledgment quote upon task completion",
+    "slot_alarm_start": "Timebox Alarm Screen",
+    "slot_alarm_start_desc": "Display reminder note below task title when alarm sounds",
+    "slot_widget": "iPhone Widget & Lock Screen",
+    "slot_widget_desc": "Display quote when no active countdown task"
   }
 }

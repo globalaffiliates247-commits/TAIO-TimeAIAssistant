@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>TAIO Clock</title>
+  <link rel="stylesheet" href="clock.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="clock-header">
+    <div class="brand-title">TAIO Time</div>
+    <div class="drag-region"></div>
+    <div class="header-actions">
+      <!-- Nút mở Nhật ký hôm nay -->
+      <button id="btnJournal" class="icon-btn" title="Mở nhật ký hôm nay (N)" aria-label="Nhật ký">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+      </button>
+      <!-- Nút đổi kiểu xem: Thanh / Vòng -->
+      <button id="btnViewMode" class="icon-btn" title="Đổi kiểu xem: Thanh / Vòng (V)" aria-label="Kiểu xem">
+        <svg id="viewModeIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+      </button>
+      <!-- Nút Ghim -->
+      <button id="btnPin" class="icon-btn active" title="Ghim luôn nổi trên cùng (P)" aria-label="Ghim">📌</button>
+      <!-- Nút Đóng -->
+      <button id="btnClose" class="icon-btn" title="Đóng" aria-label="Đóng">&times;</button>
+    </div>
+  </header>
+
+  <!-- View 1: Bar Mode -->
+  <main id="barView" class="view-container">
+    <div class="task-title" id="barTitle" title="Bấm để mở nhật ký">Chưa có việc đang làm</div>
+    <div class="subtitle-line" id="barSubtitle"></div>
+
+    <div class="timer-display">
+      <div class="time-digits" id="barDigits">00:00</div>
+    </div>
+
+    <!-- Free Timer secondary line -->
+    <div id="barFreeTimerRow" class="free-timer-row" style="display: none;">
+      <span id="barFreeTimerTitle" class="free-timer-title"></span>
+      <span id="barFreeTimerDigits" class="free-timer-digits"></span>
+    </div>
+
+    <div class="progress-track" id="barProgressTrack">
+      <div class="progress-fill" id="barProgress"></div>
+    </div>
+
+    <div class="bottom-bar" id="barBottomBar">
+      <button class="btn" id="barBtnExtend">+5p</button>
+      <button class="btn primary" id="barBtnDone">✓ Kết thúc</button>
+    </div>
+  </main>
+
+  <!-- View 2: Ring Mode -->
+  <main id="ringView" class="view-container" style="display: none;">
+    <div class="ring-wrapper">
+      <svg width="120" height="120" class="ring-svg">
+        <circle cx="60" cy="60" r="50" class="ring-track" stroke-width="8" fill="transparent" />
+        <circle cx="60" cy="60" r="50" class="ring-progress" stroke-width="8" fill="transparent" id="ringCircle" />
+      </svg>
+      <div class="ring-center">
+        <div class="ring-digits" id="ringDigits">00:00</div>
+        <div class="ring-sub" id="ringSubText">còn lại</div>
+      </div>
+    </div>
+
+    <div class="task-title" id="ringTitle" title="Bấm để mở nhật ký">Chưa có việc đang làm</div>
+    <div class="subtitle-line" id="ringSubtitle"></div>
+
+    <div class="bottom-bar" id="ringBottomBar">
+      <button class="btn" id="ringBtnExtend">+5p</button>
+      <button class="btn primary" id="ringBtnDone">✓ Kết thúc</button>
+    </div>
+  </main>
+
+  <!-- Motivation Line at Bottom -->
+  <footer id="motivationFooter" class="motivation-line">
+    <span id="quoteText" class="quote-text">Vạn dặm khởi đầu từ một bước chân</span>
+  </footer>
+
+  <!-- Quote detail popup -->
+  <div id="quoteModal" class="quote-modal" style="display: none;">
+    <div class="quote-content" id="modalQuoteContent"></div>
+    <div class="quote-author" id="modalQuoteAuthor"></div>
+    <div class="quote-actions">
+      <button id="btnQuoteNext" class="quote-action-btn" title="Đổi câu khác">↻</button>
+      <button id="btnQuoteFav" class="quote-action-btn" title="Yêu thích">♥</button>
+      <button id="btnQuoteClose" class="quote-action-btn" title="Đóng">&times;</button>
+    </div>
+  </div>
+
+  <script src="clock.js"></script>
+</body>
+</html>

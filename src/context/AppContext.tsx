@@ -2720,9 +2720,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       });
     }
-  }, [addDailyCardItem, goals, language, currentBlock, markTaskDone, shiftTaskTime]);
 
-  // PRD FIX v0.3.28 C2: Sync active timer state with Electron Desktop Clock & Tray
+    // PRD v0.3.33 Part I: Open Today's Journal on specific row
+    const openJournalBridge = bridge as unknown as { onOpenTodayJournal?: (cb: (taskId?: string) => void) => void };
+    if (openJournalBridge?.onOpenTodayJournal) {
+      openJournalBridge.onOpenTodayJournal((taskId?: string) => {
+        setCurrentTab('plan');
+        if (taskId) {
+          setTimeout(() => {
+            const el = document.getElementById(`daily-card-row-${taskId}`) || document.getElementById(`schedule-block-${taskId}`);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.classList.add('ring-2', 'ring-offset-2', 'ring-[#E0401F]');
+              setTimeout(() => {
+                el.classList.remove('ring-2', 'ring-offset-2', 'ring-[#E0401F]');
+              }, 3000);
+            }
+          }, 200);
+        }
+      });
+    }
+  }, [addDailyCardItem, goals, language, currentBlock, markTaskDone, shiftTaskTime, setCurrentTab]);
+
+  // PRD FIX v0.3.28 C2 & v0.3.33 Part I: Sync active timer state with Electron Desktop Clock & Tray
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const bridge = (window as unknown as { taioAPI?: { updateTimer?: (payload: any) => void } }).taioAPI;
@@ -2737,20 +2757,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const remainingMins = Math.max(0, timeToMinutes(currentBlock.endTime) - getDeviceTimeMinutes());
 
       bridge.updateTimer({
+        taskId: currentBlock.id,
         title: currentBlock.title,
+        mode: 'task',
         endsAt,
         startedAt,
         remaining: `${remainingMins}p`,
+        lang: language,
       });
     } else {
       bridge.updateTimer({
-        title: 'Chưa có việc đang làm',
+        taskId: null,
+        title: language === 'vi' ? 'Trống' : 'Idle',
+        mode: 'gap',
         endsAt: 0,
         startedAt: 0,
         remaining: '',
+        lang: language,
       });
     }
-  }, [currentBlock]);
+  }, [currentBlock, language]);
 
   return (
     <AppContext.Provider value={{
