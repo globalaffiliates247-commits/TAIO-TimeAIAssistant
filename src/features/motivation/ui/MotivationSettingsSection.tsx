@@ -1,25 +1,72 @@
 // TAIO Time App — Motivation Settings Section (PRD FEATURE v0.3.31 Part B Settings)
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useT } from '@/i18n/useT';
 import {
   MotivationSettings,
   DEFAULT_MOTIVATION_SETTINGS,
+  MotivationQuote,
+  UserMotivationState,
 } from '../model/types';
 import {
   loadMotivationSettings,
   saveMotivationSettings,
+  loadUserMotivationState,
+  saveUserMotivationState,
+  loadServerQuotesCache,
+  getAllQuotes,
 } from '../model/motivationStore';
-import { Sparkles, Quote, Check } from 'lucide-react';
+import { Sparkles, Quote, Check, Heart, Pin, Trash2 } from 'lucide-react';
 
 export const MotivationSettingsSection: React.FC = () => {
-  const { palette, showToast } = useApp();
+  const { palette, showToast, language } = useApp();
   const { t } = useT();
   const isCool = palette === 'cool';
+  const isEn = language === 'en';
 
   const [settings, setSettings] = useState<MotivationSettings>(() => loadMotivationSettings());
+  const [userState, setUserState] = useState<UserMotivationState>(() => loadUserMotivationState());
+  const [serverQuotes] = useState(() => loadServerQuotesCache());
+
+  const allQuotes = useMemo(() => {
+    return getAllQuotes(serverQuotes, userState.customQuotes);
+  }, [serverQuotes, userState.customQuotes]);
+
+  const favoriteQuotes = useMemo(() => {
+    return userState.favorites
+      .map(id => allQuotes.find(q => q.id === id))
+      .filter((q): q is MotivationQuote => Boolean(q));
+  }, [userState.favorites, allQuotes]);
+
+  const handleTogglePinQuote = (quoteId: string) => {
+    const isCurrentlyPinned = userState.pinnedQuoteId === quoteId;
+    const nextPinned = isCurrentlyPinned ? undefined : quoteId;
+    const updated: UserMotivationState = {
+      ...userState,
+      pinnedQuoteId: nextPinned,
+    };
+    setUserState(updated);
+    saveUserMotivationState(updated);
+    showToast(
+      nextPinned
+        ? (isEn ? 'Pinned as My Daily Quote (shows in Start Day)' : 'Đã ghim làm "câu của tôi" (hiện ở thẻ Bắt đầu ngày)')
+        : (isEn ? 'Unpinned daily quote' : 'Đã bỏ ghim câu của tôi')
+    );
+  };
+
+  const handleRemoveFavorite = (quoteId: string) => {
+    const updatedFavs = userState.favorites.filter(id => id !== quoteId);
+    const updated: UserMotivationState = {
+      ...userState,
+      favorites: updatedFavs,
+      pinnedQuoteId: userState.pinnedQuoteId === quoteId ? undefined : userState.pinnedQuoteId,
+    };
+    setUserState(updated);
+    saveUserMotivationState(updated);
+    showToast(isEn ? 'Removed from My Quotes' : 'Đã bỏ khỏi Kho của tôi');
+  };
 
   const handleToggleMaster = () => {
     const next: MotivationSettings = {
@@ -161,6 +208,96 @@ export const MotivationSettingsSection: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* PRD v0.3.35 B3.1: "Kho của tôi" (My Quotes / Favorites) */}
+      <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Heart size={14} className="text-rose-500 fill-rose-500" />
+            <h5 className="text-xs font-bold text-slate-800">
+              {isEn ? 'My Quotes Bank' : 'Kho của tôi'}
+            </h5>
+            <span className="text-[11px] font-semibold text-slate-400">
+              ({favoriteQuotes.length})
+            </span>
+          </div>
+          <span className="text-[10.5px] text-slate-400">
+            {isEn ? '3x display frequency' : 'Tần suất hiện gấp 3 lần'}
+          </span>
+        </div>
+
+        {favoriteQuotes.length === 0 ? (
+          <div className="p-3 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-500">
+            {isEn
+              ? 'No saved quotes yet. Click ♥ on any quote in the app to save it here.'
+              : 'Chưa có câu nào trong Kho của bạn. Bấm ♥ ở bất kỳ câu nào trong app để lưu vào đây.'}
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {favoriteQuotes.map(q => {
+              const isPinned = userState.pinnedQuoteId === q.id;
+
+              return (
+                <div
+                  key={q.id}
+                  className={`p-2.5 rounded-xl border transition-all text-xs space-y-1.5 ${
+                    isPinned
+                      ? 'bg-amber-50/70 border-amber-300 shadow-2xs'
+                      : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-slate-800 italic leading-relaxed font-normal">
+                      "{q.text}"
+                    </p>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {/* Pin button */}
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePinQuote(q.id)}
+                        className={`p-1 rounded-lg border transition-all cursor-pointer ${
+                          isPinned
+                            ? 'bg-amber-200 border-amber-300 text-amber-900 shadow-xs'
+                            : 'bg-white border-slate-200 text-slate-400 hover:text-slate-700'
+                        }`}
+                        title={
+                          isPinned
+                            ? (isEn ? 'Unpin from Start Day' : 'Bỏ ghim câu của tôi')
+                            : (isEn ? 'Pin as My Quote (Start Day)' : 'Ghim làm câu của tôi (hiện ở Bắt đầu ngày)')
+                        }
+                      >
+                        <Pin size={12} className={isPinned ? 'fill-amber-900' : ''} />
+                      </button>
+
+                      {/* Remove from favorites */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFavorite(q.id)}
+                        className="p-1 rounded-lg bg-white border border-slate-200 text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title={isEn ? 'Remove from favorites' : 'Bỏ tim khỏi Kho của tôi'}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10.5px]">
+                    <span className="text-slate-500 font-medium">
+                      {q.author ? `— ${q.author}` : ''}
+                    </span>
+                    {isPinned && (
+                      <span className="inline-flex items-center gap-1 font-bold text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded-md">
+                        <Pin size={10} className="fill-current" />
+                        <span>{isEn ? 'My Daily Quote' : 'Câu của tôi (Bắt đầu ngày)'}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
