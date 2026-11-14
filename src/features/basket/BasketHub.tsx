@@ -23,7 +23,7 @@ export const BasketHub: React.FC = () => {
   const groups: { label: string; items: { id: Section; label: string; count?: number; swatch: string }[] }[] = [
     { label: t('basket.sec_notes', 'GHI'), items: [{ id: 'sticky', label: t('basket.sticky_notes', 'Tờ ghi nhanh'), count: notes.length, swatch: '#FCEB8E' }] },
     { label: t('basket.sec_classify', 'PHÂN LOẠI'), items: [
-      { id: 'unsorted', label: t('basket.unsorted', 'Chưa phân loại'), count: pending, swatch: '#D8D3C4' },
+      { id: 'unsorted', label: t('basket.unsorted', 'Chưa xử lý'), count: pending, swatch: '#D8D3C4' },
       { id: 'folders', label: t('basket.priority_folders', 'Ngăn ưu tiên'), swatch: '#CDEFD6' },
     ] },
     { label: t('basket.sec_today', 'HÔM NAY'), items: [

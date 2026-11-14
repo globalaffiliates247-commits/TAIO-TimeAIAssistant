@@ -27,7 +27,7 @@ export const UnsortedSection: React.FC = () => {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-extrabold text-[#2B2A26]">{t('basket.unsorted', 'Chưa phân loại')}</h3>
+          <h3 className="text-xl font-extrabold text-[#2B2A26]">{t('basket.unsorted', 'Chưa xử lý')}</h3>
           <p className="text-[13px] text-[#6B6658]">{t('basket.unsorted_desc', 'Việc vừa ghi, chưa có ước lượng, hạn chót hoặc mục tiêu')}</p>
         </div>
         {pending.length > 0 && (

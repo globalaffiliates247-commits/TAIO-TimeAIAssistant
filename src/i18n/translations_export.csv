@@ -188,7 +188,7 @@ domain,key,context,vi,en,target_translation
 "journal","basket.sec_classify","Chuỗi giao diện / UI Label","PHÂN LOẠI","CLASSIFY",""
 "journal","basket.sec_today","Chuỗi giao diện / UI Label","HÔM NAY","TODAY",""
 "journal","basket.sticky_notes","Chuỗi giao diện / UI Label","Tờ ghi nhanh","Quick Notes",""
-"journal","basket.unsorted","Chuỗi giao diện / UI Label","Chưa phân loại","Unsorted",""
+"journal","basket.unsorted","Chuỗi giao diện / UI Label","Chưa xử lý","Untracked",""
 "journal","basket.priority_folders","Chuỗi giao diện / UI Label","Ngăn ưu tiên","Priority Folders",""
 "journal","basket.timed","Chuỗi giao diện / UI Label","Có giờ","Timed",""
 "journal","basket.flex","Chuỗi giao diện / UI Label","Linh động","Flexible",""

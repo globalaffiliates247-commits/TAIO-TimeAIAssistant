@@ -316,7 +316,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
         <div className="flex items-center justify-between text-xs text-slate-500 font-semibold border-b border-slate-100 pb-2.5">
           <span className="flex items-center gap-1.5 text-amber-600 font-bold uppercase tracking-wider">
             <Coffee className="w-3.5 h-3.5" />
-            <span>{language === 'vi' ? 'Thời gian chưa ghi nhận' : 'Unassigned Time'}</span>
+            <span>{language === 'vi' ? 'Thời gian chưa xử lý' : 'Untracked Time'}</span>
           </span>
 
           {/* 3 View Mode Switcher Buttons */}
@@ -324,7 +324,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             <button
               type="button"
               onClick={() => handleSetViewMode('remaining')}
-              title={language === 'vi' ? 'Chưa ghi nhận (Phím 1)' : 'Unassigned time (Key 1)'}
+              title={language === 'vi' ? 'Chưa xử lý (Phím 1)' : 'Untracked time (Key 1)'}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === 'remaining' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
               }`}
@@ -374,7 +374,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             }
             subText={
               viewMode === 'remaining'
-                ? (language === 'vi' ? 'chưa ghi nhận' : 'unassigned')
+                ? (language === 'vi' ? 'chưa xử lý' : 'untracked')
                 : viewMode === 'elapsed'
                 ? (language === 'vi' ? 'tới việc kế tiếp' : 'until next task')
                 : (language === 'vi' ? '/ 9g thời gian thức' : '/ 9h awake')
