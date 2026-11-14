@@ -3,27 +3,20 @@
 import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { openStickyBoard } from '@/features/sticky';
-import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, computeBlockStatus } from '@/core/clock';
+import { getDeviceCalendarDate, getDeviceTimeMinutes } from '@/core/clock';
+import { findUpcomingTasks } from '@/features/clock';
 import { useT } from '@/i18n/useT';
-import { Calendar, ChevronRight, ArrowRight } from 'lucide-react';
+import { ChevronRight, ArrowRight, Repeat } from 'lucide-react';
 import type { TimeBlock } from '@/types';
 
 export const NowNextList: React.FC = () => {
-  const { scheduleBlocks, currentBlock } = useApp();
+  const { scheduleBlocks } = useApp();
   const { t } = useT();
   const today = getDeviceCalendarDate();
   const nowMins = getDeviceTimeMinutes();
 
-  // Next 3 tasks after current
-  const upcomingTasks = (scheduleBlocks || [])
-    .filter(b => {
-      if (b.id === currentBlock?.id) return false;
-      if (b.status === 'done' || b.status === 'dropped') return false;
-      const bStatus = computeBlockStatus(b, nowMins);
-      return bStatus === 'planned' || timeToMinutes(b.startTime) > nowMins;
-    })
-    .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
-    .slice(0, 3);
+  // v0.3.34 Part E8: Unified upcoming tasks calculation
+  const upcomingTasks = findUpcomingTasks(scheduleBlocks, nowMins, 3);
 
   return (
     <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3">
@@ -56,6 +49,11 @@ export const NowNextList: React.FC = () => {
                 <span className="font-bold tabular-nums text-slate-700 shrink-0">
                   {task.startTime}
                 </span>
+                {(task.isTemplateBlock || task.blockKind === 'ritual') && (
+                  <span title="Khung cố định" className="text-slate-400 shrink-0 text-xs">
+                    🔁
+                  </span>
+                )}
                 <span className="font-semibold text-slate-900 truncate">
                   {task.title}
                 </span>

@@ -206,3 +206,23 @@ export function clockState(
     isCountDown: false,
   };
 }
+
+/**
+ * Unified finder for upcoming tasks (v0.3.34 Part E8).
+ * Used by both top clock card and NowNextList to guarantee consistent next-task determination.
+ */
+export function findUpcomingTasks(
+  scheduleBlocks: TimeBlock[] = [],
+  nowMins: number = 0,
+  limit: number = 3
+): TimeBlock[] {
+  return (scheduleBlocks || [])
+    .filter(b => {
+      if (b.status === 'done' || b.status === 'dropped') return false;
+      const bStatus = computeBlockStatus(b, nowMins);
+      if (bStatus === 'in_progress') return false;
+      return bStatus === 'planned' || timeToMinutes(b.startTime) > nowMins;
+    })
+    .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+    .slice(0, limit);
+}

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { openStickyBoard } from '@/features/sticky';
 import { getDeviceCalendarDate } from '@/core/clock';
-import { LiveClockStrip } from '@/features/quick-entry/LiveClockStrip';
+import { HeaderClockPill } from './HeaderClockPill';
 import { useSyncState } from '@/features/sync/syncStore';
 import { useT } from '@/i18n/useT';
 import { 
@@ -55,9 +55,9 @@ export const HeaderActions: React.FC = () => {
         <span className="hidden sm:inline">{t('terms.quickNote', 'Ghi nhanh')}</span>
       </button>
 
-      {/* 2. Đồng hồ đang chạy */}
-      <div className="hidden lg:block max-w-[200px] xl:max-w-[280px]">
-        <LiveClockStrip compact={true} />
+      {/* 2. Viên đồng hồ một dòng (v0.3.34 E9) */}
+      <div className="hidden lg:block">
+        <HeaderClockPill />
       </div>
 
       {/* 3. Dấu đồng bộ */}

@@ -532,9 +532,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // v0.9 & v0.11: Super Admin AI Suggestions (C6)
   const [aiSuggestions, setAiSuggestions] = useState<SuperAdminAISuggestion[]>(INITIAL_AI_SUGGESTIONS);
 
-  const [activeReturnPoint, setActiveReturnPoint] = useState<string | null>(
-    'Đang hoàn thiện cơ chế chuyển đổi 4 quyết định của thẻ việc đột xuất.'
-  );
+  // v0.3.34 Part E1: Default return point is null, no legacy hardcoded sample text
+  const [activeReturnPoint, setActiveReturnPoint] = useState<string | null>(null);
   const [timerMinutesRemaining, setTimerMinutesRemaining] = useState<number>(38);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
 

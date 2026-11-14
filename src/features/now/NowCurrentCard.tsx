@@ -8,6 +8,7 @@ import { NowClockRing } from './NowClockRing';
 import { MotivationSticker } from '@/features/motivation';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
+import { findGoalSuggestion } from '@/features/goals';
 import { useT } from '@/i18n/useT';
 import { 
   Pin, 
@@ -79,6 +80,9 @@ export const NowCurrentCard: React.FC = () => {
 
   // Paused state for count-up
   const [isPaused, setIsPaused] = useState(false);
+  // v0.3.34 Part E1: Task return point editing
+  const [isEditingReturnPoint, setIsEditingReturnPoint] = useState(false);
+  const [returnPointDraft, setReturnPointDraft] = useState('');
 
   const togglePin = () => {
     const next = !isPinned;
@@ -367,18 +371,78 @@ export const NowCurrentCard: React.FC = () => {
         </button>
       </div>
 
-      {/* Return Point (if active) */}
-      {activeReturnPoint && (
-        <div className="p-3 rounded-2xl bg-orange-50/90 border border-orange-200/80 text-orange-950 text-xs space-y-0.5">
-          <div className="font-bold flex items-center gap-1.5 text-orange-800">
-            <Bookmark className="w-3.5 h-3.5 text-orange-600" />
-            <span>{t('checkin.return_point_title', 'Bắt đầu từ nơi bạn đã dừng lại')}</span>
+      {/* v0.3.34 Part E1: Return Point belongs to each task, dismissable with × and clickable to edit */}
+      {(() => {
+        const taskReturnPoint = activeTask?.nextStep || activeTask?.returnPoint;
+        if (!taskReturnPoint || !activeTask) return null;
+
+        const handleSaveReturnPoint = (newVal: string) => {
+          setIsEditingReturnPoint(false);
+          updateScheduleEntry(
+            activeTask.id,
+            { returnPoint: newVal.trim(), nextStep: newVal.trim() },
+            { updateDailyCardItem, setBlocks, dailyCardItems }
+          );
+        };
+
+        const handleDismissReturnPoint = () => {
+          updateScheduleEntry(
+            activeTask.id,
+            { returnPoint: '', nextStep: '' },
+            { updateDailyCardItem, setBlocks, dailyCardItems }
+          );
+          showToast(language === 'vi' ? 'Đã bỏ điểm quay lại.' : 'Return point cleared.');
+        };
+
+        return (
+          <div className="p-3 rounded-2xl bg-orange-50/90 border border-orange-200/80 text-orange-950 text-xs space-y-1 relative group">
+            <div className="flex items-center justify-between font-bold text-orange-800">
+              <div className="flex items-center gap-1.5">
+                <Bookmark className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                <span>{t('checkin.return_point_title', 'Bắt đầu từ nơi bạn đã dừng lại')}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleDismissReturnPoint}
+                className="w-5 h-5 rounded-md hover:bg-orange-200/60 text-orange-700 flex items-center justify-center transition-colors"
+                title="Bỏ điểm quay lại"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {isEditingReturnPoint ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveReturnPoint(returnPointDraft);
+                }}
+                className="pt-0.5"
+              >
+                <input
+                  type="text"
+                  autoFocus
+                  value={returnPointDraft}
+                  onChange={(e) => setReturnPointDraft(e.target.value)}
+                  onBlur={() => handleSaveReturnPoint(returnPointDraft)}
+                  className="w-full px-2 py-1 bg-white border border-orange-300 rounded-lg text-xs text-orange-950 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  placeholder="Gõ bước tiếp theo..."
+                />
+              </form>
+            ) : (
+              <div
+                onClick={() => {
+                  setReturnPointDraft(taskReturnPoint);
+                  setIsEditingReturnPoint(true);
+                }}
+                className="text-orange-900 hover:text-orange-950 cursor-pointer hover:underline transition-colors"
+                title="Bấm để sửa bước tiếp theo"
+              >
+                {t('checkin.return_point_next', { step: taskReturnPoint, defaultValue: `Bước tiếp theo: ${taskReturnPoint}` })}
+              </div>
+            )}
           </div>
-          <div className="text-orange-900">
-            {t('checkin.return_point_next', { step: activeReturnPoint, defaultValue: `Bước tiếp theo: ${activeReturnPoint}` })}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* PRD v0.3.33 Part F2.3 & G2.10: Accompanying side task (Việc kèm) */}
       {(() => {
@@ -456,16 +520,72 @@ export const NowCurrentCard: React.FC = () => {
                 />
               </div>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setDetailOpen(true)}
-              className="w-full p-3 rounded-2xl border border-dashed border-slate-300 hover:border-slate-400 text-slate-500 hover:text-slate-800 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{language === 'en' ? '+ Link goal' : '+ Gắn mục tiêu'}</span>
-            </button>
-          )}
+          ) : (() => {
+            // v0.3.34 Part E2: Suggested vs Attached Goal
+            const extra = (activeTask?.extra as Record<string, unknown> | undefined) || {};
+            const isDismissed = !!extra.dismissGoalSuggestion;
+            const sug = (!linkedGoal && activeTask && !isDismissed)
+              ? findGoalSuggestion(activeTask.title, goals)
+              : null;
+
+            if (sug) {
+              return (
+                <div className="p-2.5 rounded-2xl border border-dashed border-amber-300 bg-amber-50/70 flex items-center justify-between gap-2 text-xs">
+                  <div className="min-w-0 flex items-center gap-1.5 text-amber-900 truncate">
+                    <Target className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span className="truncate">
+                      {language === 'vi' ? 'Gợi ý:' : 'Suggested:'} <strong className="font-semibold">{sug.goal.name}</strong>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (activeTask) {
+                          updateScheduleEntry(activeTask.id, {
+                            goalId: sug.goal.id,
+                            goalName: sug.goal.name,
+                            milestoneId: sug.milestone?.id,
+                            milestoneName: sug.milestone?.name,
+                          }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                          showToast(language === 'vi' ? '✓ Đã gắn mục tiêu.' : '✓ Goal linked.');
+                        }
+                      }}
+                      className="px-2 py-0.5 rounded-lg bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-colors shadow-2xs"
+                      title="Nhận gợi ý mục tiêu"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (activeTask) {
+                          updateScheduleEntry(activeTask.id, {
+                            extra: { ...extra, dismissGoalSuggestion: true }
+                          }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                        }
+                      }}
+                      className="px-1.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 transition-colors"
+                      title="Bỏ gợi ý"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <button
+                type="button"
+                onClick={() => setDetailOpen(true)}
+                className="w-full p-3 rounded-2xl border border-dashed border-slate-300 hover:border-slate-400 text-slate-500 hover:text-slate-800 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{language === 'en' ? 'Link goal' : 'Gắn mục tiêu'}</span>
+              </button>
+            );
+          })()}
 
           {/* Action buttons */}
           <div className="flex items-center gap-2">

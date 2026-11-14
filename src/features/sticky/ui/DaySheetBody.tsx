@@ -314,7 +314,10 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   const renderGoalBadge = (it: DailyCardItem, isEditingLine: boolean) => {
     const hasGoal = !!it.goalId;
-    const sug = !hasGoal ? findGoalSuggestion(isEditingLine ? editText : it.text, goals) : null;
+    const extra = (it.extra as Record<string, unknown> | undefined) || {};
+    const sug = (!hasGoal && !extra.dismissGoalSuggestion)
+      ? findGoalSuggestion(isEditingLine ? editText : it.text, goals)
+      : null;
     const isPickerOpen = pickerItemId === it.id;
 
     const goalLabel = it.goalName
@@ -334,7 +337,13 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
             <span className="truncate max-w-[150px]">{goalLabel}</span>
           </button>
         ) : sug ? (
-          <div className="inline-flex items-center rounded-md border border-amber-300/80 bg-amber-50/80 text-amber-900 text-[10.5px] overflow-hidden shrink-0">
+          <div className="inline-flex items-center rounded-lg border border-dashed border-amber-300 bg-amber-50/70 text-amber-900 text-[10.5px] overflow-hidden shrink-0">
+            <span
+              className="px-1.5 py-0.5 font-normal text-amber-800/90 truncate max-w-[130px]"
+              title={`Gợi ý tự động từ từ khóa "${sug.matchedWord}"`}
+            >
+              Gợi ý: {sug.goal.name}{sug.milestone ? ` › ${sug.milestone.name}` : ''}
+            </span>
             <button
               type="button"
               onMouseDown={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -346,10 +355,23 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   milestoneName: sug.milestone?.name,
                 });
               }}
-              className="px-1.5 py-0.5 font-medium hover:bg-amber-100/80 transition-colors flex items-center gap-1"
-              title={`Gợi ý tự động từ từ khóa "${sug.matchedWord}"`}
+              className="px-1.5 py-0.5 font-bold hover:bg-emerald-100 text-emerald-700 transition-colors"
+              title="Nhận gợi ý"
             >
-              <span>Gắn: {sug.goal.name}{sug.milestone ? ` › ${sug.milestone.name}` : ''}?</span>
+              ✓
+            </button>
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); }}
+              onClick={() => {
+                updateDailyCardItem(it.id, {
+                  extra: { ...extra, dismissGoalSuggestion: true }
+                });
+              }}
+              className="px-1.5 py-0.5 font-bold hover:bg-slate-200 text-slate-500 hover:text-slate-800 border-l border-amber-200/80 transition-colors"
+              title="Bỏ gợi ý"
+            >
+              ×
             </button>
             <button
               type="button"
