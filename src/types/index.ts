@@ -138,6 +138,7 @@ export interface Goal {
   workArea: 'Business' | 'Product' | 'Operations' | 'Personal';
   progressPercent: number;
   progressType?: GoalProgressType; // B7 v0.3.18/v0.3.19: default 'tasks'
+  size?: 'XS' | 'S' | 'M' | 'L' | 'XL'; // v0.3.34 Part E5: T-Shirt Goal Sizing
   keyResultCurrent?: number;
   keyResultTarget?: number;
   keyResultUnit?: string;

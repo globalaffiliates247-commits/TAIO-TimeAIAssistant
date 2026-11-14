@@ -202,6 +202,7 @@ interface AppContextType {
 
   // v0.18 - v0.21: 24-Hour Time Ledger
   timeLedger: TimeLedgerSegment[];
+  setTimeLedger: React.Dispatch<React.SetStateAction<TimeLedgerSegment[]>>;
 
   // v0.19 - v0.22: Method Library & Contextual Coach Cards
   methodLibraryOpen: boolean;
@@ -2949,6 +2950,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const endsAt = new Date(`${todayStr}T00:00:00`).getTime() + (eh * 60 + em) * 60 * 1000;
       const startedAt = new Date(`${todayStr}T00:00:00`).getTime() + (sh * 60 + sm) * 60 * 1000;
       const remainingMins = Math.max(0, timeToMinutes(currentBlock.endTime) - getDeviceTimeMinutes());
+      const targetGoal = goals.find(g => g.id === currentBlock.goalId);
+      const targetHours = targetGoal?.size === 'XS' ? 4 : targetGoal?.size === 'S' ? 10 : targetGoal?.size === 'L' ? 100 : targetGoal?.size === 'XL' ? 250 : 40;
+      const spentTotalMins = (targetGoal?.actualMinutesTotal || 0) + Math.max(0, timeToMinutes(currentBlock.endTime) - remainingMins - timeToMinutes(currentBlock.startTime));
+      const goalHours = Math.floor(spentTotalMins / 60);
+      const goalMins = spentTotalMins % 60;
 
       bridge.updateTimer({
         taskId: currentBlock.id,
@@ -2958,11 +2964,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         startedAt,
         remaining: `${remainingMins}p`,
         lang: language,
+        goalTitle: targetGoal?.name,
+        goalSize: targetGoal?.size,
+        goalTargetHours: targetHours,
+        goalHours,
+        goalMins
       });
     } else {
       bridge.updateTimer({
         taskId: null,
-        title: language === 'vi' ? 'Trống' : 'Idle',
+        title: language === 'vi' ? 'Bạn đang làm gì?' : 'What are you doing?',
         mode: 'gap',
         endsAt: 0,
         startedAt: 0,
@@ -2970,7 +2981,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lang: language,
       });
     }
-  }, [currentBlock, language]);
+  }, [currentBlock, language, goals]);
 
   return (
     <AppContext.Provider value={{
@@ -3075,6 +3086,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateInboxItem,
       processInboxItem,
       timeLedger,
+      setTimeLedger,
       methodLibraryOpen,
       setMethodLibraryOpen,
       methodConcepts,

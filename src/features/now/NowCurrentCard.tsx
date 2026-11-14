@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { clockState } from '@/features/clock';
 import { updateScheduleEntry } from '@/features/tasks';
 import { NowClockRing } from './NowClockRing';
 import { MotivationSticker } from '@/features/motivation';
-import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes } from '@/core/clock';
+import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
-import { findGoalSuggestion } from '@/features/goals';
+import { findGoalSuggestion, getGoalTargetHours } from '@/features/goals';
+import { commitQuickLine } from '@/features/tasks';
 import { useT } from '@/i18n/useT';
 import { 
   Pin, 
@@ -24,16 +25,25 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
-  X
+  X,
+  Hourglass,
+  Coffee,
+  BarChart2,
+  ArrowRight
 } from 'lucide-react';
 import type { TimeBlock, TaskEndType, DodItem, UserRole } from '@/types';
 
-export const NowCurrentCard: React.FC = () => {
+export interface NowCurrentCardProps {
+  size?: 'card' | 'mini';
+}
+
+export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' }) => {
   const { 
     scheduleBlocks, 
     dayTemplate, 
     goals, 
     dailyCardItems, 
+    addDailyCardItem,
     updateDailyCardItem, 
     toggleDailyCardItem,
     setBlocks,
@@ -47,7 +57,10 @@ export const NowCurrentCard: React.FC = () => {
     palette,
     language,
     showToast,
-    isNativePlatform
+    isNativePlatform,
+    setCurrentTab,
+    setTimeLedger,
+    timeLedger
   } = useApp();
 
   const { t } = useT();
@@ -83,6 +96,40 @@ export const NowCurrentCard: React.FC = () => {
   // v0.3.34 Part E1: Task return point editing
   const [isEditingReturnPoint, setIsEditingReturnPoint] = useState(false);
   const [returnPointDraft, setReturnPointDraft] = useState('');
+
+  // v0.3.34 Part E4: Three view modes (remaining, elapsed, goal)
+  const [viewMode, setViewMode] = useState<'remaining' | 'elapsed' | 'goal'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('taio_clock_three_view_mode');
+      if (saved === 'remaining' || saved === 'elapsed' || saved === 'goal') return saved;
+    }
+    return 'remaining';
+  });
+
+  const handleSetViewMode = (mode: 'remaining' | 'elapsed' | 'goal') => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('taio_clock_three_view_mode', mode);
+    }
+  };
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === '1') handleSetViewMode('remaining');
+      if (e.key === '2') handleSetViewMode('elapsed');
+      if (e.key === '3') handleSetViewMode('goal');
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  // v0.3.34 Part E7: Unassigned gap declaration state
+  const [unassignedInput, setUnassignedInput] = useState('');
+  const [pendingStartChoice, setPendingStartChoice] = useState<{
+    title: string;
+    itemId?: string;
+  } | null>(null);
 
   const togglePin = () => {
     const next = !isPinned;
@@ -187,77 +234,259 @@ export const NowCurrentCard: React.FC = () => {
   // Remaining / Elapsed string
   const totalDurationMins = activeTask ? Math.max(5, (timeToMinutes(activeTask.endTime) - timeToMinutes(activeTask.startTime) + 1440) % 1440) : 30;
   const remSec = state.remainingSeconds;
+  const elapsedSec = Math.max(0, (totalDurationMins * 60) - remSec);
   const percent = totalDurationMins > 0 ? ((totalDurationMins * 60 - remSec) / (totalDurationMins * 60)) * 100 : 0;
+  const isOverrunTime = remSec <= 0 && activeTask !== undefined;
+  const overrunMins = Math.max(1, Math.floor((nowMins - (activeTask ? timeToMinutes(activeTask.endTime) : nowMins) + 1440) % 1440));
 
-  // 1. GAP / IDLE STATE
-  if (state.mode === 'gap') {
+  // Goal metrics for Mode 3
+  const targetGoal = goals.find(g => g.id === activeTask?.goalId);
+  const targetHours = targetGoal ? getGoalTargetHours(targetGoal) : 40;
+  const goalSpentMinutes = (targetGoal?.actualMinutesTotal || 0) + Math.floor(elapsedSec / 60);
+  const goalHours = Math.floor(goalSpentMinutes / 60);
+  const goalRemainingMins = goalSpentMinutes % 60;
+  const goalPercent = Math.min(100, (goalSpentMinutes / (targetHours * 60)) * 100);
+  const goalExceededHours = Math.max(0, Math.floor((goalSpentMinutes - targetHours * 60) / 60));
+
+  // v0.3.34 Part E7: Unassigned time calculation for Gap / Idle state
+  const todayDoneItems = dailyCardItems
+    .filter(i => i.date === todayStr && i.status === 'done' && i.end)
+    .sort((a, b) => (b.end || '').localeCompare(a.end || ''));
+  const lastEndMins = todayDoneItems[0] ? timeToMinutes(todayDoneItems[0].end!) : (8 * 60);
+  const unassignedMins = Math.max(0, nowMins - lastEndMins);
+  const unassignedSecs = unassignedMins * 60 + now.getSeconds();
+  const unassignedStartStr = todayDoneItems[0]?.end || '08:00';
+  const unscheduledOptions = dailyCardItems
+    .filter(i => i.date === todayStr && !i.start && i.status === 'open')
+    .slice(0, 3);
+
+  const handleStartUnassigned = (title: string, fromStart: boolean, itemId?: string) => {
+    const startHM = fromStart ? unassignedStartStr : minutesToTime(nowMins);
+    const endHM = minutesToTime((timeToMinutes(startHM) + 30) % 1440);
+    const idToUse = itemId || `dc-${Date.now()}`;
+
+    if (itemId) {
+      updateDailyCardItem(itemId, {
+        start: startHM,
+        end: endHM,
+        status: 'open',
+        extra: { startedAt: fromStart ? (Date.now() - unassignedMins * 60000) : Date.now(), estimateMins: 30 }
+      });
+    } else {
+      commitQuickLine(`${startHM} ${title} 30p`, todayStr, { addDailyCardItem, goals });
+    }
+    setPendingStartChoice(null);
+    setUnassignedInput('');
+    showToast?.(language === 'vi' ? `▶ Bắt đầu "${title}"` : `▶ Started "${title}"`);
+  };
+
+  const handleLogRest = () => {
+    if (unassignedMins <= 0) return;
+    setTimeLedger(prev => [
+      ...prev,
+      {
+        id: `rest-${Date.now()}`,
+        date: todayStr,
+        startTime: unassignedStartStr,
+        endTime: minutesToTime(nowMins),
+        activityName: language === 'vi' ? 'Nghỉ ngơi' : 'Rest break',
+        quadrant: 4,
+        category: 'break',
+        durationMinutes: unassignedMins,
+        isBreak: true
+      } as any
+    ]);
+    showToast?.(language === 'vi' ? `✓ Đã ghi nhận đoạn nghỉ ngơi ${unassignedMins}p.` : `✓ Logged ${unassignedMins}m rest break.`);
+  };
+
+  // 1 & 2. GAP / IDLE / TEMPLATE STATE (v0.3.34 Part E7: Unassigned Time Clock)
+  if (state.mode === 'gap' || state.mode === 'template_or_current') {
     return (
       <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-md space-y-4 select-none animate-in fade-in duration-200">
+        {/* Top line with Mode Switcher */}
         <div className="flex items-center justify-between text-xs text-slate-500 font-semibold border-b border-slate-100 pb-2.5">
           <span className="flex items-center gap-1.5 text-amber-600 font-bold uppercase tracking-wider">
-            <Clock className="w-3.5 h-3.5" />
-            {t('terms.idle', 'Trống')}
+            <Coffee className="w-3.5 h-3.5" />
+            <span>{language === 'vi' ? 'Thời gian chưa ghi nhận' : 'Unassigned Time'}</span>
           </span>
-          <span className="tabular-nums">
-            {state.block ? `${state.block.startTime}` : ''}
-          </span>
-        </div>
 
-        <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            {state.subtitle}
-          </h2>
-          <p className="text-xs text-slate-500">
-            {language === 'en' ? 'You have free time before next scheduled block' : 'Bạn có khoảng thời gian trống trước công việc tiếp theo'}
-          </p>
-        </div>
-
-        {/* Action: Start next task early */}
-        {state.next && (
-          <div className="pt-2 flex items-center gap-2">
+          {/* 3 View Mode Switcher Buttons */}
+          <div className="flex items-center p-0.5 rounded-xl bg-slate-100 border border-slate-200/80 gap-0.5">
             <button
               type="button"
-              onClick={() => {
-                if (state.block) {
-                  updateScheduleEntry(
-                    state.block.id,
-                    { status: 'in_progress', extra: { ...(state.block.extra || {}), startedAt: Date.now() } },
-                    { updateDailyCardItem, setBlocks, dailyCardItems }
-                  );
-                }
-              }}
-              className="py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all flex items-center gap-2"
+              onClick={() => handleSetViewMode('remaining')}
+              title={language === 'vi' ? 'Chưa ghi nhận (Phím 1)' : 'Unassigned time (Key 1)'}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'remaining' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
+              }`}
             >
-              <Play className="w-3.5 h-3.5 fill-white" />
-              <span>{language === 'en' ? `Start early: ${state.next.title}` : `Bắt đầu sớm: ${state.next.title}`}</span>
+              <Hourglass className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSetViewMode('elapsed')}
+              title={language === 'vi' ? 'Còn lại tới việc tiếp theo (Phím 2)' : 'Until next task (Key 2)'}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'elapsed' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSetViewMode('goal')}
+              title={language === 'vi' ? 'Hôm nay: Tổng đã ghi nhận (Phím 3)' : 'Today: Total logged (Key 3)'}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'goal' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <Target className="w-3.5 h-3.5" />
             </button>
           </div>
-        )}
-
-        <MotivationSticker slotKey="clock_idle" context="break" size="line" className="pt-2 border-t border-slate-100" />
-      </div>
-    );
-  }
-
-  // 2. TEMPLATE / CURRENT TIME (No more scheduled tasks)
-  if (state.mode === 'template_or_current') {
-    return (
-      <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-md space-y-4 select-none animate-in fade-in duration-200">
-        <div className="flex items-center justify-between text-xs text-slate-500 font-semibold border-b border-slate-100 pb-2.5">
-          <span className="flex items-center gap-1.5 text-slate-600 font-bold uppercase tracking-wider">
-            <Clock className="w-3.5 h-3.5" />
-            {t('terms.clock', 'Đồng hồ')}
-          </span>
-          <span className="tabular-nums font-bold text-slate-700">{state.title}</span>
         </div>
 
-        <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            {state.subtitle}
-          </h2>
-          <p className="text-xs text-slate-500">
-            {language === 'en' ? 'All scheduled tasks for today are completed' : 'Đã hết việc có giờ cho hôm nay'}
-          </p>
+        {/* Ring Clock for Gap state */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-5 py-1">
+          <NowClockRing
+            isCountDown={viewMode === 'elapsed'}
+            percent={
+              viewMode === 'remaining'
+                ? Math.min(100, (unassignedMins / 60) * 100)
+                : viewMode === 'elapsed'
+                ? (state.next ? Math.min(100, Math.max(0, 100 - (timeToMinutes(state.next.startTime) - nowMins))) : 100)
+                : Math.min(100, (unassignedMins / (9 * 60)) * 100)
+            }
+            timeText={
+              viewMode === 'remaining'
+                ? formatTime(unassignedSecs)
+                : viewMode === 'elapsed'
+                ? (state.next ? `${Math.max(0, timeToMinutes(state.next.startTime) - nowMins)}p` : 'Hết việc')
+                : `${Math.floor(unassignedMins / 60)}g${unassignedMins % 60}p`
+            }
+            subText={
+              viewMode === 'remaining'
+                ? (language === 'vi' ? 'chưa ghi nhận' : 'unassigned')
+                : viewMode === 'elapsed'
+                ? (language === 'vi' ? 'tới việc kế tiếp' : 'until next task')
+                : (language === 'vi' ? '/ 9g thời gian thức' : '/ 9h awake')
+            }
+            isOverrun={false}
+            isCool={isCool}
+          />
+
+          <div className="flex-1 min-w-0 space-y-3 w-full sm:w-auto">
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                {state.next
+                  ? `${language === 'vi' ? 'Tiếp theo lúc' : 'Next at'} ${state.next.startTime}: ${state.next.title}`
+                  : (language === 'vi' ? 'Không còn việc có giờ hôm nay' : 'No more scheduled tasks today')}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {language === 'vi' ? `Tính từ ${unassignedStartStr} (${unassignedMins} phút)` : `Since ${unassignedStartStr} (${unassignedMins} mins)`}
+              </p>
+            </div>
+
+            {/* 1-Tap Declaration Box (v0.3.34 Part E7) */}
+            {pendingStartChoice ? (
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-2">
+                <span className="font-bold text-amber-950 block">
+                  {language === 'vi' ? 'Bắt đầu việc:' : 'Start task:'} "{pendingStartChoice.title}"
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleStartUnassigned(pendingStartChoice.title, true, pendingStartChoice.itemId)}
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors shadow-2xs"
+                  >
+                    {language === 'vi' ? `Tính từ ${unassignedStartStr} (${unassignedMins}p)` : `From ${unassignedStartStr} (${unassignedMins}m)`}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStartUnassigned(pendingStartChoice.title, false, pendingStartChoice.itemId)}
+                    className="py-1.5 px-2.5 rounded-xl bg-white hover:bg-amber-100/70 border border-amber-300 text-amber-900 font-semibold text-xs transition-colors"
+                  >
+                    {language === 'vi' ? 'Tính từ bây giờ' : 'From now'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPendingStartChoice(null)}
+                    className="p-1.5 text-slate-400 hover:text-slate-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (unassignedInput.trim()) {
+                      setPendingStartChoice({ title: unassignedInput.trim() });
+                    }
+                  }}
+                  className="flex items-center gap-1.5"
+                >
+                  <input
+                    type="text"
+                    value={unassignedInput}
+                    onChange={(e) => setUnassignedInput(e.target.value)}
+                    placeholder={language === 'vi' ? 'Bạn đang làm gì? (Gõ tên việc hoặc #mục-tiêu)' : 'What are you doing? (Type task or #goal)'}
+                    className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:bg-white placeholder:text-slate-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleLogRest}
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors shrink-0"
+                    title="Ghi nhận đoạn này là nghỉ ngơi"
+                  >
+                    {language === 'vi' ? 'Đang nghỉ' : 'Resting'}
+                  </button>
+                </form>
+
+                {/* Suggestions from unscheduled items */}
+                {unscheduledOptions.length > 0 && (
+                  <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                    <span className="text-[10.5px] text-slate-400 font-medium">
+                      {language === 'vi' ? 'Gợi ý:' : 'Picks:'}
+                    </span>
+                    {unscheduledOptions.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setPendingStartChoice({ title: item.text, itemId: item.id })}
+                        className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium transition-colors truncate max-w-[150px]"
+                      >
+                        {item.text}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action: Start next task early if present */}
+            {state.next && (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (state.block) {
+                      updateScheduleEntry(
+                        state.block.id,
+                        { status: 'in_progress', extra: { ...(state.block.extra || {}), startedAt: Date.now() } },
+                        { updateDailyCardItem, setBlocks, dailyCardItems }
+                      );
+                    }
+                  }}
+                  className="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1.5"
+                >
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <span>{language === 'en' ? `Start early: ${state.next.title}` : `Bắt đầu sớm: ${state.next.title}`}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <MotivationSticker slotKey="clock_idle" context="break" size="line" className="pt-2 border-t border-slate-100" />
@@ -281,21 +510,39 @@ export const NowCurrentCard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
-          {/* Badge: End type, clickable to toggle */}
-          <button
-            type="button"
-            onClick={cycleEndType}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
-              activeTask?.taskEndType === 'until_done_atomic'
-                ? 'bg-purple-50 text-purple-700 border-purple-200'
-                : activeTask?.taskEndType === 'until_done_pausable'
-                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                : 'bg-blue-50 text-blue-700 border-blue-200'
-            }`}
-            title="Bấm để đổi tính chất việc"
-          >
-            {endTypeLabel}
-          </button>
+          {/* v0.3.34 Part E4: 3 View Mode Switcher Buttons */}
+          <div className="flex items-center p-0.5 rounded-xl bg-slate-100 border border-slate-200/80 gap-0.5">
+            <button
+              type="button"
+              onClick={() => handleSetViewMode('remaining')}
+              title={language === 'vi' ? 'Còn lại (Phím 1)' : 'Remaining (Key 1)'}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'remaining' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <Hourglass className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSetViewMode('elapsed')}
+              title={language === 'vi' ? 'Đã dùng (Phím 2)' : 'Elapsed (Key 2)'}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'elapsed' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSetViewMode('goal')}
+              title={language === 'vi' ? 'Tổng cho mục tiêu (Phím 3)' : 'Goal progress (Key 3)'}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'goal' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <Target className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           {/* Menu ⋯ button */}
           <div className="relative">
@@ -486,19 +733,67 @@ export const NowCurrentCard: React.FC = () => {
 
       {/* Main Body: Clock Ring + Goal Info */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-5 py-2">
-        {/* Ring Clock */}
-        <NowClockRing
-          isCountDown={isCountDown}
-          percent={percent}
-          timeText={formatTime(remSec)}
-          subText={
-            isCountDown
-              ? `${language === 'en' ? 'remaining' : 'còn lại'} / ${fmtDuration(totalDurationMins, language as 'vi' | 'en')}`
-              : `${language === 'en' ? 'worked' : 'đã làm'} / ${fmtDuration(totalDurationMins, language as 'vi' | 'en')}`
-          }
-          isOverrun={!isCountDown && percent >= 100}
-          isCool={isCool}
-        />
+        {/* Ring Clock with Subline */}
+        <div className="flex flex-col items-center">
+          <NowClockRing
+            isCountDown={viewMode === 'remaining'}
+            percent={
+              viewMode === 'remaining'
+                ? (isOverrunTime ? 100 : percent)
+                : viewMode === 'elapsed'
+                ? Math.min(100, (elapsedSec / (totalDurationMins * 60)) * 100)
+                : goalPercent
+            }
+            timeText={
+              viewMode === 'remaining'
+                ? (isOverrunTime ? (language === 'vi' ? `quá ${overrunMins}p` : `over ${overrunMins}m`) : formatTime(remSec))
+                : viewMode === 'elapsed'
+                ? formatTime(elapsedSec)
+                : `${goalHours}g${goalRemainingMins > 0 ? (goalRemainingMins < 10 ? '0' : '') + goalRemainingMins : ''}`
+            }
+            subText={
+              viewMode === 'remaining'
+                ? (isOverrunTime ? (language === 'vi' ? 'đã quá hạn' : 'overrun') : `${language === 'vi' ? 'còn lại' : 'remaining'} / ${totalDurationMins}p`)
+                : viewMode === 'elapsed'
+                ? `${language === 'vi' ? 'đã dùng' : 'elapsed'} / ${totalDurationMins}p`
+                : (targetGoal ? (targetGoal.size ? `/ ${targetHours}g · cỡ ${targetGoal.size}` : `/ ${targetHours}g`) : (language === 'vi' ? 'Chưa gắn mục tiêu' : 'No goal linked'))
+            }
+            isOverrun={viewMode === 'remaining' && isOverrunTime}
+            isCool={isCool}
+          />
+
+          {/* Subline below ring per E4 table */}
+          <div className="mt-2 text-center text-[11px] text-slate-500 font-medium flex items-center justify-center gap-1.5 max-w-[220px]">
+            {viewMode === 'remaining' && (
+              <span className="truncate">
+                {language === 'vi' ? 'hết lúc' : 'ends at'} {activeTask?.endTime} · {language === 'vi' ? 'tiếp:' : 'next:'} {state.next?.title || (language === 'vi' ? 'Hết việc' : 'Done')}
+              </span>
+            )}
+            {viewMode === 'elapsed' && (
+              <span>
+                {language === 'vi' ? 'bắt đầu lúc' : 'started at'} {activeTask?.startTime}
+              </span>
+            )}
+            {viewMode === 'goal' && (
+              <div className="flex items-center gap-1 truncate">
+                <span className="truncate">
+                  {targetGoal ? targetGoal.name : (language === 'vi' ? 'Chưa gắn mục tiêu' : 'No goal linked')}
+                  {goalExceededHours > 0 ? ` (vượt ${goalExceededHours}g)` : ''}
+                </span>
+                {targetGoal && (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab?.('goals')}
+                    className="p-0.5 rounded text-slate-400 hover:text-blue-600 transition-colors shrink-0"
+                    title={language === 'vi' ? 'Mở hiệu quả mục tiêu' : 'Open goal report'}
+                  >
+                    <BarChart2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Right Info: Linked Goal & Progress */}
         <div className="flex-1 min-w-0 space-y-3 w-full sm:w-auto">
@@ -587,55 +882,31 @@ export const NowCurrentCard: React.FC = () => {
             );
           })()}
 
-          {/* Action buttons */}
+          {/* Action buttons (Always +5p, +15p, Finish) */}
           <div className="flex items-center gap-2">
-            {isCountDown ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => handleExtend(5)}
-                  className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200"
-                >
-                  +5p
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleExtend(15)}
-                  className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200"
-                >
-                  +15p
-                </button>
-                <button
-                  type="button"
-                  onClick={handleFinish}
-                  className={`flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs shadow-xs transition-all ${
-                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
-                  }`}
-                >
-                  {language === 'en' ? 'Finish' : 'Kết thúc'}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsPaused(v => !v)}
-                  className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200 flex items-center justify-center gap-1.5"
-                >
-                  {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-                  <span>{isPaused ? 'Tiếp tục' : 'Tạm dừng'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleFinish}
-                  className={`flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs shadow-xs transition-all ${
-                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
-                  }`}
-                >
-                  {language === 'en' ? 'Finish' : 'Kết thúc'}
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              onClick={() => handleExtend(5)}
+              className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200"
+            >
+              +5p
+            </button>
+            <button
+              type="button"
+              onClick={() => handleExtend(15)}
+              className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200"
+            >
+              +15p
+            </button>
+            <button
+              type="button"
+              onClick={handleFinish}
+              className={`flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs shadow-xs transition-all ${
+                isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+              }`}
+            >
+              {language === 'en' ? 'Finish' : 'Kết thúc'}
+            </button>
           </div>
         </div>
       </div>

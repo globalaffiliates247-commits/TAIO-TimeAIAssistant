@@ -25,6 +25,9 @@
   const btnClose = document.getElementById('btnClose');
   const btnJournal = document.getElementById('btnJournal');
   const btnViewMode = document.getElementById('btnViewMode');
+  const btnModeRemaining = document.getElementById('btnModeRemaining');
+  const btnModeElapsed = document.getElementById('btnModeElapsed');
+  const btnModeGoal = document.getElementById('btnModeGoal');
   const barBottomBar = document.getElementById('barBottomBar');
   const ringBottomBar = document.getElementById('ringBottomBar');
   const barProgressTrack = document.getElementById('barProgressTrack');
@@ -110,9 +113,32 @@
   }
 
   document.getElementById('barBtnExtend')?.addEventListener('click', () => triggerExtend(5));
+  document.getElementById('barBtnExtend15')?.addEventListener('click', () => triggerExtend(15));
   document.getElementById('ringBtnExtend')?.addEventListener('click', () => triggerExtend(5));
+  document.getElementById('ringBtnExtend15')?.addEventListener('click', () => triggerExtend(15));
   document.getElementById('barBtnDone')?.addEventListener('click', triggerDone);
   document.getElementById('ringBtnDone')?.addEventListener('click', triggerDone);
+
+  // Three view modes (v0.3.34 Part E4: 1=remaining, 2=elapsed, 3=goal)
+  let threeViewMode = 'remaining';
+  try {
+    const saved3 = localStorage.getItem('taio_clock_three_view_mode');
+    if (saved3 === 'remaining' || saved3 === 'elapsed' || saved3 === 'goal') threeViewMode = saved3;
+  } catch {}
+
+  function setThreeViewMode(mode) {
+    threeViewMode = mode;
+    try { localStorage.setItem('taio_clock_three_view_mode', mode); } catch {}
+    btnModeRemaining?.classList.toggle('active', mode === 'remaining');
+    btnModeElapsed?.classList.toggle('active', mode === 'elapsed');
+    btnModeGoal?.classList.toggle('active', mode === 'goal');
+    tick();
+  }
+  setThreeViewMode(threeViewMode);
+
+  btnModeRemaining?.addEventListener('click', () => setThreeViewMode('remaining'));
+  btnModeElapsed?.addEventListener('click', () => setThreeViewMode('elapsed'));
+  btnModeGoal?.addEventListener('click', () => setThreeViewMode('goal'));
 
   // Quote interactions
   quoteText.addEventListener('click', () => {
@@ -134,7 +160,7 @@
     }
   });
 
-  // Keyboard shortcuts (N, V, P)
+  // Keyboard shortcuts (N, V, P, 1, 2, 3)
   window.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const key = e.key.toLowerCase();
@@ -144,12 +170,21 @@
       setViewMode(viewMode === 'bar' ? 'ring' : 'bar');
     } else if (key === 'p') {
       btnPin.click();
+    } else if (key === '1') {
+      setThreeViewMode('remaining');
+    } else if (key === '2') {
+      setThreeViewMode('elapsed');
+    } else if (key === '3') {
+      setThreeViewMode('goal');
     }
   });
+
+  let lastData = null;
 
   // UI Update called from main.js syncClockWindowData
   window.updateUI = function(data) {
     if (!data) return;
+    lastData = data;
     currentMode = data.mode || 'task';
     currentTaskId = data.taskId || null;
     if (data.lang) currentLang = data.lang;
@@ -188,8 +223,7 @@
       ringBottomBar.style.display = 'none';
       barProgressTrack.style.display = 'none';
     } else if (currentMode === 'gap') {
-      // Clean display without unclosed parenthesis
-      const title = data.title || (currentLang === 'en' ? 'Free' : 'Trống');
+      const title = data.title || (currentLang === 'vi' ? 'Bạn đang làm gì?' : 'What are you doing?');
       const sub = data.subtitle || '';
       barTitle.innerText = title;
       ringTitle.innerText = title;
@@ -199,7 +233,6 @@
       barBottomBar.style.display = 'none';
       ringBottomBar.style.display = 'none';
       barProgressTrack.style.display = 'block';
-      ringSubText.innerText = currentLang === 'en' ? 'until next' : 'nữa tới';
       tick();
     } else {
       // In Task
@@ -213,7 +246,6 @@
       barBottomBar.style.display = 'flex';
       ringBottomBar.style.display = 'flex';
       barProgressTrack.style.display = 'block';
-      ringSubText.innerText = isCountDown ? (currentLang === 'en' ? 'remaining' : 'còn lại') : (currentLang === 'en' ? 'worked' : 'đã làm');
       tick();
     }
   };
@@ -221,31 +253,72 @@
   function tick() {
     if (currentMode === 'template_or_current') return;
     const now = Date.now();
-    let secRemaining = 0;
-    let totalSec = 1800;
+    let digitsStr = '00:00';
+    let sublineStr = '';
+    let fraction = 1;
 
-    if (isCountDown) {
-      secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
-      totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
-    } else {
-      secRemaining = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
-      totalSec = Math.max(60, Math.floor((endsAt - (startedAt || now)) / 1000));
+    if (currentMode === 'gap') {
+      if (threeViewMode === 'remaining') {
+        digitsStr = '00:00';
+        sublineStr = currentLang === 'vi' ? 'chưa ghi nhận' : 'unassigned';
+      } else if (threeViewMode === 'elapsed') {
+        digitsStr = '00:00';
+        sublineStr = currentLang === 'vi' ? 'tới việc kế tiếp' : 'until next';
+      } else {
+        digitsStr = '0g00';
+        sublineStr = currentLang === 'vi' ? '/ 9g thời gian thức' : '/ 9h awake';
+      }
+      barDigits.innerText = digitsStr;
+      ringDigits.innerText = digitsStr;
+      ringSubText.innerText = sublineStr;
+      barProgress.style.width = '100%';
+      if (ringCircle) ringCircle.style.strokeDashoffset = '0';
+      return;
     }
 
-    const m = Math.floor(secRemaining / 60);
-    const s = secRemaining % 60;
-    const digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    // Active task
+    const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
+    const totalDurationMins = Math.round(totalSec / 60);
+
+    if (threeViewMode === 'remaining') {
+      if (now > endsAt && endsAt > 0) {
+        const overrunMins = Math.max(1, Math.floor((now - endsAt) / 60000));
+        digitsStr = currentLang === 'vi' ? `quá ${overrunMins}p` : `over ${overrunMins}m`;
+        sublineStr = currentLang === 'vi' ? 'đã quá hạn' : 'overrun';
+        fraction = 1;
+      } else {
+        const secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
+        const m = Math.floor(secRemaining / 60);
+        const s = secRemaining % 60;
+        digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        sublineStr = `${currentLang === 'vi' ? 'còn lại' : 'remaining'} / ${totalDurationMins}p`;
+        fraction = totalSec > 0 ? Math.max(0, Math.min(1, secRemaining / totalSec)) : 0;
+      }
+    } else if (threeViewMode === 'elapsed') {
+      const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
+      const m = Math.floor(secElapsed / 60);
+      const s = secElapsed % 60;
+      digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      sublineStr = `${currentLang === 'vi' ? 'đã dùng' : 'elapsed'} / ${totalDurationMins}p`;
+      fraction = totalSec > 0 ? Math.max(0, Math.min(1, secElapsed / totalSec)) : 0;
+    } else if (threeViewMode === 'goal') {
+      const gh = lastData?.goalHours || 0;
+      const gm = lastData?.goalMins || 0;
+      digitsStr = `${gh}g${gm > 0 ? (gm < 10 ? '0' : '') + gm : ''}`;
+      if (lastData?.goalTitle) {
+        sublineStr = lastData?.goalSize
+          ? `/ ${lastData.goalTargetHours || 40}g · ${lastData.goalSize}`
+          : `/ ${lastData.goalTargetHours || 40}g`;
+        fraction = Math.min(1, ((gh * 60 + gm) / ((lastData.goalTargetHours || 40) * 60)));
+      } else {
+        sublineStr = currentLang === 'vi' ? 'Chưa gắn mục tiêu' : 'No goal';
+        fraction = 0;
+      }
+    }
 
     barDigits.innerText = digitsStr;
     ringDigits.innerText = digitsStr;
-
-    // Progress percentage
-    let fraction = 1;
-    if (totalSec > 0) {
-      fraction = isCountDown
-        ? Math.max(0, Math.min(1, secRemaining / totalSec))
-        : Math.max(0, Math.min(1, secRemaining / totalSec));
-    }
+    ringSubText.innerText = sublineStr;
 
     // Bar progress width
     barProgress.style.width = `${Math.round(fraction * 100)}%`;
