@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApp } from '../../../context/AppContext';
 import { useT } from '../../../i18n/useT';
+import { getDeviceCalendarDate } from '@/core/clock';
 import {
   MotivationQuote,
   QuoteContext,
@@ -101,7 +102,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   // Action: × Ẩn hết hôm nay
   const handleHideToday = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getDeviceCalendarDate();
     const updatedState = {
       ...userState,
       hiddenTodaySlots: {

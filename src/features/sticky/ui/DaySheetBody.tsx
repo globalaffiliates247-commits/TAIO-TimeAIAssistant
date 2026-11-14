@@ -4,7 +4,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import type { DailyCardItem } from '@/types';
-import { getDeviceNow } from '@/core/clock';
+import { getDeviceNow, getDeviceCalendarDate } from '@/core/clock';
 import { STICKY_COLORS, StickyNote } from '../model/stickyTypes';
 import {
   findGaps, fmtDuration, nextFreeStart, parseTimedText, priorityOf, suggestDuration,
@@ -110,7 +110,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const handleCarrySelectedToTomorrow = () => {
     const d = new Date(day);
     d.setDate(d.getDate() + 1);
-    const tomorrowStr = d.toISOString().slice(0, 10);
+    const tomorrowStr = getDeviceCalendarDate(d);
     const toCarry = items.filter(i => selectedIds.has(i.id));
     toCarry.forEach(it => {
       updateDailyCardItem(it.id, {

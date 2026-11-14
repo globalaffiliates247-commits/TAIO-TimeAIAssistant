@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { DailyCardItem, ItemOrigin } from '../types';
+import { getDeviceCalendarDate } from '@/core/clock';
 import { 
   CheckSquare, 
   Square, 
@@ -81,17 +82,17 @@ export const DailyCardView: React.FC = () => {
   const handlePrevDay = () => {
     const d = new Date(selectedCardDate);
     d.setDate(d.getDate() - 1);
-    setSelectedCardDate(d.toISOString().split('T')[0]);
+    setSelectedCardDate(getDeviceCalendarDate(d));
   };
 
   const handleNextDay = () => {
     const d = new Date(selectedCardDate);
     d.setDate(d.getDate() + 1);
-    setSelectedCardDate(d.toISOString().split('T')[0]);
+    setSelectedCardDate(getDeviceCalendarDate(d));
   };
 
   const handleToday = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getDeviceCalendarDate();
     setSelectedCardDate(today);
   };
 
@@ -130,7 +131,7 @@ export const DailyCardView: React.FC = () => {
               onClick={handleToday}
               className="px-2.5 py-1 rounded-lg font-bold text-slate-800 hover:text-slate-900 bg-white shadow-xs"
             >
-              {selectedCardDate === new Date().toISOString().split('T')[0] ? 'Hôm nay' : selectedCardDate}
+              {selectedCardDate === getDeviceCalendarDate() ? 'Hôm nay' : selectedCardDate}
             </button>
             <button 
               onClick={handleNextDay} 

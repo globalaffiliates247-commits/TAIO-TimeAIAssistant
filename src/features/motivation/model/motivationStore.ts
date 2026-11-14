@@ -9,6 +9,7 @@ import {
 import viQuotesRaw from './defaultQuotes.vi.json';
 import enQuotesRaw from './defaultQuotes.en.json';
 import { pickQuote } from './pickQuote';
+import { getDeviceCalendarDate } from '@/core/clock';
 
 const STORAGE_KEY_USER_MOTIVATION = 'taio_motivation_user_state';
 const STORAGE_KEY_SETTINGS = 'taio_motivation_settings';
@@ -181,7 +182,7 @@ export function getAllQuotes(serverQuotes: MotivationQuote[], customQuotes: Moti
 export function getRecent7DaysQuoteIds(recent: { quoteId: string; date: string }[]): string[] {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  const cutoff = sevenDaysAgo.toISOString().slice(0, 10);
+  const cutoff = getDeviceCalendarDate(sevenDaysAgo);
   return recent.filter(r => r.date >= cutoff).map(r => r.quoteId);
 }
 

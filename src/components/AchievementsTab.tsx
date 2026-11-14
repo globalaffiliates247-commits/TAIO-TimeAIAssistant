@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { GapLabel, TimeLedgerCategory } from '../types';
 import { HabitInsights } from './HabitInsights';
 import { computeGoalMetrics, computeTaskTimeEfficiency } from '../features/goals/goalMetrics';
+import { getDeviceCalendarDate } from '@/core/clock';
 import { 
   Trophy, 
   CheckCircle2, 
@@ -73,6 +74,9 @@ export const AchievementsTab: React.FC = () => {
     handleLabelGap, 
     setCloseDayModalOpen,
     dayClosed,
+    closedDays,
+    isDayClosed,
+    language,
     setBlocks,
     openDrilldown,
     timeLedger,
@@ -240,18 +244,18 @@ export const AchievementsTab: React.FC = () => {
             </button>
           </div>
 
-          {!dayClosed ? (
+          {!isDayClosed(getDeviceCalendarDate()) ? (
             <button
               onClick={() => setCloseDayModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-sm transition-all"
             >
               <Moon className="w-4 h-4 text-white" />
-              <span>Đóng ngày</span>
+              <span>{language === 'vi' ? 'Khép lại hôm nay' : 'Wrap Up Today'}</span>
             </button>
           ) : (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-[#E0401F] text-xs font-bold">
               <CheckCircle2 className="w-4 h-4 text-[#E0401F]" />
-              <span>Đã khóa ngày</span>
+              <span>{language === 'vi' ? 'Đã khép ngày' : 'Day Wrapped Up'}</span>
             </div>
           )}
         </div>

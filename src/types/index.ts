@@ -618,6 +618,15 @@ export interface SavedPlace {
   rules: PlaceRule[];
 }
 
+export interface ClosedDayRecord {
+  date: string; // YYYY-MM-DD
+  closedAt: number; // epoch ms
+  method: 'manual' | 'auto';
+}
+
+export type ClosedDaysMap = Record<string, ClosedDayRecord>;
+
+
 
 
 

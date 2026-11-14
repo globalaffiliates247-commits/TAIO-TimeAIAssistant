@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useT } from '../../i18n/useT';
 import { parseViGoal, ParsedGoal } from './parsers/vi';
 import { parseEnGoal } from './parsers/en';
+import { getDeviceCalendarDate } from '@/core/clock';
 import { Target, Sparkles, Calendar, Hash, Clock } from 'lucide-react';
 
 export const GoalInput: React.FC = () => {
@@ -46,7 +47,7 @@ export const GoalInput: React.FC = () => {
       keyResultUnit: parsed.unit,
       keyResultCurrent: 0,
       commitment: parsed.type === 'time_commitment' && parsed.duration
-        ? { minutesPerDay: parsed.duration, days: horizonDays, start: new Date().toISOString().slice(0, 10) }
+        ? { minutesPerDay: parsed.duration, days: horizonDays, start: getDeviceCalendarDate() }
         : undefined,
     });
 

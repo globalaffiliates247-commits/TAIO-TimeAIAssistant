@@ -49,6 +49,15 @@ import {
   timeToMinutes,
 } from '../core/clock';
 import {
+  ClosedDayRecord,
+  ClosedDaysMap,
+  isDayClosed as checkIsDayClosed,
+  markDayClosed as applyMarkDayClosed,
+  findDayToClose,
+  getPreviousDay,
+  getNextCalendarDate,
+} from '../features/dayclose';
+import {
   FreeTimer,
   loadFreeTimers,
   saveFreeTimers,
@@ -225,7 +234,7 @@ interface AppContextType {
   updateDailyCardItem: (id: string, patch: Partial<DailyCardItem>) => void;
   removeDailyCardItem: (id: string) => void;
   toggleDailyCardItem: (id: string) => void;
-  carryOverItem: (id: string, action: 'tomorrow' | 'leave' | 'drop', reason?: string) => void;
+  carryOverItem: (id: string, action: 'tomorrow' | 'today' | 'leave' | 'drop', reason?: string) => void;
 
   // v0.3.0 / v0.23.0 B24 & v0.3.20: Data Export & Import (taio-time-export v1)
   exportModalOpen: boolean;
@@ -393,10 +402,13 @@ interface AppContextType {
   }) => void;
   handleCheckInAnswer: (answer: 'done' | 'continue_later' | 'more_time' | 'remind_10m' | 'stop_here', extraMins?: number, nextStep?: string) => void;
   handleLabelGap: (gapId: string, label: GapLabel) => void;
-  handleCloseDay: (tomorrowTask: string) => void;
+  handleCloseDay: (tomorrowTask: string, targetDate?: string) => void;
   addNewBlock: (block: Omit<TimeBlock, 'id'>) => void;
   addGoalWithBackplanning: (goal: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => void;
   dayClosed: boolean;
+  closedDays: ClosedDaysMap;
+  markDayClosed: (date: string, method?: 'manual' | 'auto') => void;
+  isDayClosed: (date: string) => boolean;
   celebrationMsg: string | null;
   setCelebrationMsg: (msg: string | null) => void;
   // v0.3.17 B14: Toast / Top message notifications (Confirmation: 3s, 4s with Undo; Error: persistent & goes to bell list)
@@ -529,7 +541,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [socialAuditModalOpen, setSocialAuditModalOpen] = useState<boolean>(false);
   const [checkInBlock, setCheckInBlock] = useState<TimeBlock | null>(null);
 
-  const [dayClosed, setDayClosed] = useState<boolean>(false);
+  const [closedDays, setClosedDays] = useState<ClosedDaysMap>({});
+  const dayClosed = checkIsDayClosed(closedDays, getDeviceCalendarDate());
+
+  const markDayClosed = (date: string, method: 'manual' | 'auto' = 'manual') => {
+    setClosedDays(prev => {
+      const next = applyMarkDayClosed(prev, date, method);
+      saveDurableState('closedDays', next, Date.now());
+      return next;
+    });
+  };
   const [celebrationMsg, setCelebrationMsgState] = useState<string | null>(null);
   const setCelebrationMsg = (msg: string | null) => {
     setCelebrationMsgState(msg);
@@ -1258,27 +1279,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  const carryOverItem = (id: string, action: 'tomorrow' | 'leave' | 'drop', reason?: string) => {
-    setDailyCardItems(prev => prev.map(item => {
-      if (item.id === id) {
-        if (action === 'tomorrow') {
-          const d = new Date(item.date);
-          d.setDate(d.getDate() + 1);
-          const tomorrowStr = getDeviceCalendarDate(d);
-          return {
-            ...item,
-            date: tomorrowStr,
-            status: 'open',
-            carryCount: item.carryCount + 1,
-          };
-        } else if (action === 'leave') {
-          return { ...item, status: 'left' };
-        } else if (action === 'drop') {
-          return { ...item, status: 'dropped', dropReason: reason || 'Bỏ qua cuối ngày' };
+  const carryOverItem = (id: string, action: 'tomorrow' | 'today' | 'leave' | 'drop', reason?: string) => {
+    const nowTs = Date.now();
+    setDailyCardItems(prev => {
+      const next = prev.map(item => {
+        if (item.id === id) {
+          if (action === 'today') {
+            const todayStr = getDeviceCalendarDate();
+            return {
+              ...item,
+              date: todayStr,
+              status: 'open' as const,
+              carryCount: (item.carryCount || 0) + 1,
+            };
+          } else if (action === 'tomorrow') {
+            const [y, m, d] = item.date.split('-').map(Number);
+            const nextD = new Date(y, (m || 1) - 1, (d || 1) + 1);
+            const tomorrowStr = getDeviceCalendarDate(nextD);
+            return {
+              ...item,
+              date: tomorrowStr,
+              status: 'open' as const,
+              carryCount: (item.carryCount || 0) + 1,
+            };
+          } else if (action === 'leave') {
+            return { ...item, status: 'left' as const };
+          } else if (action === 'drop') {
+            return { ...item, status: 'dropped' as const, dropReason: reason || 'Bỏ qua cuối ngày' };
+          }
         }
-      }
-      return item;
-    }));
+        return item;
+      });
+      saveDurableState('dailyCardItems', next, nowTs);
+      return next;
+    });
   };
 
   const generateMarkdownSnapshot = (): string => {
@@ -1496,7 +1530,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else if (notif.targetAction === 'open_swipe') {
       setIsSwipeModalOpen(true);
     } else if (notif.targetAction === 'open_dayclose') {
-      setCloseDayModalOpen(true);
+      const dayToClose = findDayToClose(dailyCardItems, closedDays);
+      if (dayToClose) {
+        setCloseDayModalOpen(true);
+      } else {
+        setCelebrationMsg(language === 'vi' ? 'Hôm nay và các ngày trước đã khép xong!' : 'All days wrapped up!');
+      }
     }
   };
 
@@ -2157,15 +2196,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGaps(prev => prev.map(g => g.id === gapId ? { ...g, label } : g));
   };
 
-  const handleCloseDay = (tomorrowTask: string) => {
+  const handleCloseDay = (tomorrowTask: string, targetDateToClose?: string) => {
     const actualBedtime = getDeviceTimeString();
-    const actualCalendarDate = getDeviceCalendarDate();
-    setDayClosed(true);
+    const todayDate = getDeviceCalendarDate();
+    const targetDate = targetDateToClose || todayDate;
+    const nowTs = Date.now();
+
+    setClosedDays(prev => {
+      const next = applyMarkDayClosed(prev, targetDate, 'manual');
+      saveDurableState('closedDays', next, nowTs);
+      return next;
+    });
+
+    if (tomorrowTask && tomorrowTask.trim()) {
+      const nextDate = targetDate < todayDate ? todayDate : getNextCalendarDate(targetDate);
+      const newItem: DailyCardItem = {
+        id: `task-${nowTs}-${Math.random().toString(36).slice(2, 6)}`,
+        date: nextDate,
+        text: tomorrowTask.trim(),
+        status: 'open',
+        carryCount: 0,
+        origin: 'planned',
+        updatedAt: nowTs,
+      };
+      setDailyCardItems(prev => {
+        const next = [newItem, ...prev];
+        saveDurableState('dailyCardItems', next, nowTs);
+        return next;
+      });
+    }
+
     setCloseDayModalOpen(false);
     setCelebrationMsg(
       language === 'vi' 
-        ? `Đã khóa ngày lúc ${actualBedtime} (${actualCalendarDate})! Việc quan trọng số 1 ngày mai: "${tomorrowTask}". Hãy nghỉ ngơi trọn vẹn!` 
-        : `Day closed at ${actualBedtime} (${actualCalendarDate})! Tomorrow's #1 focus: "${tomorrowTask}". Rest well!`
+        ? `Đã khép ngày ${targetDate} lúc ${actualBedtime}! ${tomorrowTask.trim() ? `Việc quan trọng: "${tomorrowTask}". ` : ''}Hãy nghỉ ngơi trọn vẹn!` 
+        : `Day ${targetDate} closed at ${actualBedtime}! ${tomorrowTask.trim() ? `Focus task: "${tomorrowTask}". ` : ''}Rest well!`
     );
   };
 
@@ -2210,6 +2275,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         savedDeviceLook,
         savedDayTemplate,
         savedImportedDays,
+        savedClosedDays,
       ] = await Promise.all([
         loadDurableState<TimeBlock[]>('blocks'),
         loadDurableState<DailyCardItem[]>('dailyCardItems'),
@@ -2227,6 +2293,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loadDurableState<DeviceLook>('deviceLook'),
         loadDurableState<DayTemplateSlot[]>('dayTemplate'),
         loadDurableState<ExportedDayRecord[]>('importedDays'),
+        loadDurableState<ClosedDaysMap>('closedDays'),
       ]);
 
       if (cancelled) return;
@@ -2298,6 +2365,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } else {
           setDeviceLook(savedDeviceLook.value);
         }
+      }
+
+      if (savedClosedDays?.value) {
+        let loadedClosedDays = savedClosedDays.value;
+        const yesterday = getPreviousDay(getDeviceCalendarDate());
+        if (!checkIsDayClosed(loadedClosedDays, yesterday)) {
+          const cards = savedDailyCards?.value || [];
+          const yItems = cards.filter(i => i.date === yesterday && i.status !== 'dropped');
+          if (yItems.length > 0 && yItems.every(i => i.status === 'done')) {
+            loadedClosedDays = applyMarkDayClosed(loadedClosedDays, yesterday, 'auto');
+            saveDurableState('closedDays', loadedClosedDays, Date.now());
+          }
+        }
+        setClosedDays(loadedClosedDays);
       }
 
       isHydratedRef.current = true;
@@ -2654,6 +2735,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addNewBlock,
       addGoalWithBackplanning,
       dayClosed,
+      closedDays,
+      markDayClosed,
+      isDayClosed: (d: string) => checkIsDayClosed(closedDays, d),
       celebrationMsg,
       setCelebrationMsg,
       toastMsg,

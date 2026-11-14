@@ -22,6 +22,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { InterruptionActivityCategory, ItemOrigin, SavedPlace } from '../types';
+import { getDeviceCalendarDate } from '@/core/clock';
 
 export const ActiveCaptureModal: React.FC = () => {
   const { 
@@ -72,7 +73,7 @@ export const ActiveCaptureModal: React.FC = () => {
     e.preventDefault();
     const duration = calculateDuration(bfStartTime, bfEndTime);
     backfillTime({
-      date: new Date().toISOString().split('T')[0],
+      date: getDeviceCalendarDate(),
       startTime: bfStartTime,
       endTime: bfEndTime,
       durationMins: duration,

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { getDeviceCalendarDate } from '@/core/clock';
 import { 
   FileText, 
   Copy, 
@@ -32,7 +33,7 @@ export const ExportDataModal: React.FC = () => {
   const [exportId, setExportId] = useState<string>(`exp_${Date.now()}`);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getDeviceCalendarDate();
   const markdownContent = generateMarkdownSnapshot ? generateMarkdownSnapshot() : '';
 
   // Host URL detection (defaults to Render domain or window.location.origin)

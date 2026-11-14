@@ -13,8 +13,10 @@ import {
   IdeaState,
   ProjectStatus,
   InterruptionActivityCategory,
-  TimeLedgerCategory
+  TimeLedgerCategory,
+  ClosedDaysMap
 } from '../../../types';
+import { getDeviceCalendarDate } from '@/core/clock';
 import { PROFILES } from '../../../data/mockData';
 import { toEpochMs } from '../../../core/storage/durableStorage';
 import { loadUserMotivationState, saveUserMotivationState } from '@/features/motivation';
@@ -154,6 +156,7 @@ export interface AppImportableState {
   timeLedger: TimeLedgerSegment[];
   dayTemplate: DayTemplateSlot[];
   importedDays: ExportedDayRecord[];
+  closedDays?: ClosedDaysMap;
 }
 
 function extractExtra(obj: Record<string, unknown>, knownKeys: string[]): Record<string, unknown> | undefined {
@@ -420,6 +423,16 @@ export function applyTaioImport(
   let nextBacklogCards: BacklogCard[] = mode === 'replace' ? [] : [...currentState.backlogCards];
   let nextDayTemplate: DayTemplateSlot[] = mode === 'replace' ? [] : [...currentState.dayTemplate];
   let nextImportedDays: ExportedDayRecord[] = mode === 'replace' ? [] : [...currentState.importedDays];
+  let nextClosedDays: ClosedDaysMap = mode === 'replace' ? {} : { ...(currentState.closedDays || {}) };
+
+  if (payload.closedDays && typeof payload.closedDays === 'object') {
+    if (mode === 'replace') nextClosedDays = {};
+    for (const [dKey, rec] of Object.entries(payload.closedDays as ClosedDaysMap)) {
+      if (rec && typeof rec === 'object' && rec.date) {
+        nextClosedDays[dKey] = rec;
+      }
+    }
+  }
 
   // 1. User profile
   if (payload.user && typeof payload.user === 'object') {
@@ -631,7 +644,7 @@ export function applyTaioImport(
       if (!deadlineStr && commitmentObj?.start && commitmentObj?.days) {
         const startMs = Date.parse(commitmentObj.start);
         if (!Number.isNaN(startMs)) {
-          deadlineStr = new Date(startMs + horizonDays * 86400000).toISOString().split('T')[0];
+          deadlineStr = getDeviceCalendarDate(new Date(startMs + horizonDays * 86400000));
         }
       }
       if (!deadlineStr) deadlineStr = '2027-01-09';
@@ -1167,6 +1180,7 @@ export function applyTaioImport(
       timeLedger: nextTimeLedger,
       dayTemplate: nextDayTemplate,
       importedDays: nextImportedDays,
+      closedDays: nextClosedDays,
     },
     summary: {
       mode,
@@ -1333,6 +1347,7 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
     tasks: exportedTasks,
     dayTemplate: exportedDayTemplate,
     days: exportedDays,
+    closedDays: state.closedDays || {},
     motivation: loadUserMotivationState(),
   };
 }

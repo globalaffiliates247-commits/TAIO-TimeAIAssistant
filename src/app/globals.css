@@ -1352,6 +1352,12 @@
   .border-amber-500 {
     border-color: var(--color-amber-500);
   }
+  .border-amber-500\/20 {
+    border-color: color-mix(in srgb, oklch(76.9% 0.188 70.08) 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-amber-500) 20%, transparent);
+    }
+  }
   .border-amber-500\/30 {
     border-color: color-mix(in srgb, oklch(76.9% 0.188 70.08) 30%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -4469,6 +4475,9 @@
     .dark\:border-indigo-800 {
       border-color: var(--color-indigo-800);
     }
+    .dark\:border-neutral-700 {
+      border-color: var(--color-neutral-700);
+    }
     .dark\:border-rose-800 {
       border-color: var(--color-rose-800);
     }
@@ -4518,6 +4527,14 @@
         background-color: color-mix(in oklab, var(--color-amber-950) 40%, transparent);
       }
     }
+    .dark\:bg-black\/20 {
+      background-color: color-mix(in srgb, #000 20%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .dark\:bg-black\/20 {
+        background-color: color-mix(in oklab, var(--color-black) 20%, transparent);
+      }
+    }
     .dark\:bg-blue-950\/40 {
       background-color: color-mix(in srgb, oklch(28.2% 0.091 267.935) 40%, transparent);
     }
@@ -4561,6 +4578,9 @@
         background-color: color-mix(in oklab, var(--color-teal-950) 40%, transparent);
       }
     }
+    .dark\:bg-white {
+      background-color: var(--color-white);
+    }
     .dark\:bg-white\/\[0\.02\] {
       background-color: color-mix(in srgb, #fff 2%, transparent);
     }
@@ -4590,6 +4610,9 @@
       .dark\:bg-zinc-800\/60 {
         background-color: color-mix(in oklab, var(--color-zinc-800) 60%, transparent);
       }
+    }
+    .dark\:text-amber-200 {
+      color: var(--color-amber-200);
     }
     .dark\:text-amber-400 {
       color: var(--color-amber-400);
@@ -4621,8 +4644,17 @@
     .dark\:text-rose-400 {
       color: var(--color-rose-400);
     }
+    .dark\:text-slate-200 {
+      color: var(--color-slate-200);
+    }
+    .dark\:text-slate-900 {
+      color: var(--color-slate-900);
+    }
     .dark\:text-teal-400 {
       color: var(--color-teal-400);
+    }
+    .dark\:text-white {
+      color: var(--color-white);
     }
     .dark\:text-zinc-100 {
       color: var(--color-zinc-100);
