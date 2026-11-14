@@ -20,6 +20,7 @@ import {
   getOrPickDailyQuote,
 } from '../model/motivationStore';
 import { quoteRegistry } from '../model/quoteRegistry';
+import { sendQuoteReaction } from '../model/quoteReaction';
 import { RefreshCw, Heart, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface MotivationStickerProps {
@@ -113,6 +114,9 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
       ? userState.favorites.filter(id => id !== currentQuote.id)
       : [...userState.favorites, currentQuote.id];
 
+    // PRD v0.3.35 B3.2: Anonymous server reaction (fire-and-forget)
+    sendQuoteReaction(currentQuote.id, isFav ? 'unheart' : 'heart');
+
     const updatedState = { ...userState, favorites: updatedFavs };
     setUserState(updatedState);
     saveUserMotivationState(updatedState);
@@ -121,6 +125,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   // Action: × Ẩn hết hôm nay
   const handleHideToday = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (currentQuote) {
+      // PRD v0.3.35 B3.3: Anonymous server hide reaction
+      sendQuoteReaction(currentQuote.id, 'hide');
+    }
     const today = getDeviceCalendarDate();
     const updatedState = {
       ...userState,

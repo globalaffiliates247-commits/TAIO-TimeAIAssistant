@@ -26,6 +26,7 @@ import {
   ToggleRight,
   ShieldCheck,
   ShieldAlert,
+  Heart,
 } from 'lucide-react';
 
 const CONTEXT_OPTIONS: { id: QuoteContext; label: string }[] = [
@@ -50,6 +51,8 @@ export const QuoteAdmin: React.FC = () => {
   const [contextFilter, setContextFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [unverifiedOnly, setUnverifiedOnly] = useState(false);
+  // PRD v0.3.35 Part B3.2: Sort by hearts / hides
+  const [sortBy, setSortBy] = useState<'default' | 'hearts' | 'hides'>('default');
 
   // Modal / Form state for Add or Edit
   const [editingQuote, setEditingQuote] = useState<MotivationQuote | null>(null);
@@ -192,7 +195,7 @@ export const QuoteAdmin: React.FC = () => {
 
   // Filtered quotes list
   const filtered = useMemo(() => {
-    return quotes.filter(q => {
+    const res = quotes.filter(q => {
       if (search) {
         const query = search.toLowerCase();
         const matchText = q.text.toLowerCase().includes(query);
@@ -210,7 +213,15 @@ export const QuoteAdmin: React.FC = () => {
       }
       return true;
     });
-  }, [quotes, search, langFilter, statusFilter, unverifiedOnly, contextFilter]);
+
+    if (sortBy === 'hearts') {
+      return [...res].sort((a, b) => (b.heartCount || 0) - (a.heartCount || 0));
+    }
+    if (sortBy === 'hides') {
+      return [...res].sort((a, b) => (b.hideCount || 0) - (a.hideCount || 0));
+    }
+    return res;
+  }, [quotes, search, langFilter, statusFilter, unverifiedOnly, contextFilter, sortBy]);
 
   return (
     <div className="space-y-6">
@@ -245,7 +256,7 @@ export const QuoteAdmin: React.FC = () => {
       </div>
 
       {/* Filter toolbar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
         {/* Search */}
         <div className="relative md:col-span-2">
           <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
@@ -257,6 +268,17 @@ export const QuoteAdmin: React.FC = () => {
             className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
           />
         </div>
+
+        {/* Sort by hearts / hides (PRD v0.3.35 B3.2) */}
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value as any)}
+          className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 focus:outline-none font-medium"
+        >
+          <option value="default">Sắp xếp: Mặc định</option>
+          <option value="hearts">Sắp xếp: Nhiều tim nhất (♥)</option>
+          <option value="hides">Sắp xếp: Bị ẩn nhiều nhất (×)</option>
+        </select>
 
         {/* Lang filter */}
         <select
@@ -340,6 +362,19 @@ export const QuoteAdmin: React.FC = () => {
                   <span className="text-[10.5px]">
                     {q.contexts.join(', ')}
                   </span>
+
+                  {/* PRD v0.3.35 B3.2 & B5.7: Heart count & Hide count badges */}
+                  <span className="text-slate-300">·</span>
+                  <div className="inline-flex items-center gap-1.5 ml-1">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-bold text-[10px]" title="Số lượt thả tim từ người dùng">
+                      <Heart size={10} className="fill-rose-500" />
+                      <span>{q.heartCount || 0}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-bold text-[10px]" title="Số lượt người dùng bấm ẩn">
+                      <X size={10} />
+                      <span>{q.hideCount || 0}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
 

@@ -21,6 +21,10 @@ export interface MotivationQuote {
   originalLang?: string; // Ngôn ngữ gốc của câu (ví dụ 'en', 'vi')
   originalText?: string; // Nguyên văn câu gốc của tác giả
   translationOf?: string; // ID của câu gốc nếu đây là bản dịch
+
+  // v0.3.35 Part B3 & B4: Anonymous reaction counters (Admin visible)
+  heartCount?: number;
+  hideCount?: number;
 }
 
 export interface UserMotivationState {

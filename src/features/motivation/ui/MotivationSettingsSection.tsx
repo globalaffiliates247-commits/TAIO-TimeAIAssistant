@@ -18,6 +18,7 @@ import {
   loadServerQuotesCache,
   getAllQuotes,
 } from '../model/motivationStore';
+import { sendQuoteReaction } from '../model/quoteReaction';
 import { Sparkles, Quote, Check, Heart, Pin, Trash2 } from 'lucide-react';
 
 export const MotivationSettingsSection: React.FC = () => {
@@ -57,6 +58,9 @@ export const MotivationSettingsSection: React.FC = () => {
   };
 
   const handleRemoveFavorite = (quoteId: string) => {
+    // PRD v0.3.35 B3.2: Notify server of unheart
+    sendQuoteReaction(quoteId, 'unheart');
+
     const updatedFavs = userState.favorites.filter(id => id !== quoteId);
     const updated: UserMotivationState = {
       ...userState,
