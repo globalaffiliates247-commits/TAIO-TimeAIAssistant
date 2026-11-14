@@ -142,7 +142,11 @@
 
   // Quote interactions
   quoteText.addEventListener('click', () => {
-    modalQuoteContent.innerText = `"${currentQuote.text}"`;
+    let content = `"${currentQuote.text}"`;
+    if (currentQuote.originalText && currentQuote.originalText !== currentQuote.text) {
+      content += `\n\n(Nguyên văn [${currentQuote.originalLang || 'en'}]: "${currentQuote.originalText}")`;
+    }
+    modalQuoteContent.innerText = content;
     modalQuoteAuthor.innerText = currentQuote.author ? `— ${currentQuote.author}` : '';
     quoteModal.style.display = 'flex';
   });

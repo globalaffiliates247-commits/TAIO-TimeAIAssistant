@@ -1,0 +1,23 @@
+{
+  "pairing": {
+    "title": "Pair Devices with 6-Character Code",
+    "subtitle": "Quick accountless sync, one-time code valid for 10 minutes",
+    "generateCodeBtn": "Generate Pairing Code",
+    "enterCodeTitle": "Enter Pairing Code from another device",
+    "codePlaceholder": "Enter 6 characters",
+    "pairBtn": "Connect",
+    "yourCodeIs": "Your pairing code:",
+    "codeExpiresIn": "Expires in {{minutes}}m {{seconds}}s",
+    "expired": "Code expired",
+    "oneTimeNotice": "One-time use only with end-to-end encryption (AES-GCM).",
+    "errorInvalidOrExpired": "Invalid or expired pairing code. Please generate a new one.",
+    "errorGeneric": "Could not connect. Please verify the code and try again.",
+    "successConnected": "Devices paired successfully! Data is now synchronized.",
+    "leaveSpace": "Disconnect Device Sync"
+  },
+  "sync": {
+    "title": "Pick up where you left off, across all devices",
+    "subtitle": "Your active tasks, stopwatches, and quick notes stay in sync across Mac and iPhone.",
+    "errorRetry": "Could not sync yet. The app will retry automatically."
+  }
+}

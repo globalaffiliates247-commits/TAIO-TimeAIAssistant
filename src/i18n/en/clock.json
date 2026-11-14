@@ -1,0 +1,22 @@
+{
+  "alarm": {
+    "dismiss": "Start Task Now",
+    "snooze_after": "Snooze for {{mins}}m",
+    "stopped_after_15m": "Alarm stopped after 15 mins · rang at {{time}}",
+    "snooze_count": "Snoozed {{count}} times",
+    "change_sound": "Switch Alarm Sound",
+    "missed": "You missed the start time at {{time}}. Start now?"
+  },
+  "timebox": {
+    "endedHeader": "Time is up. Is this finished?",
+    "continueLater": "Not finished, save for later"
+  },
+  "desktop": {
+    "quickNoteTitle": "TAIO Quick Note",
+    "quickNotePlaceholder": "21:30 call Mr. Minh...",
+    "quickNoteHint": "Press ⌥⌘N anywhere to open this window",
+    "trayTimerRunning": "Timer: {{remaining}}",
+    "trayTimerIdle": "TAIO Time",
+    "noteAdded": "Added to Today's Journal at {{time}}"
+  }
+}

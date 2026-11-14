@@ -16,6 +16,11 @@ export interface MotivationQuote {
   media?: { type: 'audio' | 'image'; url: string };
   updatedAt?: string;
   linkedGoalId?: string;
+
+  // v0.3.34 Part C5: Multi-language Quote metadata
+  originalLang?: string; // Ngôn ngữ gốc của câu (ví dụ 'en', 'vi')
+  originalText?: string; // Nguyên văn câu gốc của tác giả
+  translationOf?: string; // ID của câu gốc nếu đây là bản dịch
 }
 
 export interface UserMotivationState {

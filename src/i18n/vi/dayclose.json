@@ -1,0 +1,16 @@
+{
+  "dayclose": {
+    "wrapUpToday": "Khép lại hôm nay",
+    "wrapUpDayTitle": "Khép lại {{day}}",
+    "alreadyClosed": "Đã khép ngày",
+    "tomorrowTopTask": "Sáng mai, bạn làm gì đầu tiên?",
+    "morningTopTask": "Sáng nay, bạn làm gì đầu tiên?",
+    "windDownReminder": "Khép ngày xong, app sẽ nhắc bạn nghỉ lúc {{time}}.",
+    "carryToTomorrow": "Ngày mai",
+    "carryToToday": "Hôm nay",
+    "leave": "Để lại",
+    "drop": "Bỏ",
+    "summaryCount": "Đã xếp {{planned}} việc · xong {{done}} · bỏ qua {{dropped}} · dời {{carried}}",
+    "subtitle": "Quy trình 2 phút • Dời việc có chủ đích • Chuẩn bị ngày mới"
+  }
+}

@@ -245,6 +245,15 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             — {currentQuote.author}
           </div>
         )}
+
+        {/* v0.3.34 Part C5: Original quote text when viewing a translation */}
+        {currentQuote.originalText && isExpanded && (
+          <div className="mt-1.5 pt-1.5 border-t border-black/5 dark:border-white/10 text-[10.5px] text-neutral-500 dark:text-neutral-400 italic">
+            <span className="font-semibold not-italic text-neutral-600 dark:text-neutral-300">
+              {t('motivation.original', 'Nguyên văn')} ({currentQuote.originalLang || 'en'}):
+            </span> "{currentQuote.originalText}"
+          </div>
+        )}
       </div>
     );
   }
@@ -262,6 +271,15 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           onClick={() => setIsExpanded(!isExpanded)}
         >
           "{currentQuote.text}"
+
+          {/* v0.3.34 Part C5: Original quote text when viewing a translation */}
+          {currentQuote.originalText && isExpanded && (
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400 italic font-normal">
+              <span className="font-semibold not-italic text-neutral-700 dark:text-neutral-300">
+                {t('motivation.original', 'Nguyên văn')} ({currentQuote.originalLang || 'en'}):
+              </span> "{currentQuote.originalText}"
+            </div>
+          )}
         </div>
 
         {/* Action icons */}

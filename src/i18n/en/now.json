@@ -1,0 +1,36 @@
+{
+  "now": {
+    "dod_input_label": "Completion criteria",
+    "dod_input_placeholder": "One criterion per line, press Enter to add"
+  },
+  "checkin": {
+    "done": "Done",
+    "continue_later": "Not finished, save for later",
+    "more_time": "Need +15 more minutes",
+    "remind_10m": "Remind me in 10 minutes",
+    "snooze": "Snooze…",
+    "wrap_up_now": "Wrap up now",
+    "done_despite": "Done despite unmet criteria",
+    "dod_label": "Completion criteria",
+    "kicker": "Time is up. Is this finished?",
+    "goal_serving": "Serving goal: {{goal}}",
+    "next_step_placeholder": "E.g.: Finish analysis table section 2...",
+    "next_step_label": "What is the specific next step?",
+    "save_next_step": "Save next step & Stop safely",
+    "done_celebration": "🎉 Completed! Goal progress updated.",
+    "select_all": "Select all",
+    "all_criteria_met": "All criteria met ✓",
+    "check_to_complete": "Check items to complete",
+    "sitting_break": "You have been sitting for {{count}} minutes. Stand up and stretch for 5 minutes?",
+    "continue_next_step": "Note next step ↗",
+    "unmet_criteria_prefix": "Unmet criteria: ",
+    "unnamed_step": "Continue task",
+    "return_point_title": "Pick up where you left off",
+    "return_point_next": "Next step: {{step}}"
+  },
+  "returnPoint": {
+    "title": "Pick up where you left off",
+    "step": "Next step: {{content}}",
+    "recordHint": "Save where you stopped so you can resume immediately"
+  }
+}

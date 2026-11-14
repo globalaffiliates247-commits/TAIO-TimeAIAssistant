@@ -5,6 +5,8 @@
   "scripts": {
     "build:version": "node scripts/inject-build-version.js",
     "check:i18n": "node scripts/check-i18n.js",
+    "i18n:export": "node scripts/i18n-export.js",
+    "i18n:import": "node scripts/i18n-import.js",
     "build:css": "node scripts/build-css.js",
     "dev": "npm run build:version && npm run check:i18n && npm run build:css && next dev --webpack -p 3000",
     "build": "npm run build:version && npm run check:i18n && npm run build:css && next build --webpack",

@@ -1,5 +1,18 @@
 [
   {
+    "id": "q-en-jobs",
+    "text": "Stay hungry, stay foolish.",
+    "author": "Steve Jobs",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Stay hungry, stay foolish.",
+    "contexts": ["start_day", "goal", "any"],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
     "id": "q-en-01",
     "text": "The key is not to prioritize what's on your schedule, but to schedule your priorities.",
     "author": "Stephen Covey",

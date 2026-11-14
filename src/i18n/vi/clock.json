@@ -1,0 +1,22 @@
+{
+  "alarm": {
+    "dismiss": "Vào việc ngay",
+    "snooze_after": "Báo lại sau {{mins}}p",
+    "stopped_after_15m": "Chuông đã ngừng sau 15 phút · báo lúc {{time}}",
+    "snooze_count": "Đã báo lại {{count}} lần",
+    "change_sound": "Đổi nhạc chuông",
+    "missed": "Bạn đã lỡ giờ bắt đầu lúc {{time}}. Bắt đầu bây giờ?"
+  },
+  "timebox": {
+    "endedHeader": "Hết giờ rồi. Việc này xong chưa?",
+    "continueLater": "Chưa xong, để dành làm tiếp"
+  },
+  "desktop": {
+    "quickNoteTitle": "Ghi nhanh TAIO",
+    "quickNotePlaceholder": "21:30 gọi anh Minh...",
+    "quickNoteHint": "Bấm ⌥⌘N ở bất kỳ đâu để mở cửa sổ này",
+    "trayTimerRunning": "Đồng hồ: {{remaining}}",
+    "trayTimerIdle": "TAIO Time",
+    "noteAdded": "Đã thêm vào Nhật ký hôm nay lúc {{time}}"
+  }
+}

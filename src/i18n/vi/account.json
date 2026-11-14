@@ -1,0 +1,23 @@
+{
+  "pairing": {
+    "title": "Ghép máy bằng mã 6 ký tự",
+    "subtitle": "Đồng bộ nhanh không cần tài khoản, mã dùng một lần trong 10 phút",
+    "generateCodeBtn": "Tạo mã ghép máy",
+    "enterCodeTitle": "Nhập mã ghép từ máy khác",
+    "codePlaceholder": "Nhập 6 ký tự",
+    "pairBtn": "Kết nối",
+    "yourCodeIs": "Mã ghép của bạn:",
+    "codeExpiresIn": "Hết hạn sau {{minutes}} phút {{seconds}} giây",
+    "expired": "Mã đã hết hạn",
+    "oneTimeNotice": "Mã chỉ dùng được 1 lần và bảo mật đầu-cuối (AES-GCM).",
+    "errorInvalidOrExpired": "Mã ghép không hợp lệ hoặc đã hết hạn. Vui lòng tạo mã mới.",
+    "errorGeneric": "Không thể kết nối. Vui lòng kiểm tra lại mã ghép.",
+    "successConnected": "Ghép máy thành công! Dữ liệu đã được đồng bộ.",
+    "leaveSpace": "Ngắt đồng bộ thiết bị"
+  },
+  "sync": {
+    "title": "Bắt đầu từ nơi bạn đã dừng lại, trên mọi thiết bị",
+    "subtitle": "Việc đang làm dở, đồng hồ bấm giờ và tờ ghi nhanh có mặt trên cả Mac và iPhone.",
+    "errorRetry": "Chưa đồng bộ được. App sẽ tự thử lại."
+  }
+}

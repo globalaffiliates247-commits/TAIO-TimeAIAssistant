@@ -1,0 +1,16 @@
+{
+  "dayclose": {
+    "wrapUpToday": "Wrap Up Today",
+    "wrapUpDayTitle": "Wrap Up {{day}}",
+    "alreadyClosed": "Day Wrapped Up",
+    "tomorrowTopTask": "What will you do first tomorrow morning?",
+    "morningTopTask": "What will you do first this morning?",
+    "windDownReminder": "Once day is wrapped up, the app will remind you to rest at {{time}}.",
+    "carryToTomorrow": "Tomorrow",
+    "carryToToday": "Today",
+    "leave": "Leave",
+    "drop": "Drop",
+    "summaryCount": "Scheduled {{planned}} tasks · completed {{done}} · skipped {{dropped}} · moved {{carried}}",
+    "subtitle": "2-minute wrap-up • Mindful migration • Prepare next day"
+  }
+}

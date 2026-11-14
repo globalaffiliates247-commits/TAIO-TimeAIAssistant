@@ -1,5 +1,18 @@
 [
   {
+    "id": "q-vi-jobs",
+    "text": "Hãy luôn khao khát, hãy luôn dại khờ.",
+    "author": "Steve Jobs",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Stay hungry, stay foolish.",
+    "contexts": ["start_day", "goal", "any"],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
     "id": "q-vi-01",
     "text": "Hãy bắt đầu ngày của bạn bằng một nội dung truyền cảm hứng và năng lượng: một câu nói truyền động lực, một đoạn nhạc, và một hình ảnh truyền cảm hứng. Tất cả cần liên kết với mục tiêu của bạn.",
     "author": "TAIO-Lee",
