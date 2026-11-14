@@ -72,6 +72,12 @@ export interface SubTask {
   createdAt: number;
 }
 
+// PRD v0.3.36 Part B: Task Extension record (+5p, +10p, +15p, custom)
+export interface TaskExtension {
+  at: number;        // timestamp ms
+  mins: number;      // minutes extended
+}
+
 export interface TimeBlock {
   id: string;
   title: string;
@@ -88,6 +94,7 @@ export interface TimeBlock {
   returnPoint?: string;
   notes?: string;
   children?: SubTask[]; // PRD v0.3.35 Part D: Việc con (tối đa 10)
+  extensions?: TaskExtension[]; // PRD v0.3.36 Part B: Lịch sử gia hạn (+5p, +10p, +15p)
   // B16 Priority Matrix
   quadrant?: 1 | 2 | 3 | 4;
   isImportant?: boolean;
@@ -433,6 +440,7 @@ export interface DailyCardItem {
   isTemplateBlock?: boolean;
   parallelOf?: string; // id of main task if this is a side/parallel task (Part F)
   children?: SubTask[]; // PRD v0.3.35 Part D: Việc con (tối đa 10)
+  extensions?: TaskExtension[]; // PRD v0.3.36 Part B: Lịch sử gia hạn (+5p, +10p, +15p)
   updatedAt?: string | number;
   extra?: Record<string, unknown>;
 }

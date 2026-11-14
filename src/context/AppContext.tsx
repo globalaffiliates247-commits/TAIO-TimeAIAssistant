@@ -1286,7 +1286,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateDailyCardItem = (id: string, patch: Partial<DailyCardItem>) => {
     setDailyCardItems(prev => {
-      const next = prev.map(it => (it.id === id ? { ...it, ...patch, updatedAt: Date.now() } : it));
+      const next = prev.map(it => {
+        if (it.id !== id) return it;
+        const merged: DailyCardItem = { ...it, ...patch, updatedAt: Date.now() };
+        // PRD v0.3.36 Part A4: Việc xong phải luôn có end
+        if (merged.status === 'done' && merged.start && !merged.end) {
+          const startM = timeToMinutes(merged.start);
+          const estM = (typeof merged.extra?.estimateMins === 'number' ? merged.extra.estimateMins : 30);
+          const frameEndM = startM + estM;
+          const nowM = getDeviceTimeMinutes();
+          const resolvedEndM = (nowM >= startM && nowM <= frameEndM) ? nowM : frameEndM;
+          merged.end = minutesToTime(resolvedEndM % 1440);
+        }
+        return merged;
+      });
       saveDurableState('dailyCardItems', next, Date.now());
       return next;
     });
@@ -1301,13 +1314,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleDailyCardItem = (id: string) => {
-    setDailyCardItems(prev => prev.map(item => {
-      if (item.id === id) {
-        const nextStatus: ItemStatus = item.status === 'done' ? 'open' : 'done';
-        return { ...item, status: nextStatus, updatedAt: Date.now() };
-      }
-      return item;
-    }));
+    setDailyCardItems(prev => {
+      const next = prev.map(item => {
+        if (item.id === id) {
+          const nextStatus: ItemStatus = item.status === 'done' ? 'open' : 'done';
+          const updated: DailyCardItem = { ...item, status: nextStatus, updatedAt: Date.now() };
+          // PRD v0.3.36 Part A4: Việc xong phải luôn có end
+          if (nextStatus === 'done' && updated.start && !updated.end) {
+            const startM = timeToMinutes(updated.start);
+            const estM = (typeof updated.extra?.estimateMins === 'number' ? updated.extra.estimateMins : 30);
+            const frameEndM = startM + estM;
+            const nowM = getDeviceTimeMinutes();
+            const resolvedEndM = (nowM >= startM && nowM <= frameEndM) ? nowM : frameEndM;
+            updated.end = minutesToTime(resolvedEndM % 1440);
+          }
+          return updated;
+        }
+        return item;
+      });
+      saveDurableState('dailyCardItems', next, Date.now());
+      return next;
+    });
   };
 
   const carryOverItem = (id: string, action: 'tomorrow' | 'today' | 'leave' | 'drop', reason?: string) => {
@@ -2545,6 +2572,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         saveDurableState('blocks', templateBlocks, Date.now());
         saveDurableState('dailyCardItems', cards, Date.now());
       }
+
+      // PRD v0.3.36 Part A4: Backfill missing end for done items
+      let didBackfillEnd = false;
+      cards = cards.map(c => {
+        if (c.status === 'done' && c.start && !c.end) {
+          didBackfillEnd = true;
+          const startM = timeToMinutes(c.start);
+          const estM = (typeof c.extra?.estimateMins === 'number' ? c.extra.estimateMins : 30);
+          return {
+            ...c,
+            end: minutesToTime((startM + estM) % 1440),
+          };
+        }
+        return c;
+      });
+      if (didBackfillEnd) {
+        saveDurableState('dailyCardItems', cards, Date.now());
+      }
+
       setDailyCardItems(cards);
 
       if (savedInbox?.value) {
