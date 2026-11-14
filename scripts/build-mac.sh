@@ -91,8 +91,9 @@ for ARCH in ${ARCHS:-arm64}; do
   hdiutil create -volname "TAIO Time" -srcfolder "$VOL" -ov -format UDZO "$DMG_OUT"
 
   if [ -d "$HOME/Desktop" ]; then
-    cp "$DMG_OUT" "$HOME/Desktop/TAIOTime.dmg"
-    echo "Copied DMG to $HOME/Desktop/TAIOTime.dmg"
+    rm -f "$HOME/Desktop/TAIOTime.dmg" "$HOME/Desktop/TAIO-Time-"*.dmg "$HOME/Desktop/TAIOTime-"*.dmg
+    cp "$DMG_OUT" "$HOME/Desktop/TAIOTime-${VERSION}.dmg"
+    echo "Copied DMG to $HOME/Desktop/TAIOTime-${VERSION}.dmg"
   fi
 done
 

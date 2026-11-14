@@ -33,11 +33,11 @@ import { updateScheduleEntry } from '@/features/tasks';
 import { TemplateScheduleModal } from '@/features/schedule-template';
 
 const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; border: string }> = {
-  deep: { label: 'Tập trung sâu', bg: 'bg-rose-500/15', text: 'text-rose-700', border: 'border-rose-500/30' },
-  meeting: { label: 'Họp & Trao đổi', bg: 'bg-purple-500/15', text: 'text-purple-700', border: 'border-purple-500/30' },
-  interruption: { label: 'Quỹ gián đoạn', bg: 'bg-amber-500/15', text: 'text-amber-700', border: 'border-amber-500/30' },
-  personal: { label: 'Cá nhân & Nghỉ', bg: 'bg-emerald-500/15', text: 'text-emerald-700', border: 'border-emerald-500/30' },
-  planning: { label: 'Lập kế hoạch', bg: 'bg-cyan-500/15', text: 'text-cyan-700', border: 'border-cyan-500/30' },
+  deep: { label: 'Tập trung sâu', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200/70' },
+  meeting: { label: 'Họp & Trao đổi', bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200/70' },
+  interruption: { label: 'Quỹ gián đoạn', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200/70' },
+  personal: { label: 'Cá nhân & Nghỉ', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200/70' },
+  planning: { label: 'Lập kế hoạch', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200/70' },
 };
 
 export const PlanTab: React.FC = () => {
@@ -305,176 +305,198 @@ export const PlanTab: React.FC = () => {
                       const isParallel = Boolean(block.parallelOf || (block.extra as Record<string, unknown> | undefined)?.parallelOf);
                       return (
                         <div
-                          className={`p-4 rounded-2xl transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          className={`p-3.5 sm:p-4 rounded-2xl transition-all space-y-2.5 ${
                             isParallel ? 'ml-6 border-l-4 border-l-indigo-400 pl-3.5 bg-indigo-50/40' : ''
                           } ${
                             isCurrent 
-                              ? 'border-2 border-red-400 bg-red-50/80 ring-1 ring-red-400/40 shadow-xs'
+                              ? 'border-2 border-[#E0401F] bg-orange-50/60 shadow-xs ring-1 ring-[#E0401F]/20'
                               : isCompleted
-                              ? 'border border-slate-200 bg-slate-100/90 shadow-2xs' // Thực tế: Nền đặc
-                              : 'border-2 border-dashed border-slate-300 bg-white/60 hover:border-slate-400 shadow-2xs' // Kế hoạch: Nét viền
+                              ? 'border border-slate-200 bg-slate-50/90 shadow-2xs' // Thực tế: Nền đặc nhẹ nhàng
+                              : 'border-2 border-dashed border-slate-200 hover:border-slate-300 bg-white shadow-2xs' // Kế hoạch: Nét viền trang nhã
                           }`}
                         >
-                          <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
-                            {isParallel && (
-                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
-                                ∥ Song song
-                              </span>
-                            )}
-                        {/* Time Badge (clickable to edit time) */}
-                        {isEditingTime ? (
-                          <div className="flex items-center gap-1 text-xs shrink-0">
-                            <input
-                              type="time"
-                              value={editingStart}
-                              onChange={e => setEditingStart(e.target.value)}
-                              className="px-2 py-1 rounded-lg border border-slate-300 bg-white font-mono text-xs"
-                            />
-                            <span>-</span>
-                            <input
-                              type="time"
-                              value={editingEnd}
-                              onChange={e => setEditingEnd(e.target.value)}
-                              className="px-2 py-1 rounded-lg border border-slate-300 bg-white font-mono text-xs"
-                            />
-                            <button
-                              onClick={() => {
-                                updateScheduleEntry(block.id, { startTime: editingStart, endTime: editingEnd }, { updateDailyCardItem, setBlocks, dailyCardItems });
-                                setEditingTimeId(null);
-                              }}
-                              className="p-1 rounded-md bg-emerald-600 text-white"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setEditingTimeId(null)}
-                              className="p-1 rounded-md text-slate-400 hover:bg-slate-200"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setEditingTimeId(block.id);
-                              setEditingStart(block.startTime);
-                              setEditingEnd(block.endTime);
-                            }}
-                            title="Bấm để đổi giờ"
-                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-mono font-bold whitespace-nowrap transition-colors shrink-0"
-                          >
-                            {block.startTime} - {block.endTime}
-                          </button>
-                        )}
+                          {/* Row 1: Time, Badges, and Action buttons */}
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {/* Parallel indicator */}
+                              {isParallel && (
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                  ∥ Song song
+                                </span>
+                              )}
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {typeExplicitlyChosen && (
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${conf.bg} ${conf.text} ${conf.border}`}>
-                                {conf.label}
+                              {/* Time Badge (clickable to edit time) */}
+                              {isEditingTime ? (
+                                <div className="flex items-center gap-1 text-xs shrink-0">
+                                  <input
+                                    type="time"
+                                    value={editingStart}
+                                    onChange={e => setEditingStart(e.target.value)}
+                                    className="px-2 py-0.5 rounded-lg border border-slate-300 bg-white font-mono text-xs"
+                                  />
+                                  <span>-</span>
+                                  <input
+                                    type="time"
+                                    value={editingEnd}
+                                    onChange={e => setEditingEnd(e.target.value)}
+                                    className="px-2 py-0.5 rounded-lg border border-slate-300 bg-white font-mono text-xs"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      updateScheduleEntry(block.id, { startTime: editingStart, endTime: editingEnd }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                                      setEditingTimeId(null);
+                                    }}
+                                    className="p-1 rounded-md bg-emerald-600 text-white"
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingTimeId(null)}
+                                    className="p-1 rounded-md text-slate-400 hover:bg-slate-200"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setEditingTimeId(block.id);
+                                    setEditingStart(block.startTime);
+                                    setEditingEnd(block.endTime);
+                                  }}
+                                  title="Bấm để đổi giờ"
+                                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 border border-slate-200/80 text-slate-700 text-xs font-mono font-semibold transition-colors shrink-0"
+                                >
+                                  {block.startTime} – {block.endTime}
+                                </button>
+                              )}
+
+                              {/* Type tag */}
+                              {typeExplicitlyChosen && (
+                                <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${
+                                  isCompleted ? 'bg-slate-100 text-slate-600 border-slate-200' : `${conf.bg} ${conf.text} ${conf.border}`
+                                }`}>
+                                  {conf.label}
+                                </span>
+                              )}
+
+                              {/* Status tag */}
+                              <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold ${
+                                isCompleted 
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70' 
+                                  : statusDisplay.badgeClass
+                              }`}>
+                                {isCompleted ? '✓ Đã xong' : statusDisplay.label}
                               </span>
-                            )}
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusDisplay.badgeClass}`}>
-                              {statusDisplay.label}
-                            </span>
-                            {isTemplate && (
-                              <span className="text-[11px] font-bold text-slate-500 flex items-center gap-0.5 bg-slate-100 px-2 py-0.5 rounded-full" title="Khung cố định theo lịch mẫu">
-                                🔁 Khung cố định
-                              </span>
-                            )}
+
+                              {/* Template block subtle badge */}
+                              {isTemplate && (
+                                <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1 bg-slate-100/80 px-2 py-0.5 rounded-md border border-slate-200/60" title="Khung cố định theo lịch mẫu">
+                                  <span>🔁</span>
+                                  <span>Cố định</span>
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Actions on the top right */}
+                            <div className="flex items-center gap-1 shrink-0 ml-auto">
+                              {isTemplate ? (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    onClick={() => updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems })}
+                                    className="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 text-[11px] font-medium transition-colors shadow-2xs"
+                                    title="Bỏ qua khung này cho riêng hôm nay"
+                                  >
+                                    Bỏ qua hôm nay
+                                  </button>
+                                  <button
+                                    onClick={() => setTemplateModalOpen(true)}
+                                    className="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 text-[11px] font-medium transition-colors shadow-2xs"
+                                    title="Sửa lịch mẫu"
+                                  >
+                                    Sửa lịch mẫu
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    if (confirm('Xóa công việc này khỏi lịch?')) {
+                                      updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                                    }
+                                  }}
+                                  className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                  title="Xóa công việc"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
                           </div>
 
-                          {/* Title with inline edit */}
-                          {isEditingTitle ? (
-                            <div className="flex items-center gap-2 mt-1">
-                              <input
-                                type="text"
-                                value={editingTitle}
-                                onChange={e => setEditingTitle(e.target.value)}
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter') {
+                          {/* Row 2: Title full-width! */}
+                          <div>
+                            {isEditingTitle ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={editingTitle}
+                                  onChange={e => setEditingTitle(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                      updateScheduleEntry(block.id, { title: editingTitle.trim() }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                                      setEditingId(null);
+                                    } else if (e.key === 'Escape') {
+                                      setEditingId(null);
+                                    }
+                                  }}
+                                  className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => {
                                     updateScheduleEntry(block.id, { title: editingTitle.trim() }, { updateDailyCardItem, setBlocks, dailyCardItems });
                                     setEditingId(null);
-                                  } else if (e.key === 'Escape') {
-                                    setEditingId(null);
-                                  }
-                                }}
-                                className="w-full px-2.5 py-1 rounded-lg border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none"
-                                autoFocus
-                              />
-                              <button
+                                  }}
+                                  className="p-1.5 rounded-md bg-emerald-600 text-white"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ) : (
+                              <h4
                                 onClick={() => {
-                                  updateScheduleEntry(block.id, { title: editingTitle.trim() }, { updateDailyCardItem, setBlocks, dailyCardItems });
-                                  setEditingId(null);
+                                  setEditingId(block.id);
+                                  setEditingTitle(block.title);
                                 }}
-                                className="p-1 rounded-md bg-emerald-600 text-white"
+                                title="Bấm để sửa tên"
+                                className={`text-[15px] leading-snug font-semibold cursor-pointer hover:text-blue-600 transition-colors ${
+                                  isCompleted ? 'text-slate-400 line-through font-normal' : 'text-slate-900'
+                                }`}
                               >
-                                <Check className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ) : (
-                            <h4
-                              onClick={() => {
-                                setEditingId(block.id);
-                                setEditingTitle(block.title);
-                              }}
-                              title="Bấm để sửa tên"
-                              className={`text-sm sm:text-base font-bold mt-1 cursor-pointer hover:underline ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}
-                            >
-                              {block.title}
-                            </h4>
-                          )}
+                                {block.title}
+                              </h4>
+                            )}
+                          </div>
 
-                          {block.nextStep && (
-                            <p className="text-xs text-amber-700 font-medium mt-0.5">
-                              Bước kế tiếp: {block.nextStep}
-                            </p>
-                          )}
-                          {block.goalName && (
-                            <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
-                              <Target className="w-3.5 h-3.5 text-red-400" />
-                              <span>{block.goalName}</span>
-                            </p>
+                          {/* Row 3: Next step & Goal (if any) */}
+                          {(block.nextStep || block.goalName) && (
+                            <div className="flex items-center gap-3 flex-wrap pt-0.5 text-xs text-slate-500">
+                              {block.goalName && (
+                                <p className="flex items-center gap-1.5 text-slate-600 font-medium">
+                                  <Target className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                                  <span>{block.goalName}</span>
+                                </p>
+                              )}
+                              {block.nextStep && (
+                                <p className="text-amber-800 bg-amber-50 border border-amber-200/60 rounded-md px-2 py-0.5 font-medium">
+                                  Bước kế tiếp: {block.nextStep}
+                                </p>
+                              )}
+                            </div>
                           )}
                         </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-1 shrink-0">
-                        {isTemplate ? (
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems })}
-                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition-colors"
-                              title="Bỏ qua khung này cho riêng hôm nay"
-                            >
-                              Bỏ qua hôm nay
-                            </button>
-                            <button
-                              onClick={() => setTemplateModalOpen(true)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition-colors"
-                              title="Sửa lịch mẫu"
-                            >
-                              Sửa lịch mẫu
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              if (confirm('Xóa công việc này khỏi lịch?')) {
-                                updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems });
-                              }
-                            }}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            title="Xóa công việc"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
+                      );
+                    })()}
               </React.Fragment>
             );
           })}
