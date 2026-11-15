@@ -8,20 +8,22 @@ export function generateSubTaskId(): string {
   return `st-${rand}`;
 }
 
-export function createSubTask(title: string, note?: string): SubTask {
+export function createSubTask(title: string, note?: string, estimatedMinutes?: number): SubTask {
   return {
     id: generateSubTaskId(),
     title: title.trim(),
     done: false,
     note: note?.trim(),
     createdAt: Date.now(),
+    estimatedMinutes,
   };
 }
 
 export function addSubTask(
   current: SubTask[] | undefined,
   title: string,
-  note?: string
+  note?: string,
+  estimatedMinutes?: number
 ): { children: SubTask[]; error?: string; created?: SubTask } {
   const list = current ? [...current] : [];
   if (list.length >= MAX_SUBTASKS_PER_TASK) {
@@ -31,7 +33,7 @@ export function addSubTask(
     };
   }
 
-  const sub = createSubTask(title, note);
+  const sub = createSubTask(title, note, estimatedMinutes);
   list.push(sub);
   return { children: list, created: sub };
 }

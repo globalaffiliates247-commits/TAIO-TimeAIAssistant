@@ -136,6 +136,7 @@ export function updateScheduleEntry(
           ...(patch.goalId !== undefined ? { goalId: patch.goalId, goalName: patch.goalName } : {}),
           ...(patch.milestoneId !== undefined ? { milestoneId: patch.milestoneId, milestoneName: patch.milestoneName } : {}),
           ...(patch.title !== undefined ? { title: patch.title } : {}),
+          ...(patch.children !== undefined ? { children: patch.children } : {}),
           statusDate: today,
           dailyStatus: {
             ...(b.dailyStatus || {}),

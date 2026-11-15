@@ -10,6 +10,7 @@ import {
   updateSubTask,
   removeSubTask,
 } from '../model/subTaskModel';
+import { parseTimedText } from '@/features/sticky/model/timeline';
 import { Plus, X, Check, AlertCircle } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
@@ -23,6 +24,8 @@ export interface SubTaskListProps {
   isInputOpen?: boolean;
   onCloseInput?: () => void;
   onFocusParent?: () => void;
+  parentDurationMins?: number;
+  gapToNextMins?: number;
   className?: string;
 }
 
@@ -36,6 +39,8 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
   isInputOpen = false,
   onCloseInput,
   onFocusParent,
+  parentDurationMins,
+  gapToNextMins,
   className = '',
 }) => {
   const { language, showToast } = useApp();
@@ -66,7 +71,23 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
       return;
     }
 
-    const { children, error } = addSubTask(childrenItems, newTitle);
+    const parsed = parseTimedText(newTitle);
+    const cleanTitle = parsed.rest || newTitle.trim();
+    let subMins = parsed.durationMins;
+
+    if (!subMins) {
+      // Auto-allocate duration based on parent task's budget or gap to next task
+      const totalBudget = parentDurationMins || (gapToNextMins && gapToNextMins > 0 ? gapToNextMins : 30);
+      const assignedSoFar = childrenItems.reduce((sum, c) => sum + (c.estimatedMinutes || 0), 0);
+      const remainingBudget = Math.max(0, totalBudget - assignedSoFar);
+      if (remainingBudget >= 10) {
+        subMins = Math.max(5, Math.min(remainingBudget, Math.round(remainingBudget / 2)));
+      } else {
+        subMins = Math.max(5, Math.floor(totalBudget / (childrenItems.length + 1)));
+      }
+    }
+
+    const { children, error } = addSubTask(childrenItems, cleanTitle, undefined, subMins);
     if (error) {
       showToast?.(error);
       return;
@@ -82,8 +103,9 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
   const handleBlurNew = () => {
     if (newTitle.trim()) {
       handleAddNew();
+    } else {
+      onCloseInput?.();
     }
-    onCloseInput?.();
   };
 
   const handleRemove = (id: string, e: React.MouseEvent) => {
@@ -160,6 +182,12 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
                   {st.title}
                 </span>
               )}
+
+              {Boolean(st.estimatedMinutes) && (
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-500 font-mono font-medium shrink-0">
+                  {st.estimatedMinutes}p
+                </span>
+              )}
             </div>
 
             {/* Delete button on hover */}
@@ -213,11 +241,17 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
           {newTitle.trim() && (
             <button
               type="button"
-              onMouseDown={e => {
-                e.preventDefault(); // prevent blur before click
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 handleAddNew();
               }}
-              className="text-[10.5px] px-2 py-0.5 rounded bg-slate-900 text-white font-medium hover:bg-black transition-colors"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAddNew();
+              }}
+              className="text-[10.5px] px-2 py-0.5 rounded bg-slate-900 text-white font-medium hover:bg-black transition-colors shrink-0 cursor-pointer shadow-xs"
             >
               {isEn ? 'Add' : 'Thêm'}
             </button>

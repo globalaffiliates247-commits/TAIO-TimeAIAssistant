@@ -816,6 +816,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
                 <SubTaskList
                   parentId={activeTask!.id}
                   childrenItems={children}
+                  parentDurationMins={activeTask ? (timeToMinutes(activeTask.endTime) - timeToMinutes(activeTask.startTime) + 1440) % 1440 : 30}
                   onUpdateChildren={(newChildren) => {
                     updateScheduleEntry(
                       activeTask!.id,

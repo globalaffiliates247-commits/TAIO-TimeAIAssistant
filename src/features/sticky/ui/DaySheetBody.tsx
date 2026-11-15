@@ -120,6 +120,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           const override = b.dailyOverrides?.[day];
           const start = override?.startTime || b.startTime;
           const end = override?.endTime || b.endTime;
+          const cardItem = (dailyCardItems || []).find(c => c.id === b.id);
+          const children = b.children || cardItem?.children;
           return {
             id: b.id,
             text: b.title,
@@ -136,6 +138,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
             nextStep: b.nextStep,
             isTemplateBlock: isTemplate,
             extra: b.extra,
+            children,
+            extensions: b.extensions || cardItem?.extensions,
           } as DailyCardItem & { isTemplateBlock?: boolean };
         })
         .sort((a, b) => toMins(a.start!) - toMins(b.start!));
@@ -1071,20 +1075,13 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           onKeyDown={e => {
             if (e.key === 'Enter') {
               if (pickerItemId !== it.id) {
-                if (justCommittedId === it.id) {
-                  // Rule F2.2: Enter #2 opens subtask line below
-                  setJustCommittedId(null);
-                  setEditing(null);
-                  setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
-                  setSubTaskInputOpenId(it.id);
-                  setAutoFocusSubTaskId(it.id);
-                } else {
-                  // Rule F2.1: Enter #1 saves/commits line and keeps cursor, showing subtle brief checkmark
-                  saveEdit(it);
-                  setJustCommittedId(it.id);
-                  setShowCommittedCheckmark(it.id);
-                  setTimeout(() => setShowCommittedCheckmark(null), 600);
-                }
+                e.preventDefault();
+                saveEdit(it);
+                setJustCommittedId(null);
+                setEditing(null);
+                setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
+                setSubTaskInputOpenId(it.id);
+                setAutoFocusSubTaskId(it.id);
               }
             }
             if (e.key === 'Escape') {
@@ -1489,9 +1486,21 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 parentId={it.id}
                 childrenItems={it.children}
                 onUpdateChildren={(newChildren) => {
+                  setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
                   updateDailyCardItem(it.id, { children: newChildren });
-                  if (isToday) {
-                    updateScheduleEntry(it.id, { children: newChildren }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                  updateScheduleEntry(it.id, { children: newChildren }, { updateDailyCardItem, setBlocks, dailyCardItems });
+
+                  // Auto-extend parent task if subtasks total duration exceeds current duration and gap exists
+                  const totalSubMins = newChildren.reduce((s, c) => s + (c.estimatedMinutes || 0), 0);
+                  const curDur = durationOf(it) || 30;
+                  if (totalSubMins > curDur && gap && gap.start && gap.end && it.start) {
+                    const availableGapMins = (toMins(gap.end) - toMins(gap.start) + 1440) % 1440;
+                    if (availableGapMins > 0) {
+                      const addMins = Math.min(totalSubMins - curDur, availableGapMins);
+                      const newEndMins = (toMins(it.end || toTime(toMins(it.start) + curDur)) + addMins) % 1440;
+                      const newEndTime = toTime(newEndMins);
+                      updateScheduleEntry(it.id, { endTime: newEndTime }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                    }
                   }
                 }}
                 isInputOpen={subTaskInputOpenId === it.id}
@@ -1502,6 +1511,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 }}
                 autoFocusNew={autoFocusSubTaskId === it.id}
                 onDoneAutoFocus={() => setAutoFocusSubTaskId(null)}
+                parentDurationMins={durationOf(it) || 30}
+                gapToNextMins={gap ? (toMins(gap.end) - toMins(gap.start) + 1440) % 1440 : undefined}
                 className="mb-1"
               />
             )}
@@ -1737,7 +1748,11 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               <SubTaskList
                 parentId={it.id}
                 childrenItems={it.children}
-                onUpdateChildren={(newChildren) => updateDailyCardItem(it.id, { children: newChildren })}
+                onUpdateChildren={(newChildren) => {
+                  setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
+                  updateDailyCardItem(it.id, { children: newChildren });
+                }}
+                parentDurationMins={durationOf(it) || 30}
                 isInputOpen={subTaskInputOpenId === it.id}
                 onCloseInput={() => setSubTaskInputOpenId(null)}
                 onFocusParent={() => {

@@ -70,6 +70,7 @@ export interface SubTask {
   done: boolean;
   note?: string;
   createdAt: number;
+  estimatedMinutes?: number; // duration in minutes
 }
 
 // PRD v0.3.36 Part B: Task Extension record (+5p, +10p, +15p, custom)

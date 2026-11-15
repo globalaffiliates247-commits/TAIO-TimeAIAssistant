@@ -1,6 +1,6 @@
 {
   "name": "taio-time-app",
-  "version": "0.3.41",
+  "version": "0.3.42",
   "private": true,
   "scripts": {
     "build:version": "node scripts/inject-build-version.js",
