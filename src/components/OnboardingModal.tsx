@@ -227,6 +227,14 @@ export const OnboardingModal: React.FC = () => {
               />
             </div>
 
+            {/* Unverified trial notice (PRD v0.3.39 Part D2.2) */}
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500 flex items-start gap-2">
+              <ShieldAlert className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+              <span>
+                Bản dùng thử lưu dữ liệu trên máy này. Khi chưa xác thực tài khoản, người khác có thể đăng nhập trên máy khác nếu trùng thông tin. Bạn có thể xác thực trong Cá nhân → Tài khoản bất kỳ lúc nào.
+              </span>
+            </div>
+
             {/* Actions */}
             <div className="pt-2 flex items-center justify-between">
               <button

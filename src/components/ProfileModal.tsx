@@ -327,6 +327,31 @@ export const ProfileModal: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {/* Account Section (PRD v0.3.39 Part D: Bỏ lời nhắc xác thực, chỉ có nút tự bấm) */}
+              <div className="pt-4 border-t border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      {language === 'vi' ? 'Tài khoản' : 'Account'}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      {language === 'vi'
+                        ? 'Tài khoản trên thiết bị này. Chưa xác thực thì dữ liệu lưu cục bộ.'
+                        : 'Local account on this device. Unverified data is stored locally.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      alert(language === 'vi' ? 'Tính năng xác thực tài khoản sẽ sẵn sàng trong đợt cập nhật tiếp theo.' : 'Account verification will be available in the upcoming update.');
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200/80 transition-colors shadow-2xs shrink-0 cursor-pointer"
+                  >
+                    {language === 'vi' ? 'Xác thực tài khoản' : 'Verify Account'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
