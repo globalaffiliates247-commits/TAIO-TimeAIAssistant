@@ -6,6 +6,9 @@ import { validateWorkNode, rollUpNodeMinutes } from '../src/domain/workNode.ts';
 import { computeEvmPacing, computeEstimationEfficiency, extractTaskActualMinutes } from '../src/domain/goalLedger.ts';
 import { matchLinesWithStableIds } from '../src/features/sticky/model/lineMatcher.ts';
 import { hasStickyChanged } from '../src/features/sticky/model/stickyStore.ts';
+import { updateScheduleEntry } from '../src/features/tasks/scheduleWrite.ts';
+import { buildTodaySchedule } from '../src/features/tasks/todaySchedule.ts';
+import { computeBlockStatus } from '../src/core/clock/index.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -155,6 +158,83 @@ if (fs.existsSync(goalLedgerPath)) {
     passed++;
   } else {
     console.error(`[FAIL] Part E.4 hasStickyChanged should be true when data changed`);
+    failed++;
+  }
+}
+
+// 4. PRD v0.3.40 Part A Tests: Schedule Write Gateway & Template Invariance
+{
+  const today = '2026-11-15';
+  const tomorrow = '2026-11-16';
+
+  // Test A.1: Stopping a card task sets end time and status 'left' without error
+  let dailyCardItems = [
+    { id: 'dc-1', date: today, text: 'TAIO MKT', start: '17:20', end: '18:30', status: 'open' },
+  ];
+  const updateDailyCardItem = (id, patch) => {
+    dailyCardItems = dailyCardItems.map(it => it.id === id ? { ...it, ...patch } : it);
+  };
+  let blocks = [
+    {
+      id: 'tb-dinner',
+      title: 'Ăn tối, thời gian cá nhân',
+      startTime: '18:00',
+      endTime: '22:00',
+      type: 'personal',
+      status: 'planned',
+      isTemplateBlock: true,
+      blockKind: 'routine',
+    },
+  ];
+  const setBlocks = fn => {
+    blocks = typeof fn === 'function' ? fn(blocks) : fn;
+  };
+
+  updateScheduleEntry('dc-1', { status: 'partly_done', endTime: '17:35', nextStep: 'Review clip' }, {
+    updateDailyCardItem,
+    setBlocks,
+    dailyCardItems,
+  });
+
+  const stoppedCard = dailyCardItems.find(i => i.id === 'dc-1');
+  const todaySched1 = buildTodaySchedule(blocks, dailyCardItems, today);
+  const cardBlock = todaySched1.find(b => b.id === 'dc-1');
+
+  if (stoppedCard && stoppedCard.status === 'left' && stoppedCard.end === '17:35' && cardBlock && cardBlock.status === 'partly_done') {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part A.1 Stop card task failed:`, { stoppedCard, cardBlock });
+    failed++;
+  }
+
+  // Test A.2: Stopping a fixed template block must NOT mutate root template block in `blocks`
+  updateScheduleEntry('tb-dinner', { status: 'partly_done', endTime: '18:45', timeboxEndOutcome: 'continue_later' }, {
+    updateDailyCardItem,
+    setBlocks,
+    dailyCardItems,
+  });
+
+  const rootBlock = blocks.find(b => b.id === 'tb-dinner');
+  const todaySched2 = buildTodaySchedule(blocks, dailyCardItems, today);
+  const todayDinner = todaySched2.find(b => b.id === 'tb-dinner');
+
+  const rootUnchanged = rootBlock.startTime === '18:00' && rootBlock.endTime === '22:00' && rootBlock.status === 'planned';
+  const todayOverridden = todayDinner.endTime === '18:45' && todayDinner.status === 'partly_done';
+
+  if (rootUnchanged && todayOverridden) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part A.2 Template invariance failed: rootUnchanged=${rootUnchanged}, todayOverridden=${todayOverridden}`, { rootBlock, todayDinner });
+    failed++;
+  }
+
+  // Test A.3: Tomorrow schedule synthesized from the same blocks returns original 18:00–22:00
+  const tomorrowSched = buildTodaySchedule(blocks, dailyCardItems, tomorrow);
+  const tomorrowDinner = tomorrowSched.find(b => b.id === 'tb-dinner');
+  if (tomorrowDinner && tomorrowDinner.startTime === '18:00' && tomorrowDinner.endTime === '22:00' && tomorrowDinner.status === 'planned') {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part A.3 Tomorrow schedule mutated from today's stop:`, tomorrowDinner);
     failed++;
   }
 }

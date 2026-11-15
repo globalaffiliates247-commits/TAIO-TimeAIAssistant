@@ -1,6 +1,7 @@
 // PRD B34 v0.3.26 / FIX v0.3.28: the smart part of the day sheet — times, duration pills, gaps, suggestions.
 // Pure functions over Thẻ ngày items, so they are easy to test and reuse.
-import type { DailyCardItem } from '@/types';
+import type { DailyCardItem } from '../../../types/index.ts';
+import { formatDuration } from '../../../i18n/format.ts';
 
 export const MIN_GAP_MINS = 15;      // founder decision: suggest only for gaps of 15 minutes or more
 export const DEFAULT_DURATION = 30;  // when there is no history
@@ -10,7 +11,6 @@ export const toTime = (mins: number) => {
   const m = ((Math.round(mins) % 1440) + 1440) % 1440;
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 };
-import { formatDuration } from '@/i18n/format';
 
 export const fmtDuration = (mins: number, lang: 'vi' | 'en' = 'vi') => {
   return formatDuration(mins, lang);

@@ -1,6 +1,6 @@
 // PRD FIX v0.3.28 Part A1: Unified Today's Schedule (Single Source of Truth)
-import type { TimeBlock, DailyCardItem } from '@/types';
-import { toMins, toTime } from '@/features/sticky/model/timeline';
+import type { TimeBlock, DailyCardItem } from '../../types';
+import { toMins, toTime } from '../sticky/model/timeline.ts';
 
 /**
  * Pure function: build unified today's schedule from blocks and dailyCardItems.

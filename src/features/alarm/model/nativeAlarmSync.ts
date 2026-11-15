@@ -21,11 +21,18 @@ export interface NativeAlarmSyncResult {
 
 const OPEN_STATUSES = new Set(['planned', 'unconfirmed']);
 
-/** Upcoming block starts for today (device clock), skipping finished or dropped blocks. */
+/** Upcoming block starts for today (device clock), skipping finished or dropped blocks. 
+ * v0.3.40 Part C3.1: Only schedule native alarms for core rituals or tasks explicitly marked with loudAlarm.
+ */
 export function buildUpcomingAlarms(blocks: TimeBlock[], now: Date = getDeviceNow()): NativeBlockAlarm[] {
   const nowMs = now.getTime();
   return blocks
-    .filter(b => b.startTime && OPEN_STATUSES.has(b.status))
+    .filter(b => {
+      if (!b.startTime || !OPEN_STATUSES.has(b.status)) return false;
+      const isCoreRitual = b.id === 'b-user-dayclose' || b.id === 'b-ritual-close' || b.id === 'b-10';
+      const isLoud = b.loudAlarm === true || ((b.extra as Record<string, unknown> | undefined)?.loudAlarm === true);
+      return isCoreRitual || isLoud;
+    })
     .map(b => {
       const mins = timeToMinutes(b.startTime);
       const fire = new Date(now);

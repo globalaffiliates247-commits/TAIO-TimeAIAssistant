@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BlockStatus, TimeBlock } from '@/types';
+import type { BlockStatus, TimeBlock } from '../../types/index.ts';
 
 /**
  * Single source of truth for device clock, local calendar dates,
@@ -184,45 +184,45 @@ export function getBlockStatusDisplay(status: BlockStatus): {
     case 'in_progress':
       return {
         label: '● Đang diễn ra',
-        badgeClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
-        dotColor: 'bg-emerald-500',
+        badgeClass: 'bg-emerald-50 text-emerald-950 border border-emerald-300 font-semibold',
+        dotColor: 'bg-emerald-600',
       };
     case 'unconfirmed':
       return {
         label: 'Chờ xác nhận',
-        badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800',
-        dotColor: 'bg-amber-500',
+        badgeClass: 'bg-amber-50 text-amber-950 border border-amber-300 font-semibold',
+        dotColor: 'bg-amber-600',
       };
     case 'done':
       return {
         label: 'Đã xong',
-        badgeClass: 'bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-400 border border-teal-200 dark:border-teal-800',
-        dotColor: 'bg-teal-500',
+        badgeClass: 'bg-slate-100 text-slate-800 border border-slate-300 font-medium',
+        dotColor: 'bg-emerald-600',
       };
     case 'partly_done':
       return {
         label: 'Xong 1 phần',
-        badgeClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
-        dotColor: 'bg-blue-500',
+        badgeClass: 'bg-blue-50 text-blue-950 border border-blue-300 font-semibold',
+        dotColor: 'bg-blue-600',
       };
     case 'dropped':
       return {
         label: 'Chưa làm',
-        badgeClass: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800',
-        dotColor: 'bg-rose-500',
+        badgeClass: 'bg-rose-50 text-rose-950 border border-rose-300 font-medium',
+        dotColor: 'bg-rose-600',
       };
     case 'extended':
       return {
         label: 'Đã gia hạn',
-        badgeClass: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800',
-        dotColor: 'bg-indigo-500',
+        badgeClass: 'bg-indigo-50 text-indigo-950 border border-indigo-300 font-medium',
+        dotColor: 'bg-indigo-600',
       };
     case 'planned':
     default:
       return {
         label: 'Sắp tới',
-        badgeClass: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700',
-        dotColor: 'bg-zinc-400',
+        badgeClass: 'bg-zinc-100 text-zinc-800 border border-zinc-300 font-medium',
+        dotColor: 'bg-zinc-500',
       };
   }
 }

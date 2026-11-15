@@ -510,8 +510,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   ) => {
     const startHM = toTime(nowMins);
 
-    // 1. Check if another task is running
-    if (!options?.mode && currentBlock && currentBlock.id !== it.id) {
+    // 1. Check if another real task is running (do not count background template/ritual blocks)
+    const isRealRunningTask = currentBlock && !currentBlock.isTemplateBlock && currentBlock.blockKind !== 'ritual';
+    if (!options?.mode && isRealRunningTask && currentBlock.id !== it.id) {
       setStartConflictModal({
         item: it,
         type: 'already_running',
@@ -520,37 +521,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       return;
     }
 
-    // 2. Compute duration
-    const estDur = durationOf(it) || (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
-    const upcoming = (scheduleBlocks || [])
-      .filter(b => b.id !== it.id && b.id !== currentBlock?.id && b.status !== 'done' && b.status !== 'dropped' && toMins(b.startTime) > nowMins)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
-
-    let dur = 30;
-    const gapMins = upcoming ? (toMins(upcoming.startTime) - nowMins) : undefined;
-
-    if (options?.fitGap && gapMins && gapMins > 0) {
-      dur = gapMins;
-    } else if (estDur) {
-      dur = estDur;
-      if (!options?.fitGap && gapMins && estDur > gapMins && gapMins > 0) {
-        setStartConflictModal({
-          item: it,
-          type: 'overrun',
-          mode: options?.mode,
-          nextTask: upcoming,
-          overrunMins: estDur - gapMins,
-          gapMins,
-        });
-        return;
-      }
-    } else if (gapMins && gapMins > 0) {
-      dur = gapMins;
-    } else {
-      dur = 30;
-    }
-
-    // 3. If replacing current task, cleanly stop/pause old task and record return point
+    // 2. If replacing current task, cleanly stop/pause old task and record return point
     if (options?.mode === 'replace' && currentBlock) {
       updateScheduleEntry(
         currentBlock.id,
@@ -566,6 +537,36 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         },
         { updateDailyCardItem, setBlocks, dailyCardItems }
       );
+    }
+
+    // 3. Compute duration
+    const estDur = durationOf(it) || (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
+    const upcoming = (scheduleBlocks || [])
+      .filter(b => b.id !== it.id && b.id !== currentBlock?.id && b.status !== 'done' && b.status !== 'dropped' && toMins(b.startTime) > nowMins)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+
+    let dur = 30;
+    const gapMins = upcoming ? (toMins(upcoming.startTime) - nowMins) : undefined;
+
+    if (options?.fitGap && gapMins && gapMins > 0) {
+      dur = gapMins;
+    } else if (estDur) {
+      dur = estDur;
+      if (!options?.fitGap && !options?.mode && gapMins && estDur > gapMins && gapMins > 0) {
+        setStartConflictModal({
+          item: it,
+          type: 'overrun',
+          mode: options?.mode,
+          nextTask: upcoming,
+          overrunMins: estDur - gapMins,
+          gapMins,
+        });
+        return;
+      }
+    } else if (gapMins && gapMins > 0) {
+      dur = gapMins;
+    } else {
+      dur = 30;
     }
 
     // 4. Update started item

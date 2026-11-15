@@ -1800,24 +1800,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return buildTodaySchedule(blocks, dailyCardItems, getDeviceCalendarDate(), dayCloseConfig, dayCloseOverrides);
   }, [blocks, dailyCardItems, dayCloseConfig, dayCloseOverrides]);
 
-  // Active current block (v0.3.34 Part A2.2):
+  // Active current block (v0.3.34 Part A2.2 / v0.3.40 Part A3.3):
   // "Việc hiện tại" chỉ là việc mà giờ hiện tại nằm trong khung (now >= start && now < end),
-  // hoặc việc người dùng đã chủ động bắt đầu. Bỏ hai bước lùi "việc sắp tới gần nhất" và "việc đầu danh sách".
-  // Ở khoảng trống thì không có việc hiện tại (undefined).
+  // hoặc việc người dùng đã chủ động bắt đầu. Ưu tiên việc thật người dùng lên kế hoạch trước khung cố định nền.
   const nowMins = getDeviceTimeMinutes();
-  const currentBlock: TimeBlock | undefined = scheduleBlocks.find(b => {
-    if (b.status === 'done' || b.status === 'dropped' || b.status === 'partly_done') return false;
-    const extra = (b.extra as Record<string, unknown> | undefined) || {};
-    const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
-    if (manuallyStartedAt && b.status === 'in_progress') {
-      const durationMins = b.estimatedMinutes || 30;
-      const elapsedMins = (Date.now() - manuallyStartedAt) / 60000;
-      if (elapsedMins >= 0 && elapsedMins < durationMins + 120) {
-        return true;
+  const currentBlock: TimeBlock | undefined = useMemo(() => {
+    const candidates = scheduleBlocks.filter(b => {
+      if (b.status === 'done' || b.status === 'dropped' || b.status === 'partly_done') return false;
+      const extra = (b.extra as Record<string, unknown> | undefined) || {};
+      const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
+      if (manuallyStartedAt && b.status === 'in_progress') {
+        const durationMins = b.estimatedMinutes || 30;
+        const elapsedMins = (Date.now() - manuallyStartedAt) / 60000;
+        if (elapsedMins >= 0 && elapsedMins < durationMins + 120) {
+          return true;
+        }
       }
-    }
-    return computeBlockStatus(b, nowMins) === 'in_progress';
-  });
+      return computeBlockStatus(b, nowMins) === 'in_progress';
+    });
+
+    if (candidates.length === 0) return undefined;
+    // Prioritize active user card tasks over background template blocks
+    const realTask = candidates.find(b => !b.isTemplateBlock && b.blockKind !== 'ritual');
+    return realTask || candidates[0];
+  }, [scheduleBlocks, nowMins]);
 
   // Sync remaining timer with in-progress block if running
   useEffect(() => {
@@ -1944,12 +1950,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             continue;
           }
 
-          // PRD v0.3.37 Part A2: Fullscreen alarm only for prioritized blocks
-          // 1. Fixed/ritual blocks (rituals, sleep, meals, day close)
+          // v0.3.40 Part C3.2: If user is actively running a task (Play button or real task in progress),
+          // routine fixed template blocks NEVER trigger alarm to interrupt them!
+          const anyTaskRunning = scheduleBlocks.some(other => {
+            if (other.id === b.id) return false;
+            const extraOther = (other.extra as Record<string, unknown> | undefined) || {};
+            return (extraOther.startedAt && other.status !== 'done' && other.status !== 'dropped') ||
+              (other.status === 'in_progress' && !other.isTemplateBlock);
+          });
+          if (anyTaskRunning) {
+            continue;
+          }
+
+          // v0.3.40 Part C3.1: Fullscreen loud sound alarm ONLY for:
+          // 1. Core rituals explicitly configured: Day close (b-user-dayclose), Sleep ritual (b-10, b-ritual-close)
           // 2. Tasks with "Nhắc to" (loudAlarm: true) explicitly toggled by user
-          const isFixedOrRitual = b.isTemplateBlock || b.blockKind === 'ritual' || b.id.startsWith('b-user-') || b.id === 'b-10' || b.id === 'b-ritual-close';
+          // Routine template blocks (meals, personal time, founder sample blocks) NEVER trigger fullscreen loud alarms!
+          const isCoreRitual = b.id === 'b-user-dayclose' || b.id === 'b-ritual-close' || b.id === 'b-10';
           const isLoudAlarm = b.loudAlarm === true || ((b.extra as Record<string, unknown> | undefined)?.loudAlarm === true);
-          const isPrioritized = isFixedOrRitual || isLoudAlarm;
+          const isPrioritized = isCoreRitual || isLoudAlarm;
 
           if (isPrioritized) {
             if (nativeAlarmModeRef.current !== 'alarmkit') {

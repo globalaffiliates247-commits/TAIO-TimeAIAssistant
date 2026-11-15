@@ -1,6 +1,6 @@
 // PRD FIX v0.3.28 Part A1: Unified Schedule Write Gateway
-import type { TimeBlock, DailyCardItem } from '@/types';
-import { timeToMinutes, minutesToTime, getDeviceTimeMinutes, getDeviceCalendarDate } from '@/core/clock';
+import type { TimeBlock, DailyCardItem } from '../../types';
+import { timeToMinutes, minutesToTime, getDeviceTimeMinutes, getDeviceCalendarDate } from '../../core/clock/index.ts';
 
 export interface ScheduleWriteContext {
   updateDailyCardItem: (id: string, patch: Partial<DailyCardItem>) => void;
@@ -118,30 +118,43 @@ export function updateScheduleEntry(
       if (b.id !== id) return b;
       const today = getDeviceCalendarDate();
       const isTemplateOrRitual = b.isTemplateBlock || b.blockKind === 'ritual';
-      const updated = { ...b, ...patch };
 
-      if (isTemplateOrRitual && (patch.status !== undefined || patch.timeboxEndOutcome !== undefined || patch.startTime !== undefined || patch.endTime !== undefined)) {
-        updated.statusDate = today;
-        updated.dailyStatus = {
-          ...(b.dailyStatus || {}),
-          [today]: {
-            status: patch.status || b.status,
-            outcome: patch.timeboxEndOutcome || b.timeboxEndOutcome,
-            updatedAt: Date.now(),
+      if (isTemplateOrRitual) {
+        // v0.3.40 Part A3.1: Root template block properties MUST NOT be mutated for today's runtime actions.
+        // startTime, endTime, and status for today belong strictly inside dailyOverrides & dailyStatus.
+        const prevOverrides = b.dailyOverrides?.[today] || {};
+        const newStartTime = patch.startTime || prevOverrides.startTime || b.startTime;
+        const newEndTime = patch.endTime || prevOverrides.endTime || b.endTime;
+        const newStatus = patch.status !== undefined ? patch.status : (prevOverrides.status || b.status);
+        const newOutcome = patch.timeboxEndOutcome || prevOverrides.outcome || b.timeboxEndOutcome;
+
+        return {
+          ...b,
+          // Preserve root startTime, endTime, and status untouched!
+          statusDate: today,
+          dailyStatus: {
+            ...(b.dailyStatus || {}),
+            [today]: {
+              status: newStatus,
+              outcome: newOutcome,
+              updatedAt: Date.now(),
+            },
           },
-        };
-        if (patch.startTime || patch.endTime) {
-          updated.dailyOverrides = {
+          dailyOverrides: {
             ...(b.dailyOverrides || {}),
             [today]: {
-              ...(b.dailyOverrides?.[today] || {}),
-              startTime: patch.startTime || b.startTime,
-              endTime: patch.endTime || b.endTime,
-              status: patch.status || b.status,
+              ...prevOverrides,
+              startTime: newStartTime,
+              endTime: newEndTime,
+              status: newStatus,
+              outcome: newOutcome,
             },
-          };
-        }
+          },
+          extra: patch.extra ? { ...(b.extra || {}), ...patch.extra } : b.extra,
+        };
       }
+
+      const updated = { ...b, ...patch };
 
       if (patch.status === 'done' && updated.startTime && !updated.endTime) {
         const startM = timeToMinutes(updated.startTime);
