@@ -13,9 +13,12 @@ export interface CustomSoundFile {
   nativeSoundName?: string; // v0.3.24: copy imported into the phone (iOS Library/Sounds .caf), used by native alarms
 }
 
+export type AlarmSoundPreset = 'urgent' | 'moderate' | 'gentle' | 'focus';
+
 export interface AlarmSettings {
   enabled: boolean;
   soundType: 'default' | 'custom';
+  soundPreset?: AlarmSoundPreset;
   customSound?: CustomSoundFile;
   vibrate: boolean;
   volume: number;       // 0 to 1

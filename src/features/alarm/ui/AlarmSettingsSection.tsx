@@ -188,13 +188,17 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
             </div>
           )}
 
-          {/* Radio choice: Default sound vs Custom sound */}
+          {/* Radio choice: Built-in presets vs Custom sound (Part A4) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {/* 1. Urgent (Default) */}
             <button
               type="button"
-              onClick={() => handleSoundTypeChange('default')}
+              onClick={() => {
+                onSettingsChange({ ...settings, soundType: 'default', soundPreset: 'urgent' });
+                saveAlarmSettings({ ...settings, soundType: 'default', soundPreset: 'urgent' });
+              }}
               className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between cursor-pointer ${
-                settings.soundType === 'default'
+                settings.soundType === 'default' && (settings.soundPreset === 'urgent' || !settings.soundPreset)
                   ? isCool
                     ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
                     : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
@@ -204,15 +208,70 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
               <div className="flex items-center gap-2.5">
                 <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Chuông chuẩn TAIO</div>
-                  <div className="text-[11px] text-slate-500">Hòa âm êm ái, rõ ràng</div>
+                  <div className="text-xs font-bold text-slate-900">Gấp gáp (Mặc định)</div>
+                  <div className="text-[11px] text-slate-500">Nhịp nhanh, dễ đánh thức</div>
                 </div>
               </div>
-              {settings.soundType === 'default' && (
+              {settings.soundType === 'default' && (settings.soundPreset === 'urgent' || !settings.soundPreset) && (
                 <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
               )}
             </button>
 
+            {/* 2. Moderate / Standard */}
+            <button
+              type="button"
+              onClick={() => {
+                onSettingsChange({ ...settings, soundType: 'default', soundPreset: 'moderate' });
+                saveAlarmSettings({ ...settings, soundType: 'default', soundPreset: 'moderate' });
+              }}
+              className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between cursor-pointer ${
+                settings.soundType === 'default' && settings.soundPreset === 'moderate'
+                  ? isCool
+                    ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
+                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                  : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Vừa phải (Chuông chuẩn)</div>
+                  <div className="text-[11px] text-slate-500">Hòa âm êm ái, rõ ràng</div>
+                </div>
+              </div>
+              {settings.soundType === 'default' && settings.soundPreset === 'moderate' && (
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+              )}
+            </button>
+
+            {/* 3. Gentle */}
+            <button
+              type="button"
+              onClick={() => {
+                onSettingsChange({ ...settings, soundType: 'default', soundPreset: 'gentle' });
+                saveAlarmSettings({ ...settings, soundType: 'default', soundPreset: 'gentle' });
+              }}
+              className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between cursor-pointer ${
+                settings.soundType === 'default' && settings.soundPreset === 'gentle'
+                  ? isCool
+                    ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
+                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                  : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Dịu dàng</div>
+                  <div className="text-[11px] text-slate-500">Chuông thiền, thanh thoát</div>
+                </div>
+              </div>
+              {settings.soundType === 'default' && settings.soundPreset === 'gentle' && (
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+              )}
+            </button>
+
+            {/* 4. Custom file */}
             <button
               type="button"
               onClick={() => handleSoundTypeChange('custom')}

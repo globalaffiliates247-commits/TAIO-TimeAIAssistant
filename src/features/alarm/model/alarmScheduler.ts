@@ -1,7 +1,7 @@
 import { AlarmSettings, ActiveAlarmState, PlatformAlarmCapability, CustomSoundFile } from './alarmTypes';
 import { TimeBlock } from '@/types';
 import { timeToMinutes, getDeviceCalendarDate } from '@/core/clock';
-import { playDefaultChime as playChimeFromSession, stopRingSessionAudio } from './ringSession';
+import { playChimeByPreset, stopRingSessionAudio } from './ringSession';
 
 const ALARM_SETTINGS_KEY = 'taio_alarm_settings_v1';
 
@@ -144,13 +144,13 @@ export async function triggerAlarmSound(
 
     if (!sourceUrl && sound.nativeSoundName) {
       // Large file kept only on the phone: the native alarm plays it; in-app we use the chime.
-      playChimeFromSession(settings.volume);
+      playChimeByPreset(settings.soundPreset || 'urgent', settings.volume);
       return { isFallbackDefault: false };
     }
 
     if (!sourceUrl) {
       // Missing file -> fallback default
-      playChimeFromSession(settings.volume);
+      playChimeByPreset(settings.soundPreset || 'urgent', settings.volume);
       return {
         isFallbackDefault: true,
         fallbackReason: `Không tìm thấy file âm thanh “${sound.name}” — đã dùng chuông mặc định. Chọn lại?`,
@@ -170,7 +170,7 @@ export async function triggerAlarmSound(
       return { isFallbackDefault: false };
     } catch (err) {
       console.warn('[alarmScheduler] Custom sound playback failed, falling back to default', err);
-      playChimeFromSession(settings.volume);
+      playChimeByPreset(settings.soundPreset || 'urgent', settings.volume);
       return {
         isFallbackDefault: true,
         fallbackReason: `Không tìm thấy hoặc không thể mở file âm thanh “${sound.name}” — đã dùng chuông mặc định. Chọn lại?`,
@@ -179,7 +179,7 @@ export async function triggerAlarmSound(
   }
 
   // Default sound
-  playChimeFromSession(settings.volume);
+  playChimeByPreset(settings.soundPreset || 'urgent', settings.volume);
   return { isFallbackDefault: false };
 }
 

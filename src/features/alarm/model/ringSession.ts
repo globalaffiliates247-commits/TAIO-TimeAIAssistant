@@ -97,7 +97,7 @@ export function playGentleChime(volume = 0.8): void {
   }
 }
 
-// 3. Urgent Chime: Staccato two-tone wake-up alert (A5 + E6)
+// 3. Urgent Chime: Staccato two-tone wake-up alert (A5 + E6 rising, rapid repeat)
 export function playUrgentChime(volume = 0.8): void {
   stopRingSessionAudio();
   try {
@@ -110,26 +110,76 @@ export function playUrgentChime(volume = 0.8): void {
     const playSequence = () => {
       if (ctx.state === 'suspended') ctx.resume();
       const now = ctx.currentTime;
-      const freqs = [880.0, 1318.51, 880.0, 1318.51];
+      // Fast, rising, attention-grabbing pitch pattern: 880Hz -> 1046.5Hz -> 1318.5Hz
+      const freqs = [880.0, 1046.5, 1318.51, 1567.98];
       freqs.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'square';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
-        gain.gain.setValueAtTime(0, now + idx * 0.1);
-        gain.gain.linearRampToValueAtTime(volume * 0.15, now + idx * 0.1 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.18);
+        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+        gain.gain.setValueAtTime(0, now + idx * 0.08);
+        gain.gain.linearRampToValueAtTime(volume * 0.18, now + idx * 0.08 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.12);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now + idx * 0.1);
-        osc.stop(now + idx * 0.1 + 0.2);
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 0.14);
       });
     };
 
     playSequence();
-    activeInterval = setInterval(playSequence, 1200);
+    activeInterval = setInterval(playSequence, 900);
   } catch (err) {
     console.error('[ringSession] playUrgentChime failed', err);
+  }
+}
+
+// 4. Focus Chime: Pure harmonic woodblock/marimba chime
+export function playFocusChime(volume = 0.8): void {
+  stopRingSessionAudio();
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const ctx = new AudioContextClass();
+    activeAudioContext = ctx;
+
+    const playSequence = () => {
+      if (ctx.state === 'suspended') ctx.resume();
+      const now = ctx.currentTime;
+      const freqs = [440.0, 554.37, 659.25, 880.0];
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.15);
+        gain.gain.setValueAtTime(0, now + idx * 0.15);
+        gain.gain.linearRampToValueAtTime(volume * 0.28, now + idx * 0.15 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.15 + 0.8);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.15);
+        osc.stop(now + idx * 0.15 + 0.85);
+      });
+    };
+
+    playSequence();
+    activeInterval = setInterval(playSequence, 2400);
+  } catch (err) {
+    console.error('[ringSession] playFocusChime failed', err);
+  }
+}
+
+export function playChimeByPreset(preset: string = 'urgent', volume = 0.8): void {
+  if (preset === 'gentle') {
+    playGentleChime(volume);
+  } else if (preset === 'moderate') {
+    playDefaultChime(volume);
+  } else if (preset === 'focus') {
+    playFocusChime(volume);
+  } else {
+    // Default is urgent (Part A4)
+    playUrgentChime(volume);
   }
 }
 

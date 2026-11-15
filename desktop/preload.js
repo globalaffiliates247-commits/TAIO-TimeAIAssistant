@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('taioAPI', {
   sendQuickNote: (text) => ipcRenderer.send('taio-quick-note', text),
   updateTimer: (data) => ipcRenderer.send('taio-timer-update', data),
   openClockWindow: () => ipcRenderer.send('taio-open-clock'),
+  bringToFront: () => ipcRenderer.send('taio-bring-to-front'),
   openTodayJournal: (taskId) => ipcRenderer.send('taio-open-today-journal', taskId),
   sendTimerAction: (action) => ipcRenderer.send('taio-timer-action', action),
   onQuickNoteReceived: (callback) => ipcRenderer.on('taio-quick-note-received', (_event, text) => callback(text)),

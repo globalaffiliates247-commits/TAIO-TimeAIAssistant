@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, BellOff, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
 import { ActiveAlarmState, AlarmSettings, ALARM_RING_MAX_MINS, SNOOZE_PRESETS } from '../model/alarmTypes';
+import { Z_LAYERS } from '@/styles/layers';
 import { SnoozePicker } from './SnoozePicker';
 import { SoundSwitch } from './SoundSwitch';
 import { playSoundByIndex, stopRingSessionAudio } from '../model/ringSession';
@@ -109,8 +110,9 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col justify-between bg-zinc-950/95 backdrop-blur-xl text-white animate-in fade-in duration-300"
+      className="fixed inset-0 flex flex-col justify-between bg-zinc-950/95 backdrop-blur-xl text-white animate-in fade-in duration-300"
       style={{
+        zIndex: Z_LAYERS.ALARM_FULLSCREEN,
         paddingTop: 'calc(var(--sat, 0px) + 20px)',
         paddingBottom: 'calc(var(--sab, 0px) + 28px)',
         paddingLeft: '20px',

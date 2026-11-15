@@ -41,6 +41,7 @@ import {
   triggerAlarmSound,
   stopAllAlarmSounds,
   stopRingSessionAudio,
+  playGentleChime,
   AlarmScreen,
   syncNativeBlockAlarms,
   NativeAlarmMode,
@@ -1932,26 +1933,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (startMins === currentMinutes && !firedAlarmsRef.current.has(alarmKey)) {
           firedAlarmsRef.current.add(alarmKey);
-          if (nativeAlarmModeRef.current === 'alarmkit') break; // the system alarm is already ringing
-          const soundRes = await triggerAlarmSound(alarmSettings);
-          setActiveAlarmState({
-            isActive: true,
-            blockId: b.id,
-            blockTitle: b.title,
-            startTime: b.startTime,
-            soundName: alarmSettings.customSound?.name,
-            isFallbackDefault: soundRes.isFallbackDefault,
-            fallbackReason: soundRes.fallbackReason,
-            snoozeCount: 0,
-            ringStartedAt: now,
-            isAutoStopped: false,
-          });
+
+          // PRD v0.3.37 Part A1: An item started by pressing Play (has startedAt, or status is in_progress) NEVER triggers alarm
+          const isUserStarted = !!((b.extra as Record<string, unknown> | undefined)?.startedAt) || b.status === 'in_progress';
+          if (isUserStarted) {
+            continue;
+          }
+
+          // PRD v0.3.37 Part A2: Fullscreen alarm only for prioritized blocks
+          // 1. Fixed/ritual blocks (rituals, sleep, meals, day close)
+          // 2. Tasks with "Nhắc to" (loudAlarm: true) explicitly toggled by user
+          const isFixedOrRitual = b.isTemplateBlock || b.blockKind === 'ritual' || b.id.startsWith('b-user-') || b.id === 'b-10' || b.id === 'b-ritual-close';
+          const isLoudAlarm = b.loudAlarm === true || ((b.extra as Record<string, unknown> | undefined)?.loudAlarm === true);
+          const isPrioritized = isFixedOrRitual || isLoudAlarm;
+
+          if (isPrioritized) {
+            if (nativeAlarmModeRef.current !== 'alarmkit') {
+              const soundRes = await triggerAlarmSound(alarmSettings);
+              setActiveAlarmState({
+                isActive: true,
+                blockId: b.id,
+                blockTitle: b.title,
+                startTime: b.startTime,
+                soundName: alarmSettings.customSound?.name,
+                isFallbackDefault: soundRes.isFallbackDefault,
+                fallbackReason: soundRes.fallbackReason,
+                snoozeCount: 0,
+                ringStartedAt: now,
+                isAutoStopped: false,
+              });
+            }
+
+            // Part A3: Bring Mac app window to front when alarm triggers
+            if (typeof window !== 'undefined') {
+              const bridge = (window as unknown as { taioAPI?: { bringToFront?: () => void } }).taioAPI;
+              if (bridge?.bringToFront) {
+                bridge.bringToFront();
+              }
+            }
+          } else {
+            // Flexible/regular tasks get a lightweight gentle chime + system notification, not fullscreen takeover
+            playGentleChime(alarmSettings.volume * 0.5);
+            setTimeout(() => stopRingSessionAudio(), 2500);
+          }
 
           // System notification on macOS (spec F2.4.1)
           if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
             try {
-              new Notification('TAIO Time Báo thức', {
-                body: `Bắt đầu: ${b.title}`,
+              new Notification(isPrioritized ? 'TAIO Time Báo thức' : 'TAIO Time Nhắc nhở', {
+                body: `${b.startTime}: ${b.title}`,
                 icon: '/favicon.ico',
               });
             } catch {}
@@ -1974,7 +2004,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       window.localStorage.removeItem('taio_snooze_title');
       window.localStorage.removeItem('taio_snooze_count');
     } catch {}
+    const dismissedBlockId = activeAlarmState.blockId;
     setActiveAlarmState({ isActive: false });
+
+    // Part A5: When user dismisses prioritized alarm, switch mini clock to this block
+    if (dismissedBlockId && typeof window !== 'undefined') {
+      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void } }).taioAPI;
+      if (bridge?.openClockWindow) {
+        bridge.openClockWindow();
+      }
+    }
   };
 
   const snoozeBlock = (blockId: string, option: SnoozeOption) => {

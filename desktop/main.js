@@ -283,6 +283,15 @@ ipcMain.on('taio-open-clock', () => {
   createClockWindow();
 });
 
+// IPC: bring main window to front on alarm (Part A3)
+ipcMain.on('taio-bring-to-front', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
+
 // IPC: timer actions from clock window (done, extend, pin)
 ipcMain.on('taio-timer-action', (_event, action) => {
   if (action && action.type === 'toggle-pin') {

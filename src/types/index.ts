@@ -98,6 +98,7 @@ export interface TimeBlock {
   snoozeCount?: number; // PRD v0.3.36 Part D: Số lần dời trong ngày
   snoozeHistory?: Array<{ from: string; to: string; at: number }>; // Lịch sử dời giờ
   statusDate?: string; // YYYY-MM-DD: ngày cập nhật trạng thái (PRD v0.3.36 Part E)
+  loudAlarm?: boolean; // PRD v0.3.37 Part A: Ưu tiên báo thức toàn màn hình (Nhắc to)
   dailyStatus?: Record<string, { status: BlockStatus; outcome?: string; updatedAt?: number }>;
   dailyOverrides?: Record<string, { startTime?: string; endTime?: string; status?: BlockStatus; outcome?: string; snoozes?: Array<{ from: string; to: string; at: number }> }>;
   // B16 Priority Matrix
@@ -449,6 +450,7 @@ export interface DailyCardItem {
   snoozeCount?: number; // PRD v0.3.36 Part D: Số lần dời trong ngày
   snoozeHistory?: Array<{ from: string; to: string; at: number }>; // Lịch sử dời giờ
   statusDate?: string; // YYYY-MM-DD: ngày cập nhật trạng thái (PRD v0.3.36 Part E)
+  loudAlarm?: boolean; // PRD v0.3.37 Part A: Ưu tiên báo thức toàn màn hình (Nhắc to)
   dailyStatus?: Record<string, { status: BlockStatus; outcome?: string; updatedAt?: number }>;
   dailyOverrides?: Record<string, { startTime?: string; endTime?: string; status?: BlockStatus; outcome?: string; snoozes?: Array<{ from: string; to: string; at: number }> }>;
   updatedAt?: string | number;
