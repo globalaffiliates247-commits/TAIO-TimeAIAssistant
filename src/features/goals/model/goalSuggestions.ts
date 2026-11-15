@@ -9,6 +9,7 @@ const STOP_WORDS = new Set([
   'va', 'voi', 'cho', 'cua', 'trong', 'tai', 'tren', 'duoi', 'ra', 'vao',
   'lam', 'di', 'den', 've', 'ngay', 'hom', 'nay', 'mai', 'kia', 'tuan',
   'thang', 'nam', 'gio', 'phut', 'giay', 'viec', 'mot', 'hai', 'ba', 'bon',
+  'sang', 'trua', 'chieu', 'toi', 'dem', 'buoi',
   'the', 'a', 'an', 'and', 'or', 'for', 'with', 'in', 'on', 'at', 'to', 'from',
   'of', 'is', 'are', 'was', 'were', 'be', 'do', 'task', 'doing', 'done',
   // Generic terms that previously caused ubiquitous false matches (Part C1)
@@ -85,6 +86,15 @@ export function findGoalSuggestions(
   minScore = 1.5
 ): GoalSuggestion[] {
   if (!taskTitle || !goals.length) return [];
+
+  const rawWords = taskTitle.split(/[^a-zA-Z0-9\u00C0-\u024F\u1EA0-\u1EF9_-]+/u).filter(Boolean);
+  const wordMap = new Map<string, string>();
+  for (const rw of rawWords) {
+    const norm = stripAccents(rw);
+    if (!wordMap.has(norm)) {
+      wordMap.set(norm, rw);
+    }
+  }
 
   const normTitle = stripAccents(taskTitle);
   const taskWords = normTitle
@@ -173,7 +183,7 @@ export function findGoalSuggestions(
       scoredSuggestions.push({
         goal,
         milestone: bestMilestone,
-        matchedWord: bestWord,
+        matchedWord: wordMap.get(bestWord) || bestWord,
         score: bestGoalScore,
       });
     }

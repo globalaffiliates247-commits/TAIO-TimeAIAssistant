@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Footprints, ShieldCheck, X, ChevronRight, Sparkles } from 'lucide-react';
 import { requestMotionPermission } from '../motionBridge';
-import { setMotionPermissionCardDismissed } from '../motionStore';
+import { isMotionPermissionCardDismissed, setMotionPermissionCardDismissed } from '../motionStore';
 
 interface MotionPermissionCardProps {
   onPermissionChanged?: (granted: boolean) => void;
@@ -11,7 +11,13 @@ interface MotionPermissionCardProps {
 
 export const MotionPermissionCard: React.FC<MotionPermissionCardProps> = ({ onPermissionChanged }) => {
   const [showExplanationModal, setShowExplanationModal] = useState<boolean>(false);
-  const [dismissed, setDismissed] = useState<boolean>(false);
+  const [dismissed, setDismissed] = useState<boolean>(() => isMotionPermissionCardDismissed());
+
+  useEffect(() => {
+    if (isMotionPermissionCardDismissed()) {
+      setDismissed(true);
+    }
+  }, []);
 
   if (dismissed) return null;
 

@@ -125,7 +125,7 @@ export const GoalsTab: React.FC = () => {
           className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" />
-          <span>{t('goals.add_goal', '+ Mục tiêu')}</span>
+          <span>{t('goals.add_goal', 'Mục tiêu')}</span>
         </button>
       </div>
 

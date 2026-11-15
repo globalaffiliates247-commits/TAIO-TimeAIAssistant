@@ -121,7 +121,7 @@ export const GoalFolders: React.FC<GoalFoldersProps> = ({
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 text-xs font-bold border border-black/10 shadow-2xs transition-all cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>{t('goals.add_goal', '+ Mục tiêu')}</span>
+                <span>{t('goals.add_goal', 'Mục tiêu')}</span>
               </button>
             </div>
 
@@ -212,7 +212,7 @@ export const GoalFolders: React.FC<GoalFoldersProps> = ({
                 className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 text-xs font-bold border border-black/10 shadow-2xs transition-all cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>{t('goals.add_goal', '+ Mục tiêu')}</span>
+                <span>{t('goals.add_goal', 'Mục tiêu')}</span>
               </button>
             </div>
 

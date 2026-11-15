@@ -61,6 +61,8 @@ export function updateScheduleEntry(
     if (patch.dodChecklist !== undefined) cardPatch.dodChecklist = patch.dodChecklist;
     if (patch.children !== undefined) cardPatch.children = patch.children;
     if (patch.extensions !== undefined) cardPatch.extensions = patch.extensions;
+    if ((patch as any).parallelOf !== undefined) cardPatch.parallelOf = (patch as any).parallelOf;
+    if (patch.extra && (patch.extra as any).parallelOf !== undefined) cardPatch.parallelOf = (patch.extra as any).parallelOf;
 
     if (patch.status !== undefined) {
       if (patch.status === 'done') {
@@ -131,6 +133,9 @@ export function updateScheduleEntry(
         return {
           ...b,
           // Preserve root startTime, endTime, and status untouched!
+          ...(patch.goalId !== undefined ? { goalId: patch.goalId, goalName: patch.goalName } : {}),
+          ...(patch.milestoneId !== undefined ? { milestoneId: patch.milestoneId, milestoneName: patch.milestoneName } : {}),
+          ...(patch.title !== undefined ? { title: patch.title } : {}),
           statusDate: today,
           dailyStatus: {
             ...(b.dailyStatus || {}),

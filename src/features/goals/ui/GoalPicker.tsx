@@ -267,7 +267,7 @@ export const GoalPicker: React.FC<GoalPickerProps> = ({
             className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-100 flex items-center gap-1.5 text-blue-600 font-medium transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>{t('goals.newGoal') || '+ Mục tiêu mới'}</span>
+            <span>{t('goals.newGoal') || 'Mục tiêu mới'}</span>
           </button>
         ) : (
           <div className="p-1 flex items-center gap-1 bg-slate-50 rounded-lg border border-blue-200">

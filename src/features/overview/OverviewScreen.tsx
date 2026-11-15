@@ -72,6 +72,147 @@ export const OverviewScreen: React.FC = () => {
     '#E0401F', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'
   ];
 
+  // Aggregated view based on dimension: 'goal' | 'project' | 'workArea'
+  const displayData = useMemo(() => {
+    if (dimension === 'goal') {
+      return {
+        entries: sortedEntries,
+        allocationBar: ledger.allocationBar,
+      };
+    }
+
+    if (dimension === 'workArea') {
+      const areaMap = new Map<string, any>();
+
+      for (const e of sortedEntries) {
+        const area = e.workArea || 'Business';
+        const existing = areaMap.get(area);
+        if (existing) {
+          existing.actualHours = Math.round((existing.actualHours + e.actualHours) * 10) / 10;
+          existing.plannedHours = Math.round((existing.plannedHours + e.plannedHours) * 10) / 10;
+          existing.doneTasksCount += e.doneTasksCount;
+          existing.totalTasksCount += e.totalTasksCount;
+          existing.allocationPercent += e.allocationPercent;
+        } else {
+          const areaName = area === 'Business' ? 'Kinh doanh' : area === 'Product' ? 'Sản phẩm' : area === 'Operations' ? 'Vận hành' : area === 'Personal' ? 'Cá nhân' : area;
+          areaMap.set(area, {
+            id: `area-${area}`,
+            name: areaName,
+            kind: 'workArea',
+            workArea: area,
+            size: '—',
+            actualHours: e.actualHours,
+            plannedHours: e.plannedHours,
+            progressPercent: e.progressPercent,
+            shouldBeAtPercent: e.shouldBeAtPercent,
+            spi: e.spi,
+            paceStatus: e.paceStatus,
+            paceLabel: e.paceLabel,
+            paceDeviationPercent: e.paceDeviationPercent,
+            efficiencyPercent: e.efficiencyPercent,
+            efficiencyLabel: e.efficiencyLabel,
+            doneTasksCount: e.doneTasksCount,
+            totalTasksCount: e.totalTasksCount,
+            allocationPercent: e.allocationPercent,
+          });
+        }
+      }
+
+      const entries = Array.from(areaMap.values());
+      for (const item of entries) {
+        item.progressPercent = item.totalTasksCount > 0
+          ? Math.round((item.doneTasksCount / item.totalTasksCount) * 100)
+          : (item.plannedHours > 0 ? Math.min(100, Math.round((item.actualHours / item.plannedHours) * 100)) : 0);
+        item.paceStatus = item.actualHours >= item.plannedHours * 0.8 ? 'on_track' : 'behind';
+        item.paceLabel = item.paceStatus === 'on_track' ? 'Đúng nhịp' : 'Cần tăng tốc';
+      }
+
+      entries.sort((a, b) => {
+        let diff = 0;
+        if (sortBy === 'allocation') diff = b.allocationPercent - a.allocationPercent;
+        else if (sortBy === 'progress') diff = b.progressPercent - a.progressPercent;
+        else if (sortBy === 'time') diff = b.actualHours - a.actualHours;
+        else if (sortBy === 'spi') diff = b.spi - a.spi;
+        return sortAsc ? -diff : diff;
+      });
+
+      const allocationBar = entries.filter(e => e.allocationPercent > 0).map((e, idx) => ({
+        id: e.id,
+        label: e.name,
+        hours: e.actualHours,
+        percent: e.allocationPercent,
+        kind: 'workArea',
+        color: PALETTE_COLORS[idx % PALETTE_COLORS.length],
+      }));
+
+      return { entries, allocationBar };
+    }
+
+    // dimension === 'project'
+    const projMap = new Map<string, any>();
+
+    for (const e of sortedEntries) {
+      const g = goals.find(goal => goal.id === e.id);
+      const projName = (g?.milestones && g.milestones.length > 0) ? g.milestones[0].name : e.name;
+      const projId = (g?.milestones && g.milestones.length > 0) ? g.milestones[0].id : e.id;
+      const existing = projMap.get(projId);
+      if (existing) {
+        existing.actualHours = Math.round((existing.actualHours + e.actualHours) * 10) / 10;
+        existing.plannedHours = Math.round((existing.plannedHours + e.plannedHours) * 10) / 10;
+        existing.doneTasksCount += e.doneTasksCount;
+        existing.totalTasksCount += e.totalTasksCount;
+        existing.allocationPercent += e.allocationPercent;
+      } else {
+        projMap.set(projId, {
+          id: projId,
+          name: projName,
+          kind: 'project',
+          workArea: e.workArea,
+          size: e.size,
+          actualHours: e.actualHours,
+          plannedHours: e.plannedHours,
+          progressPercent: e.progressPercent,
+          shouldBeAtPercent: e.shouldBeAtPercent,
+          spi: e.spi,
+          paceStatus: e.paceStatus,
+          paceLabel: e.paceLabel,
+          paceDeviationPercent: e.paceDeviationPercent,
+          efficiencyPercent: e.efficiencyPercent,
+          efficiencyLabel: e.efficiencyLabel,
+          doneTasksCount: e.doneTasksCount,
+          totalTasksCount: e.totalTasksCount,
+          allocationPercent: e.allocationPercent,
+        });
+      }
+    }
+
+    const entries = Array.from(projMap.values());
+    for (const item of entries) {
+      item.progressPercent = item.totalTasksCount > 0
+        ? Math.round((item.doneTasksCount / item.totalTasksCount) * 100)
+        : (item.plannedHours > 0 ? Math.min(100, Math.round((item.actualHours / item.plannedHours) * 100)) : 0);
+    }
+    entries.sort((a, b) => {
+      let diff = 0;
+      if (sortBy === 'allocation') diff = b.allocationPercent - a.allocationPercent;
+      else if (sortBy === 'progress') diff = b.progressPercent - a.progressPercent;
+      else if (sortBy === 'time') diff = b.actualHours - a.actualHours;
+      else if (sortBy === 'spi') diff = b.spi - a.spi;
+      return sortAsc ? -diff : diff;
+    });
+
+    const allocationBar = entries.filter(e => e.allocationPercent > 0).map((e, idx) => ({
+      id: e.id,
+      label: e.name,
+      hours: e.actualHours,
+      percent: e.allocationPercent,
+      kind: 'project',
+      color: PALETTE_COLORS[idx % PALETTE_COLORS.length],
+    }));
+
+    return { entries, allocationBar };
+  }, [dimension, sortedEntries, ledger.allocationBar, goals, sortBy, sortAsc]);
+
   return (
     <div className="flex flex-col gap-5 w-full max-w-4xl mx-auto py-2">
       {/* Top Header: Title & Period Selector */}
@@ -141,7 +282,7 @@ export const OverviewScreen: React.FC = () => {
 
         {/* 100% Horizontal Proportional Bar */}
         <div className="w-full h-4 rounded-full bg-slate-100 overflow-hidden flex shadow-inner">
-          {ledger.allocationBar.map((seg, idx) => (
+          {displayData.allocationBar.map((seg: any, idx: number) => (
             <div
               key={seg.id}
               style={{
@@ -156,7 +297,7 @@ export const OverviewScreen: React.FC = () => {
 
         {/* Legend */}
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 pt-1">
-          {ledger.allocationBar.map((seg, idx) => (
+          {displayData.allocationBar.map((seg: any, idx: number) => (
             <div key={seg.id} className="flex items-center gap-1.5 min-w-0">
               <span
                 className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -173,7 +314,7 @@ export const OverviewScreen: React.FC = () => {
       <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/80 shadow-2xs space-y-3">
         {/* Mobile View: 2-line cards */}
         <div className="block sm:hidden divide-y divide-slate-100">
-          {sortedEntries.map(e => (
+          {displayData.entries.map((e: any) => (
             <div
               key={e.id}
               onClick={() => setSelectedGoalId(e.id)}
@@ -251,7 +392,7 @@ export const OverviewScreen: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {sortedEntries.map(e => (
+              {displayData.entries.map((e: any) => (
                 <tr
                   key={e.id}
                   onClick={() => setSelectedGoalId(e.id)}

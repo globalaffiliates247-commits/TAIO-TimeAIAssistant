@@ -225,6 +225,57 @@ export function computeEstimationEfficiency(
   };
 }
 
+export function getPeriodDateRange(period: OverviewPeriod, asOfDate: Date): { startStr: string; endStr: string; days: number } {
+  const d = new Date(asOfDate);
+  const year = d.getFullYear();
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  if (period === 'week') {
+    const dayOfWeek = d.getDay();
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(d);
+    monday.setDate(d.getDate() + diffToMonday);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return {
+      startStr: `${monday.getFullYear()}-${pad(monday.getMonth() + 1)}-${pad(monday.getDate())}`,
+      endStr: `${sunday.getFullYear()}-${pad(sunday.getMonth() + 1)}-${pad(sunday.getDate())}`,
+      days: 7,
+    };
+  }
+
+  if (period === 'month') {
+    const month = d.getMonth();
+    const firstDay = `${year}-${pad(month + 1)}-01`;
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    const lastDay = `${year}-${pad(month + 1)}-${pad(lastDate)}`;
+    return {
+      startStr: firstDay,
+      endStr: lastDay,
+      days: lastDate,
+    };
+  }
+
+  if (period === 'quarter') {
+    const month = d.getMonth();
+    const quarterIndex = Math.floor(month / 3);
+    const qStartMonth = quarterIndex * 3 + 1;
+    const qEndMonth = quarterIndex * 3 + 3;
+    const lastDate = new Date(year, qEndMonth, 0).getDate();
+    return {
+      startStr: `${year}-${pad(qStartMonth)}-01`,
+      endStr: `${year}-${pad(qEndMonth)}-${pad(lastDate)}`,
+      days: 91,
+    };
+  }
+
+  return {
+    startStr: `${year}-01-01`,
+    endStr: `${year}-12-31`,
+    days: 365,
+  };
+}
+
 /**
  * Pure calculation of the entire Goal Ledger & Overview analytics across all dimensions.
  */
@@ -276,6 +327,10 @@ export function computeGoalLedger(
   }
 
   const allTasks = Array.from(taskMap.values());
+  const periodRange = getPeriodDateRange(period, asOfDate);
+  const periodTasks = period === 'year'
+    ? allTasks
+    : allTasks.filter(t => t.date && t.date >= periodRange.startStr && t.date <= periodRange.endStr);
 
   // 2. Filter goals relevant to target year (B2.7)
   const yearStr = String(targetYear);
@@ -291,15 +346,26 @@ export function computeGoalLedger(
   let unassignedMinutes = 0;
 
   const goalEntries: GoalLedgerEntry[] = relevantGoals.map(g => {
-    const goalTasks = allTasks.filter(t => t.goalId === g.id || t.nodeId === g.id);
+    const goalTasks = periodTasks.filter(t => t.goalId === g.id || t.nodeId === g.id);
     const doneTasks = goalTasks.filter(t => t.isDone);
 
     const actualMins = goalTasks.reduce((sum, t) => sum + t.actualMinutes, 0);
     const actualHours = Math.round((actualMins / 60) * 10) / 10;
     totalGoalMinutes += actualMins;
 
-    const plannedHours = g.size ? (SIZE_HOURS[g.size] || 40) : (g.committedHours || 40);
-    const progressPercent = g.progressPercent || (goalTasks.length > 0 ? Math.round((doneTasks.length / goalTasks.length) * 100) : 0);
+    const annualPlannedHours = g.size ? (SIZE_HOURS[g.size] || 40) : (g.committedHours || 40);
+    let plannedHours = annualPlannedHours;
+    if (period === 'week') {
+      plannedHours = Math.round((annualPlannedHours / 52) * 10) / 10;
+    } else if (period === 'month') {
+      plannedHours = Math.round((annualPlannedHours / 12) * 10) / 10;
+    } else if (period === 'quarter') {
+      plannedHours = Math.round((annualPlannedHours / 4) * 10) / 10;
+    }
+
+    const progressPercent = period === 'year'
+      ? (g.progressPercent || (goalTasks.length > 0 ? Math.round((doneTasks.length / goalTasks.length) * 100) : 0))
+      : (goalTasks.length > 0 ? Math.round((doneTasks.length / goalTasks.length) * 100) : (plannedHours > 0 ? Math.min(100, Math.round((actualHours / plannedHours) * 100)) : 0));
 
     const pacing = computeEvmPacing(
       g.start || g.commitment?.start,
@@ -335,7 +401,7 @@ export function computeGoalLedger(
   });
 
   // Calculate unassigned & undeclared time
-  const unassignedTasks = allTasks.filter(t => !t.goalId && !t.nodeId);
+  const unassignedTasks = periodTasks.filter(t => !t.goalId && !t.nodeId);
   unassignedMinutes = unassignedTasks.reduce((sum, t) => sum + t.actualMinutes, 0);
   const unassignedHours = Math.round((unassignedMinutes / 60) * 10) / 10;
 

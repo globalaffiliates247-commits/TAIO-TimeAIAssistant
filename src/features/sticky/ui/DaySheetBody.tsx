@@ -116,13 +116,17 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           const isTemplate = Boolean(b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-user-dayclose' || b.id === 'b-ritual-close');
           const computed = computeBlockStatus(b, getDeviceTimeMinutes(), day);
           const isDone = computed === 'done';
+          const isLeft = computed === 'partly_done';
+          const override = b.dailyOverrides?.[day];
+          const start = override?.startTime || b.startTime;
+          const end = override?.endTime || b.endTime;
           return {
             id: b.id,
             text: b.title,
-            start: b.startTime,
-            end: b.endTime,
+            start,
+            end,
             date: day,
-            status: isDone ? ('done' as const) : ('open' as const),
+            status: isDone ? ('done' as const) : isLeft ? ('left' as const) : ('open' as const),
             carryCount: 0,
             origin: 'planned' as const,
             goalId: b.goalId,
@@ -574,18 +578,21 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     const extra = (it.extra as Record<string, unknown> | undefined) || {};
     const isParallel = options?.mode === 'parallel';
 
-    updateDailyCardItem(it.id, {
-      start: startHM,
-      end: endHM,
-      status: 'open',
-      parallelOf: isParallel && currentBlock ? currentBlock.id : undefined,
-      extra: {
-        ...extra,
-        startedAt: Date.now(),
-        estimateMins: dur,
-        parallelOf: isParallel && currentBlock ? currentBlock.id : undefined,
+    updateScheduleEntry(
+      it.id,
+      {
+        startTime: startHM,
+        endTime: endHM,
+        status: 'in_progress',
+        extra: {
+          ...extra,
+          startedAt: Date.now(),
+          estimateMins: dur,
+          parallelOf: isParallel && currentBlock ? currentBlock.id : undefined,
+        },
       },
-    });
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
 
     // 5. Open mini clock on Mac / mobile
     if (typeof window !== 'undefined') {
@@ -1012,13 +1019,17 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 updatedText = updatedText.replace(new RegExp(`#${hashFilter}\\b|#${hashFilter}$`), '').trim();
                 if (isEditingLine) setEditText(updatedText);
               }
-              updateDailyCardItem(it.id, {
-                text: updatedText,
-                goalId: gId,
-                goalName: gName,
-                milestoneId: mId,
-                milestoneName: mName,
-              });
+              updateScheduleEntry(
+                it.id,
+                {
+                  title: updatedText,
+                  goalId: gId,
+                  goalName: gName,
+                  milestoneId: mId,
+                  milestoneName: mName,
+                },
+                { updateDailyCardItem, setBlocks, dailyCardItems }
+              );
               setPickerItemId(null);
               setHashFilter('');
             }}

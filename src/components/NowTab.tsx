@@ -75,7 +75,7 @@ export const NowTab: React.FC = () => {
       <StartDayCard />
 
       {/* Thẻ mời quyền chuyển động */}
-      <MotionPermissionCard />
+      {!isMotionPermissionCardDismissed() && <MotionPermissionCard />}
 
       {/* Cảnh báo lệch kế hoạch */}
       {isOffPlan && (
