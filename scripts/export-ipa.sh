@@ -26,10 +26,9 @@ rm -rf ios/build/exported
 DEVELOPER_DIR="$XCODE_DEV" "$XCODE_DEV/usr/bin/xcodebuild" -exportArchive \
   -archivePath ios/build/TAIOTime.xcarchive \
   -exportPath ios/build/exported \
-  -exportOptionsPlist ios/ExportOptions.plist \
-  -allowProvisioningUpdates
+  -exportOptionsPlist ios/ExportOptions.plist
 
-echo "4. Copying to Desktop..."
-rm -f "$HOME/Desktop/TAIOTime.ipa" "$HOME/Desktop/TAIOTime-"*.ipa
+echo "4. Copying to Desktop (strictly 1 IPA with version)..."
+rm -f "$HOME/Desktop/TAIOTime.ipa" "$HOME/Desktop/TAIOTime-"*.ipa "$HOME/Desktop/TAIO-Time-"*.ipa
 cp -f ios/build/exported/App.ipa "$HOME/Desktop/TAIOTime-${VERSION}.ipa"
 echo "Done: $HOME/Desktop/TAIOTime-${VERSION}.ipa"

@@ -7,7 +7,16 @@
     <key>teamID</key>
     <string>ZY6TH98F6A</string>
     <key>signingStyle</key>
-    <string>automatic</string>
+    <string>manual</string>
+    <key>signingCertificate</key>
+    <string>Apple Development</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>club.taio.timeapp</key>
+        <string>b0063b0a-fdc2-4412-b3d9-812ddda506b8</string>
+        <key>club.taio.timeapp.TAIOWidgetExtension</key>
+        <string>119958d1-41f2-431e-af88-f3d3bedba473</string>
+    </dict>
     <key>compileBitcode</key>
     <false/>
 </dict>
