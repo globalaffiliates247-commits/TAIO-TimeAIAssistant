@@ -35,6 +35,11 @@ export function recordTombstone(id: string, deletedAt = Date.now()): void {
   saveTombstones(next);
 }
 
+export function removeTombstone(id: string): void {
+  const current = loadTombstones();
+  saveTombstones(current.filter(t => t.id !== id));
+}
+
 export function mergeTombstones(incoming: Tombstone[]): void {
   if (!Array.isArray(incoming) || incoming.length === 0) return;
   const current = loadTombstones();

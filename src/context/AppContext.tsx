@@ -683,7 +683,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ]);
       return;
     }
-    const durationMs = onUndo ? 4000 : 3000;
+    const durationMs = onUndo ? 6000 : 3000;
     setTimeout(() => {
       setToastMsg(prev => (prev === msg ? null : prev));
       setToastUndoAction(null);

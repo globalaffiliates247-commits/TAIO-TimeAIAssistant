@@ -11,7 +11,7 @@ import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTi
 import { fmtDuration } from '@/features/sticky/model/timeline';
 import { formatDuration, formatDurationClock } from '@/i18n/format';
 import { computeUnassignedTime } from './unassignedTime';
-import { findGoalSuggestion, getGoalTargetHours } from '@/features/goals';
+import { findHighConfidenceGoalSuggestion, getGoalTargetHours } from '@/features/goals';
 import { useHighlight } from '@/features/prefs';
 import { useT } from '@/i18n/useT';
 import { 
@@ -1032,7 +1032,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             const extra = (activeTask?.extra as Record<string, unknown> | undefined) || {};
             const isDismissed = !!extra.dismissGoalSuggestion;
             const sug = (!linkedGoal && activeTask && !isDismissed)
-              ? findGoalSuggestion(activeTask.title, goals)
+              ? findHighConfidenceGoalSuggestion(activeTask.title, goals)
               : null;
 
             if (sug) {

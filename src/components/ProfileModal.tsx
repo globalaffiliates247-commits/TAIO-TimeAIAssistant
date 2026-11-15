@@ -28,8 +28,10 @@ import {
   Briefcase,
   Code,
   TrendingUp,
-  Compass
+  Compass,
+  Target
 } from 'lucide-react';
+import { isGoalSuggestionInlineChipEnabled, setGoalSuggestionInlineChipEnabled } from '@/features/goals';
 import { startNativeLiveActivity, stopNativeLiveActivity, openNativeAppSettings } from '../features/native';
 import { isMotionTrackingEnabled, setMotionTrackingEnabled, getMotionCapability } from '@/features/motion';
 import { PROFILES } from '../data/mockData';
@@ -141,6 +143,7 @@ export const ProfileModal: React.FC = () => {
   };
 
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'community'>('profile');
+  const [inlineGoalSuggestionEnabled, setInlineGoalSuggestionEnabled] = useState(isGoalSuggestionInlineChipEnabled);
 
   if (!isProfileModalOpen) return null;
 
@@ -602,6 +605,44 @@ export const ProfileModal: React.FC = () => {
 
                 {/* PRD FEATURE v0.3.31: Câu truyền động lực */}
                 <MotivationSettingsSection />
+
+                {/* PRD v0.3.37 Part C5: Hiện gợi ý mục tiêu ngay trên dòng việc */}
+                <div className="pt-2 border-t border-slate-200/80">
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
+                    <div className="space-y-0.5 pr-2">
+                      <div className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-rose-500" />
+                        <h4 className="text-xs font-bold text-slate-900">
+                          {language === 'vi' ? 'Hiện gợi ý mục tiêu ngay trên dòng việc' : 'Show goal suggestions on task lines'}
+                        </h4>
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        {language === 'vi'
+                          ? 'Chỉ hiện chip khi độ tin cậy rất cao. Mặc định tắt để tránh rối mắt (vẫn có gợi ý trong menu chọn mục tiêu).'
+                          : 'Only display chip when confidence is very high. Default off for clean view (suggestions remain available in picker).'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={inlineGoalSuggestionEnabled}
+                      onClick={() => {
+                        const next = !inlineGoalSuggestionEnabled;
+                        setGoalSuggestionInlineChipEnabled(next);
+                        setInlineGoalSuggestionEnabled(next);
+                      }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
+                        inlineGoalSuggestionEnabled ? 'bg-[#E0401F]' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+                          inlineGoalSuggestionEnabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Data Export & Privacy */}

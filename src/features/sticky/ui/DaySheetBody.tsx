@@ -14,12 +14,13 @@ import { commitQuickLine, matchGoalByTag, SubTaskList, formatExtensionHistory } 
 import { IconHourglass, IconLock, IconSpark, IconOverlap } from './StickyIcons';
 import { LiveClockStrip } from '@/features/quick-entry';
 import { MotivationSticker } from '@/features/motivation';
-import { GoalPicker, findGoalSuggestion } from '@/features/goals';
+import { GoalPicker, findHighConfidenceGoalSuggestion } from '@/features/goals';
+import { recordTombstone, removeTombstone } from '@/features/data-transfer/model/tombstones';
 import { useRowSelection } from './useRowSelection';
 import { updateScheduleEntry } from '@/features/tasks';
 import { getPreviousDay } from '@/features/dayclose';
 import { TemplateScheduleModal } from '@/features/schedule-template';
-import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight, ChevronRight, Plus } from 'lucide-react';
+import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight, ChevronRight, Plus, Check } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -58,6 +59,32 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   // PRD v0.3.35 Part D: Subtasks expansion and focus state
   const [expandedSubTaskIds, setExpandedSubTaskIds] = useState<Set<string>>(new Set());
   const [autoFocusSubTaskId, setAutoFocusSubTaskId] = useState<string | null>(null);
+  const [subTaskInputOpenId, setSubTaskInputOpenId] = useState<string | null>(null);
+  const [justCommittedId, setJustCommittedId] = useState<string | null>(null);
+  const [showCommittedCheckmark, setShowCommittedCheckmark] = useState<string | null>(null);
+
+  // PRD v0.3.37 Part B: Delete with undo and subtask safety prompt
+  const handleDeleteItemWithUndo = (it: DailyCardItem) => {
+    if (it.children && it.children.length > 0) {
+      const count = it.children.length;
+      const msg = language === 'vi' ? `Xóa cả ${count} việc con?` : `Delete all ${count} subtasks as well?`;
+      if (!window.confirm(msg)) return;
+    }
+
+    const saved = { ...it };
+    removeDailyCardItem(it.id);
+    recordTombstone(it.id);
+
+    showToast(
+      language === 'vi' ? 'Đã xóa việc' : 'Task deleted',
+      () => {
+        removeTombstone(it.id);
+        addDailyCardItem(saved);
+      },
+      'confirmation',
+      language === 'vi' ? 'Hoàn tác' : 'Undo'
+    );
+  };
 
   // PRD v0.3.35 Part E3: "Lùi các việc sau" toggle switch (default: true, session-remembered)
   const [autoShiftAfter, setAutoShiftAfter] = useState<boolean>(() => {
@@ -499,8 +526,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const renderGoalBadge = (it: DailyCardItem, isEditingLine: boolean) => {
     const hasGoal = !!it.goalId;
     const extra = (it.extra as Record<string, unknown> | undefined) || {};
+    // PRD v0.3.37 Part C1 & C2: Chip is default hidden on line unless high-confidence and user enabled inline chip
     const sug = (!hasGoal && !extra.dismissGoalSuggestion)
-      ? findGoalSuggestion(isEditingLine ? editText : it.text, goals)
+      ? findHighConfidenceGoalSuggestion(isEditingLine ? editText : it.text, goals)
       : null;
     const isPickerOpen = pickerItemId === it.id;
 
@@ -581,6 +609,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
         {isPickerOpen && (
           <GoalPicker
+            taskTitle={isEditingLine ? editText : it.text}
             currentGoalId={it.goalId}
             currentMilestoneId={it.milestoneId}
             initialSearch={hashFilter}
@@ -618,6 +647,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           autoFocus value={editText}
           onChange={e => {
             const val = e.target.value;
+            setJustCommittedId(null); // rule F2.2: typing resets commit stage
             setEditText(val);
             const hashMatch = val.match(/#([a-zA-Zà-ỹÀ-Ỹ0-9_-]*)$/);
             if (hashMatch) {
@@ -631,15 +661,26 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           onBlur={() => {
             if (pickerItemId !== it.id) {
               saveEdit(it);
+              setJustCommittedId(null);
             }
           }}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               if (pickerItemId !== it.id) {
-                saveEdit(it);
-                // PRD v0.3.35 D2.1 & D6.1: Enter in task name opens subtask line below
-                setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
-                setAutoFocusSubTaskId(it.id);
+                if (justCommittedId === it.id) {
+                  // Rule F2.2: Enter #2 opens subtask line below
+                  setJustCommittedId(null);
+                  setEditing(null);
+                  setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
+                  setSubTaskInputOpenId(it.id);
+                  setAutoFocusSubTaskId(it.id);
+                } else {
+                  // Rule F2.1: Enter #1 saves/commits line and keeps cursor, showing subtle brief checkmark
+                  saveEdit(it);
+                  setJustCommittedId(it.id);
+                  setShowCommittedCheckmark(it.id);
+                  setTimeout(() => setShowCommittedCheckmark(null), 600);
+                }
               }
             }
             if (e.key === 'Escape') {
@@ -648,11 +689,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 setHashFilter('');
               } else {
                 setEditing(null);
+                setJustCommittedId(null);
               }
             }
           }}
           className="flex-1 bg-transparent outline-none min-w-0" style={{ color: c.ink }}
         />
+        {showCommittedCheckmark === it.id && (
+          <span className="text-[11px] font-bold text-emerald-600 animate-in fade-in duration-150">✓</span>
+        )}
         {renderGoalBadge(it, true)}
       </div>
     ) : (
@@ -802,6 +847,40 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${expandedSubTaskIds.has(it.id) ? 'rotate-90' : ''}`} />
                 </button>
               )}
+              {/* PRD v0.3.37 Part B: Check and Delete buttons at line start */}
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  title={it.status === 'done' ? (language === 'vi' ? 'Đánh dấu chưa xong' : 'Mark undone') : (language === 'vi' ? 'Đánh dấu xong' : 'Mark done')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleItem(it);
+                  }}
+                  className={`w-4 h-4 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                    it.status === 'done'
+                      ? 'text-emerald-600 hover:text-emerald-700 font-bold'
+                      : 'text-slate-400 hover:text-slate-700'
+                  }`}
+                >
+                  <Check className={`w-3.5 h-3.5 ${it.status === 'done' ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
+                </button>
+                <button
+                  type="button"
+                  title={language === 'vi' ? 'Xóa việc' : 'Delete task'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteItemWithUndo(it);
+                  }}
+                  className={`w-4 h-4 rounded flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-black/5 transition-all cursor-pointer ${
+                    selectedIds.has(it.id)
+                      ? 'opacity-100'
+                      : 'opacity-0 group-hover/row:opacity-100'
+                  }`}
+                >
+                  <X className="w-3 h-3 stroke-[1.5]" />
+                </button>
+              </div>
+
               <button title="Chạm để đánh dấu xong" onClick={() => handleToggleItem(it)}
                 className="font-semibold tabular-nums shrink-0 cursor-pointer" style={{ color: c.ink }}>{it.start}</button>
               {it.isTemplateBlock && (
@@ -962,8 +1041,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               )}
             </div>
 
-            {/* PRD v0.3.35 Part D: SubTask list for timed item */}
-            {(expandedSubTaskIds.has(it.id) || autoFocusSubTaskId === it.id) && (
+            {/* PRD v0.3.35 Part D & v0.3.37 Part F: SubTask list for timed item */}
+            {(expandedSubTaskIds.has(it.id) || autoFocusSubTaskId === it.id || subTaskInputOpenId === it.id) && (
               <SubTaskList
                 parentId={it.id}
                 childrenItems={it.children}
@@ -972,6 +1051,12 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   if (isToday) {
                     updateScheduleEntry(it.id, { children: newChildren }, { updateDailyCardItem, setBlocks, dailyCardItems });
                   }
+                }}
+                isInputOpen={subTaskInputOpenId === it.id}
+                onCloseInput={() => setSubTaskInputOpenId(null)}
+                onFocusParent={() => {
+                  setEditing(it.id);
+                  setEditText(lineText(it));
                 }}
                 autoFocusNew={autoFocusSubTaskId === it.id}
                 onDoneAutoFocus={() => setAutoFocusSubTaskId(null)}
@@ -1083,7 +1168,39 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${expandedSubTaskIds.has(it.id) ? 'rotate-90' : ''}`} />
                 </button>
               )}
-              <button title="Chạm để đánh dấu xong" onClick={() => toggleDailyCardItem(it.id)} className="shrink-0" style={{ color: c.muted }}>•</button>
+              {/* PRD v0.3.37 Part B: Check and Delete buttons at line start */}
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  title={it.status === 'done' ? (language === 'vi' ? 'Đánh dấu chưa xong' : 'Mark undone') : (language === 'vi' ? 'Đánh dấu xong' : 'Mark done')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleDailyCardItem(it.id);
+                  }}
+                  className={`w-4 h-4 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                    it.status === 'done'
+                      ? 'text-emerald-600 hover:text-emerald-700 font-bold'
+                      : 'text-slate-400 hover:text-slate-700'
+                  }`}
+                >
+                  <Check className={`w-3.5 h-3.5 ${it.status === 'done' ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
+                </button>
+                <button
+                  type="button"
+                  title={language === 'vi' ? 'Xóa việc' : 'Delete task'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteItemWithUndo(it);
+                  }}
+                  className={`w-4 h-4 rounded flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-black/5 transition-all cursor-pointer ${
+                    selectedIds.has(it.id)
+                      ? 'opacity-100'
+                      : 'opacity-0 group-hover/flex:opacity-100'
+                  }`}
+                >
+                  <X className="w-3 h-3 stroke-[1.5]" />
+                </button>
+              </div>
               {renderText(it)}
               {/* v0.3.34 Part B: Play button on selected row / hover */}
               <button
@@ -1104,12 +1221,18 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               )}
             </div>
 
-            {/* PRD v0.3.35 Part D: SubTask list for flex item */}
-            {(expandedSubTaskIds.has(it.id) || autoFocusSubTaskId === it.id) && (
+            {/* PRD v0.3.35 Part D & v0.3.37 Part F: SubTask list for flex item */}
+            {(expandedSubTaskIds.has(it.id) || autoFocusSubTaskId === it.id || subTaskInputOpenId === it.id) && (
               <SubTaskList
                 parentId={it.id}
                 childrenItems={it.children}
                 onUpdateChildren={(newChildren) => updateDailyCardItem(it.id, { children: newChildren })}
+                isInputOpen={subTaskInputOpenId === it.id}
+                onCloseInput={() => setSubTaskInputOpenId(null)}
+                onFocusParent={() => {
+                  setEditing(it.id);
+                  setEditText(lineText(it));
+                }}
                 autoFocusNew={autoFocusSubTaskId === it.id}
                 onDoneAutoFocus={() => setAutoFocusSubTaskId(null)}
                 className="mb-1"
