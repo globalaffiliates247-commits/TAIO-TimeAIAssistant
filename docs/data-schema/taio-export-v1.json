@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TaioExportV1",
+  "description": "JSON schema for TAIO Time export payload v1 (PRD v0.3.38 Part F2.3)",
+  "type": "object",
+  "required": ["format", "formatVersion"],
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": ["taio-time-export", "taio-time-export-v1"]
+    },
+    "formatVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "specVersion": {
+      "type": "string"
+    },
+    "exportedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "user": {
+      "type": "object"
+    },
+    "goals": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "projects": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Unified WorkNode collection introduced in v0.3.38 Part C",
+      "items": { "type": "object" }
+    },
+    "lists": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "tasks": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "dayTemplate": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "days": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "journalItems": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "stickyNotes": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "deletedStickies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "deletedAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "deletedAt": { "type": "number" }
+        }
+      }
+    },
+    "deletedItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "deletedAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "deletedAt": { "type": "number" }
+        }
+      }
+    },
+    "todayJournalSummary": {
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "count": { "type": "integer" },
+        "hash": { "type": "string" }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}
