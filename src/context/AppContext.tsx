@@ -1806,7 +1806,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Ở khoảng trống thì không có việc hiện tại (undefined).
   const nowMins = getDeviceTimeMinutes();
   const currentBlock: TimeBlock | undefined = scheduleBlocks.find(b => {
-    if (b.status === 'done' || b.status === 'dropped') return false;
+    if (b.status === 'done' || b.status === 'dropped' || b.status === 'partly_done') return false;
     const extra = (b.extra as Record<string, unknown> | undefined) || {};
     const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
     if (manuallyStartedAt && b.status === 'in_progress') {
@@ -2394,65 +2394,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ) => {
     if (!checkInBlock) return;
 
-    if (answer === 'done') {
-      const actualMins = checkInBlock.startTime && checkInBlock.endTime
-        ? Math.max(5, (timeToMinutes(checkInBlock.endTime) - timeToMinutes(checkInBlock.startTime) + 1440) % 1440)
-        : (checkInBlock.estimatedMinutes || 30);
+    try {
+      if (answer === 'done') {
+        const actualMins = checkInBlock.startTime && checkInBlock.endTime
+          ? Math.max(5, (timeToMinutes(checkInBlock.endTime) - timeToMinutes(checkInBlock.startTime) + 1440) % 1440)
+          : (checkInBlock.estimatedMinutes || 30);
 
-      updateScheduleEntry(
-        checkInBlock.id,
-        { 
-          status: 'done', 
-          timeboxEndOutcome: 'done_on_time',
-          touchTimeMinutes: actualMins,
-          cycleTimeMinutes: actualMins,
-          flowEfficiency: 1.0,
-        },
-        { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
-      );
-      setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed! Goal progress updated.');
-      triggerCoachCard('first_dod_done');
-      // PRD FIX v0.3.33 Part D1: Do NOT auto-assign 'in_progress' to next block!
-      // Next block only becomes in_progress when its scheduled time window arrives or when started early.
-    } else if (answer === 'continue_later' || answer === 'stop_here') {
-      updateScheduleEntry(
-        checkInBlock.id,
-        { 
-          status: 'partly_done',
-          timeboxEndOutcome: 'continue_later',
-          nextStep: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
-          returnPoint: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
-        },
-        { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
-      );
-      // Auto add residual step to Inbox so mind is clear (Zeigarnik effect reduction)
-      if (nextStep) {
-        addInboxItem({
-          title: `Làm tiếp: ${checkInBlock.title}`,
-          nextAction: nextStep,
-          estimatedMinutes: 30,
-          linkedGoalId: checkInBlock.goalId,
-        });
+        updateScheduleEntry(
+          checkInBlock.id,
+          { 
+            status: 'done', 
+            timeboxEndOutcome: 'done_on_time',
+            touchTimeMinutes: actualMins,
+            cycleTimeMinutes: actualMins,
+            flowEfficiency: 1.0,
+          },
+          { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
+        );
+        setIsTimerRunning(false);
+        setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed! Goal progress updated.');
+        triggerCoachCard('first_dod_done');
+        // PRD FIX v0.3.33 Part D1: Do NOT auto-assign 'in_progress' to next block!
+        // Next block only becomes in_progress when its scheduled time window arrives or when started early.
+      } else if (answer === 'continue_later' || answer === 'stop_here') {
+        const stopTime = minutesToTime(getDeviceTimeMinutes());
+        updateScheduleEntry(
+          checkInBlock.id,
+          { 
+            status: 'partly_done',
+            timeboxEndOutcome: 'continue_later',
+            endTime: stopTime,
+            nextStep: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
+            returnPoint: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
+          },
+          { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
+        );
+        setIsTimerRunning(false);
+        // Auto add residual step to Inbox so mind is clear (Zeigarnik effect reduction)
+        if (nextStep) {
+          addInboxItem({
+            title: `Làm tiếp: ${checkInBlock.title}`,
+            nextAction: nextStep,
+            estimatedMinutes: 30,
+            linkedGoalId: checkInBlock.goalId,
+          });
+        }
+        setCelebrationMsg(language === 'vi' ? 'Đã lưu bước kế tiếp và đưa vào Rổ việc để tâm trí hoàn toàn thanh thản (Zeigarnik)!' : 'Saved next step cleanly!');
+      } else if (answer === 'more_time') {
+        const res = extendTask(
+          checkInBlock.id,
+          extraMins,
+          { updateDailyCardItem, setBlocks, dailyCardItems, goals, setGoals }
+        );
+        setTimerMinutesRemaining(prev => prev + extraMins);
+        setCelebrationMsg(
+          language === 'vi'
+            ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại (kết thúc lúc ${res?.newEndTime || 'mới'}).`
+            : `Added +${extraMins} minutes.`
+        );
+      } else if (answer === 'remind_10m') {
+        snoozeBlock(checkInBlock.id, { type: 'minutes', minutes: extraMins || 10 });
       }
-      setCelebrationMsg(language === 'vi' ? 'Đã lưu bước kế tiếp và đưa vào Rổ việc để tâm trí hoàn toàn thanh thản (Zeigarnik)!' : 'Saved next step cleanly!');
-    } else if (answer === 'more_time') {
-      const res = extendTask(
-        checkInBlock.id,
-        extraMins,
-        { updateDailyCardItem, setBlocks, dailyCardItems, goals, setGoals }
-      );
-      setTimerMinutesRemaining(prev => prev + extraMins);
-      setCelebrationMsg(
-        language === 'vi'
-          ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại (kết thúc lúc ${res?.newEndTime || 'mới'}).`
-          : `Added +${extraMins} minutes.`
-      );
-    } else if (answer === 'remind_10m') {
-      snoozeBlock(checkInBlock.id, { type: 'minutes', minutes: extraMins || 10 });
+    } finally {
+      setCheckInModalOpen(false);
+      setCheckInBlock(null);
     }
-
-    setCheckInModalOpen(false);
-    setCheckInBlock(null);
   };
 
   // D5 v0.3.11: Overlays must lock the screen behind them (fixes drag scrolling behind sheets on iOS)

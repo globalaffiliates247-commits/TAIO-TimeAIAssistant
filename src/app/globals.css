@@ -3482,6 +3482,9 @@
   .underline {
     text-decoration-line: underline;
   }
+  .decoration-slate-300 {
+    text-decoration-color: var(--color-slate-300);
+  }
   .underline-offset-2 {
     text-underline-offset: 2px;
   }

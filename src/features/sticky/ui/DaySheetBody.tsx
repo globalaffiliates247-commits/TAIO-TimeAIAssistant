@@ -497,6 +497,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [startConflictModal, setStartConflictModal] = useState<{
     item: DailyCardItem;
     type: 'overrun' | 'already_running';
+    mode?: 'replace' | 'parallel';
     runningTask?: any;
     nextTask?: any;
     overrunMins?: number;
@@ -536,6 +537,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         setStartConflictModal({
           item: it,
           type: 'overrun',
+          mode: options?.mode,
           nextTask: upcoming,
           overrunMins: estDur - gapMins,
           gapMins,
@@ -548,11 +550,20 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       dur = 30;
     }
 
-    // 3. If replacing current task, pause old task and record return point
+    // 3. If replacing current task, cleanly stop/pause old task and record return point
     if (options?.mode === 'replace' && currentBlock) {
       updateScheduleEntry(
         currentBlock.id,
-        { returnPoint: currentBlock.title, status: 'planned' },
+        {
+          endTime: startHM,
+          status: 'partly_done',
+          returnPoint: currentBlock.title,
+          timeboxEndOutcome: 'continue_later',
+          extra: {
+            ...((currentBlock.extra as Record<string, unknown>) || {}),
+            startedAt: undefined,
+          },
+        },
         { updateDailyCardItem, setBlocks, dailyCardItems }
       );
     }
@@ -1189,7 +1200,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         const gap = gapAfter.get(it.id);
         const sug = gap ? suggestForGap(flex, taken, gap.mins, dailyCardItems) : undefined;
         if (sug) taken.add(sug.id);
-        const isNowRunning = it.start && it.end && toMins(it.start) <= nowMins && nowMins < toMins(it.end) && it.status !== 'done';
+        const isNowRunning = it.start && it.end && toMins(it.start) <= nowMins && nowMins < toMins(it.end) && it.status !== 'done' && it.status !== 'left' && it.status !== 'dropped';
         const isParallel = Boolean(it.parallelOf || (it.extra as Record<string, unknown> | undefined)?.parallelOf);
         const isBeingDragged = draggedItemId === it.id;
         const isDragTarget = dragOverTarget?.type === 'task' && dragOverTarget.targetId === it.id;
@@ -1839,8 +1850,14 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
       {/* v0.3.34 Part B: Overrun Warning & Task Conflict Modal */}
       {startConflictModal && (
-        <div className="fixed app-overlay-safe z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm shadow-2xl p-5 text-slate-900 space-y-3.5">
+        <div 
+          onClick={() => setStartConflictModal(null)}
+          className="fixed app-overlay-safe z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm shadow-2xl p-5 text-slate-900 space-y-3.5 cursor-default"
+          >
             {startConflictModal.type === 'already_running' ? (
               <>
                 <div className="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-wide">
@@ -1873,7 +1890,10 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStartConflictModal(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setStartConflictModal(null);
+                    }}
                     className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
                   >
                     {language === 'vi' ? 'Hủy' : 'Cancel'}
@@ -1901,21 +1921,24 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                 <div className="space-y-1.5 pt-1">
                   <button
                     type="button"
-                    onClick={() => handleStartItemNow(startConflictModal.item, { fitGap: true })}
+                    onClick={() => handleStartItemNow(startConflictModal.item, { fitGap: true, mode: startConflictModal.mode })}
                     className="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <span>{language === 'vi' ? `Cắt cho vừa (${startConflictModal.gapMins}p)` : `Fit to gap (${startConflictModal.gapMins}m)`}</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleStartItemNow(startConflictModal.item, { fitGap: false })}
+                    onClick={() => handleStartItemNow(startConflictModal.item, { fitGap: false, mode: startConflictModal.mode })}
                     className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>{language === 'vi' ? 'Vẫn bắt đầu' : 'Start anyway'}</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStartConflictModal(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setStartConflictModal(null);
+                    }}
                     className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
                   >
                     {language === 'vi' ? 'Hủy' : 'Cancel'}

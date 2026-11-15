@@ -469,8 +469,8 @@ export const PlanTab: React.FC = () => {
                                   setEditingTitle(block.title);
                                 }}
                                 title="Bấm để sửa tên"
-                                className={`text-[15px] leading-snug font-semibold cursor-pointer hover:text-blue-600 transition-colors ${
-                                  isCompleted ? 'text-slate-400 line-through font-normal' : 'text-slate-900'
+                                className={`text-[15px] leading-snug cursor-pointer hover:text-blue-600 transition-colors ${
+                                  isCompleted ? 'text-slate-400 line-through decoration-slate-300 font-normal' : 'text-slate-900 font-semibold'
                                 }`}
                               >
                                 {block.title}

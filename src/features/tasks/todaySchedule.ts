@@ -90,6 +90,8 @@ export function buildTodaySchedule(
     let status: TimeBlock['status'] = 'planned';
     if (item.status === 'done') {
       status = 'done';
+    } else if (item.status === 'left') {
+      status = 'partly_done';
     } else if (item.status === 'dropped') {
       status = 'dropped';
     }
