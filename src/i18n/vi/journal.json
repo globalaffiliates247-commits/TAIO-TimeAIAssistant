@@ -26,7 +26,12 @@
     "flexibleRemaining": "{{count}} việc Linh động hôm nay",
     "basketRemaining": "{{count}} việc trong Rổ",
     "toastPostponed": "Đã dời việc sang ngày mai",
-    "toastScheduled": "Đã xếp việc vào khoảng trống phù hợp"
+    "toastScheduled": "Đã xếp việc vào khoảng trống phù hợp",
+    "tasksWaiting": "{{count}} việc đang chờ · Quẹt thẻ ngay",
+    "swipeNow": "Quẹt thẻ ngay",
+    "swipeNowCount": "Quẹt thẻ ngay ({{count}})",
+    "cardSubtitle": "Lên lịch nhanh, dọn dẹp việc linh động & rổ việc trong 1 phút",
+    "staleTasksReminder": "Bạn có {{count}} việc chờ hơn 3 ngày · Quẹt thẻ ngay"
   },
   "basket": {
     "title": "Rổ công việc",

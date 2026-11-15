@@ -1,9 +1,10 @@
 'use client';
 // PRD B34 v0.3.26: "Chưa phân loại". Rows stay quiet (title + one chevron); the next-step choices
 // appear only for the selected row, all in one neutral style.
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getDeviceCalendarDate } from '@/core/clock';
+import { countSwipeDeck } from '@/domain/swipeDeck';
 import { GoalPicker } from '@/features/goals';
 import { useT } from '@/i18n/useT';
 
@@ -16,12 +17,17 @@ const Chevron = () => (
 );
 
 export const UnsortedSection: React.FC = () => {
-  const { inbox, addInboxItem, updateInboxItem, processInboxItem, addDailyCardItem, setIsSwipeModalOpen } = useApp();
+  const { inbox, dailyCardItems, backlogCards, addInboxItem, updateInboxItem, processInboxItem, addDailyCardItem, setIsSwipeModalOpen } = useApp();
   const { t } = useT();
   const pending = inbox.filter(i => i.status === 'inbox');
   const [selected, setSelected] = useState<string | null>(null);
   const [pickerItemId, setPickerItemId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+
+  // Unified swipe deck count (A2.4 & A3.4)
+  const totalDeckCount = useMemo(() => {
+    return countSwipeDeck(dailyCardItems, inbox as any, backlogCards, getDeviceCalendarDate());
+  }, [dailyCardItems, inbox, backlogCards]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -30,9 +36,9 @@ export const UnsortedSection: React.FC = () => {
           <h3 className="text-xl font-extrabold text-[#2B2A26]">{t('basket.unsorted', 'Chưa xử lý')}</h3>
           <p className="text-[13px] text-[#6B6658]">{t('basket.unsorted_desc', 'Việc vừa ghi, chưa có ước lượng, hạn chót hoặc mục tiêu')}</p>
         </div>
-        {pending.length > 0 && (
-          <button onClick={() => setIsSwipeModalOpen(true)} className="h-10 px-4 rounded-xl bg-[#2B2A26] text-white text-sm font-semibold shrink-0">
-            {t('basket.swipe_cards', { count: pending.length, defaultValue: `Quẹt thẻ ${pending.length} việc` })}
+        {totalDeckCount > 0 && (
+          <button onClick={() => setIsSwipeModalOpen(true)} className="h-10 px-4 rounded-xl bg-[#2B2A26] hover:bg-[#3D3A34] text-white text-sm font-semibold shrink-0 transition-colors">
+            {t('swipe.swipeNow', 'Quẹt thẻ ngay')} ({totalDeckCount})
           </button>
         )}
       </div>

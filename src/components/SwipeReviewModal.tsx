@@ -25,6 +25,7 @@ import {
   minutesToTime,
 } from '../core/clock';
 import { useT } from '../i18n/useT';
+import { buildSwipeDeck, SwipeDeckItem } from '@/domain/swipeDeck';
 
 export interface SwipeDeckCard extends BacklogCard {
   sourceType: 'flex' | 'basket' | 'backlog';
@@ -92,51 +93,15 @@ export const SwipeReviewModal: React.FC = () => {
     if (isSwipeModalOpen) {
       const today = getDeviceCalendarDate();
       
-      // 1. Việc Linh động hôm nay (Chưa xếp giờ):
-      const flexTasks: SwipeDeckCard[] = dailyCardItems
-        .filter(i => (i.date === today || i.date === '2026-11-02' || !i.start) && !i.start && i.status !== 'done' && i.status !== 'dropped' && i.status !== 'carried')
-        .map(i => ({
-          id: `flex_${i.id}`,
-          sourceType: 'flex',
-          sourceId: i.id,
-          text: i.text,
-          note: i.note,
-          type: 'task',
-          ageDays: i.carryCount || 0,
-          snoozesCount: i.carryCount || 0,
-          goalId: i.goalId,
-          goalName: i.goalName,
-          whyThisCard: t('swipe.flexibleBadge'),
-          estimatedMinutes: 30,
-        }));
-
-      // 2. Việc trong Rổ (Inbox / Chưa phân loại):
-      const basketTasks: SwipeDeckCard[] = inbox
-        .filter(i => i.status === 'inbox')
-        .map(i => ({
-          id: `basket_${i.id}`,
-          sourceType: 'basket',
-          sourceId: i.id,
-          text: i.title,
-          note: i.nextAction,
-          type: 'inbox',
-          ageDays: 1,
-          snoozesCount: 0,
-          goalId: i.linkedGoalId,
-          goalName: i.linkedGoalName,
-          whyThisCard: t('swipe.basketBadge'),
-          estimatedMinutes: i.estimatedMinutes || 25,
-        }));
-
-      // B35.1: Linh động hôm nay trước, rồi tới Rổ!
-      let deck: SwipeDeckCard[] = [...flexTasks, ...basketTasks];
-      if (deck.length === 0) {
-        deck = backlogCards.map(c => ({
-          ...c,
-          sourceType: 'backlog',
-          sourceId: c.id,
-        }));
-      }
+      // PRD v0.3.38 Part A: Unified buildSwipeDeck from domain (exact parity across all entry points)
+      const deck: SwipeDeckCard[] = buildSwipeDeck(dailyCardItems, inbox as any, backlogCards, today).map(item => ({
+        ...item,
+        whyThisCard: item.sourceType === 'flex' 
+          ? t('swipe.flexibleBadge') 
+          : item.sourceType === 'basket' 
+            ? t('swipe.basketBadge') 
+            : item.whyThisCard || '',
+      })) as SwipeDeckCard[];
 
       setSessionCards(deck);
       setCurrentIndex(0);

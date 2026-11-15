@@ -26,7 +26,12 @@
     "flexibleRemaining": "{{count}} today's flexible tasks",
     "basketRemaining": "{{count}} basket items",
     "toastPostponed": "Task moved to tomorrow",
-    "toastScheduled": "Task scheduled into available slot"
+    "toastScheduled": "Task scheduled into available slot",
+    "tasksWaiting": "{{count}} tasks waiting · Swipe now",
+    "swipeNow": "Swipe now",
+    "swipeNowCount": "Swipe now ({{count}})",
+    "cardSubtitle": "Quickly schedule and organize flexible & basket tasks in 1 minute",
+    "staleTasksReminder": "You have {{count}} tasks waiting over 3 days · Swipe now"
   },
   "basket": {
     "title": "Task Basket",

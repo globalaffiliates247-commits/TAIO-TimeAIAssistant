@@ -15,6 +15,8 @@ import {
   Filter
 } from 'lucide-react';
 import { ReminderQuestion } from '../types';
+import { buildSwipeDeck, SWIPE_REMINDER_MIN_DAYS } from '@/domain/swipeDeck';
+import { getDeviceCalendarDate } from '@/core/clock';
 
 export const ReminderQuestionsModal: React.FC = () => {
   const { 
@@ -24,7 +26,11 @@ export const ReminderQuestionsModal: React.FC = () => {
     activeQuestion,
     setActiveQuestion,
     setCurrentTab,
-    setIsSwipeModalOpen
+    setIsSwipeModalOpen,
+    dailyCardItems,
+    inbox,
+    backlogCards,
+    language
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'today' | 'week' | 'goals'>('all');
@@ -125,7 +131,20 @@ export const ReminderQuestionsModal: React.FC = () => {
                   <Sparkles className="w-4 h-4 text-[#ff7556] shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-slate-800">Dữ liệu thực tế của bạn: </strong>
-                    <span>{q.answerSummary}</span>
+                    <span>
+                      {q.id === 'rq-6' ? (() => {
+                        const deck = buildSwipeDeck(dailyCardItems, inbox as any, backlogCards, getDeviceCalendarDate());
+                        const staleCount = deck.filter(c => (c.ageDays || 0) >= SWIPE_REMINDER_MIN_DAYS).length;
+                        if (staleCount > 0) {
+                          return language === 'vi'
+                            ? `Bạn có ${staleCount} việc chờ hơn 3 ngày · Quẹt thẻ ngay`
+                            : `You have ${staleCount} tasks waiting over 3 days · Swipe now`;
+                        }
+                        return language === 'vi'
+                          ? 'Hiện không có việc nào tồn đọng quá 3 ngày.'
+                          : 'No tasks waiting over 3 days.';
+                      })() : q.answerSummary}
+                    </span>
                   </div>
                 </div>
 

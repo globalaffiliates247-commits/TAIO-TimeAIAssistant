@@ -23,6 +23,7 @@ import {
   Zap,
   Tag
 } from 'lucide-react';
+import { SwipeEntryCard } from '@/features/swipe';
 
 export const DailyCardView: React.FC = () => {
   const { 
@@ -157,13 +158,8 @@ export const DailyCardView: React.FC = () => {
             </span>
           </button>
           <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-            <button
-              onClick={() => setIsSwipeModalOpen(true)}
-              className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
-              title="Mở Quẹt thẻ nhiệm vụ"
-            >
-              <span>Quẹt thẻ nhiệm vụ</span>
-            </button>
+            {/* PRD v0.3.38 Part A4: Thống nhất nhãn Quẹt thẻ ngay kèm số việc */}
+            <SwipeEntryCard variant="compact" />
             <button
               onClick={() => setIsActiveCaptureOpen(true)}
               className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-[#E0401F] text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"

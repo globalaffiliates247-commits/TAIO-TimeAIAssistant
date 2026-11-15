@@ -553,9 +553,9 @@ export const INITIAL_NOTIFICATIONS: import('../types').AppNotificationItem[] = [
   {
     id: 'notif-4',
     kind: 'question',
-    title: 'Liệu mình có đang bỏ sót ý tưởng nào trong rổ việc không?',
+    title: 'Bạn có việc chờ hơn 3 ngày · Quẹt thẻ ngay',
     time: '3 giờ trước',
-    ctaLabel: 'Mở Quẹt thẻ nhiệm vụ',
+    ctaLabel: 'Quẹt thẻ ngay',
     read: true,
     targetAction: 'open_swipe',
   },
@@ -1363,12 +1363,12 @@ export const INITIAL_REMINDER_QUESTIONS: ReminderQuestion[] = [
   },
   {
     id: 'rq-6',
-    text: 'Liệu mình có đang bỏ sót ý tưởng nào không?',
+    text: 'Liệu mình có đang bỏ sót việc hay ý tưởng nào không?',
     category: 'week',
     triggerType: 'backlog_untouched',
-    answerSummary: 'Có 5 ý tưởng trong Rổ việc chưa được rà soát trong 7 ngày qua.',
+    answerSummary: 'Dữ liệu được rà soát trực tiếp từ các việc chờ trong Rổ việc và Thẻ tồn đọng.',
     targetScreen: 'swipe_review',
-    actionLabel: 'Mở Quẹt thẻ nhiệm vụ',
+    actionLabel: 'Quẹt thẻ ngay',
   },
   {
     id: 'rq-7',

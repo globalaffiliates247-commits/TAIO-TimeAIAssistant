@@ -20,6 +20,7 @@ import { useRowSelection } from './useRowSelection';
 import { updateScheduleEntry } from '@/features/tasks';
 import { getPreviousDay } from '@/features/dayclose';
 import { TemplateScheduleModal } from '@/features/schedule-template';
+import { SwipeEntryCard } from '@/features/swipe';
 import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight, ChevronRight, Plus, Check, GripVertical } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
@@ -1597,9 +1598,11 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         <span className="text-[11.5px] font-semibold tracking-wide" style={{ color: c.muted }}>
           {dragOverTarget?.type === 'flex'
             ? (language === 'vi' ? 'THẢ VÀO ĐÂY ĐỂ BỎ GIỜ (CHUYỂN VỀ LINH ĐỘNG)' : 'DROP HERE TO REMOVE TIME (CONVERT TO FLEXIBLE)')
-            : 'CHƯA XẾP GIỜ · LÀM KHI CÓ HỨNG'}
+            : (language === 'vi' ? 'CHƯA XẾP GIỜ · LÀM KHI CÓ HỨNG' : 'UNSCHEDULED · DO WHEN INSPIRED')}
         </span>
         <span className="flex-1 h-px" style={{ background: c.line }} />
+        {/* PRD v0.3.38 Part A2: Nút Quẹt thẻ ngay khi mục có từ 3 việc trở lên */}
+        <SwipeEntryCard variant="button" customCount={flex.length} minThreshold={3} />
       </div>
       {flex.map(it => {
         const est = (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
