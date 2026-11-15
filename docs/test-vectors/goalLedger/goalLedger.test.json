@@ -1,0 +1,66 @@
+{
+  "description": "Golden test vectors for Goal Ledger EVM & time allocation (PRD v0.3.38 Part B4 & F2.5)",
+  "testCases": [
+    {
+      "name": "B4.2: EVM Pacing behind schedule",
+      "input": {
+        "startDate": "2026-01-01T00:00:00Z",
+        "deadlineDate": "2026-12-31T23:59:59Z",
+        "plannedHours": 100,
+        "actualHours": 40,
+        "progressPercent": 45,
+        "asOfDate": "2026-11-15T00:00:00Z"
+      },
+      "expected": {
+        "shouldBeAtPercent": 87,
+        "paceStatus": "behind",
+        "paceLabel": "chậm 42%"
+      }
+    },
+    {
+      "name": "B4.3: Estimation Efficiency with 5 tasks",
+      "input": {
+        "doneTasks": [
+          { "estimatedMinutes": 40, "actualMinutes": 50 },
+          { "estimatedMinutes": 40, "actualMinutes": 50 },
+          { "estimatedMinutes": 40, "actualMinutes": 50 },
+          { "estimatedMinutes": 40, "actualMinutes": 50 },
+          { "estimatedMinutes": 40, "actualMinutes": 50 }
+        ]
+      },
+      "expected": {
+        "efficiencyPercent": 80,
+        "label": "80%"
+      }
+    },
+    {
+      "name": "B4.3: Estimation Efficiency with only 2 tasks returns not enough data",
+      "input": {
+        "doneTasks": [
+          { "estimatedMinutes": 40, "actualMinutes": 50 },
+          { "estimatedMinutes": 40, "actualMinutes": 50 }
+        ]
+      },
+      "expected": {
+        "efficiencyPercent": null,
+        "label": "chưa đủ dữ liệu"
+      }
+    },
+    {
+      "name": "B4.4: Task duration extraction without 30m default",
+      "input": {
+        "task": {
+          "extra": {
+            "startedAt": 1794726000000,
+            "endedAt": 1794728100000
+          },
+          "extensions": [{ "addedMinutes": 15 }]
+        }
+      },
+      "expected": {
+        "minutes": 50,
+        "isEstimated": false
+      }
+    }
+  ]
+}

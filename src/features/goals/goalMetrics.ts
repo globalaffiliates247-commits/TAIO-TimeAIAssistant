@@ -1,4 +1,5 @@
 import { DailyCardItem, Goal, GoalProgressType, TimeBlock } from '@/types';
+import { extractTaskActualMinutes, computeEvmPacing, computeEstimationEfficiency } from '@/domain/goalLedger';
 
 export interface GoalMetricsResult {
   progressType: GoalProgressType;
@@ -46,6 +47,9 @@ export function getBlockActualMinutes(block: TimeBlock): number {
   if (block.touchTimeMinutes && block.touchTimeMinutes > 0) {
     return block.touchTimeMinutes;
   }
+  // PRD v0.3.38 Part B2.8: Use pure extractTaskActualMinutes, remove 30m default
+  const extracted = extractTaskActualMinutes(block);
+  if (extracted.minutes > 0) return extracted.minutes;
   return getBlockEstimatedMinutes(block);
 }
 
@@ -97,11 +101,8 @@ export function computeGoalMetrics(
   }, 0);
   const dailyEffortMinutes = linkedDailyItems.reduce((acc, it) => {
     if (it.status === 'done') {
-      const extra = (it.extra as Record<string, unknown> | undefined) || {};
-      const actual = typeof extra.actualMinutes === 'number'
-        ? extra.actualMinutes
-        : (typeof extra.estimateMins === 'number' ? extra.estimateMins : 30);
-      return acc + actual;
+      const extracted = extractTaskActualMinutes(it);
+      return acc + extracted.minutes;
     }
     return acc;
   }, 0);

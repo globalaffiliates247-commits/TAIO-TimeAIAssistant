@@ -3,3 +3,4 @@
 // All functions are deterministic and take current time as explicit parameters.
 export * from './swipeDeck';
 export * from './workNode';
+export * from './goalLedger';
