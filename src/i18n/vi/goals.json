@@ -41,5 +41,33 @@
     "input_budget": "Ngân sách thời gian/ngày",
     "create_submit": "Tạo mục tiêu",
     "created_toast": "Đã thêm mục tiêu vào ngăn!"
+  },
+  "overview": {
+    "title": "Toàn cảnh mục tiêu · {{year}}",
+    "periodWeek": "Tuần",
+    "periodMonth": "Tháng",
+    "periodQuarter": "Quý",
+    "periodYear": "Năm",
+    "whereTimeGoes": "Thời gian của bạn đi vào đâu",
+    "byGoal": "Mục tiêu",
+    "byProject": "Dự án",
+    "byWorkArea": "Nhóm việc",
+    "colGoal": "Mục tiêu",
+    "colProgress": "Tiến độ",
+    "colTime": "Đã dùng / Dự kiến",
+    "colEfficiency": "Hiệu suất",
+    "colShare": "Tỷ trọng",
+    "onTrack": "đúng nhịp",
+    "behind": "chậm {{percent}}%",
+    "ahead": "vượt {{percent}}%",
+    "unassigned": "Không gắn mục tiêu",
+    "undeclared": "Chưa xử lý",
+    "summaryRow": "{{onTrack}} đúng nhịp · {{behind}} chậm · {{ratio}}% thời gian cho mục tiêu",
+    "burnUpChart": "Biểu đồ giờ tích lũy (Burn-up)",
+    "velocityForecast": "Tốc độ 4 tuần: {{hours}}g/tuần · Dự báo hoàn thành: {{date}}",
+    "nowCardTitle": "Toàn cảnh {{year}} · {{count}} mục tiêu",
+    "detailTitle": "Chi tiết mục tiêu",
+    "targetDatePrompt": "Mục tiêu này chưa có hạn chót. Đặt hạn chót để theo dõi nhịp độ chuẩn EVM.",
+    "viewOverview": "Xem Toàn cảnh"
   }
 }

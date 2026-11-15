@@ -41,5 +41,33 @@
     "input_budget": "Daily Time Budget",
     "create_submit": "Create Goal",
     "created_toast": "Goal added to folder!"
+  },
+  "overview": {
+    "title": "Goal Overview · {{year}}",
+    "periodWeek": "Week",
+    "periodMonth": "Month",
+    "periodQuarter": "Quarter",
+    "periodYear": "Year",
+    "whereTimeGoes": "Where your time goes",
+    "byGoal": "Goals",
+    "byProject": "Projects",
+    "byWorkArea": "Work Areas",
+    "colGoal": "Goal",
+    "colProgress": "Progress",
+    "colTime": "Used / Planned",
+    "colEfficiency": "Efficiency",
+    "colShare": "Share",
+    "onTrack": "on track",
+    "behind": "behind {{percent}}%",
+    "ahead": "ahead {{percent}}%",
+    "unassigned": "Unassigned",
+    "undeclared": "Unprocessed",
+    "summaryRow": "{{onTrack}} on track · {{behind}} behind · {{ratio}}% time for goals",
+    "burnUpChart": "Cumulative Hours Burn-up Chart",
+    "velocityForecast": "4-week velocity: {{hours}}h/week · Forecast: {{date}}",
+    "nowCardTitle": "Overview {{year}} · {{count}} goals",
+    "detailTitle": "Goal Details",
+    "targetDatePrompt": "This goal has no deadline. Set a deadline to track EVM pacing.",
+    "viewOverview": "View Overview"
   }
 }

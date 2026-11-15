@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Goal, GoalProgressType } from '../types';
 import { GoalFolders, WorkAreaType } from '../features/goals/folders';
+import { OverviewScreen } from '../features/overview';
 import { Plus, Target, Sparkles, X } from 'lucide-react';
 import { useT } from '@/i18n/useT';
 
@@ -127,6 +128,9 @@ export const GoalsTab: React.FC = () => {
           <span>{t('goals.add_goal', '+ Mục tiêu')}</span>
         </button>
       </div>
+
+      {/* PRD v0.3.38 Part B3.3: Toàn cảnh là phần đầu của tab Mục tiêu */}
+      <OverviewScreen />
 
       {/* Main Dossier Folders Component */}
       <GoalFolders

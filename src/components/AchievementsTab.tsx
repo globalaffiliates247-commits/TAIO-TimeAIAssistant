@@ -6,6 +6,7 @@ import { GapLabel, TimeLedgerCategory } from '../types';
 import { HabitInsights } from './HabitInsights';
 import { computeGoalMetrics, computeTaskTimeEfficiency } from '../features/goals/goalMetrics';
 import { getDeviceCalendarDate, timeToMinutes } from '@/core/clock';
+import { useT } from '@/i18n/useT';
 import { 
   Trophy, 
   CheckCircle2, 
@@ -81,8 +82,10 @@ export const AchievementsTab: React.FC = () => {
     openDrilldown,
     timeLedger,
     setMethodLibraryOpen,
-    setIsActiveCaptureOpen
+    setIsActiveCaptureOpen,
+    setCurrentTab
   } = useApp();
+  const { t } = useT();
 
   // B21: Three views in segmented control: 'time' | 'tasks' | 'projects' + 'habits'
   const [viewMode, setViewMode] = useState<'time' | 'tasks' | 'projects' | 'habits'>('time');
@@ -859,84 +862,32 @@ export const AchievementsTab: React.FC = () => {
         </div>
       )}
 
-      {/* VIEW 3: PROJECTS & LONG-TERM GOALS (B7 v0.3.18/v0.3.19: Separate Progress % and Time Efficiency) */}
+      {/* VIEW 3: Dẫn sang Toàn cảnh mục tiêu (PRD v0.3.38 Part B3.3: Thống nhất số liệu một nguồn) */}
       {viewMode === 'projects' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <FolderKanban className="w-4 h-4 text-[#E0401F]" />
-                <span>Tiến độ dự án & Hiệu suất thời gian</span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Tách bạch rõ ràng: Tiến độ hoàn thành (đã gần đích bao nhiêu %) và Hiệu suất thời gian (ước lượng ÷ thực tế)
-              </p>
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4 animate-in fade-in duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-50/80 via-white to-orange-50/60 border border-amber-200/70">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E0401F] to-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                <FolderKanban className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900">
+                  {t('overview.title', { year: 2026, defaultValue: 'Toàn cảnh mục tiêu · 2026' })}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Số liệu tiến độ, giờ tích lũy chuẩn EVM và tỷ trọng thời gian đã được hợp nhất sang màn Toàn cảnh.
+                </p>
+              </div>
             </div>
-
-            <div className="space-y-4 pt-2">
-              {goals.map((g) => {
-                const metrics = computeGoalMetrics(g, scheduleBlocks, dailyCardItems);
-                const plannedHours = Math.round(g.dailyBudgetMins * (g.horizonDays / 7) / 60);
-
-                return (
-                  <div key={g.id} className="p-5 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-3 shadow-xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-50 text-[#E0401F] border border-red-200">
-                          {g.workArea}
-                        </span>
-                        <h4 className="text-base font-bold text-slate-900">{g.name}</h4>
-                      </div>
-                      <div className="text-xs font-mono text-slate-500">
-                        Hạn chót: <strong className="text-slate-700">{g.deadline}</strong> ({g.horizonDays} ngày)
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-700 font-medium">
-                      Kết quả đo lường: {g.measurableResult}
-                    </p>
-
-                    {/* Progress & Basis + Separate Effort & Time Efficiency */}
-                    <div className="space-y-2">
-                      <div className="flex items-baseline justify-between text-xs">
-                        <div>
-                          <span className="font-bold text-slate-800">Tiến độ hoàn thành</span>
-                          <p className="text-[11px] font-semibold text-slate-600 mt-0.5">
-                            {metrics.basisText}
-                          </p>
-                        </div>
-                        <span className="text-[#E0401F] text-base font-black">{metrics.progressPercent}% hoàn thành</span>
-                      </div>
-                      <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-[#E0401F] rounded-full transition-all" 
-                          style={{ width: `${metrics.progressPercent}%` }} 
-                        />
-                      </div>
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 pt-1">
-                        <span>
-                          Công sức đã dành: <strong className="text-slate-900">{metrics.effortText}</strong> (kế hoạch kỳ: {plannedHours} giờ)
-                        </span>
-                        {metrics.timeEfficiencyPercent !== null ? (
-                          <span className={`px-2.5 py-0.5 rounded-lg font-bold border ${
-                            metrics.timeEfficiencyPercent >= 100
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                              : 'bg-amber-50 text-amber-800 border-amber-200'
-                          }`}>
-                            Hiệu suất thời gian: {metrics.timeEfficiencyPercent}% (ước lượng {metrics.estimatedDoneMinutes} phút / thực tế {metrics.actualDoneMinutes} phút)
-                          </span>
-                        ) : (
-                          <span>Cột mốc: {g.milestones.filter(m => m.status === 'completed').length}/{g.milestones.length} xong</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentTab('goals')}
+              className="px-4 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-xs transition-colors shrink-0 flex items-center gap-2"
+            >
+              <span>{t('overview.viewOverview', 'Xem Toàn cảnh')}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-
         </div>
       )}
 

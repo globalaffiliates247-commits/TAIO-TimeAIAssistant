@@ -18,6 +18,7 @@ import {
   NowTodayLine 
 } from '@/features/now';
 import { SwipeEntryCard } from '@/features/swipe';
+import { OverviewNowCard } from '@/features/overview';
 import { AlertTriangle, Clock } from 'lucide-react';
 
 export const NowTab: React.FC = () => {
@@ -102,6 +103,9 @@ export const NowTab: React.FC = () => {
 
       {/* PRD v0.3.38 Part A1: Thẻ Quẹt thẻ ngay dưới thẻ Đang làm (tự ẩn khi N = 0) */}
       <SwipeEntryCard variant="card" />
+
+      {/* PRD v0.3.38 Part B3.3: Thẻ Toàn cảnh mục tiêu trên màn Lúc này */}
+      <OverviewNowCard />
 
       {/* 4. Hai ô: "Ghi nhanh" và "Bấm giờ riêng" */}
       <NowActions />
