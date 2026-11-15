@@ -24,18 +24,20 @@ import {
   Trash2,
   AlertTriangle,
   Clock,
-  Footprints
+  Footprints,
+  Briefcase,
+  Code,
+  TrendingUp,
+  Compass
 } from 'lucide-react';
 import { startNativeLiveActivity, stopNativeLiveActivity, openNativeAppSettings } from '../features/native';
 import { isMotionTrackingEnabled, setMotionTrackingEnabled, getMotionCapability } from '@/features/motion';
 import { PROFILES } from '../data/mockData';
 import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
-import { DataImportSection } from '../features/data-transfer';
+import { DataSettingsPanel } from '../features/profile/DataSettingsPanel';
 import { AlarmSettingsSection } from '../features/alarm';
 import { MotivationSettingsSection } from '@/features/motivation';
 import { HighlightSettings } from '@/features/prefs';
-import { SyncSection } from '../features/sync/ui/SyncSection';
-import { PairSection } from '../features/sync/ui/PairSection';
 import { VersionLabel } from '@/components/header/VersionLabel';
 
 export const ProfileModal: React.FC = () => {
@@ -139,10 +141,6 @@ export const ProfileModal: React.FC = () => {
   };
 
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'community'>('profile');
-  // B27 v0.3.12: Delete all data confirmation state
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
-  const [deleteServerCopy, setDeleteServerCopy] = useState(false);
 
   if (!isProfileModalOpen) return null;
 
@@ -282,33 +280,49 @@ export const ProfileModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Profile Group Selector */}
+              {/* Profile Group Selector (Part G3: 3x2 grid of 6 clean icon tiles) */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">Nhóm hồ sơ năng suất (Onboarding Profile)</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {Object.values(PROFILES).map(p => {
-                    const isSelected = profile.id === p.id;
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
+                  {language === 'vi' ? 'Nhóm hồ sơ năng suất' : 'Productivity Profile'}
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {[
+                    { id: 'owner', labelVi: 'Chủ DN', labelEn: 'Owner', icon: Briefcase },
+                    { id: 'manager', labelVi: 'Quản lý', labelEn: 'Manager', icon: Users },
+                    { id: 'technical', labelVi: 'Kỹ thuật', labelEn: 'Technical', icon: Code },
+                    { id: 'admin', labelVi: 'Văn phòng', labelEn: 'Office', icon: FileText },
+                    { id: 'trade', labelVi: 'Bán hàng', labelEn: 'Sales', icon: TrendingUp },
+                    { id: 'freelancer', labelVi: 'Tự do', labelEn: 'Freelancer', icon: Compass },
+                  ].map(tile => {
+                    const p = PROFILES[tile.id];
+                    const isSelected = profile?.id === p?.id || profile?.id === tile.id;
+                    const IconComponent = tile.icon;
                     return (
-                      <div
-                        key={p.id}
-                        onClick={() => setProfile(p)}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                      <button
+                        key={tile.id}
+                        type="button"
+                        onClick={() => p && setProfile(p)}
+                        className={`aspect-square p-2 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900 shadow-sm'
-                            : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200 hover:text-slate-700'
+                            ? 'bg-slate-100 border-2 border-slate-700 text-slate-900 shadow-xs'
+                            : 'bg-slate-50/70 border border-slate-200/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="text-xs font-bold text-slate-800">{p.title}</h4>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#ff7556]" />}
-                        </div>
-                        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
-                          {p.description}
-                        </p>
-                      </div>
+                        <IconComponent className={`w-5 h-5 ${isSelected ? 'text-slate-900' : 'text-slate-500'}`} strokeWidth={1.75} />
+                        <span className="text-[11px] font-bold text-center leading-tight truncate w-full">
+                          {language === 'vi' ? tile.labelVi : tile.labelEn}
+                        </span>
+                      </button>
                     );
                   })}
                 </div>
+                {/* 1-line description below grid for selected profile */}
+                {profile && (
+                  <div className="mt-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 animate-in fade-in">
+                    <span className="font-bold text-slate-800">{profile.title}:</span>{' '}
+                    <span>{profile.description}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -734,175 +748,24 @@ export const ProfileModal: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {/* PRD v0.3.37 Part G1: Modular DataSettingsPanel hosted exclusively under Kết nối TAIO */}
+              <DataSettingsPanel
+                importTaioData={importTaioData}
+                exportTaioJsonV1={exportTaioJsonV1}
+                remainingSampleGoals={remainingSampleGoals}
+                deleteGoal={deleteGoal}
+                resetAllUserData={resetAllUserData}
+                setIsProfileModalOpen={setIsProfileModalOpen}
+                setExportModalOpen={setExportModalOpen}
+                language={language}
+              />
             </div>
           )}
 
-          {/* B24 v0.3.20 & B27 v0.3.12: Section "Dữ liệu" — "Nhập dữ liệu", followed by "Xóa toàn bộ dữ liệu…" as the last item */}
-          <div className="pt-5 mt-6 border-t border-slate-200 space-y-3.5">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Dữ liệu
-            </h4>
-
-            <SyncSection />
-
-            {/* B35.4 v0.3.27: Device Pairing via 6-char code */}
-            <PairSection />
-
-            <DataImportSection
-              onImport={importTaioData}
-              onExportJson={exportTaioJsonV1}
-            />
-
-            {/* v0.3.34 Part A2.1: Remaining sample data */}
-            {remainingSampleGoals && remainingSampleGoals.length > 0 && (
-              <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-900">
-                    {language === 'vi' ? 'Dữ liệu mẫu còn lại' : 'Remaining Sample Data'}
-                  </span>
-                  <span className="text-[10px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-medium">
-                    {remainingSampleGoals.length} {language === 'vi' ? 'mục tiêu mẫu' : 'sample goals'}
-                  </span>
-                </div>
-                <p className="text-[11px] text-amber-800 leading-relaxed">
-                  {language === 'vi'
-                    ? 'Các mục tiêu mẫu được giữ lại vì bạn đã chỉnh sửa hoặc có việc đang gắn vào. Bạn có thể xóa nếu không còn dùng.'
-                    : 'Sample goals retained because they were customized or have attached tasks. You can delete them if no longer needed.'}
-                </p>
-                <div className="space-y-1.5 pt-1">
-                  {remainingSampleGoals.map(g => (
-                    <div key={g.id} className="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/80 text-xs">
-                      <div className="min-w-0 pr-2">
-                        <p className="font-semibold text-slate-800 truncate">{g.name}</p>
-                        <p className="text-[10px] text-slate-500">ID: {g.id}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => deleteGoal(g.id)}
-                        className="px-2.5 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors shrink-0"
-                      >
-                        {language === 'vi' ? 'Xóa' : 'Delete'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!showDeleteConfirm ? (
-              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-red-50/60 border border-red-200">
-                <div>
-                  <p className="text-xs font-bold text-slate-900">Xóa dữ liệu cá nhân & Đặt lại từ đầu</p>
-                  <p className="text-[11px] text-slate-600">
-                    Xóa toàn bộ dữ liệu trên thiết bị này và quay lại màn hình thiết lập hồ sơ ban đầu.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDeleteConfirm(true);
-                    setDeleteConfirmText('');
-                    setDeleteServerCopy(false);
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-red-300 font-bold text-xs flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Xóa toàn bộ dữ liệu…</span>
-                </button>
-              </div>
-            ) : (
-              <div className="p-4 rounded-2xl bg-red-50/70 border border-red-300 space-y-3 animate-in fade-in">
-                <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                  <div>
-                    <h5 className="text-xs sm:text-sm font-bold text-slate-900">
-                      Xác nhận xóa toàn bộ dữ liệu cá nhân
-                    </h5>
-                    <p className="text-[11px] text-slate-700 mt-1 leading-relaxed">
-                      Các dữ liệu sẽ bị xóa trên thiết bị này: lịch ngày và kết quả công việc, việc chen ngang, Rổ công việc, Danh sách, Ma trận ưu tiên, Thói quen, Thông báo và Cài đặt giao diện. Không thể hoàn tác sau bước này.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Offer Export first */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200">
-                  <span className="text-[11px] font-medium text-slate-700">
-                    Bạn có muốn lưu bản sao Markdown trước khi xóa?
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileModalOpen(false);
-                      setExportModalOpen(true);
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 text-[11px] font-bold"
-                  >
-                    Xuất dữ liệu trước
-                  </button>
-                </div>
-
-                {/* Optional server deletion checkbox */}
-                <label className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={deleteServerCopy}
-                    onChange={(e) => setDeleteServerCopy(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded text-red-600 focus:ring-0"
-                  />
-                  <div className="text-[11px]">
-                    <span className="font-bold text-slate-900">Xóa luôn bản sao trên máy chủ</span>{' '}
-                    <span className="text-red-600 font-semibold">(không khôi phục được)</span>
-                    <p className="text-slate-500 mt-0.5">
-                      Xóa hoàn toàn dữ liệu tài khoản trên máy chủ và bản sao lưu trong vòng 30 ngày.
-                    </p>
-                  </div>
-                </label>
-
-                {/* Type XÓA to enable */}
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                    Nhập chữ <span className="font-mono font-black text-red-600">XÓA</span> để mở khóa nút xác nhận:
-                  </label>
-                  <input
-                    type="text"
-                    value={deleteConfirmText}
-                    onChange={(e) => setDeleteConfirmText(e.target.value)}
-                    placeholder="Gõ XÓA tại đây..."
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 font-semibold focus:outline-none focus:border-red-500"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-xs font-semibold"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="button"
-                    disabled={deleteConfirmText.trim().toUpperCase() !== 'XÓA'}
-                    onClick={() => {
-                      resetAllUserData(deleteServerCopy);
-                      setShowDeleteConfirm(false);
-                    }}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all ${
-                      deleteConfirmText.trim().toUpperCase() === 'XÓA'
-                        ? 'bg-red-600 hover:bg-red-700 shadow-sm cursor-pointer'
-                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                    }`}
-                  >
-                    Xác nhận xóa vĩnh viễn
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Version label at bottom of Cá nhân (Part C1.3) */}
-            <div className="pt-6 border-t border-slate-100">
-              <VersionLabel placement="inline" />
-            </div>
+          {/* Version label at bottom of modal */}
+          <div className="pt-6 border-t border-slate-100">
+            <VersionLabel placement="inline" />
           </div>
         </div>
       </div>
