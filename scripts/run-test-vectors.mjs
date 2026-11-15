@@ -4,6 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateWorkNode, rollUpNodeMinutes } from '../src/domain/workNode.ts';
 import { computeEvmPacing, computeEstimationEfficiency, extractTaskActualMinutes } from '../src/domain/goalLedger.ts';
+import { matchLinesWithStableIds } from '../src/features/sticky/model/lineMatcher.ts';
+import { hasStickyChanged } from '../src/features/sticky/model/stickyStore.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -90,6 +92,70 @@ if (fs.existsSync(goalLedgerPath)) {
         failed++;
       }
     }
+  }
+}
+
+// 3. PRD v0.3.39 Part E Tests: Sticky Line Matching & Store Loop Protection
+{
+  const oldLines = [
+    { id: 'l-1', text: '10:00 Họp nhóm 30p', done: false },
+    { id: 'l-2', text: '11:00 Viết kịch bản 60p', done: false },
+  ];
+  // Test E.1: Inserting blank line at top preserves line IDs and task association
+  const insertedTop = matchLinesWithStableIds(['', '10:00 Họp nhóm 30p', '11:00 Viết kịch bản 60p'], oldLines);
+  if (insertedTop.length === 3 && insertedTop[1].id === 'l-1' && insertedTop[2].id === 'l-2') {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part E.1 matchLinesWithStableIds top insert mismatch:`, insertedTop);
+    failed++;
+  }
+
+  // Test E.2: Editing line text preserves id
+  const editedText = matchLinesWithStableIds(['10:00 Họp nhóm 45p', '11:00 Viết kịch bản 60p'], oldLines);
+  if (editedText.length === 2 && editedText[1].id === 'l-2' && editedText[0].id === 'l-1') {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part E.2 matchLinesWithStableIds text edit mismatch:`, editedText);
+    failed++;
+  }
+
+  // Test E.3: hasStickyChanged returns false for identical content
+  const mockNote = {
+    id: 'note-1',
+    kind: 'free',
+    color: 'pink',
+    title: 'Ghi chú',
+    content: 'hello',
+    lines: [{ id: 'l-1', text: 'hello', done: false }],
+    scheduledMap: { 'l-1': 'task-1' },
+    pinned: false,
+    collapsed: false,
+    open: true,
+    lastOpen: true,
+    updatedAt: 1000,
+  };
+  const noChange = hasStickyChanged(mockNote, {
+    content: 'hello',
+    lines: [{ id: 'l-1', text: 'hello', done: false }],
+    scheduledMap: { 'l-1': 'task-1' },
+    title: 'Ghi chú',
+  });
+  if (noChange === false) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part E.3 hasStickyChanged should be false when data unchanged`);
+    failed++;
+  }
+
+  // Test E.4: hasStickyChanged returns true when content changed
+  const realChange = hasStickyChanged(mockNote, {
+    content: 'hello world',
+  });
+  if (realChange === true) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part E.4 hasStickyChanged should be true when data changed`);
+    failed++;
   }
 }
 

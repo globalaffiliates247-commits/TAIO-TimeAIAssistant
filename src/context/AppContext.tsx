@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   saveDurableState,
   loadDurableState,
@@ -1293,7 +1293,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCelebrationMsg('Đã tạo mã token bảo mật mới. Các link cũ đã được vô hiệu hóa an toàn!');
   };
 
-  const addDailyCardItem = (item: {
+  const addDailyCardItem = useCallback((item: {
     text: string;
     goalId?: string;
     goalName?: string;
@@ -1338,13 +1338,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
     return newItem.id;
-  };
+  }, [goals, selectedCardDate]);
 
-  const updateDailyCardItem = (id: string, patch: Partial<DailyCardItem>) => {
+  const updateDailyCardItem = useCallback((id: string, patch: Partial<DailyCardItem>) => {
     setDailyCardItems(prev => {
       const next = prev.map(it => {
         if (it.id !== id) return it;
-        const merged: DailyCardItem = { ...it, ...patch, updatedAt: Date.now() };
+        // PRD v0.3.39 Part E2.5: Gộp extra sâu theo từng khóa, không xóa các trường khác
+        const mergedExtra = patch.extra !== undefined
+          ? { ...(it.extra || {}), ...patch.extra }
+          : it.extra;
+        const merged: DailyCardItem = { ...it, ...patch, extra: mergedExtra, updatedAt: Date.now() };
         // PRD v0.3.36 Part A4: Việc xong phải luôn có end
         if (merged.status === 'done' && merged.start && !merged.end) {
           const startM = timeToMinutes(merged.start);
@@ -1359,7 +1363,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       saveDurableState('dailyCardItems', next, Date.now());
       return next;
     });
-  };
+  }, []);
 
   const removeDailyCardItem = (id: string) => {
     recordTombstone(id);

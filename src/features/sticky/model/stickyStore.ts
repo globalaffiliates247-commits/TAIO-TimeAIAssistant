@@ -175,11 +175,68 @@ export function setActiveSticky(id: string) {
   commit({ ...state, activeId: id });
 }
 
+function isLinesEqual(a: StickyNote['lines'] = [], b: StickyNote['lines'] = []): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const la = a[i];
+    const lb = b[i];
+    if (la.id !== lb.id || la.text !== lb.text || Boolean(la.done) !== Boolean(lb.done)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isMapEqual(a?: Record<string, string>, b?: Record<string, string>): boolean {
+  if (a === b) return true;
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  for (const k of keysA) {
+    if (a[k] !== b[k]) return false;
+  }
+  return true;
+}
+
+export function hasStickyChanged(existing: StickyNote, patch: Partial<StickyNote>): boolean {
+  for (const key of Object.keys(patch) as (keyof StickyNote)[]) {
+    if (key === 'updatedAt') continue;
+    if (key === 'lines') {
+      if (!isLinesEqual(existing.lines, patch.lines)) return true;
+    } else if (key === 'scheduledMap') {
+      if (!isMapEqual(existing.scheduledMap, patch.scheduledMap)) return true;
+    } else {
+      if (existing[key] !== patch[key]) return true;
+    }
+  }
+  return false;
+}
+
+// PRD v0.3.39 Part E2.7: Cầu chì chống vòng lặp (circuit breaker)
+const recentWriteTimes: number[] = [];
+
 export function updateSticky(id: string, patch: Partial<StickyNote>) {
   load();
+  const existing = state.notes.find(n => n.id === id);
+  if (!existing) return;
+  // PRD v0.3.39 Part E2.3: Kho từ chối ghi vô nghĩa nếu patch không làm đổi giá trị
+  if (!hasStickyChanged(existing, patch)) return;
+
+  const now = Date.now();
+  while (recentWriteTimes.length > 0 && now - recentWriteTimes[0] > 1000) {
+    recentWriteTimes.shift();
+  }
+  if (recentWriteTimes.length >= 20) {
+    console.error(`[stickyStore] Vòng lặp ghi tờ ghi chú bị ngắt (circuit breaker tripped): noteId=${id}`);
+    return;
+  }
+  recentWriteTimes.push(now);
+
   commit({
     ...state,
-    notes: state.notes.map(n => (n.id === id ? { ...n, ...patch, updatedAt: Date.now() } : n)),
+    notes: state.notes.map(n => (n.id === id ? { ...n, ...patch, updatedAt: now } : n)),
   });
 }
 

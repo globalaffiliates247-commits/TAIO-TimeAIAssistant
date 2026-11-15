@@ -9,6 +9,7 @@ import { MotivationSticker } from '@/features/motivation';
 import { parseTimedText, toMins, toTime } from '../model/timeline';
 import { commitQuickLine } from '@/features/tasks';
 import { getDeviceCalendarDate } from '@/core/clock';
+import { matchLinesWithStableIds } from '../model/lineMatcher';
 
 export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -21,6 +22,18 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const textRef = useRef(text);
   textRef.current = text;
 
+  // PRD v0.3.39 Part E2.1-E2.2: Refs for stable persistNow identity across renders
+  const noteRef = useRef(note);
+  noteRef.current = note;
+  const addDailyCardItemRef = useRef(addDailyCardItem);
+  addDailyCardItemRef.current = addDailyCardItem;
+  const updateDailyCardItemRef = useRef(updateDailyCardItem);
+  updateDailyCardItemRef.current = updateDailyCardItem;
+  const goalsRef = useRef(goals);
+  goalsRef.current = goals;
+
+  const lastSavedTextRef = useRef(initialText);
+
   const [saved, setSaved] = useState(true);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const scheduledMapRef = useRef<Record<string, string>>(note.scheduledMap || {});
@@ -30,6 +43,7 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     if (note.content !== undefined && note.content !== textRef.current) {
       setText(note.content);
       textRef.current = note.content;
+      lastSavedTextRef.current = note.content;
       setSaved(true);
     }
   }, [note.content]);
@@ -46,39 +60,54 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     autoResize();
   }, [text]);
 
-  // Core persist function (Rule E2.3)
+  // Core persist function (PRD v0.3.39 Part E2.1 & E2.2: Stable identity, only save on change)
   const persistNow = useCallback((contentToSave: string) => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
 
+    // PRD v0.3.39 Part E2.2: Chỉ ghi khi có thay đổi thực sự
+    if (contentToSave === lastSavedTextRef.current) {
+      return;
+    }
+
     const today = getDeviceCalendarDate();
     const rawLines = contentToSave.split('\n');
+    const matchedLines = matchLinesWithStableIds(rawLines, noteRef.current.lines);
     const updatedScheduledMap = { ...scheduledMapRef.current };
 
     // 1. Process lines starting with time (e.g. "15:30 gọi anh Minh")
-    rawLines.forEach((line, idx) => {
-      const trimmed = line.trim();
+    matchedLines.forEach((line, idx) => {
+      const trimmed = line.text.trim();
       if (!trimmed) return;
 
       const parsed = parseTimedText(trimmed);
       if (parsed.time) {
-        const lineKey = `line_${idx}`;
-        const existingTaskId = updatedScheduledMap[lineKey];
+        // PRD v0.3.39 Part E2.6: Liên kết dòng ↔ việc bằng line.id thay vì line_${idx}
+        const lineKey = line.id;
+        const legacyKey = `line_${idx}`;
+        const existingTaskId = updatedScheduledMap[lineKey] || updatedScheduledMap[legacyKey];
 
         const dur = parsed.durationMins || 30;
         const endTime = toTime(toMins(parsed.time) + dur);
 
         if (existingTaskId) {
-          updateDailyCardItem(existingTaskId, {
+          updateDailyCardItemRef.current(existingTaskId, {
             text: parsed.rest || 'Công việc không tên',
             start: parsed.time,
             end: endTime,
             extra: { estimateMins: dur },
           });
+          if (updatedScheduledMap[legacyKey]) {
+            delete updatedScheduledMap[legacyKey];
+          }
+          updatedScheduledMap[lineKey] = existingTaskId;
         } else {
-          const createdId = commitQuickLine(trimmed, today, { addDailyCardItem, goals });
+          const createdId = commitQuickLine(trimmed, today, {
+            addDailyCardItem: addDailyCardItemRef.current,
+            goals: goalsRef.current,
+          });
           if (createdId) {
             updatedScheduledMap[lineKey] = createdId;
           }
@@ -88,25 +117,19 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
     scheduledMapRef.current = updatedScheduledMap;
 
-    // 2. Persist to sticky store
-    const lines = rawLines.map((l, i) => ({
-      id: note.lines[i]?.id || `line-${Date.now()}-${i}`,
-      text: l,
-      done: note.lines[i]?.done || false,
-    }));
-
     const firstLineTrimmed = rawLines.find(l => l.trim())?.trim() || '';
     const title = firstLineTrimmed.slice(0, 40) || 'Ghi chú';
 
     updateSticky(note.id, {
       content: contentToSave,
-      lines,
+      lines: matchedLines,
       title,
       scheduledMap: updatedScheduledMap,
     });
 
+    lastSavedTextRef.current = contentToSave;
     setSaved(true);
-  }, [note.id, note.lines, addDailyCardItem, updateDailyCardItem, goals]);
+  }, [note.id]);
 
   // Handle typing with 2-second debounce (Rule E2.3)
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -180,10 +203,12 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     }
   };
 
-  // Immediate save on unmount, page hide, visibility change, beforeunload (Rule E2.3)
+  // Immediate save on unmount, page hide, visibility change, beforeunload (PRD v0.3.39 Part E2.1 & E2.2)
   useEffect(() => {
     const handleImmediateFlush = () => {
-      persistNow(textRef.current);
+      if (textRef.current !== lastSavedTextRef.current) {
+        persistNow(textRef.current);
+      }
     };
 
     const handleVisibility = () => {
@@ -202,7 +227,7 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       window.removeEventListener('beforeunload', handleImmediateFlush);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [persistNow]);
+  }, [note.id, persistNow]);
 
   return (
     <div className="flex flex-col gap-1.5 text-[15px] leading-snug min-h-full" style={{ color: c.ink }}>
