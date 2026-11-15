@@ -49,6 +49,48 @@
     ringCircle.style.strokeDasharray = `${ringCircumference} ${ringCircumference}`;
   }
 
+  // Dynamic Ring Geometry (PRD v0.3.38 Part E: responsive ring without edge clipping)
+  const ringWrapper = document.getElementById('ringWrapper');
+  const motivationFooter = document.getElementById('motivationFooter');
+
+  function updateRingDimensions() {
+    if (!ringView || ringView.style.display === 'none') return;
+    const winW = window.innerWidth || document.documentElement.clientWidth;
+    const winH = window.innerHeight || document.documentElement.clientHeight;
+
+    const headerH = 22;
+    const footerH = (motivationFooter && motivationFooter.style.display !== 'none') ? 16 : 0;
+    const titleH = 18;
+    const bottomBarH = (ringBottomBar && ringBottomBar.style.display !== 'none') ? 28 : 0;
+    const overheadH = headerH + footerH + titleH + bottomBarH + 16;
+
+    const availH = Math.max(48, winH - overheadH);
+    const availW = Math.max(48, winW - 24);
+    const ringSize = Math.max(50, Math.min(availH, availW, 130));
+
+    if (ringWrapper) {
+      ringWrapper.style.width = `${ringSize}px`;
+      ringWrapper.style.height = `${ringSize}px`;
+    }
+
+    if (ringDigits) {
+      const dSize = Math.max(12, Math.min(20, Math.floor(ringSize * 0.22)));
+      ringDigits.style.fontSize = `${dSize}px`;
+    }
+
+    if (ringSubText) {
+      if (ringSize < 65) {
+        ringSubText.style.display = 'none';
+      } else {
+        ringSubText.style.display = 'block';
+        const sSize = Math.max(7.5, Math.min(9.5, Math.floor(ringSize * 0.1)));
+        ringSubText.style.fontSize = `${sSize}px`;
+      }
+    }
+  }
+
+  window.addEventListener('resize', updateRingDimensions);
+
   // Load persisted view mode (bar vs ring)
   let viewMode = 'bar';
   try {
@@ -63,6 +105,7 @@
       barView.style.display = 'none';
       ringView.style.display = 'flex';
       btnViewMode.title = currentLang === 'en' ? 'Switch to Bar view (V)' : 'Đổi sang kiểu Thanh (V)';
+      updateRingDimensions();
     } else {
       ringView.style.display = 'none';
       barView.style.display = 'flex';
@@ -270,7 +313,7 @@
         sublineStr = currentLang === 'vi' ? 'tới việc kế tiếp' : 'until next';
       } else {
         digitsStr = '0g00';
-        sublineStr = currentLang === 'vi' ? '/ 9g thời gian thức' : '/ 9h awake';
+        sublineStr = currentLang === 'vi' ? '9g thức' : '9h awake';
       }
       barDigits.innerText = digitsStr;
       ringDigits.innerText = digitsStr;

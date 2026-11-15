@@ -91,16 +91,15 @@ body {
 }
 
 .task-title {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #1e293b;
   text-align: center;
   line-height: 1.25;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
-  max-width: 100%;
+  text-overflow: ellipsis;
+  max-width: 92%;
   cursor: pointer;
   transition: color 0.15s;
 }
@@ -179,21 +178,23 @@ body {
   font-weight: 700;
 }
 
-/* Ring Display */
+/* Ring Display (PRD v0.3.38 Part E: responsive ring geometry without clipping) */
 .ring-wrapper {
   position: relative;
-  width: 110px;
-  height: 110px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin: 0 auto;
 }
 
 .ring-svg {
   transform: rotate(-90deg);
-  width: 110px;
-  height: 110px;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .ring-track {
@@ -214,21 +215,29 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 2px;
+  pointer-events: none;
 }
 
 .ring-digits {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', monospace;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -0.5px;
+  line-height: 1.15;
 }
 
 .ring-sub {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 600;
   color: #64748b;
-  margin-top: 1px;
+  margin-top: 2px;
+  line-height: 1.1;
+  max-width: 85%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Bottom Actions */
