@@ -8,6 +8,7 @@ import { DataImportSection } from '../data-transfer';
 import { Goal } from '@/types';
 import { TaioImportSummary } from '../data-transfer/model/taioExportV1';
 import { useT } from '@/i18n/useT';
+import { RecentErrorLogSection } from './RecentErrorLogSection';
 
 interface DataSettingsPanelProps {
   importTaioData: (rawJson: string, mode: 'merge' | 'replace') => TaioImportSummary | null;
@@ -94,7 +95,10 @@ export const DataSettingsPanel: React.FC<DataSettingsPanelProps> = ({
         </div>
       )}
 
-      {/* 4. Reset & Data Wipe (Rule G1.2: luôn là mục cuối cùng) */}
+      {/* 4. Recent Errors & Lag Log (PRD v0.3.39 Part A2.2 & A2.4) */}
+      <RecentErrorLogSection language={language} />
+
+      {/* 5. Reset & Data Wipe (Rule G1.2: luôn là mục cuối cùng) */}
       {!showDeleteConfirm ? (
         <div className="flex items-center justify-between p-3.5 rounded-2xl bg-red-50/60 border border-red-200">
           <div>

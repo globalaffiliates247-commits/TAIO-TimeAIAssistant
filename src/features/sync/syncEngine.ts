@@ -12,6 +12,12 @@ export interface SyncDeps {
 }
 
 let running = false;
+let consecutiveSyncErrors = 0;
+let lastNotifiedSyncErrorDate = '';
+
+export function isSyncRunning(): boolean {
+  return running;
+}
 
 /** Returns true when remote data was applied (caller should run again shortly to push the merged state). */
 export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
@@ -24,9 +30,14 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
   let applied = false;
   let receivedJournalCount = 0;
   let isMismatched = false;
+  const startTime = Date.now();
+
   try {
+    // PRD v0.3.39 Part A2.4: Chỉ dựng gói dữ liệu một lần và dùng lại cho cả lượt đồng bộ
+    const localPayload = deps.getPayload();
+
     // 0. Record local edits made since the last round (their time = now), so a pull cannot overwrite them
-    if (!s.joinPending) stampPayload(deps.getPayload());
+    if (!s.joinPending) stampPayload(localPayload);
 
     // 1. Pull
     const rows = (await pullSnapshots(s.spaceId, s.deviceId)) || [];
@@ -63,13 +74,12 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
       devices: rows.map(r => ({ id: r.device_id, name: r.device_name || 'Thiết bị', ts: r.client_updated_at })),
     });
 
-    const currentLocalPayload = deps.getPayload();
-    const sentJournalCount = currentLocalPayload.journalItems?.length || 0;
+    const sentJournalCount = localPayload.journalItems?.length || 0;
 
     // Check verification hash (PRD v0.3.36 Part F2.7)
-    if (latestRemoteSummary && currentLocalPayload.todayJournalSummary) {
-      if (latestRemoteSummary.date === currentLocalPayload.todayJournalSummary.date) {
-        if (latestRemoteSummary.hash !== currentLocalPayload.todayJournalSummary.hash) {
+    if (latestRemoteSummary && localPayload.todayJournalSummary) {
+      if (latestRemoteSummary.date === localPayload.todayJournalSummary.date) {
+        if (latestRemoteSummary.hash !== localPayload.todayJournalSummary.hash) {
           isMismatched = true;
         }
       }
@@ -77,7 +87,7 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
 
     // 2. Push (skipped right after applying remote data: React state updates on the next render)
     if (!applied) {
-      const stamped = stampPayload(currentLocalPayload);
+      const stamped = stampPayload(localPayload);
       const fp = payloadFingerprint(stamped);
       if (fp !== getSyncSettings().lastPushHash) {
         const { iv, ciphertext } = await encryptJson(s.code, stamped);
@@ -85,6 +95,8 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
         updateSyncSettings({ lastPushHash: fp });
       }
     }
+
+    consecutiveSyncErrors = 0;
     setSyncStatus({
       state: 'idle',
       lastSyncAt: Date.now(),
@@ -94,8 +106,23 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    const offline = /Failed to fetch|NetworkError|Load failed/i.test(msg);
+    const offline = /Failed to fetch|NetworkError|Load failed|timeout/i.test(msg);
     const notInstalled = /PGRST202|404|Could not find the function/i.test(msg);
+
+    // PRD v0.3.39 Part A2.3: Hộp thông báo lỗi đồng bộ chỉ hiện khi lỗi không phải mất mạng và 3 lượt liên tiếp đều lỗi (tối đa 1 lần/ngày)
+    if (!offline) {
+      consecutiveSyncErrors++;
+      if (consecutiveSyncErrors >= 3) {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        if (lastNotifiedSyncErrorDate !== todayStr) {
+          lastNotifiedSyncErrorDate = todayStr;
+          console.warn(`[syncEngine] Lỗi đồng bộ không phải mất mạng (3 lượt liên tiếp): ${msg}`);
+        }
+      }
+    } else {
+      consecutiveSyncErrors = 0;
+    }
+
     setSyncStatus({
       state: 'error',
       message: offline ? 'Không có mạng. App sẽ thử lại sau.'
@@ -103,6 +130,7 @@ export async function runSyncRound(deps: SyncDeps): Promise<boolean> {
         : msg,
     });
   } finally {
+    // Luôn nhả cờ running
     running = false;
   }
   return applied;

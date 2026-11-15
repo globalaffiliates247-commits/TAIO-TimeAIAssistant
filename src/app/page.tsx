@@ -30,6 +30,8 @@ import { ReminderQuestionsModal } from '../components/ReminderQuestionsModal';
 import { ActiveCaptureModal } from '../components/ActiveCaptureModal';
 import { useLockScreenClock } from '../features/quick-entry';
 import { Sparkles, X, Smartphone, AlertCircle } from 'lucide-react';
+import { TabErrorBoundary } from '../components/TabErrorBoundary';
+import { initGlobalErrorListeners, setActiveTabForLogging } from '../core/errorLogger';
 
 const OrientationHint: React.FC = () => {
   const [dismissed, setDismissed] = React.useState(false);
@@ -65,8 +67,17 @@ const MainAppContent: React.FC = () => {
     dismissToast,
     isOnboarded,
     hasServerBackupToRestore,
-    resolveServerBackupChoice
+    resolveServerBackupChoice,
+    language
   } = useApp();
+
+  React.useEffect(() => {
+    initGlobalErrorListeners();
+  }, []);
+
+  React.useEffect(() => {
+    setActiveTabForLogging(currentTab);
+  }, [currentTab]);
   const isCool = palette === 'cool';
   const touchStartYRef = React.useRef<number | null>(null);
 
@@ -232,11 +243,32 @@ const MainAppContent: React.FC = () => {
         <OrientationHint />
       )}
 
-      {currentTab === 'now' && <NowTab />}
-      {currentTab === 'plan' && <PlanTab />}
-      {(currentTab === 'achievements' || (currentTab as any) === 'efficiency') && <AchievementsTab />}
-      {currentTab === 'goals' && <GoalsTab />}
-      {currentTab === 'admin' && <AdminPortal />}
+      {/* PRD v0.3.39 Part A2.1: Wrap each tab in TabErrorBoundary so one tab error does not crash the entire app */}
+      {currentTab === 'now' && (
+        <TabErrorBoundary tabName="now" language={language}>
+          <NowTab />
+        </TabErrorBoundary>
+      )}
+      {currentTab === 'plan' && (
+        <TabErrorBoundary tabName="plan" language={language}>
+          <PlanTab />
+        </TabErrorBoundary>
+      )}
+      {(currentTab === 'achievements' || (currentTab as any) === 'efficiency') && (
+        <TabErrorBoundary tabName="achievements" language={language}>
+          <AchievementsTab />
+        </TabErrorBoundary>
+      )}
+      {currentTab === 'goals' && (
+        <TabErrorBoundary tabName="goals" language={language}>
+          <GoalsTab />
+        </TabErrorBoundary>
+      )}
+      {currentTab === 'admin' && (
+        <TabErrorBoundary tabName="admin" language={language}>
+          <AdminPortal />
+        </TabErrorBoundary>
+      )}
     </AppShell>
   );
 };

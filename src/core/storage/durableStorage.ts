@@ -250,3 +250,20 @@ export function mergeCollectionsByUpdatedAt<T extends { id: string; updatedAt?: 
 
   return orderIds.map(id => mergedMap.get(id)!).filter(Boolean);
 }
+
+export function getStorageItemSync<T>(key: string, defaultValue: T): T {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const raw = window.localStorage.getItem(LS_PREFIX + key);
+    return raw ? JSON.parse(raw) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+export function setStorageItemSync<T>(key: string, value: T): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(LS_PREFIX + key, JSON.stringify(value));
+  } catch {}
+}

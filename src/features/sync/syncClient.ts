@@ -12,13 +12,29 @@ export interface RemoteSnapshot {
 async function rpc<T>(fn: string, body: Record<string, unknown>): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json', apikey: SYNC_KEY };
   if (SYNC_KEY.startsWith('eyJ')) headers.Authorization = `Bearer ${SYNC_KEY}`; // legacy anon JWT
-  const res = await fetch(`${SYNC_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(body) });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`${res.status} ${text.slice(0, 200)}`);
+
+  // PRD v0.3.39 Part A2.3: 20-second network timeout via AbortController
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort(new Error('Sync timeout: request took longer than 20s'));
+  }, 20000);
+
+  try {
+    const res = await fetch(`${SYNC_URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`${res.status} ${text.slice(0, 200)}`);
+    }
+    const text = await res.text();
+    return (text ? JSON.parse(text) : null) as T;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  const text = await res.text();
-  return (text ? JSON.parse(text) : null) as T;
 }
 
 export const pushSnapshot = (p: { space: string; device: string; name: string; iv: string; cipher: string; ts: number }) =>
