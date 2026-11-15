@@ -20,7 +20,7 @@ import { useRowSelection } from './useRowSelection';
 import { updateScheduleEntry } from '@/features/tasks';
 import { getPreviousDay } from '@/features/dayclose';
 import { TemplateScheduleModal } from '@/features/schedule-template';
-import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight, ChevronRight, Plus, Check } from 'lucide-react';
+import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight, ChevronRight, Plus, Check, GripVertical } from 'lucide-react';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -161,6 +161,291 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [overlapTargetId, setOverlapTargetId] = useState<string | null>(null);
   const [hashFilter, setHashFilter] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // PRD v0.3.37 Part D: Drag & Drop state
+  const [hoveredHandleItemId, setHoveredHandleItemId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [dragOverTarget, setDragOverTarget] = useState<{
+    type: 'gap' | 'task' | 'flex';
+    time?: string;
+    targetId?: string;
+  } | null>(null);
+  const [keyboardShiftState, setKeyboardShiftState] = useState<{
+    itemId: string;
+    currentStartMins: number;
+    initialStartMins: number;
+    durationMins: number;
+  } | null>(null);
+
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleRowMouseEnter = (id: string) => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => {
+      setHoveredHandleItemId(id);
+    }, 600);
+  };
+
+  const handleRowMouseLeave = (id: string) => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    if (hoveredHandleItemId === id && !isDragging) {
+      setHoveredHandleItemId(null);
+    }
+  };
+
+  // PRD v0.3.37 Part D2: Unified moveItemToTime for drag-and-drop, Play, "Xếp vào", and time shifting
+  const moveItemToTime = (
+    itemId: string,
+    newStart?: string, // undefined = unschedule (to "Chưa xếp giờ")
+    options?: {
+      fitGap?: boolean;
+      mode?: 'parallel' | 'replace' | 'gap';
+      targetBlockId?: string;
+      shiftAfter?: boolean;
+      targetDay?: string;
+      customDuration?: number;
+      isBatch?: boolean;
+    }
+  ) => {
+    // 1. If dropping onto another day
+    if (options?.targetDay && options.targetDay !== day) {
+      const it = items.find(i => i.id === itemId);
+      if (!it) return;
+      const saved = { ...it };
+      updateDailyCardItem(itemId, {
+        date: options.targetDay,
+        start: newStart,
+        end: newStart && it.end && it.start ? toTime(toMins(newStart) + (toMins(it.end) - toMins(it.start))) : undefined,
+      });
+      showToast?.(
+        language === 'vi' ? `Đã chuyển sang ngày ${options.targetDay}` : `Moved to ${options.targetDay}`,
+        () => {
+          updateDailyCardItem(itemId, { date: saved.date, start: saved.start, end: saved.end });
+        },
+        'confirmation',
+        language === 'vi' ? 'Hoàn tác' : 'Undo'
+      );
+      return;
+    }
+
+    // 2. Unschedule (Drop into "Chưa xếp giờ")
+    if (!newStart) {
+      const it = items.find(i => i.id === itemId);
+      if (!it) return;
+      const saved = { ...it };
+      const newExtra = { ...(it.extra as Record<string, unknown> || {}) };
+      delete newExtra.parallelOf;
+      const dur = durationOf(it);
+      if (dur) newExtra.estimateMins = dur;
+
+      updateDailyCardItem(itemId, {
+        start: undefined,
+        end: undefined,
+        extra: newExtra,
+      });
+      if (isToday) {
+        updateScheduleEntry(itemId, {
+          startTime: '',
+          endTime: '',
+          extra: newExtra,
+        }, { updateDailyCardItem, setBlocks, dailyCardItems });
+      }
+
+      showToast?.(
+        language === 'vi' ? `Đã chuyển "${it.text}" về Chưa xếp giờ` : `Moved "${it.text}" to unscheduled`,
+        () => {
+          updateDailyCardItem(itemId, {
+            start: saved.start,
+            end: saved.end,
+            extra: saved.extra,
+          });
+          if (isToday && saved.start && saved.end) {
+            updateScheduleEntry(itemId, {
+              startTime: saved.start,
+              endTime: saved.end,
+              extra: saved.extra,
+            }, { updateDailyCardItem, setBlocks, dailyCardItems });
+          }
+        },
+        'confirmation',
+        language === 'vi' ? 'Hoàn tác' : 'Undo'
+      );
+      return;
+    }
+
+    // 3. Moving to a specific time
+    const it = items.find(i => i.id === itemId);
+    if (!it) return;
+    const saved = { ...it };
+
+    // Duration calculation
+    let dur = options?.customDuration || durationOf(it) || (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined || 30;
+    const newStartMins = toMins(newStart);
+    let newEndMins = Math.min(23 * 60 + 59, newStartMins + dur);
+
+    // If options.fitGap and gap exists, fit within gap
+    if (options?.fitGap) {
+      const matchingGap = gaps.find(g => g.start === newStart);
+      if (matchingGap && matchingGap.mins > 0 && dur > matchingGap.mins) {
+        dur = matchingGap.mins;
+        newEndMins = newStartMins + dur;
+      }
+    }
+
+    const newEndStr = toTime(newEndMins);
+    const newExtra = { ...(it.extra as Record<string, unknown> || {}) };
+
+    // Check if target is another task (Parallel by default as per v0.3.37 Part D2.3)
+    if (options?.targetBlockId) {
+      const target = timed.find(t => t.id === options.targetBlockId);
+      if (target && target.id !== it.id) {
+        newExtra.parallelOf = target.id;
+        const targetStart = target.start || newStart;
+        const targetStartMins = toMins(targetStart);
+        const pEndMins = Math.min(23 * 60 + 59, targetStartMins + dur);
+        const pEndStr = toTime(pEndMins);
+
+        updateDailyCardItem(itemId, {
+          start: targetStart,
+          end: pEndStr,
+          extra: newExtra,
+        });
+        if (isToday) {
+          updateScheduleEntry(itemId, {
+            startTime: targetStart,
+            endTime: pEndStr,
+            extra: newExtra,
+          }, { updateDailyCardItem, setBlocks, dailyCardItems });
+        }
+
+        showToast?.(
+          language === 'vi'
+            ? `Đã xếp song song với "${target.text}" (${targetStart}–${pEndStr})`
+            : `Scheduled parallel with "${target.text}" (${targetStart}–${pEndStr})`,
+          () => {
+            updateDailyCardItem(itemId, {
+              start: saved.start,
+              end: saved.end,
+              extra: saved.extra,
+            });
+            if (isToday && saved.start && saved.end) {
+              updateScheduleEntry(itemId, {
+                startTime: saved.start,
+                endTime: saved.end,
+                extra: saved.extra,
+              }, { updateDailyCardItem, setBlocks, dailyCardItems });
+            }
+          },
+          'confirmation',
+          language === 'vi' ? 'Hoàn tác' : 'Undo'
+        );
+        return;
+      }
+    }
+
+    // Normal move to time (Gap or empty space)
+    delete newExtra.parallelOf;
+    updateDailyCardItem(itemId, {
+      start: newStart,
+      end: newEndStr,
+      extra: newExtra,
+    });
+    if (isToday) {
+      updateScheduleEntry(itemId, {
+        startTime: newStart,
+        endTime: newEndStr,
+        extra: newExtra,
+      }, { updateDailyCardItem, setBlocks, dailyCardItems });
+    }
+
+    // Check auto-shift subsequent tasks
+    const shouldShift = options?.shiftAfter ?? autoShiftAfter;
+    const oldStartMins = it.start ? toMins(it.start) : null;
+    const delta = oldStartMins !== null ? newStartMins - oldStartMins : 0;
+
+    const shiftedSnapshots: { id: string; start?: string; end?: string }[] = [];
+
+    if (shouldShift && oldStartMins !== null && delta !== 0) {
+      const subsequentTasks = timed.filter(t => 
+        t.id !== it.id && 
+        t.start && 
+        toMins(t.start) > oldStartMins &&
+        !t.isTemplateBlock &&
+        !boundIds.has(t.id)
+      );
+
+      for (const subTask of subsequentTasks) {
+        if (!subTask.start) continue;
+        shiftedSnapshots.push({ id: subTask.id, start: subTask.start, end: subTask.end });
+        const subStartMins = toMins(subTask.start) + delta;
+        const subDur = durationOf(subTask) || 30;
+        const clampedStartMins = Math.max(0, Math.min(23 * 60 + 30, subStartMins));
+        const clampedEndMins = Math.min(23 * 60 + 59, clampedStartMins + subDur);
+        const nextStartStr = toTime(clampedStartMins);
+        const nextEndStr = toTime(clampedEndMins);
+        updateDailyCardItem(subTask.id, {
+          start: nextStartStr,
+          end: nextEndStr,
+        });
+        if (isToday) {
+          updateScheduleEntry(subTask.id, {
+            startTime: nextStartStr,
+            endTime: nextEndStr,
+          }, { updateDailyCardItem, setBlocks, dailyCardItems });
+        }
+      }
+    }
+
+    if (!options?.isBatch) {
+      showToast?.(
+        language === 'vi'
+          ? `Đã chuyển sang ${newStart}–${newEndStr}`
+          : `Moved to ${newStart}–${newEndStr}`,
+        () => {
+          updateDailyCardItem(itemId, {
+            start: saved.start,
+            end: saved.end,
+            extra: saved.extra,
+          });
+          if (isToday && saved.start && saved.end) {
+            updateScheduleEntry(itemId, {
+              startTime: saved.start,
+              endTime: saved.end,
+              extra: saved.extra,
+            }, { updateDailyCardItem, setBlocks, dailyCardItems });
+          }
+          // restore any shifted tasks
+          for (const s of shiftedSnapshots) {
+            updateDailyCardItem(s.id, { start: s.start, end: s.end });
+            if (isToday && s.start && s.end) {
+              updateScheduleEntry(s.id, { startTime: s.start, endTime: s.end }, { updateDailyCardItem, setBlocks, dailyCardItems });
+            }
+          }
+        },
+        'confirmation',
+        language === 'vi' ? 'Hoàn tác' : 'Undo'
+      );
+    }
+  };
+
+  // Drag start/end helpers
+  const handleDragStart = (id: string, e: React.DragEvent) => {
+    setIsDragging(true);
+    setDraggedItemId(id);
+    e.dataTransfer.setData('text/plain', id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    setDraggedItemId(null);
+    setDragOverTarget(null);
+    setHoveredHandleItemId(null);
+  };
 
   // PRD v0.3.33 Part F2.2: Parallel and shift actions for overlapping tasks
   const handleMakeParallel = (targetItem: DailyCardItem) => {
@@ -352,6 +637,99 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     },
   });
 
+  const handlePerformDrop = (newStart?: string, options?: { fitGap?: boolean; targetBlockId?: string }) => {
+    if (!draggedItemId) return;
+
+    // Check if dragging multi-select
+    if (selectedIds.has(draggedItemId) && selectedIds.size > 1) {
+      const selectedList = items.filter(i => selectedIds.has(i.id));
+      const anchor = selectedList.find(i => i.id === draggedItemId) || selectedList[0];
+      const anchorStartMins = anchor.start ? toMins(anchor.start) : nowMins;
+      const targetStartMins = newStart ? toMins(newStart) : nowMins;
+      const delta = targetStartMins - anchorStartMins;
+
+      selectedList.forEach((it, idx) => {
+        if (!newStart) {
+          moveItemToTime(it.id, undefined, { isBatch: true });
+        } else {
+          const itStartMins = it.start ? toMins(it.start) + delta : targetStartMins + idx * 30;
+          const clamped = Math.max(0, Math.min(23 * 60 + 30, itStartMins));
+          moveItemToTime(it.id, toTime(clamped), {
+            fitGap: options?.fitGap,
+            targetBlockId: options?.targetBlockId,
+            isBatch: true,
+          });
+        }
+      });
+
+      showToast?.(
+        language === 'vi' ? `Đã dời ${selectedList.length} việc` : `Moved ${selectedList.length} tasks`,
+        undefined,
+        'confirmation'
+      );
+    } else {
+      moveItemToTime(draggedItemId, newStart, {
+        fitGap: options?.fitGap,
+        targetBlockId: options?.targetBlockId,
+      });
+    }
+
+    handleDragEnd();
+  };
+
+  // Keyboard navigation for shifting time (Requirement D2.9)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+
+      if (e.code === 'Space' && selectedIds.size > 0 && !keyboardShiftState) {
+        const firstSelectedId = Array.from(selectedIds)[0];
+        const it = items.find(i => i.id === firstSelectedId);
+        if (it && it.start) {
+          e.preventDefault();
+          const sMins = toMins(it.start);
+          setKeyboardShiftState({
+            itemId: it.id,
+            currentStartMins: sMins,
+            initialStartMins: sMins,
+            durationMins: durationOf(it) || 30,
+          });
+          showToast?.(
+            language === 'vi' ? 'Dời giờ: Phím Lên/Xuống để chỉnh, Enter để chốt, Esc để hủy' : 'Shift time: Arrow keys to adjust, Enter to drop, Esc to cancel',
+            undefined,
+            'confirmation'
+          );
+        }
+      } else if (keyboardShiftState) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setKeyboardShiftState(prev => prev ? {
+            ...prev,
+            currentStartMins: Math.max(0, prev.currentStartMins - 15),
+          } : null);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setKeyboardShiftState(prev => prev ? {
+            ...prev,
+            currentStartMins: Math.min(23 * 60 + 30, prev.currentStartMins + 15),
+          } : null);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const targetTime = toTime(keyboardShiftState.currentStartMins);
+          moveItemToTime(keyboardShiftState.itemId, targetTime);
+          setKeyboardShiftState(null);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          setKeyboardShiftState(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIds, items, keyboardShiftState, language, showToast]);
+
   const handlePasteMultiLine = (e: React.ClipboardEvent<HTMLInputElement>, isFlex: boolean = false) => {
     const pasted = e.clipboardData.getData('text');
     if (pasted && pasted.includes('\n')) {
@@ -368,8 +746,10 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
   const handleTouchStart = (id: string) => {
     touchTimerRef.current = setTimeout(() => {
+      try { navigator.vibrate?.(40); } catch {}
+      setHoveredHandleItemId(id);
       selectRow(id, false, true);
-    }, 400);
+    }, 600);
   };
   const handleTouchEnd = () => {
     if (touchTimerRef.current) {
@@ -810,15 +1190,39 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         if (sug) taken.add(sug.id);
         const isNowRunning = it.start && it.end && toMins(it.start) <= nowMins && nowMins < toMins(it.end) && it.status !== 'done';
         const isParallel = Boolean(it.parallelOf || (it.extra as Record<string, unknown> | undefined)?.parallelOf);
+        const isBeingDragged = draggedItemId === it.id;
+        const isDragTarget = dragOverTarget?.type === 'task' && dragOverTarget.targetId === it.id;
+
         return (
           <React.Fragment key={it.id}>
             <div
+              onMouseEnter={() => handleRowMouseEnter(it.id)}
+              onMouseLeave={() => handleRowMouseLeave(it.id)}
+              onDragOver={(e) => {
+                if (draggedItemId && draggedItemId !== it.id) {
+                  e.preventDefault();
+                  if (dragOverTarget?.targetId !== it.id) {
+                    setDragOverTarget({ type: 'task', targetId: it.id, time: it.start });
+                  }
+                }
+              }}
+              onDragLeave={() => {
+                if (dragOverTarget?.targetId === it.id) setDragOverTarget(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                handlePerformDrop(it.start, { targetBlockId: it.id });
+              }}
               onPointerDown={e => handleRowPointerDown(it.id, e)}
               onPointerEnter={() => handleRowPointerEnter(it.id)}
               onTouchStart={() => handleTouchStart(it.id)}
               onTouchEnd={handleTouchEnd}
-              className={`group/row flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors relative ${
+              className={`group/row flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-all relative ${
                 isParallel ? 'ml-5 pl-2.5 border-l-2 border-slate-300' : ''
+              } ${
+                isBeingDragged ? 'opacity-40' : ''
+              } ${
+                isDragTarget ? 'ring-2 ring-indigo-400 bg-indigo-50/50' : ''
               } ${
                 selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
               }`}
@@ -828,6 +1232,20 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   ∥
                 </span>
               )}
+              {/* PRD v0.3.37 Part D: 6-dot Drag Handle (2x3) */}
+              <div
+                draggable={true}
+                onDragStart={(e) => handleDragStart(it.id, e)}
+                onDragEnd={handleDragEnd}
+                title={language === 'vi' ? 'Nắm kéo để dời giờ' : 'Drag to reschedule'}
+                className={`w-3.5 h-4 flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing transition-opacity ${
+                  hoveredHandleItemId === it.id || (isDragging && draggedItemId === it.id)
+                    ? 'opacity-80 hover:opacity-100'
+                    : 'opacity-0 pointer-events-none'
+                }`}
+              >
+                <GripVertical className="w-3.5 h-3.5 text-slate-400 hover:text-slate-700" />
+              </div>
               {/* PRD v0.3.35 D3: Expand/collapse arrow for subtasks */}
               {Boolean(it.children?.length || editing === it.id) && (
                 <button
@@ -1064,10 +1482,43 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               />
             )}
             {gap && (
-              <div className="flex items-center gap-2 text-sm py-0.5" style={{ color: c.muted }}>
-                <span className="font-semibold tabular-nums">{gap.start}</span>
-                <IconHourglass color={c.muted} />
-                <span>Bạn có {fmtDuration(gap.mins)} trống đến {gap.end}</span>
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (dragOverTarget?.time !== gap.start) {
+                    setDragOverTarget({ type: 'gap', time: gap.start });
+                  }
+                }}
+                onDragLeave={() => {
+                  if (dragOverTarget?.time === gap.start) setDragOverTarget(null);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handlePerformDrop(gap.start, { fitGap: true });
+                }}
+                className={`flex items-center gap-2 text-sm py-1 px-1.5 rounded-lg transition-all ${
+                  dragOverTarget?.type === 'gap' && dragOverTarget.time === gap.start
+                    ? 'bg-amber-100/70 border-2 border-dashed border-[#E0401F]'
+                    : ''
+                }`}
+                style={{ color: c.muted }}
+              >
+                {dragOverTarget?.type === 'gap' && dragOverTarget.time === gap.start ? (
+                  <div className="flex items-center gap-2 w-full text-[#E0401F] font-semibold text-xs">
+                    <div className="h-0.5 flex-1 bg-[#E0401F] rounded-full" />
+                    <span className="px-2 py-0.5 bg-[#E0401F] text-white font-mono rounded font-bold shadow-2xs">
+                      {gap.start}
+                    </span>
+                    <span className="text-[11px]">{language === 'vi' ? 'Thả vào khoảng trống' : 'Drop into gap'}</span>
+                    <div className="h-0.5 flex-1 bg-[#E0401F] rounded-full" />
+                  </div>
+                ) : (
+                  <>
+                    <span className="font-semibold tabular-nums">{gap.start}</span>
+                    <IconHourglass color={c.muted} />
+                    <span>Bạn có {fmtDuration(gap.mins)} trống đến {gap.end}</span>
+                  </>
+                )}
               </div>
             )}
             {gap && sug && (() => {
@@ -1082,21 +1533,14 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   {fits ? (
                     <button
                       className="underline underline-offset-2 font-semibold text-[12.5px]"
-                      onClick={() => updateDailyCardItem(sug.id, {
-                        start: gap.start,
-                        end: toTime(toMins(gap.start) + dur),
-                      })}
+                      onClick={() => moveItemToTime(sug.id, gap.start, { fitGap: true })}
                     >
                       Xếp vào
                     </button>
                   ) : (
                     <button
                       className="underline underline-offset-2 font-semibold text-[12.5px]"
-                      onClick={() => updateDailyCardItem(sug.id, {
-                        start: gap.start,
-                        end: gap.end,
-                        nextStep: `Còn lại ${dur - gap.mins}p`,
-                      })}
+                      onClick={() => moveItemToTime(sug.id, gap.start, { fitGap: true, customDuration: gap.mins })}
                     >
                       Xếp {gap.mins}p
                     </button>
@@ -1132,23 +1576,64 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         )}
       </div>
 
-      <div className="mt-2 flex items-center gap-2">
-        <span className="text-[11.5px] font-semibold tracking-wide" style={{ color: c.muted }}>CHƯA XẾP GIỜ · LÀM KHI CÓ HỨNG</span>
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (dragOverTarget?.type !== 'flex') {
+            setDragOverTarget({ type: 'flex' });
+          }
+        }}
+        onDragLeave={() => {
+          if (dragOverTarget?.type === 'flex') setDragOverTarget(null);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          handlePerformDrop(undefined);
+        }}
+        className={`mt-2 flex items-center gap-2 p-1 rounded-lg transition-colors ${
+          dragOverTarget?.type === 'flex' ? 'bg-amber-100/70 ring-2 ring-dashed ring-amber-400' : ''
+        }`}
+      >
+        <span className="text-[11.5px] font-semibold tracking-wide" style={{ color: c.muted }}>
+          {dragOverTarget?.type === 'flex'
+            ? (language === 'vi' ? 'THẢ VÀO ĐÂY ĐỂ BỎ GIỜ (CHUYỂN VỀ LINH ĐỘNG)' : 'DROP HERE TO REMOVE TIME (CONVERT TO FLEXIBLE)')
+            : 'CHƯA XẾP GIỜ · LÀM KHI CÓ HỨNG'}
+        </span>
         <span className="flex-1 h-px" style={{ background: c.line }} />
       </div>
       {flex.map(it => {
         const est = (it.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined;
+        const isBeingDragged = draggedItemId === it.id;
+
         return (
           <React.Fragment key={it.id}>
             <div
+              onMouseEnter={() => handleRowMouseEnter(it.id)}
+              onMouseLeave={() => handleRowMouseLeave(it.id)}
               onPointerDown={e => handleRowPointerDown(it.id, e)}
               onPointerEnter={() => handleRowPointerEnter(it.id)}
               onTouchStart={() => handleTouchStart(it.id)}
               onTouchEnd={handleTouchEnd}
-              className={`group/flex flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-colors ${
+              className={`group/flex flex items-center gap-2 px-1.5 py-0.5 -mx-1 rounded-lg transition-all ${
+                isBeingDragged ? 'opacity-40' : ''
+              } ${
                 selectedIds.has(it.id) ? 'bg-black/10 ring-1 ring-black/15' : 'hover:bg-black/[0.03]'
               }`}
             >
+              {/* PRD v0.3.37 Part D: 6-dot Drag Handle (2x3) */}
+              <div
+                draggable={true}
+                onDragStart={(e) => handleDragStart(it.id, e)}
+                onDragEnd={handleDragEnd}
+                title={language === 'vi' ? 'Nắm kéo để dời giờ' : 'Drag to reschedule'}
+                className={`w-3.5 h-4 flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing transition-opacity ${
+                  hoveredHandleItemId === it.id || (isDragging && draggedItemId === it.id)
+                    ? 'opacity-80 hover:opacity-100'
+                    : 'opacity-0 pointer-events-none'
+                }`}
+              >
+                <GripVertical className="w-3.5 h-3.5 text-slate-400 hover:text-slate-700" />
+              </div>
               {/* PRD v0.3.35 D3: Expand/collapse arrow for subtasks */}
               {Boolean(it.children?.length || editing === it.id) && (
                 <button
