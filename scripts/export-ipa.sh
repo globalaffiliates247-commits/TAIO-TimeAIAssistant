@@ -19,7 +19,7 @@ DEVELOPER_DIR="$XCODE_DEV" "$XCODE_DEV/usr/bin/xcodebuild" archive \
   -scheme App \
   -destination "generic/platform=iOS" \
   -archivePath ios/build/TAIOTime.xcarchive \
-  CODE_SIGN_IDENTITY="Apple Development: hoang.leminh2302@gmail.com (2CTGGMFA9C)"
+  CODE_SIGN_IDENTITY="Apple Development"
 
 echo "3. Exporting official signed IPA..."
 rm -rf ios/build/exported
