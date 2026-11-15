@@ -36,4 +36,6 @@ export interface StickyNote {
   scheduledMap?: Record<string, string>; // maps line token/idx to dailyCardItemId
   hasMotivationSticker?: boolean; // v0.3.31 B2: "Thêm nhãn động lực"
   updatedAt: number;
+  deletedAt?: number;     // PRD v0.3.37 Part E: soft-deleted (30-day trash retention)
+  lastOpen?: boolean;      // PRD v0.3.37 Part E: track open state before hiding/closing board
 }

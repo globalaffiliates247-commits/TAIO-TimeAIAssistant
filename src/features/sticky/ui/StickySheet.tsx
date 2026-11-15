@@ -2,9 +2,9 @@
 // PRD B34 v0.3.26: one sticky window — toolbar (close, pin, colour, collapse, new) + body.
 import React, { useRef, useState } from 'react';
 import { STICKY_COLORS, StickyColor, StickyNote } from '../model/stickyTypes';
-import { closeSticky, newFreeSticky, setActiveSticky, updateSticky } from '../model/stickyStore';
+import { closeSticky, newFreeSticky, setActiveSticky, updateSticky, trashSticky } from '../model/stickyStore';
 import { IconClose, IconCollapse, IconPin, IconPlus, IconShirt } from './StickyIcons';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Trash2, EyeOff } from 'lucide-react';
 import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
@@ -31,9 +31,19 @@ const dayTitle = (date: string, lang: 'vi' | 'en' = 'vi') => {
 };
 
 export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: number }> = ({ note, floating, z }) => {
-  const { language } = useApp();
+  const { language, showToast } = useApp();
   const c = STICKY_COLORS[note.color];
   const [palette, setPalette] = useState(false);
+
+  const handleTrash = () => {
+    const { undo } = trashSticky(note.id);
+    showToast(
+      language === 'vi' ? 'Đã chuyển tờ vào thùng rác (lưu 30 ngày)' : 'Note moved to trash (kept 30 days)',
+      undo,
+      'confirmation',
+      language === 'vi' ? 'Hoàn tác' : 'Undo'
+    );
+  };
   const defaultW = note.kind === 'day' ? 460 : 300;
   const defaultH = note.kind === 'day' ? 520 : 320;
 
@@ -119,9 +129,19 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
         onPointerUp={onPointerUp}
         onDoubleClick={handleTitleBarDoubleClick}
       >
-        <button className={btn} aria-label="Đóng tờ" onClick={() => closeSticky(note.id)}>
+        <button className={btn} aria-label="Ẩn tờ (Đóng)" title="Ẩn tờ này (Mở lại bất cứ lúc nào từ Rổ công việc)" onClick={() => closeSticky(note.id)}>
           <IconClose color={c.muted} />
         </button>
+        {note.kind === 'free' && (
+          <button
+            className={btn}
+            aria-label="Xóa tờ"
+            title="Xóa tờ (Chuyển vào thùng rác 30 ngày có thể hoàn tác)"
+            onClick={handleTrash}
+          >
+            <Trash2 size={13} color={c.muted} />
+          </button>
+        )}
         <button
           className={btn}
           aria-label={note.pinned ? 'Bỏ ghim' : 'Ghim lên trên cùng'}

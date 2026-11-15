@@ -30,7 +30,7 @@ function toMs(v: unknown): number {
   return 0;
 }
 
-const SECTIONS = ['goals', 'projects', 'lists', 'tasks', 'dayTemplate', 'days', 'journalItems'] as const;
+const SECTIONS = ['goals', 'projects', 'lists', 'tasks', 'dayTemplate', 'days', 'journalItems', 'stickyNotes'] as const;
 
 /** Returns a copy of `payload` where every record carries updatedAt (epoch ms). */
 export function stampPayload(payload: TaioExportV1, now = Date.now()): TaioExportV1 {

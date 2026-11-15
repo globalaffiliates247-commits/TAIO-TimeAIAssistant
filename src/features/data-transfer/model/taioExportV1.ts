@@ -23,6 +23,8 @@ import { PROFILES } from '../../../data/mockData';
 import { toEpochMs } from '../../../core/storage/durableStorage';
 import { loadUserMotivationState, saveUserMotivationState } from '@/features/motivation';
 import { loadTombstones, mergeTombstones, type Tombstone } from './tombstones';
+import { getStickyNotesForExport, applyStickyNotesFromImport, loadStickyTombstones, type StickyTombstone } from '@/features/sticky/model/stickyStore';
+import type { StickyNote } from '@/features/sticky/model/stickyTypes';
 
 export interface ExportedDayBlockResult {
   id?: string;
@@ -108,6 +110,8 @@ export interface TaioExportV1 {
   dayTemplate?: Array<Record<string, unknown>>;
   days?: Array<Record<string, unknown>>;
   journalItems?: Array<Record<string, unknown>>;
+  stickyNotes?: Array<Record<string, unknown>>;
+  deletedStickies?: Array<{ id: string; deletedAt: number }>;
   deletedItems?: Array<{ id: string; deletedAt: number }>;
   todayJournalSummary?: { date: string; count: number; hash: string };
   notes?: string[];
@@ -1239,6 +1243,14 @@ export function applyTaioImport(
     breakdown.days.updated +
     journalCounters.updated;
 
+  // PRD v0.3.37 Part E: Merge or import sticky notes
+  if (Array.isArray(payload.stickyNotes)) {
+    applyStickyNotesFromImport(
+      payload.stickyNotes as unknown as StickyNote[],
+      (payload.deletedStickies || []) as StickyTombstone[]
+    );
+  }
+
   const totalSkipped =
     breakdown.goals.skipped +
     breakdown.projects.skipped +
@@ -1482,6 +1494,8 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
     days: exportedDays,
     closedDays: state.closedDays || {},
     journalItems: exportedJournalItems,
+    stickyNotes: getStickyNotesForExport() as unknown as Array<Record<string, unknown>>,
+    deletedStickies: loadStickyTombstones(),
     deletedItems: loadTombstones(),
     todayJournalSummary,
     motivation: loadUserMotivationState(),
