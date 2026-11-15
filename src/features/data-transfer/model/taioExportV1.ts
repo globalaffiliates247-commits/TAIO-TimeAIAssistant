@@ -25,6 +25,7 @@ import { loadUserMotivationState, saveUserMotivationState } from '@/features/mot
 import { loadTombstones, mergeTombstones, type Tombstone } from './tombstones';
 import { getStickyNotesForExport, applyStickyNotesFromImport, loadStickyTombstones, type StickyTombstone } from '@/features/sticky/model/stickyStore';
 import type { StickyNote } from '@/features/sticky/model/stickyTypes';
+import { convertLegacyToWorkNodes, type WorkNode } from '@/domain/workNode';
 
 export interface ExportedDayBlockResult {
   id?: string;
@@ -1488,6 +1489,7 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
     },
     goals: exportedGoals,
     projects: exportedProjects,
+    nodes: convertLegacyToWorkNodes(state.goals, projectItems as any) as unknown as Array<Record<string, unknown>>,
     lists: exportedLists,
     tasks: exportedTasks,
     dayTemplate: exportedDayTemplate,

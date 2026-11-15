@@ -1,5 +1,5 @@
 // TAIO Time Domain — Pure Swipe Deck Construction & Card Metrics (PRD v0.3.38 Part A & Part F)
-import type { DailyCardItem, BacklogCard } from '@/types';
+import type { DailyCardItem, BacklogCard } from '../types';
 
 export interface SwipeDeckItem {
   id: string;

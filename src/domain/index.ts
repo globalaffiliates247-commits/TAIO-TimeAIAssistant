@@ -2,3 +2,4 @@
 // Pure domain business logic: NO React, NO DOM, NO direct localStorage.
 // All functions are deterministic and take current time as explicit parameters.
 export * from './swipeDeck';
+export * from './workNode';

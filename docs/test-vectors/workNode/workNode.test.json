@@ -1,0 +1,58 @@
+{
+  "description": "Golden test vectors for WorkNode domain operations (PRD v0.3.38 Part C & F2.5)",
+  "testCases": [
+    {
+      "name": "validateWorkNode - goal missing name",
+      "input": {
+        "kind": "goal",
+        "name": "",
+        "desiredResult": "Xong MVP"
+      },
+      "expected": {
+        "valid": false,
+        "errorsCount": 1
+      }
+    },
+    {
+      "name": "validateWorkNode - project missing deadline",
+      "input": {
+        "kind": "project",
+        "name": "Dự án A",
+        "desiredResult": "Sản phẩm A"
+      },
+      "expected": {
+        "valid": false,
+        "errorsCount": 1
+      }
+    },
+    {
+      "name": "validateWorkNode - standalone personal project with deadline and deliverable",
+      "input": {
+        "kind": "project",
+        "name": "Dự án cá nhân",
+        "desiredResult": "Website cá nhân",
+        "deadline": "2026-12-31"
+      },
+      "expected": {
+        "valid": true,
+        "errorsCount": 0
+      }
+    },
+    {
+      "name": "rollUpNodeMinutes - child project minutes roll up to parent goal",
+      "parentGoal": { "id": "g-ai", "kind": "goal", "name": "Xây ứng dụng AI" },
+      "childProject": { "id": "p-taio", "parentId": "g-ai", "kind": "project", "name": "TAIO Time App" },
+      "childMilestone": { "id": "m-v38", "parentId": "p-taio", "kind": "milestone", "name": "v0.3.38" },
+      "taskMinutesMap": {
+        "m-v38": 120,
+        "p-taio": 80,
+        "g-ai": 30
+      },
+      "expected": {
+        "milestoneTotal": 120,
+        "projectTotal": 200,
+        "goalTotal": 230
+      }
+    }
+  ]
+}

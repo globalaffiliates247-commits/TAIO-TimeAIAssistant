@@ -87,6 +87,7 @@ export interface TimeBlock {
   status: BlockStatus;
   goalId?: string; // or undefined for "outside goals"
   goalName?: string;
+  nodeId?: string; // PRD v0.3.38 Part C: Unified WorkNode reference
   milestoneId?: string;
   milestoneName?: string;
   stepNumber?: number;
@@ -221,6 +222,7 @@ export interface InterruptionRecord {
   decision: InterruptionDecision;
   goalId?: string;
   goalName?: string;
+  nodeId?: string; // PRD v0.3.38 Part C: Unified WorkNode reference
   milestoneId?: string;
   milestoneName?: string;
   returnPoint?: string;
@@ -426,6 +428,7 @@ export interface DailyCardItem {
   date: string; // "YYYY-MM-DD"
   goalId?: string;
   goalName?: string;
+  nodeId?: string; // PRD v0.3.38 Part C: Unified WorkNode reference
   milestoneId?: string;
   milestoneName?: string;
   start?: string;
@@ -507,6 +510,7 @@ export interface ListItem {
   // Project list fields (same entity as projects in Goals & Efficiency B21)
   goalId?: string;
   goalName?: string;
+  nodeId?: string; // PRD v0.3.38 Part C: Unified WorkNode reference
   milestoneId?: string;
   milestoneName?: string;
   startDate?: string;
@@ -585,6 +589,7 @@ export interface BacklogCard {
   snoozesCount: number;
   goalId?: string;
   goalName?: string;
+  nodeId?: string; // PRD v0.3.38 Part C: Unified WorkNode reference
   milestoneId?: string;
   milestoneName?: string;
   whyThisCard: string; // "Tồn đọng 7 ngày", "Thuộc mục tiêu chậm tiến độ", "Khám phá ngẫu nhiên (1/5)"
@@ -614,6 +619,7 @@ export interface BackfillEntry {
   category: InterruptionActivityCategory;
   goalId?: string;
   goalName?: string;
+  nodeId?: string; // PRD v0.3.38 Part C: Unified WorkNode reference
   milestoneId?: string;
   milestoneName?: string;
   origin: ItemOrigin;
@@ -630,6 +636,7 @@ export interface PassiveTimeSuggestion {
   category: InterruptionActivityCategory;
   goalId?: string;
   goalName?: string;
+  nodeId?: string; // PRD v0.3.38 Part C: Unified WorkNode reference
   milestoneId?: string;
   milestoneName?: string;
   source: 'ai_tool_timestamp' | 'geofence' | 'calendar' | 'motion';
