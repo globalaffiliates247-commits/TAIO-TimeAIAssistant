@@ -782,7 +782,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         ...prev,
       ]);
-      setToastMsg(`Đã ghi nhận ${elapsedMins} phút vào sổ thời gian`);
+      setToastMsg(`Đã ghi nhận ${elapsedMins} phút vào sổ tay thời gian`);
     }
 
     setFreeTimers(prev => prev.filter(t => t.id !== timer.id));

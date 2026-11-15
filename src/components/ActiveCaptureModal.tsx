@@ -400,7 +400,7 @@ export const ActiveCaptureModal: React.FC = () => {
                         </div>
                       ) : (
                         <div className="text-xs text-slate-500 italic">
-                          Trạng thái: {s.status === 'accepted' ? 'Đã ghi vào sổ thời gian' : 'Đã bỏ qua'}
+                          Trạng thái: {s.status === 'accepted' ? 'Đã ghi vào sổ tay thời gian' : 'Đã bỏ qua'}
                         </div>
                       )}
                     </div>

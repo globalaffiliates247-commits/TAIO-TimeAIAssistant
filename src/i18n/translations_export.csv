@@ -60,7 +60,7 @@ domain,key,context,vi,en,target_translation
 "common","terms.miniClock","Chuỗi giao diện / UI Label","Đồng hồ mini","Mini Clock",""
 "common","terms.pinnedClock","Chuỗi giao diện / UI Label","Đồng hồ ghim","Pinned Clock",""
 "common","terms.stopwatches","Chuỗi giao diện / UI Label","Bấm giờ riêng","Stopwatches",""
-"common","terms.timeLedger","Chuỗi giao diện / UI Label","Sổ thời gian","Time Ledger",""
+"common","terms.timeLedger","Chuỗi giao diện / UI Label","Sổ tay thời gian","Time Notebook",""
 "common","terms.timetable","Chuỗi giao diện / UI Label","Thời gian biểu","Timetable",""
 "common","terms.templateSchedule","Chuỗi giao diện / UI Label","Lịch ngày mẫu","Template Schedule",""
 "common","terms.dailyCard","Chuỗi giao diện / UI Label","Thẻ ngày","Daily Card",""

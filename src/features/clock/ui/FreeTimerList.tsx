@@ -209,7 +209,7 @@ export const FreeTimerList: React.FC<FreeTimerListProps> = ({
           <div className="bg-white border border-slate-200 rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-3">
             <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
               <BookOpen className="w-4 h-4 text-orange-500" />
-              <span>Ghi vào Sổ thời gian?</span>
+              <span>Ghi vào Sổ tay thời gian?</span>
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed">
