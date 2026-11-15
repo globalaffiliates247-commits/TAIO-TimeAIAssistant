@@ -2,7 +2,7 @@
 // PRD B24 v0.3.25 & v0.3.37 Part G2: End-to-end encrypted device sync.
 // Single sync code with AirDrop/Share button, auto-normalized paste, and security disclaimer.
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Smartphone, Laptop, Copy, Eye, EyeOff, Link2Off, Share2, Check, ShieldAlert } from 'lucide-react';
+import { RefreshCw, Copy, Eye, EyeOff, Link2Off, Share2, Check, ShieldAlert } from 'lucide-react';
 import { SYNC_ENABLED } from '../syncConfig';
 import { useSyncState, updateSyncSettings } from '../syncStore';
 import { createSyncSpace, joinSyncSpace, leaveSyncSpace } from '../syncEngine';
@@ -145,7 +145,6 @@ export const SyncSection: React.FC = () => {
     );
   }
 
-  const otherDevices = settings.devices;
   return (
     <div className={card}>
       <div className="flex items-start justify-between gap-2">
@@ -230,32 +229,6 @@ export const SyncSection: React.FC = () => {
             )}
           </span>
         </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <label className="text-[11px] font-semibold text-slate-700">Tên máy này</label>
-        <input
-          defaultValue={settings.deviceName}
-          onBlur={e => updateSyncSettings({ deviceName: e.target.value.trim() || settings.deviceName })}
-          className="w-full h-9 rounded-xl border border-slate-300 px-3 text-xs focus:outline-none focus:border-slate-800"
-        />
-      </div>
-
-      <div className="space-y-1.5 pt-1">
-        <p className="text-[11px] font-semibold text-slate-700">Máy khác đang dùng mã này</p>
-        {otherDevices.length === 0 ? (
-          <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/60">
-            Chưa có. Mở TAIO Time trên máy kia → Cá nhân → Kết nối TAIO → Nhập mã.
-          </p>
-        ) : (
-          otherDevices.map(d => (
-            <div key={d.id} className="flex items-center gap-2 text-xs text-slate-800 p-2 rounded-xl bg-slate-50 border border-slate-200/60">
-              {/iPhone|iPad|Android/i.test(d.name) ? <Smartphone className="w-4 h-4 text-slate-600" /> : <Laptop className="w-4 h-4 text-slate-600" />}
-              <span className="flex-1 font-medium">{d.name}</span>
-              <span className="text-[11px] text-slate-500">gửi lên {timeAgo(d.ts)}</span>
-            </div>
-          ))
-        )}
       </div>
 
       <button
