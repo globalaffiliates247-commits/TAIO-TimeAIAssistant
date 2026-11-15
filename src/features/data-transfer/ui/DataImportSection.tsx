@@ -55,7 +55,10 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
     e.target.value = '';
   };
 
+  const isInternalBuild = process.env.NEXT_PUBLIC_ENABLE_INTERNAL_SAMPLE === 'true';
+
   const handleLoadFounderSample = () => {
+    if (!isInternalBuild) return;
     const sampleStr = JSON.stringify(FOUNDER_TAIO_EXPORT_V1, null, 2);
     loadJsonContent(sampleStr, 'taio-lee-data-v1.json');
   };
@@ -118,14 +121,16 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
           <span>Chọn file JSON…</span>
         </button>
 
-        <button
-          type="button"
-          onClick={handleLoadFounderSample}
-          className="px-3 py-2 rounded-xl bg-white hover:bg-red-50/60 text-[#E0401F] border border-[#E0401F]/30 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#E0401F]" />
-          <span>Nạp dữ liệu thật TAIO-Lee (file đính kèm)</span>
-        </button>
+        {isInternalBuild && (
+          <button
+            type="button"
+            onClick={handleLoadFounderSample}
+            className="px-3 py-2 rounded-xl bg-white hover:bg-red-50/60 text-[#E0401F] border border-[#E0401F]/30 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#E0401F]" />
+            <span>Nạp dữ liệu mẫu TAIO-Lee (Nội bộ)</span>
+          </button>
+        )}
       </div>
 
       {/* Step 2: Preview counts */}

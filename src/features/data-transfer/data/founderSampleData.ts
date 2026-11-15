@@ -1,4 +1,5 @@
-export const FOUNDER_TAIO_EXPORT_V1 = {
+// PRD v0.3.38 Part D2.7: Personal founder data gated behind NEXT_PUBLIC_ENABLE_INTERNAL_SAMPLE env var
+export const FOUNDER_TAIO_EXPORT_V1: Record<string, unknown> = (process.env.NEXT_PUBLIC_ENABLE_INTERNAL_SAMPLE === 'true') ? {
   "format": "taio-time-export",
   "formatVersion": 1,
   "specVersion": "0.3.19",
@@ -766,4 +767,4 @@ export const FOUNDER_TAIO_EXPORT_V1 = {
     "Kết quả khối việc ngày 1/11 và 2/11 được ghi trước khi lịch mẫu đổi, tên khối có thể lệch.",
     "Bộ đếm clip Kênh AI để 0 vì chưa có clip nào được ghi nhận."
   ]
-} as const;
+} as const : {};
