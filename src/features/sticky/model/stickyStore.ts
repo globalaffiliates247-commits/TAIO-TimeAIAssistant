@@ -66,9 +66,10 @@ interface State {
   activeId?: string;
   isTemporarilyHidden?: boolean;
   cacheWipedWarning?: boolean;
+  listPanelOpen?: boolean; // PRD v0.3.43 Part E: Bảng danh sách phiếu
 }
 
-let state: State = { notes: [], boardOpen: false, isTemporarilyHidden: false, cacheWipedWarning: false };
+let state: State = { notes: [], boardOpen: false, isTemporarilyHidden: false, cacheWipedWarning: false, listPanelOpen: false };
 let loaded = false;
 const listeners = new Set<() => void>();
 
@@ -240,8 +241,17 @@ export function updateSticky(id: string, patch: Partial<StickyNote>) {
   });
 }
 
-export function newFreeSticky(color: StickyColor = 'pink') {
+export function newFreeSticky(color: StickyColor = 'pink'): string {
   load();
+  // PRD v0.3.43 Part E2.6: Nếu đã có phiếu trống chưa gõ gì thì không tạo thêm phiếu trống thứ hai
+  const existingEmpty = state.notes.find(
+    n => n.kind === 'free' && n.open && !n.deletedAt && (!n.content || !n.content.trim()) && (!n.lines || n.lines.length === 0)
+  );
+  if (existingEmpty) {
+    commit({ ...state, boardOpen: true, activeId: existingEmpty.id, isTemporarilyHidden: false });
+    return existingEmpty.id;
+  }
+
   const open = state.notes.filter(n => n.open && !n.deletedAt).length;
   const note: StickyNote = {
     id: uid(),
@@ -258,6 +268,18 @@ export function newFreeSticky(color: StickyColor = 'pink') {
     updatedAt: Date.now(),
   };
   commit({ ...state, notes: [...state.notes, note], boardOpen: true, activeId: note.id, isTemporarilyHidden: false });
+  return note.id;
+}
+
+/** PRD v0.3.43 Part E: Bảng danh sách phiếu */
+export function toggleStickyListPanel() {
+  load();
+  commit({ ...state, listPanelOpen: !state.listPanelOpen, boardOpen: true });
+}
+
+export function setStickyListPanelOpen(open: boolean) {
+  load();
+  commit({ ...state, listPanelOpen: open });
 }
 
 /**

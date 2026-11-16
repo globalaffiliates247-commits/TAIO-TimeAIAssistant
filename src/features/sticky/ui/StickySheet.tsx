@@ -2,9 +2,9 @@
 // PRD B34 v0.3.26: one sticky window — toolbar (close, pin, colour, collapse, new) + body.
 import React, { useRef, useState } from 'react';
 import { STICKY_COLORS, StickyColor, StickyNote } from '../model/stickyTypes';
-import { closeSticky, newFreeSticky, setActiveSticky, updateSticky, trashSticky } from '../model/stickyStore';
+import { closeSticky, newFreeSticky, setActiveSticky, updateSticky, trashSticky, toggleStickyListPanel } from '../model/stickyStore';
 import { IconClose, IconCollapse, IconPin, IconPlus, IconShirt } from './StickyIcons';
-import { Sparkles, Trash2, EyeOff } from 'lucide-react';
+import { Sparkles, Trash2, EyeOff, Layers } from 'lucide-react';
 import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
@@ -129,8 +129,17 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
         onPointerUp={onPointerUp}
         onDoubleClick={handleTitleBarDoubleClick}
       >
-        <button className={btn} aria-label="Ẩn tờ (Đóng)" title="Ẩn tờ này (Mở lại bất cứ lúc nào từ Rổ công việc)" onClick={() => closeSticky(note.id)}>
+        <button className={btn} aria-label="Ẩn tờ (Đóng)" title="Ẩn tờ này (Mở lại bất cứ lúc nào từ Rổ công việc hoặc Danh sách phiếu)" onClick={() => closeSticky(note.id)}>
           <IconClose color={c.muted} />
+        </button>
+        {/* PRD v0.3.43 Part E: Bảng danh sách phiếu (Notes & Journals) */}
+        <button
+          className={btn}
+          aria-label="Danh sách phiếu"
+          title="Danh sách tất cả phiếu ghi chú và nhật ký"
+          onClick={toggleStickyListPanel}
+        >
+          <Layers size={13} color={c.muted} />
         </button>
         {note.kind === 'free' && (
           <button
@@ -211,7 +220,13 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
 
       {/* Body */}
       {!note.collapsed && (
-        <div className="px-5 py-4 overflow-y-auto overscroll-contain flex-1 select-text">
+        <div
+          style={{
+            ['--scrollbar-thumb' as any]: `${c.muted}80`,
+            ['--scrollbar-thumb-hover' as any]: `${c.muted}B0`,
+          }}
+          className="px-5 py-4 overflow-y-auto overscroll-contain flex-1 select-text sticky-scrollbar"
+        >
           {note.kind === 'day' ? <DaySheetBody note={note} /> : <FreeSheetBody note={note} />}
         </div>
       )}

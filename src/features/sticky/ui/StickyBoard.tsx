@@ -14,6 +14,7 @@ import {
   dismissCacheWipeWarning,
 } from '../model/stickyStore';
 import { StickySheet } from './StickySheet';
+import { StickyListPanel } from './StickyListPanel';
 import { IconClose, IconPin, IconPlus } from './StickyIcons';
 import { Eye, RotateCcw, AlertTriangle, X } from 'lucide-react';
 import { Z_LAYERS } from '@/styles/layers';
@@ -55,6 +56,9 @@ export const StickyBoard: React.FC = () => {
 
   return (
     <>
+      {/* Sticky List Panel (Sidebar / Drawer) */}
+      <StickyListPanel isPhone={isPhone} />
+
       {/* Cache wipe warning banner (Rule E2.6) */}
       {cacheWipedWarning && (
         <div

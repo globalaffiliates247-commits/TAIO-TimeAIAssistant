@@ -9,6 +9,9 @@ import { hasStickyChanged } from '../src/features/sticky/model/stickyStore.ts';
 import { updateScheduleEntry } from '../src/features/tasks/scheduleWrite.ts';
 import { buildTodaySchedule } from '../src/features/tasks/todaySchedule.ts';
 import { computeBlockStatus, getDeviceCalendarDate } from '../src/core/clock/index.ts';
+import { expandOccurrences } from '../src/domain/events/index.ts';
+import { defaultLunarProvider } from '../src/domain/lunar/index.ts';
+import { newFreeSticky, updateSticky, closeSticky, getStickyNotesForExport } from '../src/features/sticky/model/stickyStore.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -237,6 +240,174 @@ if (fs.existsSync(goalLedgerPath)) {
     passed++;
   } else {
     console.error(`[FAIL] Part A.3 Tomorrow schedule mutated from today's stop:`, tomorrowDinner);
+    failed++;
+  }
+}
+
+// 5. PRD v0.3.43 Part E2.7: Sticky Note Persistence Across Close/Reopen
+{
+  const testNoteId = newFreeSticky('pink');
+  const sampleText = 'Dòng 1: Gặp đối tác\nDòng 2: Chuẩn bị slide\nDòng 3: Gửi báo cáo';
+  updateSticky(testNoteId, { content: sampleText });
+
+  // Close note
+  closeSticky(testNoteId);
+  let notes = getStickyNotesForExport();
+  let closedNote = notes.find(n => n.id === testNoteId);
+
+  if (closedNote && closedNote.open === false && closedNote.content === sampleText) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part E2.7 Sticky close failed to preserve content:`, closedNote);
+    failed++;
+  }
+
+  // Reopen note
+  updateSticky(testNoteId, { open: true });
+  notes = getStickyNotesForExport();
+  let reopenedNote = notes.find(n => n.id === testNoteId);
+
+  if (reopenedNote && reopenedNote.open === true && reopenedNote.content === sampleText) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part E2.7 Sticky reopen failed to restore content:`, reopenedNote);
+    failed++;
+  }
+}
+
+// 6. PRD v0.3.43 Part A2: Pure Occurrence Engine (expandOccurrences)
+{
+  // Test A2.1: Annual solar recurring event
+  const annualBday = {
+    id: 'evt-bday',
+    title: 'Sinh nhật bạn',
+    startDate: '2025-05-15',
+    allDay: true,
+    recurrence: {
+      freq: 'yearly',
+      interval: 1,
+    },
+    source: 'taio',
+    createdAt: 1000,
+    updatedAt: 1000,
+  };
+  const bdayOccs = expandOccurrences([annualBday], '2025-01-01', '2027-12-31');
+  const bdayDates = bdayOccs.map(o => o.date);
+  if (
+    bdayOccs.length === 3 &&
+    bdayDates[0] === '2025-05-15' &&
+    bdayDates[1] === '2026-05-15' &&
+    bdayDates[2] === '2027-05-15'
+  ) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part A2.1 Annual recurrence mismatch:`, bdayDates);
+    failed++;
+  }
+
+  // Test A2.2: Weekly event with count limit
+  const weeklySync = {
+    id: 'evt-weekly',
+    title: 'Họp tuần',
+    startDate: '2025-06-02', // Monday
+    start: '10:00',
+    end: '11:00',
+    recurrence: {
+      freq: 'weekly',
+      interval: 1,
+      count: 4,
+    },
+    source: 'taio',
+    createdAt: 1000,
+    updatedAt: 1000,
+  };
+  const weeklyOccs = expandOccurrences([weeklySync], '2025-06-01', '2025-08-31');
+  if (weeklyOccs.length === 4 && weeklyOccs[3].date === '2025-06-23') {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part A2.2 Weekly count limit mismatch:`, weeklyOccs);
+    failed++;
+  }
+
+  // Test A2.3: Single event with exception override (skip & custom time)
+  const singleEvt = {
+    id: 'evt-single',
+    title: 'Gặp khách',
+    startDate: '2025-07-10',
+    start: '14:00',
+    end: '15:00',
+    exceptions: {
+      '2025-07-10': { start: '15:30', end: '16:30' },
+    },
+    source: 'taio',
+    createdAt: 1000,
+    updatedAt: 1000,
+  };
+  const singleOccs = expandOccurrences([singleEvt], '2025-07-01', '2025-07-31');
+  if (singleOccs.length === 1 && singleOccs[0].start === '15:30' && singleOccs[0].isException === true) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part A2.3 Exception override mismatch:`, singleOccs);
+    failed++;
+  }
+}
+
+// 7. PRD v0.3.43 Part C: Vietnamese Lunar Calendar Algorithm & Recurrence
+{
+  // Test C.1: Solar to Lunar for Tết 2025 (2025-01-29 -> 1/1 Ất Tỵ)
+  const lunar2025 = defaultLunarProvider.toLunar({ day: 29, month: 1, year: 2025 });
+  if (lunar2025 && lunar2025.day === 1 && lunar2025.month === 1 && lunar2025.year === 2025) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part C.1 Tết 2025 Solar->Lunar mismatch:`, lunar2025);
+    failed++;
+  }
+
+  // Test C.2: Lunar to Solar for Tết 2026 (1/1 Bính Ngọ -> 2026-02-17)
+  const solar2026 = defaultLunarProvider.toSolar({ day: 1, month: 1, year: 2026 }, 2026);
+  if (solar2026 && solar2026.day === 17 && solar2026.month === 2 && solar2026.year === 2026) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part C.2 Tết 2026 Lunar->Solar mismatch:`, solar2026);
+    failed++;
+  }
+
+  // Test C.3: Lunar recurring event expansion across 3 years
+  const tetEvt = {
+    id: 'evt-tet',
+    title: 'Tết Nguyên Đán',
+    startDate: '2025-01-29',
+    allDay: true,
+    recurrence: {
+      freq: 'yearly',
+      interval: 1,
+      calendar: 'lunar',
+    },
+    source: 'taio',
+    createdAt: 1000,
+    updatedAt: 1000,
+  };
+  const tetOccs = expandOccurrences([tetEvt], '2025-01-01', '2027-12-31', defaultLunarProvider);
+  const tetDates = tetOccs.map(o => o.date);
+  if (
+    tetOccs.length === 3 &&
+    tetDates[0] === '2025-01-29' &&
+    tetDates[1] === '2026-02-17' &&
+    tetDates[2] === '2027-02-06'
+  ) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part C.3 Lunar recurring occurrence mismatch:`, tetDates);
+    failed++;
+  }
+
+  // Test C.4: Day 30 clamp rule (C1.4): for 29-day month (e.g. Month 2/2025), day 30 clamps safely to 29
+  const d29 = defaultLunarProvider.toSolar({ day: 29, month: 2, year: 2025 }, 2025);
+  const d30 = defaultLunarProvider.toSolar({ day: 30, month: 2, year: 2025 }, 2025);
+  if (d29 && d30 && d29.day === 28 && d29.month === 3 && d30.day === d29.day && d30.month === d29.month) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part C.4 Day 30 clamp mismatch:`, { d29, d30 });
     failed++;
   }
 }
