@@ -1879,7 +1879,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       {startConflictModal && (
         <div 
           onClick={() => setStartConflictModal(null)}
-          className="fixed app-overlay-safe z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150 cursor-pointer"
+          className="fixed app-overlay-safe z-[100] bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}

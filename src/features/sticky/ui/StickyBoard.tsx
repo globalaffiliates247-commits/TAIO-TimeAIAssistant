@@ -58,7 +58,7 @@ export const StickyBoard: React.FC = () => {
       {/* Cache wipe warning banner (Rule E2.6) */}
       {cacheWipedWarning && (
         <div
-          style={{ zIndex: Z_LAYERS?.STICKY ? Z_LAYERS.STICKY + 20 : 110 }}
+          style={{ zIndex: (Z_LAYERS?.STICKY || 42) + 7 }}
           className="fixed top-14 left-1/2 -translate-x-1/2 max-w-md w-[90%] p-3.5 rounded-2xl bg-amber-50 border border-amber-300 shadow-xl flex items-center justify-between gap-3 text-xs text-amber-900"
         >
           <div className="flex items-center gap-2 min-w-0">
@@ -89,7 +89,7 @@ export const StickyBoard: React.FC = () => {
       {/* Floating restore pill when notes are temporarily hidden (Rule E2.1) */}
       {isTemporarilyHidden && (
         <div
-          style={{ zIndex: Z_LAYERS?.STICKY ? Z_LAYERS.STICKY + 10 : 100 }}
+          style={{ zIndex: (Z_LAYERS?.STICKY || 42) + 7 }}
           className="fixed bottom-6 right-6 flex items-center gap-2 p-2 pl-3 rounded-full bg-slate-900/90 text-white text-xs backdrop-blur-md shadow-2xl border border-white/20 animate-in fade-in slide-in-from-bottom-2 duration-200"
         >
           <Eye className="w-3.5 h-3.5 text-orange-400" />
@@ -105,7 +105,7 @@ export const StickyBoard: React.FC = () => {
       )}
 
       {visible.length > 0 && isPhone && boardOpen && (
-        <div className="fixed inset-0 z-[70] bg-[#EFEDE6] flex flex-col" style={{ paddingTop: 'calc(var(--sat, 0px) + 10px)', paddingBottom: 'calc(var(--sab, 0px) + 10px)' }}>
+        <div className="fixed inset-0 z-40 bg-[#EFEDE6] flex flex-col" style={{ paddingTop: 'calc(var(--sat, 0px) + 10px)', paddingBottom: 'calc(var(--sab, 0px) + 10px)' }}>
           <div className="flex items-center gap-1.5 px-3 pb-2 overflow-x-auto">
             {visible.map(n => (
               <button key={n.id} onClick={() => setActiveSticky(n.id)}
@@ -126,7 +126,12 @@ export const StickyBoard: React.FC = () => {
       {visible.length > 0 && !isPhone && (
         <>
           {visible.map((n, i) => (
-            <StickySheet key={n.id} note={n} floating z={(n.pinned ? 90 : 75) + (n.id === activeId ? 5 : 0) + i * 0} />
+            <StickySheet
+              key={n.id}
+              note={n}
+              floating
+              z={(n.pinned ? (Z_LAYERS?.STICKY_PINNED || 46) : (Z_LAYERS?.STICKY || 42)) + (n.id === activeId ? 2 : 0) + i * 0}
+            />
           ))}
         </>
       )}

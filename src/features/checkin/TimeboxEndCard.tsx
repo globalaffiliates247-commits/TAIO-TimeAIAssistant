@@ -44,7 +44,7 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
   const hasGoal = Boolean(checkInBlock.goalName && checkInBlock.goalName.trim() && checkInBlock.goalName !== 'Ngoài mục tiêu chính');
 
   return (
-    <div className="fixed app-bottom-sheet-safe z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed app-bottom-sheet-safe z-[100] bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
       <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-orange-500/30 sm:border">
         {/* Kicker */}
         <div className="flex items-center justify-between pb-2 border-b border-slate-100/80 mb-3">

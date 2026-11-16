@@ -208,6 +208,7 @@ const MainAppContent: React.FC = () => {
 
   const overlays = (
     <>
+      <StickyBoard />
       <AppearanceModal />
       <OnboardingModal />
       <InterruptionModal />
@@ -217,7 +218,6 @@ const MainAppContent: React.FC = () => {
       <BedtimeCheckInPopover />
       <DrilldownSheet />
       <InboxModal />
-      <StickyBoard />
       <MethodLibraryModal />
       <CoachCardOverlay />
       <ExportDataModal />
