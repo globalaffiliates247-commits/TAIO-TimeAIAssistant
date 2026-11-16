@@ -393,6 +393,9 @@
   .-top-1 {
     top: calc(var(--spacing) * -1);
   }
+  .-top-7 {
+    top: calc(var(--spacing) * -7);
+  }
   .top-0 {
     top: 0px;
   }

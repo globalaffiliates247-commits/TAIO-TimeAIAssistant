@@ -63,6 +63,8 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [subTaskInputOpenId, setSubTaskInputOpenId] = useState<string | null>(null);
   const [justCommittedId, setJustCommittedId] = useState<string | null>(null);
   const [showCommittedCheckmark, setShowCommittedCheckmark] = useState<string | null>(null);
+  const [savedTooltipId, setSavedTooltipId] = useState<string | null>(null);
+  const savedTooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // PRD v0.3.37 Part B: Delete with undo and subtask safety prompt
   const handleDeleteItemWithUndo = (it: DailyCardItem) => {
@@ -816,7 +818,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const saveEdit = (it: DailyCardItem) => {
+  const saveEdit = (it: DailyCardItem, keepEditing: boolean = false) => {
     const p = parseTimedText(editText);
     if (!p.rest && !p.time) { removeDailyCardItem(it.id); setEditing(null); return; }
 
@@ -863,6 +865,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         end: newEnd,
         extra: newExtra,
       });
+      if (isToday) {
+        updateScheduleEntry(it.id, {
+          title: text,
+          startTime: p.time,
+          endTime: newEnd,
+          goalId,
+          goalName,
+        }, { updateDailyCardItem, setBlocks, dailyCardItems });
+      }
 
       // PRD v0.3.35 E3: Auto-shift subsequent tasks if switch is ON
       if (autoShiftAfter && oldStartMins !== null && newStartMins !== null && oldStartMins !== newStartMins) {
@@ -913,8 +924,17 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         end: undefined,
         extra: newExtra,
       });
+      if (isToday) {
+        updateScheduleEntry(it.id, {
+          title: text,
+          goalId,
+          goalName,
+        }, { updateDailyCardItem, setBlocks, dailyCardItems });
+      }
     }
-    setEditing(null);
+    if (!keepEditing) {
+      setEditing(null);
+    }
   };
 
   const lineText = (it: DailyCardItem) => {
@@ -1050,12 +1070,13 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   const renderText = (it: DailyCardItem) =>
     editing === it.id ? (
-      <div className="flex-1 flex items-center gap-2 min-w-0">
+      <div className="flex-1 flex items-center gap-2 min-w-0 relative">
         <input
           autoFocus value={editText}
           onChange={e => {
             const val = e.target.value;
             setJustCommittedId(null); // rule F2.2: typing resets commit stage
+            setSavedTooltipId(null);
             setEditText(val);
             const hashMatch = val.match(/#([a-zA-Zà-ỹÀ-Ỹ0-9_-]*)$/);
             if (hashMatch) {
@@ -1068,20 +1089,34 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           }}
           onBlur={() => {
             if (pickerItemId !== it.id) {
-              saveEdit(it);
+              saveEdit(it, false);
               setJustCommittedId(null);
+              setSavedTooltipId(null);
             }
           }}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               if (pickerItemId !== it.id) {
                 e.preventDefault();
-                saveEdit(it);
-                setJustCommittedId(null);
-                setEditing(null);
-                setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
-                setSubTaskInputOpenId(it.id);
-                setAutoFocusSubTaskId(it.id);
+                if (justCommittedId === it.id) {
+                  // Rule F2.2: Enter #2 on the same line opens subtask breakdown below
+                  setJustCommittedId(null);
+                  setSavedTooltipId(null);
+                  setEditing(null);
+                  setExpandedSubTaskIds(prev => new Set(prev).add(it.id));
+                  setSubTaskInputOpenId(it.id);
+                  setAutoFocusSubTaskId(it.id);
+                } else {
+                  // Rule F2.1: Enter #1 saves/commits line and keeps cursor, showing "Đã cập nhật" tooltip for 2s
+                  saveEdit(it, true);
+                  setJustCommittedId(it.id);
+                  setSavedTooltipId(it.id);
+                  if (savedTooltipTimeoutRef.current) clearTimeout(savedTooltipTimeoutRef.current);
+                  savedTooltipTimeoutRef.current = setTimeout(() => {
+                    setSavedTooltipId(null);
+                    setJustCommittedId(null);
+                  }, 2000);
+                }
               }
             }
             if (e.key === 'Escape') {
@@ -1091,11 +1126,18 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               } else {
                 setEditing(null);
                 setJustCommittedId(null);
+                setSavedTooltipId(null);
               }
             }
           }}
           className="flex-1 bg-transparent outline-none min-w-0" style={{ color: c.ink }}
         />
+        {savedTooltipId === it.id && (
+          <div className="absolute right-0 -top-7 z-30 pointer-events-none flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/90 text-white text-[11px] font-semibold shadow-lg backdrop-blur-xs border border-white/10 animate-in fade-in slide-in-from-bottom-1 duration-150">
+            <Check className="w-3 h-3 text-emerald-400 stroke-[2.5]" />
+            <span>{language === 'vi' ? 'Đã cập nhật' : 'Updated'}</span>
+          </div>
+        )}
         {showCommittedCheckmark === it.id && (
           <span className="text-[11px] font-bold text-emerald-600 animate-in fade-in duration-150">✓</span>
         )}
