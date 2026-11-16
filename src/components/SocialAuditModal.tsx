@@ -3,7 +3,7 @@
 // Numbers come from socialAuditModel.ts; no sample scenario is ever shown as if it were real.
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Wine, X, CalendarClock } from 'lucide-react';
+import { Wine, X, CalendarClock, Moon } from 'lucide-react';
 import {
   buildSocialAudit,
   formatHours,
@@ -11,7 +11,15 @@ import {
 } from '../features/social-audit/socialAuditModel';
 
 export const SocialAuditModal: React.FC = () => {
-  const { socialAuditModalOpen, setSocialAuditModalOpen, profile, setProfile, interruptions, blocks } = useApp();
+  const {
+    socialAuditModalOpen,
+    setSocialAuditModalOpen,
+    setBedtimePopoverOpen,
+    profile,
+    setProfile,
+    interruptions,
+    blocks,
+  } = useApp();
   if (!socialAuditModalOpen) return null;
 
   const ageBand = profile.ageBand || '<45';
@@ -25,9 +33,24 @@ export const SocialAuditModal: React.FC = () => {
   const relationItem = nextDay && nextDay.movedMeetings.length > 0 && (
     <CostRow key="rel" title="Hẹn và cam kết bị ảnh hưởng" lines={nextDay.movedMeetings} />
   );
-  // Spec B12 order: health first for 45+, then work, then relationships. The app has no sleep or
-  // health data yet, so health is not shown (facts only, never inferred) and work/relationships keep their order.
-  const ordered = [workItem, relationItem].filter(Boolean);
+  const healthItem = profile.lastBedtime && (
+    <CostRow
+      key="health"
+      title="Sức khỏe & Giấc ngủ"
+      lines={[
+        `Giờ ngủ đêm qua: ${profile.lastBedtime.time} (kế hoạch nghỉ ngơi: ${profile.personalAnchors?.windDownTime || '22:30'})`,
+        profile.lastBedtime.sleepDurationHours && profile.lastBedtime.sleepDurationHours < 7
+          ? `Thời lượng ngủ: ~${profile.lastBedtime.sleepDurationHours} giờ (ngắn hơn mức 7 giờ khuyến nghị)`
+          : `Thời lượng ngủ: ~${profile.lastBedtime.sleepDurationHours || 7} giờ (đạt chu kỳ phục hồi)`,
+      ]}
+    />
+  );
+  // Spec B12 order: health first for 45+, then work, then relationships.
+  // Under 45: work first, then relationships, then health.
+  const ordered = (ageBand === '>=45'
+    ? [healthItem, workItem, relationItem]
+    : [workItem, relationItem, healthItem]
+  ).filter(Boolean);
 
   return (
     <div className="fixed app-overlay-safe z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
@@ -36,11 +59,39 @@ export const SocialAuditModal: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-amber-100 text-amber-700"><Wine className="w-5 h-5" /></div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold">Giao lưu ngoài giờ</h3>
+              <h3 className="text-base sm:text-lg font-bold">Giao lưu ngoài giờ & Giấc ngủ</h3>
               <p className="text-xs text-slate-500">Thời gian thật của các buổi tối · không phán xét, không cấm đoán</p>
             </div>
           </div>
           <button onClick={close} aria-label="Đóng" className="text-slate-500 hover:text-slate-900"><X className="w-5 h-5" /></button>
+        </div>
+
+        {/* Sleep Check-in Banner (PRD B12 & B14) */}
+        <div className="mb-5 p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/60 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700">
+              <Moon className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900">
+                {profile.lastBedtime
+                  ? `Giờ ngủ đêm qua: ${profile.lastBedtime.time} (~${profile.lastBedtime.sleepDurationHours ?? 7}h ngủ)`
+                  : 'Đêm qua bạn ngủ lúc mấy giờ?'}
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {profile.lastBedtime
+                  ? `Mốc nghỉ ngơi theo lịch: ${profile.personalAnchors?.windDownTime || '22:30'}`
+                  : 'Ghi nhận giờ ngủ để hệ thống tính ảnh hưởng năng lượng và công việc sáng nay'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setBedtimePopoverOpen(true)}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 transition shadow-xs"
+          >
+            {profile.lastBedtime ? 'Đổi giờ ngủ' : 'Ghi nhận giờ ngủ'}
+          </button>
         </div>
 
         {!latest ? (
@@ -63,11 +114,11 @@ export const SocialAuditModal: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <h4 className="text-xs font-bold text-slate-700">Sáng hôm sau</h4>
-              {!nextDay ? (
-                <p className="text-xs text-slate-500">Sáng hôm sau buổi giao lưu, mục này sẽ hiện những việc buổi sáng bị trễ hoặc dời.</p>
-              ) : ordered.length > 0 ? ordered : (
-                <p className="text-xs text-slate-600">Sáng nay chưa có khối việc nào bị lỡ. Giờ ngủ thật sẽ hiện ở đây khi bạn ghi nhận giờ ngủ.</p>
+              <h4 className="text-xs font-bold text-slate-700">Tác động sáng hôm sau (Ưu tiên theo lứa tuổi)</h4>
+              {ordered.length > 0 ? (
+                ordered
+              ) : (
+                <p className="text-xs text-slate-600">Sáng nay chưa có khối việc nào bị lỡ.</p>
               )}
             </div>
           </div>

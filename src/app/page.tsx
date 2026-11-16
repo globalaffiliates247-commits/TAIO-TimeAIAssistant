@@ -14,6 +14,7 @@ import { InterruptionModal } from '../components/InterruptionModal';
 import { CheckInModal } from '../components/CheckInModal';
 import { CloseDayModal } from '../components/CloseDayModal';
 import { SocialAuditModal } from '../components/SocialAuditModal';
+import { BedtimeCheckInPopover } from '../components/BedtimeCheckInPopover';
 import { DrilldownSheet } from '../components/DrilldownSheet';
 import { ActionNudgeBanner } from '../components/ActionNudgeBanner';
 import { AppearanceModal } from '../components/AppearanceModal';
@@ -213,6 +214,7 @@ const MainAppContent: React.FC = () => {
       <CheckInModal />
       <CloseDayModal />
       <SocialAuditModal />
+      <BedtimeCheckInPopover />
       <DrilldownSheet />
       <InboxModal />
       <StickyBoard />

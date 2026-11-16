@@ -39,6 +39,13 @@ export interface UserProfile {
   ageBand?: '<45' | '>=45';
   // v0.22.0 B23:
   workStyle?: WorkStyle;
+  lastBedtime?: {
+    date: string;
+    time: string;
+    targetTime?: string;
+    sleepDurationHours?: number;
+    recordedAt?: number;
+  };
 }
 
 export type BlockType = 'deep' | 'meeting' | 'interruption' | 'personal' | 'planning';

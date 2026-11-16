@@ -341,6 +341,8 @@ interface AppContextType {
   setCloseDayModalOpen: (val: boolean) => void;
   socialAuditModalOpen: boolean;
   setSocialAuditModalOpen: (val: boolean) => void;
+  bedtimePopoverOpen: boolean;
+  setBedtimePopoverOpen: (val: boolean) => void;
   checkInBlock: TimeBlock | null;
   setCheckInBlock: (b: TimeBlock | null) => void;
 
@@ -436,6 +438,7 @@ interface AppContextType {
   dismissToast: () => void;
   // v0.3.11 B14: Bell notifications (5 most recent)
   notifications: AppNotificationItem[];
+  setNotifications: React.Dispatch<React.SetStateAction<AppNotificationItem[]>>;
   markAllNotificationsRead: () => void;
   triggerNotificationAction: (notif: AppNotificationItem) => void;
   // v0.3.12 B27: Wipe all user data & server copy restore prompt
@@ -554,6 +557,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [checkInModalOpen, setCheckInModalOpen] = useState<boolean>(false);
   const [closeDayModalOpen, setCloseDayModalOpen] = useState<boolean>(false);
   const [socialAuditModalOpen, setSocialAuditModalOpen] = useState<boolean>(false);
+  const [bedtimePopoverOpen, setBedtimePopoverOpen] = useState<boolean>(false);
   const [checkInBlock, setCheckInBlock] = useState<TimeBlock | null>(null);
 
   const [closedDays, setClosedDays] = useState<ClosedDaysMap>({});
@@ -1625,8 +1629,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const currentType = actionNudge.type;
     setActionNudge(null);
     if (currentType === 'sleep_next_day') {
-      // B14 v0.3.10 -> opens B12 next-day cost question
-      setSocialAuditModalOpen(true);
+      // B14 v0.3.10 -> opens bedtime check-in popover (PRD B12 next-day cost question)
+      setBedtimePopoverOpen(true);
     } else if (currentType === 'close_day') {
       setCloseDayModalOpen(true);
     } else {
@@ -1647,7 +1651,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const triggerNotificationAction = (notif: AppNotificationItem) => {
     setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
     if (notif.targetAction === 'sleep') {
-      setSocialAuditModalOpen(true);
+      setBedtimePopoverOpen(true);
     } else if (notif.targetAction === 'start_deep') {
       setCurrentTab('now');
       setIsTimerRunning(true);
@@ -3260,6 +3264,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCloseDayModalOpen,
       socialAuditModalOpen,
       setSocialAuditModalOpen,
+      bedtimePopoverOpen,
+      setBedtimePopoverOpen,
       checkInBlock,
       setCheckInBlock,
       handleInterruptionSubmit,
@@ -3288,6 +3294,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast,
       dismissToast,
       notifications,
+      setNotifications,
       markAllNotificationsRead,
       triggerNotificationAction,
       resetAllUserData,

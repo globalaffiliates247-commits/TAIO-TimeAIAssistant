@@ -8,7 +8,7 @@ import { matchLinesWithStableIds } from '../src/features/sticky/model/lineMatche
 import { hasStickyChanged } from '../src/features/sticky/model/stickyStore.ts';
 import { updateScheduleEntry } from '../src/features/tasks/scheduleWrite.ts';
 import { buildTodaySchedule } from '../src/features/tasks/todaySchedule.ts';
-import { computeBlockStatus } from '../src/core/clock/index.ts';
+import { computeBlockStatus, getDeviceCalendarDate } from '../src/core/clock/index.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -164,8 +164,10 @@ if (fs.existsSync(goalLedgerPath)) {
 
 // 4. PRD v0.3.40 Part A Tests: Schedule Write Gateway & Template Invariance
 {
-  const today = '2026-11-15';
-  const tomorrow = '2026-11-16';
+  const today = getDeviceCalendarDate();
+  const tomDate = new Date();
+  tomDate.setDate(tomDate.getDate() + 1);
+  const tomorrow = getDeviceCalendarDate(tomDate);
 
   // Test A.1: Stopping a card task sets end time and status 'left' without error
   let dailyCardItems = [
