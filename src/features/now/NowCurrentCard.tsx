@@ -71,9 +71,19 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
   const { t } = useT();
   const isCool = palette === 'cool';
   const { highlightStyle } = useHighlight();
-  const now = new Date();
+
+  // 1-second live clock ticker for active countdown / countup (PRD v0.3.36 & v0.3.42)
+  const [nowSec, setNowSec] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNowSec(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const now = new Date(nowSec);
   const todayStr = getDeviceCalendarDate(now);
-  const nowMins = getDeviceTimeMinutes();
+  const nowMins = getDeviceTimeMinutes(now);
   const state = clockState(scheduleBlocks, dayTemplate, now, language as 'vi' | 'en');
 
   // Active block
