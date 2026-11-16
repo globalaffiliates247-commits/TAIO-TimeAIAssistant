@@ -68,6 +68,7 @@ import {
   loadFreeTimers,
   saveFreeTimers,
   getFreeTimerElapsedSeconds,
+  clockState,
 } from '../features/clock';
 import {
   isMotionTrackingEnabled,
@@ -3146,12 +3147,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (bridge?.onTimerAction) {
-      bridge.onTimerAction((action) => {
-        if (!currentBlock) return;
+      bridge.onTimerAction((action: { type: string; minutes?: number }) => {
         if (action.type === 'done') {
-          markTaskDone(currentBlock.id);
+          if (currentBlock) {
+            markTaskDone(currentBlock.id);
+          }
         } else if (action.type === 'extend') {
-          shiftTaskTime(currentBlock.id, action.minutes || 5);
+          if (currentBlock) {
+            shiftTaskTime(currentBlock.id, action.minutes || 5);
+          } else {
+            const mins = action.minutes || 15;
+            const startStr = getDeviceTimeString();
+            const startM = getDeviceTimeMinutes();
+            const endStr = minutesToTime((startM + mins) % 1440);
+            const newItem = {
+              id: `dc-${Date.now()}`,
+              date: getDeviceCalendarDate(),
+              text: language === 'vi' ? 'Việc tập trung nhanh' : 'Quick focus task',
+              start: startStr,
+              end: endStr,
+              status: 'open' as const,
+              extra: { startedAt: Date.now(), estimateMins: mins },
+            };
+            addDailyCardItem(newItem);
+            showToast?.(language === 'vi' ? `▶ Bắt đầu việc nhanh (${mins}p)` : `▶ Started quick task (${mins}m)`);
+          }
+        } else if (action.type === 'start-quick') {
+          const mins = action.minutes || 15;
+          const startStr = getDeviceTimeString();
+          const startM = getDeviceTimeMinutes();
+          const endStr = minutesToTime((startM + mins) % 1440);
+          const newItem = {
+            id: `dc-${Date.now()}`,
+            date: getDeviceCalendarDate(),
+            text: language === 'vi' ? 'Việc tập trung nhanh' : 'Quick focus task',
+            start: startStr,
+            end: endStr,
+            status: 'open' as const,
+            extra: { startedAt: Date.now(), estimateMins: mins },
+          };
+          addDailyCardItem(newItem);
+          showToast?.(language === 'vi' ? `▶ Bắt đầu việc nhanh (${mins}p)` : `▶ Started quick task (${mins}m)`);
+        } else if (action.type === 'open-journal') {
+          setCurrentTab('plan');
         }
       });
     }
@@ -3183,45 +3221,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const bridge = (window as unknown as { taioAPI?: { updateTimer?: (payload: any) => void } }).taioAPI;
     if (!bridge?.updateTimer) return;
 
-    if (currentBlock && computeBlockStatus(currentBlock, getDeviceTimeMinutes()) === 'in_progress') {
-      const todayStr = getDeviceCalendarDate();
-      const [eh, em] = currentBlock.endTime.split(':').map(Number);
-      const [sh, sm] = currentBlock.startTime.split(':').map(Number);
-      const endsAt = new Date(`${todayStr}T00:00:00`).getTime() + (eh * 60 + em) * 60 * 1000;
-      const startedAt = new Date(`${todayStr}T00:00:00`).getTime() + (sh * 60 + sm) * 60 * 1000;
-      const remainingMins = Math.max(0, timeToMinutes(currentBlock.endTime) - getDeviceTimeMinutes());
-      const targetGoal = goals.find(g => g.id === currentBlock.goalId);
+    const syncTimer = () => {
+      const now = new Date();
+      const st = clockState(scheduleBlocks, dayTemplate, now, language as 'vi' | 'en');
+      const targetGoal = st.block ? goals.find(g => g.id === st.block?.goalId) : undefined;
       const targetHours = targetGoal?.size === 'XS' ? 4 : targetGoal?.size === 'S' ? 10 : targetGoal?.size === 'L' ? 100 : targetGoal?.size === 'XL' ? 250 : 40;
-      const spentTotalMins = (targetGoal?.actualMinutesTotal || 0) + Math.max(0, timeToMinutes(currentBlock.endTime) - remainingMins - timeToMinutes(currentBlock.startTime));
+      const spentTotalMins = (targetGoal?.actualMinutesTotal || 0);
       const goalHours = Math.floor(spentTotalMins / 60);
       const goalMins = spentTotalMins % 60;
 
-      bridge.updateTimer({
-        taskId: currentBlock.id,
-        title: currentBlock.title,
-        mode: 'task',
-        endsAt,
-        startedAt,
-        remaining: `${remainingMins}p`,
+      bridge.updateTimer?.({
+        taskId: st.block?.id || null,
+        title: st.title,
+        subtitle: st.subtitle,
+        mode: st.mode,
+        startedAt: st.startedAt,
+        endsAt: st.endsAt,
+        remaining: `${Math.round(st.remainingSeconds / 60)}p`,
         lang: language,
         goalTitle: targetGoal?.name,
         goalSize: targetGoal?.size,
         goalTargetHours: targetHours,
         goalHours,
-        goalMins
+        goalMins,
+        isCountDown: st.isCountDown,
       });
-    } else {
-      bridge.updateTimer({
-        taskId: null,
-        title: language === 'vi' ? 'Bạn đang làm gì?' : 'What are you doing?',
-        mode: 'gap',
-        endsAt: 0,
-        startedAt: 0,
-        remaining: '',
-        lang: language,
-      });
-    }
-  }, [currentBlock, language, goals]);
+    };
+
+    syncTimer();
+    const ticker = setInterval(syncTimer, 2000);
+    return () => clearInterval(ticker);
+  }, [scheduleBlocks, dayTemplate, language, goals]);
 
   return (
     <AppContext.Provider value={{

@@ -23,9 +23,12 @@ let timerLabel = 'TAIO Time';
 
 // Remembered clock state
 let currentTimerData = {
-  title: 'Chưa có việc đang làm',
+  title: 'Trống',
+  subtitle: 'Chưa có việc đang làm',
+  mode: 'gap',
   endsAt: 0,
   startedAt: 0,
+  lang: 'vi',
 };
 let clockWindowBounds = null;
 let quickNoteWindowBounds = null;
@@ -205,16 +208,28 @@ function createClockWindow() {
     syncClockWindowData();
   });
 
+  clockWindow.webContents.on("did-finish-load", () => {
+    syncClockWindowData();
+  });
+
   clockWindow.on("closed", () => { clockWindow = null; });
 }
 
+ipcMain.on("taio-clock-ready", () => {
+  syncClockWindowData();
+});
+
 ipcMain.on("taio-open-today-journal", (_event, taskId) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
+    if (process.platform === 'darwin') {
+      app.focus({ steal: true });
+    }
+    if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.show();
     mainWindow.focus();
     mainWindow.webContents.send("taio-open-today-journal", taskId);
   } else {
-    createQuickNoteWindow();
+    createWindow();
   }
 });
 

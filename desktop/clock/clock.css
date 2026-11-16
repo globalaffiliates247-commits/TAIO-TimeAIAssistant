@@ -66,6 +66,7 @@ body {
   justify-content: center;
   line-height: 1;
   transition: all 0.15s;
+  -webkit-app-region: no-drag;
 }
 
 .icon-btn:hover {
@@ -102,6 +103,7 @@ body {
   max-width: 92%;
   cursor: pointer;
   transition: color 0.15s;
+  -webkit-app-region: no-drag;
 }
 
 .task-title:hover {

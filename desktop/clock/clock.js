@@ -30,6 +30,8 @@
   const btnModeGoal = document.getElementById('btnModeGoal');
   const barBottomBar = document.getElementById('barBottomBar');
   const ringBottomBar = document.getElementById('ringBottomBar');
+  const barIdleBottomBar = document.getElementById('barIdleBottomBar');
+  const ringIdleBottomBar = document.getElementById('ringIdleBottomBar');
   const barProgressTrack = document.getElementById('barProgressTrack');
   const barFreeTimerRow = document.getElementById('barFreeTimerRow');
   const barFreeTimerTitle = document.getElementById('barFreeTimerTitle');
@@ -154,6 +156,11 @@
       window.taioAPI.sendTimerAction({ type: 'done' });
     }
   }
+  function triggerStartQuick(mins = 15) {
+    if (window.taioAPI && window.taioAPI.sendTimerAction) {
+      window.taioAPI.sendTimerAction({ type: 'start-quick', minutes: mins });
+    }
+  }
 
   document.getElementById('barBtnExtend')?.addEventListener('click', () => triggerExtend(5));
   document.getElementById('barBtnExtend15')?.addEventListener('click', () => triggerExtend(15));
@@ -161,6 +168,11 @@
   document.getElementById('ringBtnExtend15')?.addEventListener('click', () => triggerExtend(15));
   document.getElementById('barBtnDone')?.addEventListener('click', triggerDone);
   document.getElementById('ringBtnDone')?.addEventListener('click', triggerDone);
+
+  document.getElementById('barBtnQuick15')?.addEventListener('click', () => triggerStartQuick(15));
+  document.getElementById('ringBtnQuick15')?.addEventListener('click', () => triggerStartQuick(15));
+  document.getElementById('barBtnOpenJournal')?.addEventListener('click', triggerOpenJournal);
+  document.getElementById('ringBtnOpenJournal')?.addEventListener('click', triggerOpenJournal);
 
   // Three view modes (v0.3.34 Part E4: 1=remaining, 2=elapsed, 3=goal)
   let threeViewMode = 'remaining';
@@ -268,10 +280,13 @@
 
       barBottomBar.style.display = 'none';
       ringBottomBar.style.display = 'none';
+      if (barIdleBottomBar) barIdleBottomBar.style.display = 'flex';
+      if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'flex';
       barProgressTrack.style.display = 'none';
+      tick();
     } else if (currentMode === 'gap') {
-      const title = data.title || (currentLang === 'vi' ? 'Bạn đang làm gì?' : 'What are you doing?');
-      const sub = data.subtitle || '';
+      const title = data.title || (currentLang === 'vi' ? 'Trống' : 'Free');
+      const sub = data.subtitle || (currentLang === 'vi' ? 'Chưa có việc đang làm' : 'No active task');
       barTitle.innerText = title;
       ringTitle.innerText = title;
       barSubtitle.innerText = sub;
@@ -279,6 +294,8 @@
 
       barBottomBar.style.display = 'none';
       ringBottomBar.style.display = 'none';
+      if (barIdleBottomBar) barIdleBottomBar.style.display = 'flex';
+      if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'flex';
       barProgressTrack.style.display = 'block';
       tick();
     } else {
@@ -292,34 +309,71 @@
 
       barBottomBar.style.display = 'flex';
       ringBottomBar.style.display = 'flex';
+      if (barIdleBottomBar) barIdleBottomBar.style.display = 'none';
+      if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'none';
       barProgressTrack.style.display = 'block';
       tick();
     }
   };
 
   function tick() {
-    if (currentMode === 'template_or_current') return;
     const now = Date.now();
     let digitsStr = '00:00';
     let sublineStr = '';
     let fraction = 1;
 
+    if (currentMode === 'template_or_current') {
+      const nowD = new Date();
+      const curH = String(nowD.getHours()).padStart(2, '0');
+      const curM = String(nowD.getMinutes()).padStart(2, '0');
+      const curTime = `${curH}:${curM}`;
+      barDigits.innerText = curTime;
+      ringDigits.innerText = curTime;
+      ringSubText.innerText = currentLang === 'vi' ? 'giờ hiện tại' : 'current time';
+      barProgress.style.width = '100%';
+      if (ringCircle) ringCircle.style.strokeDashoffset = '0';
+      return;
+    }
+
     if (currentMode === 'gap') {
-      if (threeViewMode === 'remaining') {
-        digitsStr = '00:00';
-        sublineStr = currentLang === 'vi' ? 'chưa ghi nhận' : 'unassigned';
-      } else if (threeViewMode === 'elapsed') {
-        digitsStr = '00:00';
-        sublineStr = currentLang === 'vi' ? 'tới việc kế tiếp' : 'until next';
+      if (endsAt > now && endsAt > 0) {
+        const secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
+        const m = Math.floor(secRemaining / 60);
+        const s = secRemaining % 60;
+        digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        sublineStr = currentLang === 'vi' ? 'tới việc kế tiếp' : 'until next task';
+        const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
+        fraction = Math.max(0, Math.min(1, secRemaining / totalSec));
       } else {
-        digitsStr = '0g00';
-        sublineStr = currentLang === 'vi' ? '9g thức' : '9h awake';
+        const nowD = new Date();
+        const curH = String(nowD.getHours()).padStart(2, '0');
+        const curM = String(nowD.getMinutes()).padStart(2, '0');
+        digitsStr = `${curH}:${curM}`;
+        sublineStr = currentLang === 'vi' ? 'thời gian trống' : 'free time';
+        fraction = 1;
       }
+
+      if (threeViewMode === 'elapsed') {
+        const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
+        const em = Math.floor(secElapsed / 60);
+        const es = secElapsed % 60;
+        digitsStr = `${String(em).padStart(2, '0')}:${String(es).padStart(2, '0')}`;
+        sublineStr = currentLang === 'vi' ? 'thời gian trống' : 'gap time';
+      } else if (threeViewMode === 'goal') {
+        const gh = lastData?.goalHours || 0;
+        const gm = lastData?.goalMins || 0;
+        digitsStr = `${gh}g${gm > 0 ? (gm < 10 ? '0' : '') + gm : '00'}`;
+        sublineStr = lastData?.goalTitle ? `${lastData.goalTitle}` : (currentLang === 'vi' ? 'Tiến độ mục tiêu' : 'Goal progress');
+      }
+
       barDigits.innerText = digitsStr;
       ringDigits.innerText = digitsStr;
       ringSubText.innerText = sublineStr;
-      barProgress.style.width = '100%';
-      if (ringCircle) ringCircle.style.strokeDashoffset = '0';
+      barProgress.style.width = `${Math.round(fraction * 100)}%`;
+      if (ringCircle) {
+        const offset = ringCircumference - fraction * ringCircumference;
+        ringCircle.style.strokeDashoffset = offset;
+      }
       return;
     }
 
@@ -379,4 +433,9 @@
 
   // Live timer tick every second
   setInterval(tick, 1000);
+
+  // Notify main process that clock window is loaded and ready for sync
+  if (window.taioAPI && window.taioAPI.notifyClockReady) {
+    window.taioAPI.notifyClockReady();
+  }
 })();
