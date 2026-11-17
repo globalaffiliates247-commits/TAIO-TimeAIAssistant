@@ -94,10 +94,19 @@ export const StickyListPanel: React.FC<{ isPhone?: boolean }> = ({ isPhone = fal
   };
 
   const handleOpenNote = (n: StickyNote) => {
+    // If note is positioned behind or overlapping the list panel (x < 310 on desktop), shift it to the right of panel
+    const patch: Partial<StickyNote> = { open: true };
+    if (!isPhone && (typeof n.x !== 'number' || n.x < 310)) {
+      patch.x = 320;
+    }
+
     if (n.kind === 'day' && n.date) {
       openStickyBoard(n.date, n.id);
+      if (patch.x !== undefined) {
+        updateSticky(n.id, { x: patch.x });
+      }
     } else {
-      updateSticky(n.id, { open: true });
+      updateSticky(n.id, patch);
       setActiveSticky(n.id);
     }
     if (isPhone) {
@@ -119,6 +128,12 @@ export const StickyListPanel: React.FC<{ isPhone?: boolean }> = ({ isPhone = fal
   const handleCreateNew = () => {
     const newId = newFreeSticky('pink');
     if (newId) {
+      if (!isPhone) {
+        const created = notes.find(n => n.id === newId);
+        if (created && (typeof created.x !== 'number' || created.x < 310)) {
+          updateSticky(newId, { x: 320 });
+        }
+      }
       setActiveSticky(newId);
     }
     if (isPhone) {
@@ -128,7 +143,7 @@ export const StickyListPanel: React.FC<{ isPhone?: boolean }> = ({ isPhone = fal
 
   return (
     <div
-      style={{ zIndex: 49 }}
+      style={{ zIndex: 47 }}
       className={`bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xl flex flex-col select-none ${
         isPhone
           ? 'fixed inset-0 z-[70] p-4'

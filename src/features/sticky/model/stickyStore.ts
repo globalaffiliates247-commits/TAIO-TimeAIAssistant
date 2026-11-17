@@ -142,7 +142,7 @@ export function openStickyBoard(today: string, focusId?: string, reopenPrevious 
       collapsed: false,
       open: true,
       lastOpen: true,
-      x: 40,
+      x: 320,
       y: 90,
       lines: [],
       updatedAt: Date.now(),

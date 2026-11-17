@@ -129,14 +129,20 @@ export const StickyBoard: React.FC = () => {
 
       {visible.length > 0 && !isPhone && (
         <>
-          {visible.map((n, i) => (
-            <StickySheet
-              key={n.id}
-              note={n}
-              floating
-              z={(n.pinned ? (Z_LAYERS?.STICKY_PINNED || 46) : (Z_LAYERS?.STICKY || 42)) + (n.id === activeId ? 2 : 0) + i * 0}
-            />
-          ))}
+          {visible.map((n, i) => {
+            const isActive = n.id === activeId;
+            const baseZ = n.pinned ? (Z_LAYERS?.STICKY_PINNED || 46) : (Z_LAYERS?.STICKY || 42);
+            // Focused / active note always rises to topmost layer (z=52) above inactive notes and list panel
+            const z = isActive ? 52 : baseZ + (i % 3);
+            return (
+              <StickySheet
+                key={n.id}
+                note={n}
+                floating
+                z={z}
+              />
+            );
+          })}
         </>
       )}
     </>
