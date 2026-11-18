@@ -727,19 +727,27 @@ export const ProfileModal: React.FC = () => {
                       href={communityConfig.advisor.zaloUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-slate-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-blue-600/20"
+                      className={`flex-1 py-2 px-3 rounded-xl ${
+                        isCool
+                          ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+                          : 'bg-[#E0401F] hover:bg-[#c93517] shadow-[#E0401F]/20'
+                      } text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
                     >
                       <span>Nhắn qua Zalo</span>
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3 h-3 text-white/80" />
                     </a>
                     <a
                       href={communityConfig.advisor.telegramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-slate-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-sky-600/20"
+                      className={`flex-1 py-2 px-3 rounded-xl ${
+                        isCool
+                          ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+                          : 'bg-[#E0401F] hover:bg-[#c93517] shadow-[#E0401F]/20'
+                      } text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
                     >
                       <span>Nhắn qua Telegram</span>
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3 h-3 text-white/80" />
                     </a>
                   </div>
                 </div>
@@ -760,8 +768,9 @@ export const ProfileModal: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <h5 className="text-xs sm:text-sm font-bold text-slate-900">{grp.name}</h5>
                           {grp.membersCount && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-                              {grp.membersCount}
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                              <User className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>{grp.membersCount.replace(/\s*thành viên/gi, '').trim()}</span>
                             </span>
                           )}
                         </div>

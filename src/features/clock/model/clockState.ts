@@ -54,13 +54,14 @@ export function clockState(
   };
 
   // 1. Current in-progress task
-  // PRD FIX v0.3.33 Part D2: A task is considered running when current time is within its frame,
+  // PRD FIX v0.3.33 Part D2 & v0.3.43: A task is considered running when current time is within its frame,
   // or when explicitly started early (with real startedAt timestamp in extra).
-  const inProgressBlock = scheduleBlocks.find(b => {
-    if (b.status === 'done' || b.status === 'dropped') return false;
+  // Prioritize active user card tasks over background template/ritual blocks.
+  const inProgressCandidates = scheduleBlocks.filter(b => {
+    if (b.status === 'done' || b.status === 'dropped' || b.status === 'partly_done') return false;
     const extra = (b.extra as Record<string, unknown> | undefined) || {};
     const manuallyStartedAt = typeof extra.startedAt === 'number' ? extra.startedAt : undefined;
-    if (manuallyStartedAt && b.status === 'in_progress') {
+    if (manuallyStartedAt) {
       const durationMins = b.estimatedMinutes || 30;
       const elapsedMins = (nowMs - manuallyStartedAt) / 60000;
       if (elapsedMins >= 0 && elapsedMins < durationMins + 120) {
@@ -69,6 +70,8 @@ export function clockState(
     }
     return computeBlockStatus(b, nowMins) === 'in_progress';
   });
+
+  const inProgressBlock = inProgressCandidates.find(b => !b.isTemplateBlock && b.blockKind !== 'ritual') || inProgressCandidates[0];
 
   // 2. Next planned task
   const nextPlannedBlock = scheduleBlocks

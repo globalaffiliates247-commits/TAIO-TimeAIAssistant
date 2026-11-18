@@ -19,6 +19,7 @@ DEVELOPER_DIR="$XCODE_DEV" "$XCODE_DEV/usr/bin/xcodebuild" archive \
   -scheme App \
   -destination "generic/platform=iOS" \
   -archivePath ios/build/TAIOTime.xcarchive \
+  -allowProvisioningUpdates \
   CODE_SIGN_IDENTITY="Apple Development"
 
 echo "3. Exporting official signed IPA..."
@@ -26,6 +27,7 @@ rm -rf ios/build/exported
 DEVELOPER_DIR="$XCODE_DEV" "$XCODE_DEV/usr/bin/xcodebuild" -exportArchive \
   -archivePath ios/build/TAIOTime.xcarchive \
   -exportPath ios/build/exported \
+  -allowProvisioningUpdates \
   -exportOptionsPlist ios/ExportOptions.plist
 
 echo "4. Copying to Desktop (strictly 1 IPA with version)..."

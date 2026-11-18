@@ -3129,48 +3129,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return goals.filter(g => initialGoalIds.has(g.id));
   }, [goals]);
 
-  // PRD FIX v0.3.28 A2 #7 & C2: Electron Mac Quick Note & Timer listener
+  // Keep latest state in refs for IPC timer listeners without re-binding
+  const currentBlockRef = useRef(currentBlock);
+  currentBlockRef.current = currentBlock;
+  const scheduleBlocksRef = useRef(scheduleBlocks);
+  scheduleBlocksRef.current = scheduleBlocks;
+
+  // PRD FIX v0.3.28 A2 #7 & C2 & v0.3.43: Electron Mac Quick Note & Timer listener
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const bridge = (window as unknown as {
       taioAPI?: {
-        onQuickNoteReceived?: (cb: (text: string) => void) => void;
-        onTimerAction?: (cb: (action: { type: string; minutes?: number }) => void) => void;
+        onQuickNoteReceived?: (cb: (text: string) => void) => (() => void) | void;
+        onTimerAction?: (cb: (action: { type: string; minutes?: number }) => void) => (() => void) | void;
+        onOpenTodayJournal?: (cb: (taskId?: string) => void) => (() => void) | void;
       };
     }).taioAPI;
 
+    const cleanups: Array<() => void> = [];
+
     if (bridge?.onQuickNoteReceived) {
-      bridge.onQuickNoteReceived((text: string) => {
+      const unsub = bridge.onQuickNoteReceived((text: string) => {
         commitQuickLine(text, getDeviceCalendarDate(), { addDailyCardItem, goals });
         setCelebrationMsg(language === 'vi' ? `✓ Đã ghi nhận: "${text}"` : `✓ Note added: "${text}"`);
       });
+      if (typeof unsub === 'function') cleanups.push(unsub);
     }
 
     if (bridge?.onTimerAction) {
-      bridge.onTimerAction((action: { type: string; minutes?: number }) => {
+      const unsub = bridge.onTimerAction((action: { type: string; minutes?: number }) => {
+        const cur = currentBlockRef.current || scheduleBlocksRef.current.find(b => b.status === 'in_progress' || (b.extra as any)?.startedAt);
         if (action.type === 'done') {
-          if (currentBlock) {
-            markTaskDone(currentBlock.id);
+          if (cur) {
+            markTaskDone(cur.id);
           }
         } else if (action.type === 'extend') {
-          if (currentBlock) {
-            shiftTaskTime(currentBlock.id, action.minutes || 5);
+          if (cur) {
+            shiftTaskTime(cur.id, action.minutes || 5);
           } else {
-            const mins = action.minutes || 15;
-            const startStr = getDeviceTimeString();
-            const startM = getDeviceTimeMinutes();
-            const endStr = minutesToTime((startM + mins) % 1440);
-            const newItem = {
-              id: `dc-${Date.now()}`,
-              date: getDeviceCalendarDate(),
-              text: language === 'vi' ? 'Việc tập trung nhanh' : 'Quick focus task',
-              start: startStr,
-              end: endStr,
-              status: 'open' as const,
-              extra: { startedAt: Date.now(), estimateMins: mins },
-            };
-            addDailyCardItem(newItem);
-            showToast?.(language === 'vi' ? `▶ Bắt đầu việc nhanh (${mins}p)` : `▶ Started quick task (${mins}m)`);
+            // Do NOT generate duplicate quick focus tasks on extend click!
+            showToast?.(language === 'vi' ? 'Chưa có việc đang làm để thêm giờ' : 'No active task to extend');
           }
         } else if (action.type === 'start-quick') {
           const mins = action.minutes || 15;
@@ -3192,12 +3190,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setCurrentTab('plan');
         }
       });
+      if (typeof unsub === 'function') cleanups.push(unsub);
     }
 
     // PRD v0.3.33 Part I: Open Today's Journal on specific row
-    const openJournalBridge = bridge as unknown as { onOpenTodayJournal?: (cb: (taskId?: string) => void) => void };
+    const openJournalBridge = bridge as unknown as { onOpenTodayJournal?: (cb: (taskId?: string) => void) => (() => void) | void };
     if (openJournalBridge?.onOpenTodayJournal) {
-      openJournalBridge.onOpenTodayJournal((taskId?: string) => {
+      const unsub = openJournalBridge.onOpenTodayJournal((taskId?: string) => {
         setCurrentTab('plan');
         if (taskId) {
           setTimeout(() => {
@@ -3212,8 +3211,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }, 200);
         }
       });
+      if (typeof unsub === 'function') cleanups.push(unsub);
     }
-  }, [addDailyCardItem, goals, language, currentBlock, markTaskDone, shiftTaskTime, setCurrentTab]);
+
+    return () => {
+      cleanups.forEach(fn => fn());
+    };
+  }, [addDailyCardItem, goals, language, markTaskDone, shiftTaskTime, setCurrentTab]);
 
   // PRD FIX v0.3.28 C2 & v0.3.33 Part I: Sync active timer state with Electron Desktop Clock & Tray
   useEffect(() => {

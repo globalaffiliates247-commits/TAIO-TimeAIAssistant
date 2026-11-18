@@ -9,7 +9,24 @@ contextBridge.exposeInMainWorld('taioAPI', {
   openTodayJournal: (taskId) => ipcRenderer.send('taio-open-today-journal', taskId),
   sendTimerAction: (action) => ipcRenderer.send('taio-timer-action', action),
   notifyClockReady: () => ipcRenderer.send('taio-clock-ready'),
-  onQuickNoteReceived: (callback) => ipcRenderer.on('taio-quick-note-received', (_event, text) => callback(text)),
-  onTimerAction: (callback) => ipcRenderer.on('taio-timer-action', (_event, action) => callback(action)),
-  onOpenTodayJournal: (callback) => ipcRenderer.on('taio-open-today-journal', (_event, taskId) => callback(taskId)),
+  onQuickNoteReceived: (callback) => {
+    const listener = (_event, text) => callback(text);
+    ipcRenderer.on('taio-quick-note-received', listener);
+    return () => ipcRenderer.removeListener('taio-quick-note-received', listener);
+  },
+  onTimerAction: (callback) => {
+    const listener = (_event, action) => callback(action);
+    ipcRenderer.on('taio-timer-action', listener);
+    return () => ipcRenderer.removeListener('taio-timer-action', listener);
+  },
+  onOpenTodayJournal: (callback) => {
+    const listener = (_event, taskId) => callback(taskId);
+    ipcRenderer.on('taio-open-today-journal', listener);
+    return () => ipcRenderer.removeListener('taio-open-today-journal', listener);
+  },
+  onSyncTimer: (callback) => {
+    const listener = (_event, data) => callback(data);
+    ipcRenderer.on('taio-sync-timer', listener);
+    return () => ipcRenderer.removeListener('taio-sync-timer', listener);
+  },
 });

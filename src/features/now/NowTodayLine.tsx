@@ -29,7 +29,7 @@ export const NowTodayLine: React.FC<{ stepsToday?: number }> = ({ stepsToday = 0
       type="button"
       onClick={() => setCurrentTab('achievements')}
       className="w-full py-2.5 px-4 rounded-2xl bg-white border border-slate-200/80 hover:bg-slate-50 transition-all flex items-center justify-between text-xs text-slate-700 font-semibold shadow-xs select-none group"
-      title={t('nav.results', 'Hiệu quả')}
+      title={t('nav.efficiency', 'Hiệu quả')}
     >
       <div className="flex items-center gap-2 truncate">
         <Award className="w-4 h-4 text-amber-500 shrink-0" />

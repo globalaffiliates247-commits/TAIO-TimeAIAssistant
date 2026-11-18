@@ -209,7 +209,7 @@ export const SyncSection: React.FC = () => {
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
           <button
-            className={`${btn} bg-slate-900 text-white hover:bg-black border-slate-900 flex items-center gap-1.5`}
+            className={`${primary} flex items-center gap-1.5`}
             onClick={handleShareCode}
             aria-label="Gửi mã qua AirDrop / Chia sẻ"
             title="Gửi mã qua AirDrop / Chia sẻ"

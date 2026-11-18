@@ -183,7 +183,7 @@ export const AchievementsTab: React.FC = () => {
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Activity className="w-5 h-5 text-[#E0401F]" />
-              <span>Hiệu quả</span>
+              <span>{t('nav.efficiency', 'Hiệu quả')}</span>
             </h2>
             <button
               onClick={() => setMethodLibraryOpen(true)}

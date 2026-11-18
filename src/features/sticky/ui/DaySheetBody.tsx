@@ -600,9 +600,22 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       { updateDailyCardItem, setBlocks, dailyCardItems }
     );
 
-    // 5. Open mini clock on Mac / mobile
+    // 5. Open mini clock on Mac / mobile with instant timer sync
     if (typeof window !== 'undefined') {
-      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void } }).taioAPI;
+      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void; updateTimer?: (payload: any) => void } }).taioAPI;
+      if (bridge?.updateTimer) {
+        bridge.updateTimer({
+          taskId: it.id,
+          title: it.text,
+          subtitle: language === 'vi' ? 'Đang thực hiện' : 'In progress',
+          mode: 'task',
+          startedAt: Date.now(),
+          endsAt: Date.now() + dur * 60000,
+          remaining: `${dur}p`,
+          lang: language,
+          isCountDown: true,
+        });
+      }
       if (bridge?.openClockWindow) {
         bridge.openClockWindow();
       }

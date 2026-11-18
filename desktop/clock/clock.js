@@ -438,4 +438,11 @@
   if (window.taioAPI && window.taioAPI.notifyClockReady) {
     window.taioAPI.notifyClockReady();
   }
+
+  // PRD v0.3.43 Fix: Direct IPC listener for timer sync (reliable and instant)
+  if (window.taioAPI && window.taioAPI.onSyncTimer) {
+    window.taioAPI.onSyncTimer((data) => {
+      window.updateUI(data);
+    });
+  }
 })();

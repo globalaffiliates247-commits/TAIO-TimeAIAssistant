@@ -235,9 +235,16 @@ ipcMain.on("taio-open-today-journal", (_event, taskId) => {
 
 function syncClockWindowData() {
   if (!clockWindow || clockWindow.isDestroyed() || !clockWindow.webContents) return;
+  // 1. Direct IPC send (reliable, context-isolation safe)
+  try {
+    clockWindow.webContents.send('taio-sync-timer', currentTimerData);
+  } catch (err) {
+    console.error('[main] syncClockWindowData IPC send failed', err);
+  }
+  // 2. JavaScript execution fallback
   clockWindow.webContents.executeJavaScript(
     `if (typeof updateUI === 'function') updateUI(${JSON.stringify(currentTimerData)});`
-  );
+  ).catch(() => {});
 }
 
 // B35.5: Tray with timer display

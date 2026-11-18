@@ -32,7 +32,7 @@ export const Navbar: React.FC = () => {
   const tabs: { id: AppTab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'now', label: t('nav.now', 'Lúc này'), icon: Clock },
     { id: 'plan', label: t('nav.plan', 'Kế hoạch'), icon: Calendar },
-    { id: 'achievements', label: t('nav.results', 'Hiệu quả'), icon: Activity },
+    { id: 'achievements', label: t('nav.efficiency', 'Hiệu quả'), icon: Activity },
     { id: 'goals', label: t('nav.goals', 'Mục tiêu'), icon: Target },
   ];
 
