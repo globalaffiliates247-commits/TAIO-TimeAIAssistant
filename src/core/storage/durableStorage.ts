@@ -267,3 +267,10 @@ export function setStorageItemSync<T>(key: string, value: T): void {
     window.localStorage.setItem(LS_PREFIX + key, JSON.stringify(value));
   } catch {}
 }
+
+export function removeStorageItemSync(key: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(LS_PREFIX + key);
+  } catch {}
+}

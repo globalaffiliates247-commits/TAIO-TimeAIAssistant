@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { updateScheduleEntry } from '@/features/tasks';
 import { TemplateScheduleModal } from '@/features/schedule-template';
+import { AddEventModal } from '@/features/events';
 
 const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; border: string }> = {
   deep: { label: 'Tập trung sâu', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200/70' },
@@ -61,6 +62,7 @@ export const PlanTab: React.FC = () => {
 
   const [activeView, setActiveView] = useState<'card' | 'timeline' | 'matrix'>('card');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [showAddEventModal, setShowAddEventModal] = useState<boolean>(false);
   const [templateModalOpen, setTemplateModalOpen] = useState<boolean>(false);
 
   const [newTitle, setNewTitle] = useState<string>('');
@@ -180,6 +182,15 @@ export const PlanTab: React.FC = () => {
           >
             <RotateCw className="w-3.5 h-3.5 text-slate-500" />
             <span className="hidden sm:inline">Lịch mẫu</span>
+          </button>
+
+          <button
+            onClick={() => setShowAddEventModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all"
+            title="Thêm sự kiện, sinh nhật, ngày lễ, giỗ..."
+          >
+            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+            <span>Thêm sự kiện</span>
           </button>
 
           <button
@@ -404,7 +415,9 @@ export const PlanTab: React.FC = () => {
                             } ${
                               isCurrent 
                                 ? 'border-2 border-[var(--taio-brand)] bg-orange-50/60 shadow-xs ring-1 ring-[var(--taio-brand)]/20'
-                                : 'border border-slate-200 hover:border-slate-300 bg-white shadow-2xs'
+                                : isParallel
+                                  ? 'border border-slate-200 hover:border-slate-300 bg-white shadow-2xs'
+                                  : 'border border-slate-200 border-l-[3.5px] border-l-sky-500 hover:border-slate-300 bg-white shadow-2xs'
                             }`}
                           >
                             {/* Row 1: Time, Type, Status, Actions */}
@@ -744,6 +757,12 @@ export const PlanTab: React.FC = () => {
       <TemplateScheduleModal
         isOpen={templateModalOpen}
         onClose={() => setTemplateModalOpen(false)}
+      />
+
+      {/* PRD v0.3.45 Part A: Add Event Modal */}
+      <AddEventModal
+        isOpen={showAddEventModal}
+        onClose={() => setShowAddEventModal(false)}
       />
 
     </div>

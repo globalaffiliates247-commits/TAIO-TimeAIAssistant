@@ -41,7 +41,11 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         CAPPluginMethod(name: "getMotionCapability", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestMotionPermission", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "queryMotionSegments", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "queryPedometer", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "queryPedometer", returnType: CAPPluginReturnPromise),
+        // v0.3.45 Part D EventKit (iOS Calendar)
+        CAPPluginMethod(name: "getCalendarPermissionStatus", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "requestCalendarPermission", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "fetchCalendarEvents", returnType: CAPPluginReturnPromise)
     ]
 
     private var db: OpaquePointer?

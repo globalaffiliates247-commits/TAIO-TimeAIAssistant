@@ -3,7 +3,7 @@
 // a line that starts with a time is "Có giờ", lines under "Chưa xếp giờ" are "Linh động".
 import React, { useMemo, useRef, useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import type { DailyCardItem } from '@/types';
+import type { DailyCardItem, ItemStatus } from '@/types';
 import { getDeviceNow, getDeviceCalendarDate, getDeviceTimeMinutes, computeBlockStatus, openClockWindowWithSync } from '@/core/clock';
 import { STICKY_COLORS, StickyNote } from '../model/stickyTypes';
 import {
@@ -22,6 +22,9 @@ import { getPreviousDay } from '@/features/dayclose';
 import { TemplateScheduleModal } from '@/features/schedule-template';
 import { SwipeEntryCard } from '@/features/swipe';
 import { Clock, Trash2, Copy, Calendar, X, RotateCw, Play, Square, AlertTriangle, ArrowRight, CornerDownRight, ChevronRight, Plus, Check, GripVertical } from 'lucide-react';
+import { expandOccurrences, EventOccurrence } from '@/domain/events';
+import { defaultLunarProvider } from '@/domain/lunar';
+import { fetchIOSCalendarOccurrences, EventDetailModal } from '@/features/events';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
@@ -40,6 +43,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     currentBlock,
     setCheckInBlock,
     setCheckInModalOpen,
+    scheduledEvents,
   } = useApp();
   const day = note.date!;
   const today = getDeviceCalendarDate();
@@ -68,6 +72,31 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   // PRD v0.3.44 Part A: Inline input for gaps
   const [activeGapInput, setActiveGapInput] = useState<{ start: string; text: string } | null>(null);
+
+  // PRD v0.3.45 Part B & D: Scheduled Events & Occurrences
+  const [selectedEventOccurrence, setSelectedEventOccurrence] = useState<EventOccurrence | null>(null);
+  const [externalOccurrences, setExternalOccurrences] = useState<EventOccurrence[]>([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    fetchIOSCalendarOccurrences(day).then(events => {
+      if (isMounted) setExternalOccurrences(events);
+    });
+    return () => { isMounted = false; };
+  }, [day]);
+
+  const allOccurrences = useMemo(() => {
+    const localOccurrences = expandOccurrences(scheduledEvents || [], day, day, defaultLunarProvider);
+    return [...localOccurrences, ...externalOccurrences];
+  }, [scheduledEvents, day, externalOccurrences]);
+
+  const allDayOccurrences = useMemo(() => {
+    return allOccurrences.filter(o => o.allDay);
+  }, [allOccurrences]);
+
+  const timedOccurrences = useMemo(() => {
+    return allOccurrences.filter(o => !o.allDay && o.start);
+  }, [allOccurrences]);
 
   const handleCommitGapInput = (gap: { start: string; end: string; mins: number }) => {
     if (!activeGapInput || !activeGapInput.text.trim()) {
@@ -160,8 +189,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   // Part E3.1: Read unified scheduleBlocks for today, or dailyCardItems for other days
   const timed = useMemo(() => {
+    let baseTimed: Array<DailyCardItem & { isTemplateBlock?: boolean; isScheduledEvent?: boolean; occurrence?: EventOccurrence }> = [];
     if (isToday && scheduleBlocks) {
-      return scheduleBlocks
+      baseTimed = scheduleBlocks
         .filter(b => Boolean(b.startTime && b.endTime) && b.status !== 'dropped')
         .filter(b => {
           if (!showTemplateBlocks && (b.isTemplateBlock || b.blockKind === 'ritual' || b.id === 'b-10' || b.id === 'b-user-dayclose' || b.id === 'b-ritual-close')) {
@@ -198,11 +228,30 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
             children,
             extensions: b.extensions || cardItem?.extensions,
           } as DailyCardItem & { isTemplateBlock?: boolean };
-        })
-        .sort((a, b) => toMins(a.start!) - toMins(b.start!));
+        });
+    } else {
+      baseTimed = (rawDayItems.filter(i => i.start) as Array<DailyCardItem & { isTemplateBlock?: boolean }>);
     }
-    return rawDayItems.filter(i => i.start).sort((a, b) => toMins(a.start!) - toMins(b.start!));
-  }, [isToday, scheduleBlocks, showTemplateBlocks, rawDayItems, day]);
+
+    // PRD v0.3.45 Part B2: Merge timed occurrences into schedule sorted by time
+    const eventItems: Array<DailyCardItem & { isTemplateBlock?: boolean; isScheduledEvent?: boolean; occurrence?: EventOccurrence }> = timedOccurrences.map(o => ({
+      id: `occ-${o.eventId}-${o.date}`,
+      text: o.title,
+      start: o.start!,
+      end: o.end || o.start!,
+      date: day,
+      status: (o.status === 'done' ? 'done' : 'open') as ItemStatus,
+      carryCount: 0,
+      origin: 'planned' as const,
+      isScheduledEvent: true,
+      occurrence: o,
+      extra: {},
+      children: [],
+      extensions: [],
+    }));
+
+    return [...baseTimed, ...eventItems].sort((a, b) => toMins(a.start!) - toMins(b.start!));
+  }, [isToday, scheduleBlocks, showTemplateBlocks, rawDayItems, day, timedOccurrences, dailyCardItems]);
 
   const items = useMemo(() => {
     const flexItems = rawDayItems.filter(i => !i.start);
@@ -1308,7 +1357,74 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         );
       })()}
 
+      {/* PRD v0.3.45 Part B2: All-day events horizontal banner cards */}
+      {allDayOccurrences.length > 0 && (
+        <div className="space-y-1.5 pb-2 mb-2 border-b border-dashed border-slate-300/60">
+          {allDayOccurrences.map(ev => {
+            const isExt = ev.source?.startsWith('external');
+            return (
+              <div
+                key={ev.eventId}
+                onClick={() => setSelectedEventOccurrence(ev)}
+                className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-orange-50/90 hover:bg-orange-100/80 border border-orange-200 text-xs text-orange-950 font-medium cursor-pointer transition-all shadow-2xs group"
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span className="p-1 rounded-lg bg-white/90 text-[var(--taio-brand)] shrink-0 shadow-2xs">
+                    <Calendar className="w-3.5 h-3.5" />
+                  </span>
+                  <span className="font-bold truncate text-slate-900">{ev.title}</span>
+                  {isExt && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white text-slate-600 border border-slate-200 shrink-0 flex items-center gap-1 font-semibold">
+                      <span>📱</span>
+                      <span>Lịch iPhone</span>
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-bold text-orange-800 bg-orange-100 px-2 py-0.5 rounded-full shrink-0 border border-orange-200">
+                  Cả ngày
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {timed.map(it => {
+        // PRD v0.3.45 Part B2: Timed Scheduled Event row (No Play/Dừng button)
+        if ((it as any).isScheduledEvent) {
+          const occ = (it as any).occurrence as EventOccurrence;
+          const isExt = occ?.source?.startsWith('external');
+          return (
+            <React.Fragment key={it.id}>
+              <div
+                onClick={() => setSelectedEventOccurrence(occ)}
+                className="group/row flex items-center justify-between gap-2 px-2.5 py-1.5 -mx-1 rounded-xl bg-orange-50/70 hover:bg-orange-100/60 border border-orange-200/70 text-xs transition-all cursor-pointer shadow-2xs"
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span className="font-bold font-mono text-orange-950 shrink-0">{it.start}</span>
+                  <span className="p-0.5 rounded text-[var(--taio-brand)] shrink-0">
+                    <Calendar className="w-3.5 h-3.5" />
+                  </span>
+                  <span className="font-semibold text-slate-900 truncate">{it.text}</span>
+                  {isExt ? (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white text-slate-600 border border-slate-200 shrink-0 flex items-center gap-1">
+                      <span>📱</span>
+                      <span>Lịch iPhone</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 shrink-0 font-medium">
+                      Sự kiện
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 shrink-0 text-slate-400 group-hover/row:text-slate-600">
+                  <span className="text-[11px] font-mono">{it.start} – {it.end}</span>
+                </div>
+              </div>
+            </React.Fragment>
+          );
+        }
+
         const gap = gapAfter.get(it.id);
         const sug = gap ? suggestForGap(flex, taken, gap.mins, dailyCardItems) : undefined;
         if (sug) taken.add(sug.id);
@@ -2118,6 +2234,12 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       <TemplateScheduleModal
         isOpen={templateModalOpen}
         onClose={() => setTemplateModalOpen(false)}
+      />
+
+      {/* PRD v0.3.45 Part B: Event Detail Modal */}
+      <EventDetailModal
+        occurrence={selectedEventOccurrence}
+        onClose={() => setSelectedEventOccurrence(null)}
       />
     </div>
   );

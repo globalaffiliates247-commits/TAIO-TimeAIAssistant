@@ -82,5 +82,9 @@
 	<string>TAIO Time sử dụng vùng địa lý trên thiết bị để tự động nhắc việc khi bạn đến hoặc rời địa điểm đã cài đặt.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>TAIO Time dùng dữ liệu chuyển động để đếm bước chân và gợi ý ghi lại thời gian di chuyển mà bạn quên ghi.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>TAIO Time cần quyền truy cập Lịch để hiển thị các sự kiện cá nhân cùng với thời gian biểu trong ngày.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>TAIO Time cần quyền truy cập Lịch để hiển thị các sự kiện cá nhân cùng với thời gian biểu trong ngày.</string>
 </dict>
 </plist>

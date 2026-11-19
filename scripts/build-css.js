@@ -27,7 +27,7 @@ async function build() {
   
   // Extract all words/candidates
   const candidateSet = new Set();
-  const wordRegex = /([a-zA-Z0-9_\-\/\[\]\:\%\#\.\>\<\=]+)/g;
+  const wordRegex = /([a-zA-Z0-9_\-\/\[\]\:\%\#\.\=\(\)\,\!]+)/g;
 
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf8');
@@ -155,18 +155,18 @@ body {
 }
 
 /* Brand Color Aliases for legacy #E0401F */
-.bg-\[\#E0401F\] { background-color: var(--taio-brand); }
-.hover\:bg-\[\#E0401F\]:hover { background-color: var(--taio-brand); }
-.hover\:bg-\[\#d03515\]:hover { background-color: var(--taio-brand-hover); }
-.hover\:bg-\[\#cc3515\]:hover { background-color: var(--taio-brand-hover); }
-.hover\:bg-\[\#c53314\]:hover { background-color: var(--taio-brand-hover); }
-.hover\:bg-\[\#c93517\]:hover { background-color: var(--taio-brand-hover); }
-.text-\[\#E0401F\] { color: var(--taio-brand); }
-.border-\[\#E0401F\] { border-color: var(--taio-brand); }
-.ring-\[\#E0401F\] { --tw-ring-color: var(--taio-brand); }
-.focus\:ring-\[\#E0401F\]:focus { --tw-ring-color: var(--taio-brand); }
-.stroke-\[\#E0401F\] { stroke: var(--taio-brand); }
-.fill-\[\#E0401F\] { fill: var(--taio-brand); }
+.bg-\\[\\#E0401F\\] { background-color: var(--taio-brand); }
+.hover\\:bg-\\[\\#E0401F\\]:hover { background-color: var(--taio-brand); }
+.hover\\:bg-\\[\\#d03515\\]:hover { background-color: var(--taio-brand-hover); }
+.hover\\:bg-\\[\\#cc3515\\]:hover { background-color: var(--taio-brand-hover); }
+.hover\\:bg-\\[\\#c53314\\]:hover { background-color: var(--taio-brand-hover); }
+.hover\\:bg-\\[\\#c93517\\]:hover { background-color: var(--taio-brand-hover); }
+.text-\\[\\#E0401F\\] { color: var(--taio-brand); }
+.border-\\[\\#E0401F\\] { border-color: var(--taio-brand); }
+.ring-\\[\\#E0401F\\] { --tw-ring-color: var(--taio-brand); }
+.focus\\:ring-\\[\\#E0401F\\]:focus { --tw-ring-color: var(--taio-brand); }
+.stroke-\\[\\#E0401F\\] { stroke: var(--taio-brand); }
+.fill-\\[\\#E0401F\\] { fill: var(--taio-brand); }
 `;
 
   const finalCss = generatedCss + "\n" + customCss;

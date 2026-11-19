@@ -83,6 +83,10 @@ export interface TAIONativePluginInterface {
   cancelBlockAlarms(): Promise<{ ok: boolean }>;
   getAlarmCapability(): Promise<{ alarmKit: boolean }>;
   syncWidgetSchedule(options: { scheduleJson: string }): Promise<{ ok: boolean; synced?: boolean }>;
+  // v0.3.45 Part D EventKit (iOS Calendar - read-only)
+  getCalendarPermissionStatus(): Promise<{ status: string; authorized: boolean }>;
+  requestCalendarPermission(): Promise<{ granted: boolean; error?: string }>;
+  fetchCalendarEvents(options: { startDate: string; endDate?: string }): Promise<{ ok: boolean; events: Array<{ id: string; title: string; date: string; allDay: boolean; start?: string; end?: string; source: string; notes?: string }>; error?: string }>;
 }
 
 export const TAIONative = registerPlugin<TAIONativePluginInterface>('TAIONative');

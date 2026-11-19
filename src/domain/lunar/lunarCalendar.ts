@@ -209,3 +209,19 @@ export class VietnamLunarProvider implements LunarProvider {
 }
 
 export const defaultLunarProvider = new VietnamLunarProvider();
+
+/**
+ * Convenience helper to convert solar date to lunar date.
+ * Accepts either ISO string "YYYY-MM-DD" or SolarDate object.
+ * Returns null if out of bounds (1900-2100) or module disabled.
+ */
+export function toLunar(date: string | SolarDate): LunarDate | null {
+  if (!LUNAR_MODULE_ENABLED) return null;
+  if (!date) return null;
+  if (typeof date === 'string') {
+    const parts = date.split('-').map(Number);
+    if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) return null;
+    return defaultLunarProvider.toLunar({ year: parts[0], month: parts[1], day: parts[2] });
+  }
+  return defaultLunarProvider.toLunar(date);
+}

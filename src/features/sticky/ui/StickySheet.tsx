@@ -10,24 +10,39 @@ import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { useApp } from '@/context/AppContext';
+import { toLunar } from '@/domain/lunar';
 
 const dayTitle = (date: string, lang: 'vi' | 'en' = 'vi') => {
   const [y, m, d] = date.split('-').map(Number);
   const dateObj = new Date(y, (m || 1) - 1, d || 1);
   const today = getDeviceCalendarDate();
+  
+  // PRD v0.3.45 Part C: Hiển thị Âm lịch
+  let lunarSuffix = '';
+  try {
+    const lunar = toLunar(date);
+    if (lunar) {
+      lunarSuffix = lang === 'en' 
+        ? ` · Lunar ${lunar.day}/${lunar.month}` 
+        : ` · ${lunar.day}/${lunar.month}${lunar.isLeap ? ' nhuận' : ''} Âm lịch`;
+    }
+  } catch {
+    lunarSuffix = '';
+  }
+
   if (lang === 'en') {
     const wdEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dateObj.getDay()];
     const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     if (date === today) {
-      return `Today's Journal · ${wdEn}, ${monthsEn[(m || 1) - 1]} ${d}`;
+      return `Today's Journal · ${wdEn}, ${monthsEn[(m || 1) - 1]} ${d}${lunarSuffix}`;
     }
-    return `Journal · ${wdEn}, ${monthsEn[(m || 1) - 1]} ${d}`;
+    return `Journal · ${wdEn}, ${monthsEn[(m || 1) - 1]} ${d}${lunarSuffix}`;
   }
   const wd = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'][dateObj.getDay()];
   if (date === today) {
-    return `Nhật ký hôm nay · ${wd} ${d}/${m}`;
+    return `Nhật ký hôm nay · ${wd} ${d}/${m}${lunarSuffix}`;
   }
-  return `Nhật ký ${wd} ${d}/${m}`;
+  return `Nhật ký ${wd} ${d}/${m}${lunarSuffix}`;
 };
 
 export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: number }> = ({ note, floating, z }) => {

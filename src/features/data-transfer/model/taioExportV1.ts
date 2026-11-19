@@ -20,7 +20,7 @@ import {
 } from '../../../types';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { PROFILES } from '../../../data/mockData';
-import { toEpochMs } from '../../../core/storage/durableStorage';
+import { toEpochMs, mergeCollectionsByUpdatedAt, getStorageItemSync, setStorageItemSync } from '../../../core/storage/durableStorage';
 import { loadUserMotivationState, saveUserMotivationState } from '@/features/motivation';
 import { loadTombstones, mergeTombstones, type Tombstone } from './tombstones';
 import { getStickyNotesForExport, applyStickyNotesFromImport, loadStickyTombstones, type StickyTombstone } from '@/features/sticky/model/stickyStore';
@@ -112,6 +112,7 @@ export interface TaioExportV1 {
   days?: Array<Record<string, unknown>>;
   journalItems?: Array<Record<string, unknown>>;
   stickyNotes?: Array<Record<string, unknown>>;
+  events?: Array<Record<string, unknown>>;
   deletedStickies?: Array<{ id: string; deletedAt: number }>;
   deletedItems?: Array<{ id: string; deletedAt: number }>;
   todayJournalSummary?: { date: string; count: number; hash: string };
@@ -168,6 +169,7 @@ export interface AppImportableState {
   dayTemplate: DayTemplateSlot[];
   importedDays: ExportedDayRecord[];
   closedDays?: ClosedDaysMap;
+  scheduledEvents?: any[];
 }
 
 function extractExtra(obj: Record<string, unknown>, knownKeys: string[]): Record<string, unknown> | undefined {
@@ -1252,6 +1254,17 @@ export function applyTaioImport(
     );
   }
 
+  // PRD v0.3.45 Part E: Merge or import scheduled events
+  if (Array.isArray(payload.events)) {
+    try {
+      const existing = getStorageItemSync<any[]>('scheduled_events_store', []);
+      const merged = mergeCollectionsByUpdatedAt(existing, payload.events as any[]);
+      setStorageItemSync('scheduled_events_store', merged);
+    } catch (e) {
+      console.warn('Failed to import scheduled events:', e);
+    }
+  }
+
   const totalSkipped =
     breakdown.goals.skipped +
     breakdown.projects.skipped +
@@ -1497,6 +1510,16 @@ export function buildTaioExportV1(state: AppImportableState): TaioExportV1 {
     closedDays: state.closedDays || {},
     journalItems: exportedJournalItems,
     stickyNotes: getStickyNotesForExport() as unknown as Array<Record<string, unknown>>,
+    events: (() => {
+      try {
+        if (Array.isArray(state.scheduledEvents)) {
+          return (state.scheduledEvents as any[]).filter(e => e.source !== 'external:ios-calendar') as unknown as Array<Record<string, unknown>>;
+        }
+        const list = getStorageItemSync<any[]>('scheduled_events_store', []);
+        return (Array.isArray(list) ? list : []).filter((e: any) => e.source !== 'external:ios-calendar');
+      } catch {}
+      return [];
+    })(),
     deletedStickies: loadStickyTombstones(),
     deletedItems: loadTombstones(),
     todayJournalSummary,

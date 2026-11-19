@@ -29,8 +29,10 @@ import {
   Code,
   TrendingUp,
   Compass,
-  Target
+  Target,
+  Calendar
 } from 'lucide-react';
+import { isIOSCalendarConnected, setIOSCalendarConnected, requestIOSCalendarAccess } from '@/features/events/service/calendarSync';
 import { isGoalSuggestionInlineChipEnabled, setGoalSuggestionInlineChipEnabled } from '@/features/goals';
 import { startNativeLiveActivity, stopNativeLiveActivity, openNativeAppSettings } from '../features/native';
 import { isMotionTrackingEnabled, setMotionTrackingEnabled, getMotionCapability } from '@/features/motion';
@@ -87,6 +89,23 @@ export const ProfileModal: React.FC = () => {
 
   const [motionTrackingState, setMotionTrackingState] = useState<boolean>(() => isMotionTrackingEnabled());
   const [motionAuthStatus, setMotionAuthStatus] = useState<string>('unknown');
+  const [iosCalConnected, setIosCalConnected] = useState<boolean>(() => isIOSCalendarConnected());
+
+  const handleToggleIOSCalendar = async () => {
+    if (iosCalConnected) {
+      setIOSCalendarConnected(false);
+      setIosCalConnected(false);
+      showToast(language === 'vi' ? 'Đã ngắt kết nối lịch iPhone' : 'Disconnected iPhone Calendar');
+    } else {
+      const res = await requestIOSCalendarAccess();
+      if (res.granted) {
+        setIosCalConnected(true);
+        showToast(language === 'vi' ? 'Đã kết nối lịch iPhone thành công' : 'iPhone Calendar connected');
+      } else {
+        alert(res.error || (language === 'vi' ? 'Chưa được cấp quyền truy cập Lịch' : 'Calendar access not granted'));
+      }
+    }
+  };
 
   React.useEffect(() => {
     if (isNativePlatform) {
@@ -821,6 +840,44 @@ export const ProfileModal: React.FC = () => {
                       </a>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* PRD v0.3.45 Part D2: Kết nối lịch iPhone (EventKit) */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-[var(--taio-brand)] shrink-0">
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <span>{language === 'vi' ? 'Kết nối Lịch iPhone' : 'iPhone Calendar'}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          iosCalConnected ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}>
+                          {iosCalConnected ? (language === 'vi' ? 'Đã kết nối' : 'Connected') : (language === 'vi' ? 'Chưa kết nối' : 'Not connected')}
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {language === 'vi'
+                          ? 'Đọc sự kiện từ ứng dụng Lịch (EventKit) hiển thị vào Nhật ký hôm nay. Chỉ đọc an toàn, không tải lên máy chủ.'
+                          : 'Read-only events from Apple Calendar (EventKit). Never uploaded to cloud.'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleToggleIOSCalendar}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0 ${
+                      iosCalConnected
+                        ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
+                        : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white'
+                    }`}
+                  >
+                    {iosCalConnected 
+                      ? (language === 'vi' ? 'Ngắt kết nối' : 'Disconnect') 
+                      : (language === 'vi' ? 'Kết nối lịch iPhone' : 'Connect iPhone Calendar')}
+                  </button>
                 </div>
               </div>
 

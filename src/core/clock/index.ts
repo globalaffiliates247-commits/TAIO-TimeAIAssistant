@@ -222,8 +222,8 @@ export function getBlockStatusDisplay(status: BlockStatus): {
     default:
       return {
         label: 'Sắp tới',
-        badgeClass: 'bg-zinc-100 text-zinc-800 border border-zinc-300 font-medium',
-        dotColor: 'bg-zinc-500',
+        badgeClass: 'bg-sky-50 text-sky-800 border border-sky-300 font-semibold',
+        dotColor: 'bg-sky-500',
       };
   }
 }

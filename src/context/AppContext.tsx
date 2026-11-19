@@ -33,6 +33,7 @@ import {
   snoozeScheduleEntry,
 } from '../features/tasks';
 import type { SnoozeOption } from '../features/snooze';
+import type { ScheduledEvent, EventOccurrenceOverride } from '../domain/events';
 import {
   AlarmSettings,
   ActiveAlarmState,
@@ -246,6 +247,13 @@ interface AppContextType {
   removeDailyCardItem: (id: string) => void;
   toggleDailyCardItem: (id: string) => void;
   carryOverItem: (id: string, action: 'tomorrow' | 'today' | 'leave' | 'drop', reason?: string) => void;
+
+  // PRD v0.3.45 Part A & E: Scheduled Events
+  scheduledEvents: ScheduledEvent[];
+  addScheduledEvent: (event: Omit<ScheduledEvent, 'id' | 'updatedAt'> | any) => string;
+  updateScheduledEvent: (id: string, patch: Partial<ScheduledEvent>) => void;
+  deleteScheduledEvent: (id: string) => void;
+  addOccurrenceException: (eventId: string, date: string, override: EventOccurrenceOverride) => void;
 
   // v0.3.0 / v0.23.0 B24 & v0.3.20: Data Export & Import (taio-time-export v1)
   exportModalOpen: boolean;
@@ -700,6 +708,64 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const todayDateStr = getDeviceCalendarDate();
   const [selectedCardDate, setSelectedCardDate] = useState<string>(todayDateStr);
   const [dailyCardItems, setDailyCardItems] = useState<DailyCardItem[]>(INITIAL_DAILY_CARD_ITEMS);
+
+  // PRD v0.3.45 Part E: Scheduled Events state & durable storage
+  const [scheduledEvents, setScheduledEvents] = useState<ScheduledEvent[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = localStorage.getItem('taio_scheduled_events');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem('taio_scheduled_events', JSON.stringify(scheduledEvents));
+      saveDurableState('scheduledEvents', scheduledEvents, Date.now());
+    } catch (e) {
+      console.warn('Failed to persist scheduledEvents:', e);
+    }
+  }, [scheduledEvents]);
+
+  const addScheduledEvent = useCallback((event: any): string => {
+    const id = event.id || `ev-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const newEvent: ScheduledEvent = {
+      ...event,
+      id,
+      category: event.category || 'event',
+      startDate: event.startDate || getDeviceCalendarDate(),
+      updatedAt: Date.now(),
+    };
+    setScheduledEvents(prev => [newEvent, ...prev]);
+    return id;
+  }, []);
+
+  const updateScheduledEvent = useCallback((id: string, patch: Partial<ScheduledEvent>) => {
+    setScheduledEvents(prev => prev.map(ev => {
+      if (ev.id !== id) return ev;
+      return { ...ev, ...patch, updatedAt: Date.now() };
+    }));
+  }, []);
+
+  const deleteScheduledEvent = useCallback((id: string) => {
+    setScheduledEvents(prev => prev.map(ev => {
+      if (ev.id !== id) return ev;
+      return { ...ev, deletedAt: Date.now(), updatedAt: Date.now() };
+    }));
+  }, []);
+
+  const addOccurrenceException = useCallback((eventId: string, date: string, override: EventOccurrenceOverride) => {
+    setScheduledEvents(prev => prev.map(ev => {
+      if (ev.id !== eventId) return ev;
+      const exceptions = { ...(ev.exceptions || {}), [date]: override };
+      return { ...ev, exceptions, updatedAt: Date.now() };
+    }));
+  }, []);
 
   // PRD FIX v0.3.30 Part E2: Free Timers State & Operations
   const [freeTimers, setFreeTimers] = useState<FreeTimer[]>(() => loadFreeTimers());
@@ -2018,12 +2084,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           break;
         }
       }
+
+      // PRD v0.3.45 Part B3: Check ScheduledEvent reminders
+      for (const ev of (scheduledEvents || [])) {
+        if (!ev.reminders?.length || ev.deletedAt) continue;
+        for (const rem of ev.reminders) {
+          const remTime = rem.time || '08:00';
+          const remMinutes = timeToMinutes(remTime);
+          if (remMinutes !== currentMinutes) continue;
+
+          let shouldTrigger = false;
+          if (rem.trigger === 'day_of' && ev.startDate === todayDate) {
+            shouldTrigger = true;
+          } else if (rem.trigger === 'days_before') {
+            const daysOffset = rem.amount || 1;
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + daysOffset);
+            const targetDateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+            if (ev.startDate === targetDateStr) {
+              shouldTrigger = true;
+            }
+          }
+
+          const remKey = `ev_rem_${todayDate}_${ev.id}_${remTime}`;
+          if (shouldTrigger && !firedAlarmsRef.current.has(remKey)) {
+            firedAlarmsRef.current.add(remKey);
+
+            if (rem.level === 'loud') {
+              const soundRes = await triggerAlarmSound(alarmSettings);
+              setActiveAlarmState({
+                isActive: true,
+                blockTitle: `Sự kiện: ${ev.title}`,
+                startTime: remTime,
+                soundName: alarmSettings.customSound?.name,
+                isFallbackDefault: soundRes.isFallbackDefault,
+                fallbackReason: soundRes.fallbackReason,
+                ringStartedAt: Date.now(),
+              });
+            } else {
+              playGentleChime(alarmSettings.volume * 0.5);
+              setTimeout(() => stopRingSessionAudio(), 2500);
+            }
+
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+              try {
+                new Notification('TAIO Time Nhắc sự kiện', {
+                  body: `${remTime}: ${ev.title}`,
+                  icon: '/favicon.ico',
+                });
+              } catch {}
+            }
+            break;
+          }
+        }
+      }
     };
 
     checkAlarmTrigger();
     const interval = setInterval(checkAlarmTrigger, 10000);
     return () => clearInterval(interval);
-  }, [alarmSettings, scheduleBlocks]);
+  }, [alarmSettings, scheduleBlocks, scheduledEvents]);
 
   const dismissAlarm = () => {
     stopAllAlarmSounds();
@@ -3414,6 +3534,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateDailyCardItem,
       removeDailyCardItem,
       carryOverItem,
+      scheduledEvents,
+      addScheduledEvent,
+      updateScheduledEvent,
+      deleteScheduledEvent,
+      addOccurrenceException,
       exportModalOpen,
       setExportModalOpen,
       shareToken,
