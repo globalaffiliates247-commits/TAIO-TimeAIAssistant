@@ -12,6 +12,7 @@ import {
   useDeviceClock,
   getDeviceCalendarDate,
   timeToMinutes,
+  minutesToTime,
 } from '../core/clock';
 import { 
   Calendar, 
@@ -67,6 +68,7 @@ export const PlanTab: React.FC = () => {
   const [newStartTime, setNewStartTime] = useState<string>('16:00');
   const [newEndTime, setNewEndTime] = useState<string>('17:00');
   const [newGoalId, setNewGoalId] = useState<string>(goals[0]?.id || '');
+  const [addTimeError, setAddTimeError] = useState<string>('');
 
   // Inline edit state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -82,6 +84,18 @@ export const PlanTab: React.FC = () => {
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
+
+    // Validate: giờ bắt đầu phải trước giờ kết thúc
+    const startMins = timeToMinutes(newStartTime);
+    const endMins = timeToMinutes(newEndTime);
+    if (startMins >= endMins) {
+      setAddTimeError(language === 'vi'
+        ? 'Giờ bắt đầu phải trước giờ kết thúc'
+        : 'Start time must be before end time');
+      return;
+    }
+    setAddTimeError('');
+
     const goal = goals.find(g => g.id === newGoalId);
     
     // Part E3.2: Unified - adds to dailyCardItems for today
@@ -100,6 +114,7 @@ export const PlanTab: React.FC = () => {
     });
 
     setNewTitle('');
+    setAddTimeError('');
     setShowAddModal(false);
   };
 
@@ -336,6 +351,7 @@ export const PlanTab: React.FC = () => {
                               onClick={() => {
                                 setNewStartTime(prevBlock!.endTime);
                                 setNewEndTime(block.startTime);
+                                setAddTimeError('');
                                 setShowAddModal(true);
                               }}
                               className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium border border-slate-200 shadow-2xs transition-colors"
@@ -631,7 +647,17 @@ export const PlanTab: React.FC = () => {
                     type="time"
                     required
                     value={newStartTime}
-                    onChange={e => setNewStartTime(e.target.value)}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setNewStartTime(val);
+                      setAddTimeError('');
+                      // Auto-adjust end time: if new start >= current end, push end = start + 30p
+                      const startM = timeToMinutes(val);
+                      const endM = timeToMinutes(newEndTime);
+                      if (startM >= endM) {
+                        setNewEndTime(minutesToTime((startM + 30) % 1440));
+                      }
+                    }}
                     className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
                   />
                 </div>
@@ -641,11 +667,19 @@ export const PlanTab: React.FC = () => {
                     type="time"
                     required
                     value={newEndTime}
-                    onChange={e => setNewEndTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
+                    onChange={e => {
+                      setNewEndTime(e.target.value);
+                      setAddTimeError('');
+                    }}
+                    className={`w-full px-3 py-2 rounded-xl bg-slate-100 border text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 ${
+                      addTimeError ? 'border-red-400 ring-1 ring-red-300' : 'border-slate-200 focus:ring-[#E0401F]'
+                    }`}
                   />
                 </div>
               </div>
+              {addTimeError && (
+                <p className="text-xs text-red-500 font-medium -mt-1">{addTimeError}</p>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Loại khối</label>
@@ -679,7 +713,7 @@ export const PlanTab: React.FC = () => {
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => { setShowAddModal(false); setAddTimeError(''); }}
                   className="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-semibold transition-colors"
                 >
                   Hủy
