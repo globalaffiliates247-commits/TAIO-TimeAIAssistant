@@ -8,7 +8,9 @@ VERSION="$(node -p "require('./package.json').version")"
 OUT=dist_dmg
 STAGE="$OUT/stage"
 
-npm run build
+if [ "${SKIP_BUILD:-0}" != "1" ]; then
+  npm run build
+fi
 rm -rf "$OUT" && mkdir -p "$STAGE/app"
 
 # App payload: desktop shell + preload + web export

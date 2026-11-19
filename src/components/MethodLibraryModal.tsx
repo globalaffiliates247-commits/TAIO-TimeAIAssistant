@@ -92,7 +92,7 @@ export const MethodLibraryModal: React.FC = () => {
               onClick={() => setActiveCategory(cat.id as any)}
               className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all border ${
                 activeCategory === cat.id
-                  ? 'bg-gradient-to-r from-[#E0401F] to-orange-500 text-white border-transparent shadow-sm'
+                  ? 'bg-gradient-to-r from-[var(--taio-brand)] to-orange-500 text-white border-transparent shadow-sm'
                   : 'bg-slate-100/80 border-slate-200 text-slate-500 hover:text-slate-900'
               }`}
             >

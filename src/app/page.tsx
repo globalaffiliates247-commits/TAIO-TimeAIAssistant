@@ -133,7 +133,7 @@ const MainAppContent: React.FC = () => {
                     toastUndoAction();
                     dismissToast();
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-[#E0401F] text-white font-bold text-[11px] shrink-0"
+                  className="px-2.5 py-1 rounded-lg bg-[var(--taio-brand)] text-white font-bold text-[11px] shrink-0"
                 >
                   {toastActionLabel || 'Hoàn tác'}
                 </button>
@@ -159,7 +159,7 @@ const MainAppContent: React.FC = () => {
           <div className="max-w-xl mx-auto flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 text-white ${
-                isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+                isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]'
               }`}>
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
@@ -189,7 +189,7 @@ const MainAppContent: React.FC = () => {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => resolveServerBackupChoice('restore')}
-                className="px-3 py-1.5 rounded-xl bg-[#E0401F] text-white font-bold text-xs shadow-xs"
+                className="px-3 py-1.5 rounded-xl bg-[var(--taio-brand)] text-white font-bold text-xs shadow-xs"
               >
                 Khôi phục dữ liệu cũ
               </button>

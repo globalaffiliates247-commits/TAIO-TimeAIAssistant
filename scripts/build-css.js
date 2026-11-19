@@ -42,7 +42,7 @@ async function build() {
 
   console.log(`Found ${candidateSet.size} candidate tokens across ${files.length} source files.`);
 
-  const compiler = await tw.compile('@import "tailwindcss";', {
+  const compiler = await tw.compile('@import "tailwindcss"; @theme { --color-brand: var(--taio-brand); --color-brand-hover: var(--taio-brand-hover); }', {
     base: path.resolve(__dirname, '..'),
     loadStylesheet: async (id, base) => {
       let resolvedPath;
@@ -63,6 +63,8 @@ async function build() {
 
   const customCss = `
 :root {
+  --taio-brand: #E8311C;
+  --taio-brand-hover: #d02512;
   --background: #ffffff;
   --foreground: #0f172a;
   --native-sat: 0px;
@@ -151,6 +153,20 @@ body {
 .animate-pulse-slow {
   animation: pulse-slow 3s ease-in-out infinite;
 }
+
+/* Brand Color Aliases for legacy #E0401F */
+.bg-\[\#E0401F\] { background-color: var(--taio-brand); }
+.hover\:bg-\[\#E0401F\]:hover { background-color: var(--taio-brand); }
+.hover\:bg-\[\#d03515\]:hover { background-color: var(--taio-brand-hover); }
+.hover\:bg-\[\#cc3515\]:hover { background-color: var(--taio-brand-hover); }
+.hover\:bg-\[\#c53314\]:hover { background-color: var(--taio-brand-hover); }
+.hover\:bg-\[\#c93517\]:hover { background-color: var(--taio-brand-hover); }
+.text-\[\#E0401F\] { color: var(--taio-brand); }
+.border-\[\#E0401F\] { border-color: var(--taio-brand); }
+.ring-\[\#E0401F\] { --tw-ring-color: var(--taio-brand); }
+.focus\:ring-\[\#E0401F\]:focus { --tw-ring-color: var(--taio-brand); }
+.stroke-\[\#E0401F\] { stroke: var(--taio-brand); }
+.fill-\[\#E0401F\] { fill: var(--taio-brand); }
 `;
 
   const finalCss = generatedCss + "\n" + customCss;

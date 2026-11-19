@@ -36,7 +36,7 @@ export const HighlightSettings: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
           <div className="flex items-center gap-1.5 font-bold text-xs text-slate-800">
-            <Sparkles className={`w-3.5 h-3.5 ${isCool ? 'text-blue-500' : 'text-[#E0401F]'}`} />
+            <Sparkles className={`w-3.5 h-3.5 ${isCool ? 'text-blue-500' : 'text-[var(--taio-brand)]'}`} />
             <span>{isEn ? 'Highlight Text' : 'Chữ nổi bật'}</span>
           </div>
           <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -128,7 +128,7 @@ export const HighlightSettings: React.FC = () => {
           aria-checked={bold}
           onClick={handleToggleBold}
           className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
-            bold ? (isCool ? 'bg-blue-600' : 'bg-[#E0401F]') : 'bg-slate-300'
+            bold ? (isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
           }`}
         >
           <span

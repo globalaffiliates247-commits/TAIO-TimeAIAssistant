@@ -10,7 +10,7 @@ import {
   RotateCw, 
   Plus, 
   Calendar, 
-  Sparkles, 
+  Lightbulb, 
   ChevronLeft, 
   ChevronRight, 
   Trash2, 
@@ -162,7 +162,7 @@ export const DailyCardView: React.FC = () => {
             <SwipeEntryCard variant="compact" />
             <button
               onClick={() => setIsActiveCaptureOpen(true)}
-              className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-[#E0401F] text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
+              className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-[var(--taio-brand)] text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
               title="Thu thập chủ động & Ghi bù"
             >
               <span>Ghi bù</span>
@@ -173,7 +173,7 @@ export const DailyCardView: React.FC = () => {
         {/* Planning Fallacy & Throughput Hint (B25.4) */}
         <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+            <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
             <span>
               <strong>Nhịp năng suất:</strong> Bạn thường hoàn thành trung bình <strong>{usualDailyCapacity} việc/ngày</strong>. Thẻ hôm nay đang có <strong>{currentTotal} việc</strong> {currentTotal > usualDailyCapacity ? '(chú ý nguy cơ quá tải)' : '(vừa vặn, khả thi)'}.
             </span>
@@ -212,7 +212,7 @@ export const DailyCardView: React.FC = () => {
 
             <button
               type="submit"
-              className="py-2.5 px-4 rounded-2xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+              className="py-2.5 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4 text-white" />
               <span>Thêm</span>
@@ -424,7 +424,7 @@ export const DailyCardView: React.FC = () => {
         <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold uppercase text-slate-400">Ngoài kế hoạch (có mục tiêu)</span>
-            <p className="text-2xl font-bold text-[#E0401F] mt-1">
+            <p className="text-2xl font-bold text-[var(--taio-brand)] mt-1">
               {currentItems.filter(i => i.origin === 'unplanned_goal').length} việc
             </p>
           </div>

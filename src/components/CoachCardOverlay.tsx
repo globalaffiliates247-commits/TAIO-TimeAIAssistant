@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Sparkles, ArrowRight, X, BookOpen } from 'lucide-react';
+import { Lightbulb, ArrowRight, X, BookOpen } from 'lucide-react';
 
 export const CoachCardOverlay: React.FC = () => {
   const { 
@@ -31,7 +31,7 @@ export const CoachCardOverlay: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs font-bold text-orange-400">
-            <Sparkles className="w-4 h-4 text-orange-400" />
+            <Lightbulb className="w-4 h-4 text-orange-400" />
             <span>{activeCoachCard.conceptLineVi}</span>
           </div>
           <button 
@@ -61,7 +61,7 @@ export const CoachCardOverlay: React.FC = () => {
           </button>
           <button
             onClick={handleLearnMore}
-            className="px-3 py-1 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white text-xs font-bold flex items-center gap-1 shadow-sm"
+            className="px-3 py-1 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold flex items-center gap-1 shadow-sm"
           >
             <BookOpen className="w-3 h-3" />
             <span>Tìm hiểu thêm</span>

@@ -108,7 +108,7 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
           type="button"
           disabled={isLimitReached}
           onClick={() => handleSubmit()}
-          className="py-2.5 px-4 rounded-xl bg-[#E0401F] hover:bg-[#c93517] disabled:opacity-50 disabled:pointer-events-none text-white font-bold text-xs shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
+          className="py-2.5 px-4 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] disabled:opacity-50 disabled:pointer-events-none text-white font-bold text-xs shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
           <span>{inputText.trim() ? 'Chạy' : 'Bấm giờ'}</span>

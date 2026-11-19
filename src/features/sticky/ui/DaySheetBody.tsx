@@ -4,7 +4,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import type { DailyCardItem } from '@/types';
-import { getDeviceNow, getDeviceCalendarDate, getDeviceTimeMinutes, computeBlockStatus } from '@/core/clock';
+import { getDeviceNow, getDeviceCalendarDate, getDeviceTimeMinutes, computeBlockStatus, openClockWindowWithSync } from '@/core/clock';
 import { STICKY_COLORS, StickyNote } from '../model/stickyTypes';
 import {
   findGaps, fmtDuration, nextFreeStart, parseTimedText, priorityOf, suggestDuration,
@@ -65,6 +65,61 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const [showCommittedCheckmark, setShowCommittedCheckmark] = useState<string | null>(null);
   const [savedTooltipId, setSavedTooltipId] = useState<string | null>(null);
   const savedTooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // PRD v0.3.44 Part A: Inline input for gaps
+  const [activeGapInput, setActiveGapInput] = useState<{ start: string; text: string } | null>(null);
+
+  const handleCommitGapInput = (gap: { start: string; end: string; mins: number }) => {
+    if (!activeGapInput || !activeGapInput.text.trim()) {
+      setActiveGapInput(null);
+      return;
+    }
+    const rawText = activeGapInput.text.trim();
+    const parsed = parseTimedText(rawText);
+    let itemText = parsed.rest || rawText;
+    const requestedDur = parsed.durationMins || 30;
+    const effectiveDur = Math.min(requestedDur, gap.mins);
+    const start = gap.start;
+    const end = toTime((toMins(start) + effectiveDur) % 1440);
+
+    // Goal tag detection (#goal)
+    let goalId: string | undefined;
+    let goalName: string | undefined;
+    const goalTagMatch = itemText.match(/#([a-zA-Zà-ỹÀ-Ỹ0-9_]+)/g);
+    if (goalTagMatch && goals?.length) {
+      for (const rawTagWithHash of goalTagMatch) {
+        const tag = rawTagWithHash.slice(1);
+        if (/^[1-9]$/.test(tag)) continue;
+        const matched = matchGoalByTag(tag, goals);
+        if (matched) {
+          goalId = matched.id;
+          goalName = matched.name;
+          itemText = itemText.replace(rawTagWithHash, ' ').replace(/\s+/g, ' ').trim();
+        }
+      }
+    }
+
+    const newItem: DailyCardItem = {
+      id: `dc-${Date.now()}`,
+      date: day,
+      text: itemText,
+      start,
+      end,
+      status: 'open',
+      origin: 'planned',
+      carryCount: 0,
+      goalId,
+      goalName,
+      extra: {
+        estimateMins: effectiveDur,
+        blockType: goalId ? 'deep' : 'personal',
+      },
+    };
+
+    addDailyCardItem(newItem);
+    showToast(language === 'vi' ? `✓ Đã thêm "${itemText}" (${start} – ${end})` : `✓ Added "${itemText}" (${start} – ${end})`);
+    setActiveGapInput(null);
+  };
 
   // PRD v0.3.37 Part B: Delete with undo and subtask safety prompt
   const handleDeleteItemWithUndo = (it: DailyCardItem) => {
@@ -601,26 +656,18 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       { updateDailyCardItem, setBlocks, dailyCardItems }
     );
 
-    // 5. Open mini clock on Mac / mobile with instant timer sync
-    if (typeof window !== 'undefined') {
-      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void; updateTimer?: (payload: any) => void } }).taioAPI;
-      if (bridge?.updateTimer) {
-        bridge.updateTimer({
-          taskId: it.id,
-          title: it.text,
-          subtitle: language === 'vi' ? 'Đang thực hiện' : 'In progress',
-          mode: 'task',
-          startedAt: Date.now(),
-          endsAt: Date.now() + dur * 60000,
-          remaining: `${dur}p`,
-          lang: language,
-          isCountDown: true,
-        });
-      }
-      if (bridge?.openClockWindow) {
-        bridge.openClockWindow();
-      }
-    }
+    // 5. Open mini clock on Mac / mobile with instant timer sync (PRD v0.3.44 Part B2)
+    openClockWindowWithSync({
+      taskId: it.id,
+      title: it.text,
+      subtitle: language === 'vi' ? 'Đang thực hiện' : 'In progress',
+      mode: 'task',
+      startedAt: Date.now(),
+      endsAt: Date.now() + dur * 60000,
+      remaining: `${dur}p`,
+      lang: language,
+      isCountDown: true,
+    });
 
     showToast?.(language === 'vi' ? `▶ Bắt đầu "${it.text}" (${dur}p)` : `▶ Started "${it.text}" (${dur}m)`);
     setStartConflictModal(null);
@@ -1573,44 +1620,79 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               />
             )}
             {gap && (
-              <div
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  if (dragOverTarget?.time !== gap.start) {
-                    setDragOverTarget({ type: 'gap', time: gap.start });
-                  }
-                }}
-                onDragLeave={() => {
-                  if (dragOverTarget?.time === gap.start) setDragOverTarget(null);
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  handlePerformDrop(gap.start, { fitGap: true });
-                }}
-                className={`flex items-center gap-2 text-sm py-1 px-1.5 rounded-lg transition-all ${
-                  dragOverTarget?.type === 'gap' && dragOverTarget.time === gap.start
-                    ? 'bg-amber-100/70 border-2 border-dashed border-[#E0401F]'
-                    : ''
-                }`}
-                style={{ color: c.muted }}
-              >
-                {dragOverTarget?.type === 'gap' && dragOverTarget.time === gap.start ? (
-                  <div className="flex items-center gap-2 w-full text-[#E0401F] font-semibold text-xs">
-                    <div className="h-0.5 flex-1 bg-[#E0401F] rounded-full" />
-                    <span className="px-2 py-0.5 bg-[#E0401F] text-white font-mono rounded font-bold shadow-2xs">
-                      {gap.start}
-                    </span>
-                    <span className="text-[11px]">{language === 'vi' ? 'Thả vào khoảng trống' : 'Drop into gap'}</span>
-                    <div className="h-0.5 flex-1 bg-[#E0401F] rounded-full" />
-                  </div>
-                ) : (
-                  <>
-                    <span className="font-semibold tabular-nums">{gap.start}</span>
-                    <IconHourglass color={c.muted} />
-                    <span>Bạn có {fmtDuration(gap.mins)} trống đến {gap.end}</span>
-                  </>
-                )}
-              </div>
+              activeGapInput?.start === gap.start ? (
+                <div className="flex items-center gap-2 py-1 px-2 my-0.5 rounded-lg bg-amber-50/90 border border-amber-300 shadow-2xs">
+                  <span className="font-semibold text-xs font-mono text-amber-900 shrink-0">{gap.start}</span>
+                  <input
+                    type="text"
+                    autoFocus
+                    value={activeGapInput.text}
+                    onChange={(e) => setActiveGapInput({ ...activeGapInput, text: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleCommitGapInput(gap);
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        setActiveGapInput(null);
+                      }
+                    }}
+                    onBlur={() => {
+                      setTimeout(() => {
+                        setActiveGapInput(null);
+                      }, 150);
+                    }}
+                    placeholder={language === 'vi' ? 'Làm gì trong lúc này?' : 'What to do during this time?'}
+                    className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder-amber-700/50"
+                  />
+                  <span className="text-[11px] text-amber-700/70 font-mono shrink-0">
+                    tối đa {gap.mins}p
+                  </span>
+                </div>
+              ) : (
+                <div
+                  onClick={() => setActiveGapInput({ start: gap.start, text: '' })}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (dragOverTarget?.time !== gap.start) {
+                      setDragOverTarget({ type: 'gap', time: gap.start });
+                    }
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverTarget?.time === gap.start) setDragOverTarget(null);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handlePerformDrop(gap.start, { fitGap: true });
+                  }}
+                  className={`group flex items-center gap-2 text-sm py-1 px-1.5 rounded-lg transition-all cursor-pointer hover:bg-amber-50/60 ${
+                    dragOverTarget?.type === 'gap' && dragOverTarget.time === gap.start
+                      ? 'bg-amber-100/70 border-2 border-dashed border-[var(--taio-brand)]'
+                      : ''
+                  }`}
+                  style={{ color: c.muted }}
+                  title={language === 'vi' ? 'Bấm để gõ nhanh việc vào khung giờ này' : 'Click to quickly add task into this gap'}
+                >
+                  {dragOverTarget?.type === 'gap' && dragOverTarget.time === gap.start ? (
+                    <div className="flex items-center gap-2 w-full text-[var(--taio-brand)] font-semibold text-xs">
+                      <div className="h-0.5 flex-1 bg-[var(--taio-brand)] rounded-full" />
+                      <span className="px-2 py-0.5 bg-[var(--taio-brand)] text-white font-mono rounded font-bold shadow-2xs">
+                        {gap.start}
+                      </span>
+                      <span className="text-[11px]">{language === 'vi' ? 'Thả vào khoảng trống' : 'Drop into gap'}</span>
+                      <div className="h-0.5 flex-1 bg-[var(--taio-brand)] rounded-full" />
+                    </div>
+                  ) : (
+                    <>
+                      <span className="font-semibold tabular-nums">{gap.start}</span>
+                      <IconHourglass color={c.muted} />
+                      <span className="group-hover:text-amber-800 transition-colors">
+                        Bạn có {fmtDuration(gap.mins)} trống đến {gap.end}
+                      </span>
+                    </>
+                  )}
+                </div>
+              )
             )}
             {gap && sug && (() => {
               const dur = durationForPlacement(sug, dailyCardItems);
@@ -1888,7 +1970,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   setExpandedSubTaskIds(prev => new Set(prev).add(singleId));
                   setAutoFocusSubTaskId(singleId);
                 }}
-                className="px-2.5 py-1 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#E0401F] font-medium text-xs flex items-center gap-1 transition-colors"
+                className="px-2.5 py-1 rounded-xl bg-orange-50 hover:bg-orange-100 text-[var(--taio-brand)] font-medium text-xs flex items-center gap-1 transition-colors"
                 title={language === 'en' ? 'Add subtask' : 'Thêm việc con'}
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -1959,7 +2041,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   <button
                     type="button"
                     onClick={() => handleStartItemNow(startConflictModal.item, { mode: 'replace' })}
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <span>{language === 'vi' ? 'Thay việc đang làm (Tạm dừng việc cũ)' : 'Replace (Pause previous)'}</span>
                   </button>

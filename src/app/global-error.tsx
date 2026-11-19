@@ -69,7 +69,7 @@ export default function GlobalError({
 
               <button
                 onClick={handleReload}
-                style={{ padding: '10px 20px', borderRadius: '12px', background: '#E0401F', border: 'none', color: '#ffffff', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--taio-brand)', border: 'none', color: '#ffffff', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
               >
                 🔄 Tải lại
               </button>

@@ -649,8 +649,8 @@ import { ColorPalette, PaletteColors, InterruptionActivityCategory } from '../ty
 export const PALETTES: Record<ColorPalette, PaletteColors> = {
   warm: {
     name: 'warm',
-    brandAccent: '#E0401F',
-    deepWork: '#E0401F',
+    brandAccent: 'var(--taio-brand)',
+    deepWork: 'var(--taio-brand)',
     interruption: '#F59E0B',
     meeting: '#8A6248',
     personal: '#5E8C31',

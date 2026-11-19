@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { clockState } from '@/features/clock';
-import { getDeviceTimeMinutes, timeToMinutes } from '@/core/clock';
+import { getDeviceTimeMinutes, timeToMinutes, openClockWindowWithSync } from '@/core/clock';
 import { formatDuration, formatDurationClock } from '@/i18n/format';
 import { Clock, Hourglass, Coffee } from 'lucide-react';
 
@@ -45,22 +45,19 @@ export const HeaderClockPill: React.FC = () => {
 
   const handleClick = () => {
     if (typeof window !== 'undefined') {
-      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void; updateTimer?: (payload: any) => void } }).taioAPI;
+      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void } }).taioAPI;
       if (bridge?.openClockWindow) {
-        if (bridge?.updateTimer) {
-          bridge.updateTimer({
-            taskId: st.block?.id || null,
-            title: st.title,
-            subtitle: st.subtitle,
-            mode: st.mode,
-            startedAt: st.startedAt,
-            endsAt: st.endsAt,
-            remaining: displayText,
-            lang: language,
-            isCountDown: st.isCountDown ?? true,
-          });
-        }
-        bridge.openClockWindow();
+        openClockWindowWithSync({
+          taskId: st.block?.id || null,
+          title: st.title,
+          subtitle: st.subtitle,
+          mode: st.mode,
+          startedAt: st.startedAt,
+          endsAt: st.endsAt,
+          remaining: displayText,
+          lang: language,
+          isCountDown: st.isCountDown ?? true,
+        });
         return;
       }
     }

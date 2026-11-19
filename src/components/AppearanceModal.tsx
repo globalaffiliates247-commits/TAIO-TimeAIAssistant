@@ -82,7 +82,7 @@ export const AppearanceModal: React.FC = () => {
     { 
       id: 'warm', 
       label: '🔥 Tông màu Nóng (Đỏ cam & Trắng)', 
-      desc: 'Nền ấm, thẻ trắng, điểm nhấn đỏ cam thương hiệu #E0401F nổi bật.',
+      desc: 'Nền ấm, thẻ trắng, điểm nhấn đỏ cam thương hiệu var(--taio-brand) nổi bật.',
       icon: '🔥'
     },
   ];
@@ -123,7 +123,7 @@ export const AppearanceModal: React.FC = () => {
                   onClick={() => setDeviceLook(d.id)}
                   className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                     deviceLook === d.id
-                      ? 'border-[#E0401F] bg-red-50 text-slate-900'
+                      ? 'border-[var(--taio-brand)] bg-red-50 text-slate-900'
                       : 'border-slate-200 bg-white/60 text-slate-700 hover:border-slate-300'
                   }`}
                 >
@@ -131,7 +131,7 @@ export const AppearanceModal: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold">{d.label}</span>
-                      {deviceLook === d.id && <Check className="w-3.5 h-3.5 text-[#E0401F]" />}
+                      {deviceLook === d.id && <Check className="w-3.5 h-3.5 text-[var(--taio-brand)]" />}
                     </div>
                     <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{d.desc}</p>
                   </div>
@@ -152,7 +152,7 @@ export const AppearanceModal: React.FC = () => {
                   onClick={() => setThemeMode(t.id)}
                   className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                     themeMode === t.id
-                      ? 'border-[#E0401F] bg-red-50 text-slate-900'
+                      ? 'border-[var(--taio-brand)] bg-red-50 text-slate-900'
                       : 'border-slate-200 bg-white/60 text-slate-500 hover:border-slate-300 hover:text-slate-900'
                   }`}
                 >
@@ -178,14 +178,14 @@ export const AppearanceModal: React.FC = () => {
                     onClick={() => setPalette(p.id)}
                     className={`w-full p-3 rounded-xl border text-left transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       isSelected
-                        ? 'border-[#E0401F] bg-red-50 text-slate-900'
+                        ? 'border-[var(--taio-brand)] bg-red-50 text-slate-900'
                         : 'border-slate-200 bg-white/60 text-slate-700 hover:border-slate-300'
                     }`}
                   >
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold">{p.label}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#E0401F]" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[var(--taio-brand)]" />}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5">{p.desc}</p>
                     </div>
@@ -269,13 +269,13 @@ export const AppearanceModal: React.FC = () => {
           <div className="pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <RotateCw className="w-3.5 h-3.5 text-[#E0401F]" />
+                <RotateCw className="w-3.5 h-3.5 text-[var(--taio-brand)]" />
                 <span>{language === 'vi' ? 'Lịch ngày mẫu' : 'Daily Template Schedule'}</span>
               </label>
               <button
                 type="button"
                 onClick={() => setTemplateModalOpen(true)}
-                className="text-xs text-[#E0401F] font-bold hover:underline flex items-center gap-1"
+                className="text-xs text-[var(--taio-brand)] font-bold hover:underline flex items-center gap-1"
               >
                 <span>{language === 'vi' ? 'Quản lý lịch mẫu ↗' : 'Manage Templates ↗'}</span>
               </button>
@@ -294,7 +294,7 @@ export const AppearanceModal: React.FC = () => {
         <div className="px-5 py-3 border-t border-slate-200 bg-white/50 flex justify-end">
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-md transition-all"
+            className="px-5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-md transition-all"
           >
             Áp dụng và Đóng
           </button>

@@ -108,7 +108,7 @@ export default function Error({
 
           <button
             onClick={handleReload}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
           >
             <RotateCw className="w-4 h-4" />
             <span>Tải lại</span>

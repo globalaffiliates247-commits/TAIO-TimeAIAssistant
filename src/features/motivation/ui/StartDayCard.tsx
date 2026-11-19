@@ -19,7 +19,7 @@ import { pickQuote } from '../model/pickQuote';
 import { quoteRegistry } from '../model/quoteRegistry';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { getPreviousDay, isDayClosed } from '@/features/dayclose';
-import { Sparkles, ArrowRight, X, Clock, Plus } from 'lucide-react';
+import { Lightbulb, ArrowRight, X, Clock, Plus } from 'lucide-react';
 
 const STORAGE_KEY_START_DAY_SEEN = 'taio_start_day_card_seen';
 
@@ -169,8 +169,8 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
       </button>
 
       {/* Header pill */}
-      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#E0401F] mb-2">
-        <Sparkles size={14} className="text-[#E0401F]" />
+      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--taio-brand)] mb-2">
+        <Lightbulb size={14} className="text-[var(--taio-brand)]" />
         <span>{t('motivation.startDayTitle', 'Bắt đầu ngày')}</span>
       </div>
 
@@ -254,7 +254,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
         <button
           onClick={handleStart}
           className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white shadow-xs transition-transform active:scale-95 ${
-            isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c73416]'
+            isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
           }`}
         >
           <span>{t('motivation.startDayBtn', 'Bắt đầu')}</span>

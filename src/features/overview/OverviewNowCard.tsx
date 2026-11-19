@@ -21,7 +21,7 @@ export const OverviewNowCard: React.FC<{ className?: string }> = ({ className = 
     setCurrentTab('goals');
   };
 
-  const PALETTE_COLORS = ['#E0401F', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#64748b'];
+  const PALETTE_COLORS = ['var(--taio-brand)', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#64748b'];
 
   return (
     <div
@@ -33,14 +33,14 @@ export const OverviewNowCard: React.FC<{ className?: string }> = ({ className = 
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-red-50 text-[#E0401F] flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-red-50 text-[var(--taio-brand)] flex items-center justify-center">
             <PieChart className="w-3.5 h-3.5" />
           </div>
           <span className="text-xs font-extrabold text-slate-900">
             {t('overview.nowCardTitle', { year: 2026, count: ledger.summary.totalGoals, defaultValue: `Toàn cảnh 2026 · ${ledger.summary.totalGoals} mục tiêu` })}
           </span>
         </div>
-        <div className="flex items-center gap-1 text-[11px] font-bold text-[#E0401F]">
+        <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--taio-brand)]">
           <span>{t('overview.viewOverview', 'Xem Toàn cảnh')}</span>
           <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
         </div>

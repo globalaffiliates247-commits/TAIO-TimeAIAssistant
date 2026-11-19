@@ -413,7 +413,7 @@ export const PriorityMatrix: React.FC = () => {
               onClick={() => setShowQuickAdd(!showQuickAdd)}
               className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-bold shadow-2xs shrink-0"
             >
-              <Plus className="w-3.5 h-3.5 text-[#E0401F]" />
+              <Plus className="w-3.5 h-3.5 text-[var(--taio-brand)]" />
               <span>Thêm việc</span>
             </button>
           </div>
@@ -431,7 +431,7 @@ export const PriorityMatrix: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <button
                   type="submit"
-                  className="px-3.5 py-2 rounded-xl bg-[#E0401F] text-white text-xs font-bold"
+                  className="px-3.5 py-2 rounded-xl bg-[var(--taio-brand)] text-white text-xs font-bold"
                 >
                   Lưu việc
                 </button>
@@ -483,7 +483,7 @@ export const PriorityMatrix: React.FC = () => {
                           </div>
                           <div className="flex flex-wrap items-center gap-2.5 mt-1 text-[11px] text-slate-500">
                             <span className="inline-flex items-center gap-1 font-medium text-slate-600">
-                              <Target className="w-3 h-3 text-[#E0401F] shrink-0" />
+                              <Target className="w-3 h-3 text-[var(--taio-brand)] shrink-0" />
                               <span className="truncate max-w-[200px]">
                                 {task.goalName || 'Ngoài mục tiêu chính'}
                               </span>
@@ -616,7 +616,7 @@ export const PriorityMatrix: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#E0401F]" />
+              <Sparkles className="w-4 h-4 text-[var(--taio-brand)]" />
               <span>Cân bằng thời gian giữa 4 nhóm ưu tiên</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">

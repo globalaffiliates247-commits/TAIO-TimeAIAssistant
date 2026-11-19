@@ -3,7 +3,7 @@
 // Answers the morning question: "Đêm qua bạn ngủ lúc mấy giờ? (Tính chi phí ngày hôm sau)"
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Moon, X, Clock, Check, Sparkles, ArrowRight } from 'lucide-react';
+import { Moon, X, Clock, Check, Lightbulb, ArrowRight } from 'lucide-react';
 import { getDeviceCalendarDate, timeToMinutes } from '../core/clock';
 
 const QUICK_TIMES = [
@@ -177,7 +177,7 @@ export const BedtimeCheckInPopover: React.FC = () => {
         <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2 mb-5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-amber-900 font-bold flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
               {delayMinutes > 0
                 ? `Trễ ${Math.floor(delayMinutes / 60) > 0 ? `${Math.floor(delayMinutes / 60)} giờ ` : ''}${delayMinutes % 60 ? `${delayMinutes % 60}p` : ''} so với mốc ${windDownTime}`
                 : `Đúng mốc nghỉ ngơi (${windDownTime})`}

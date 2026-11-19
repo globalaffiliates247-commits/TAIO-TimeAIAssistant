@@ -428,7 +428,7 @@ export interface CoachCard {
 
 // B25 (PRD v0.3.1): Daily Card, Carry-over & Work Diary
 export type ItemOrigin = 'planned' | 'unplanned_goal' | 'interruption';
-export type ItemStatus = 'open' | 'done' | 'carried' | 'left' | 'dropped';
+export type ItemStatus = 'open' | 'done' | 'carried' | 'left' | 'dropped' | 'in_progress';
 
 export interface DailyCardItem {
   id: string;

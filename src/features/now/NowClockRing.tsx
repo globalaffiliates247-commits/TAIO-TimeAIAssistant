@@ -30,7 +30,7 @@ export const NowClockRing: React.FC<NowClockRingProps> = ({
   const clampedPercent = Math.min(100, Math.max(0, percent));
   const strokeDashoffset = circumference - (clampedPercent / 100) * circumference;
 
-  const colorPrimary = isCool ? '#007aff' : '#E0401F';
+  const colorPrimary = isCool ? '#007aff' : 'var(--taio-brand)';
   const colorTrack = isCool ? '#e0f2fe' : '#fee2e2';
   const { highlightStyle } = useHighlight();
 

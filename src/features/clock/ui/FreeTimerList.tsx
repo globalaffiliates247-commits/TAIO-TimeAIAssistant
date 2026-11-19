@@ -233,7 +233,7 @@ export const FreeTimerList: React.FC<FreeTimerListProps> = ({
                   onFinishTimer(confirmDialogTimer.timer, true);
                   setConfirmDialogTimer(null);
                 }}
-                className="py-2 px-4 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white text-xs font-bold shadow-xs transition-colors"
+                className="py-2 px-4 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-xs transition-colors"
               >
                 Ghi vào sổ
               </button>

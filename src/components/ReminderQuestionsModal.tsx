@@ -9,7 +9,7 @@ import {
   Calendar, 
   Target, 
   ArrowRight, 
-  Sparkles, 
+  Lightbulb, 
   Clock, 
   CheckCircle2,
   Filter
@@ -59,7 +59,7 @@ export const ReminderQuestionsModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center shadow-md shadow-red-500/20">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[var(--taio-brand)] to-amber-500 flex items-center justify-center shadow-md shadow-red-500/20">
               <Compass className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -92,7 +92,7 @@ export const ReminderQuestionsModal: React.FC = () => {
               onClick={() => setActiveCategory(tab.id as any)}
               className={`px-3 py-1.5 rounded-xl font-semibold transition-all shrink-0 ${
                 activeCategory === tab.id
-                  ? 'bg-[#E0401F] text-white shadow-sm'
+                  ? 'bg-[var(--taio-brand)] text-white shadow-sm'
                   : 'bg-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
@@ -111,7 +111,7 @@ export const ReminderQuestionsModal: React.FC = () => {
                 onClick={() => setActiveQuestion(q)}
                 className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-3 ${
                   isSelected 
-                    ? 'bg-slate-50 border-[#E0401F]/50 shadow-md shadow-red-500/10' 
+                    ? 'bg-slate-50 border-[var(--taio-brand)]/50 shadow-md shadow-red-500/10' 
                     : 'bg-slate-50 border-slate-200 hover:border-slate-200'
                 }`}
               >
@@ -128,7 +128,7 @@ export const ReminderQuestionsModal: React.FC = () => {
 
                 {/* Answer Card based on user data */}
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed flex items-start gap-2.5">
-                  <Sparkles className="w-4 h-4 text-[#ff7556] shrink-0 mt-0.5" />
+                  <Lightbulb className="w-4 h-4 text-[var(--taio-brand)] shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-slate-800">Dữ liệu thực tế của bạn: </strong>
                     <span>
@@ -152,7 +152,7 @@ export const ReminderQuestionsModal: React.FC = () => {
                 <div className="flex items-center justify-end pt-1">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleAction(q); }}
-                    className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[#E0401F] text-slate-800 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[var(--taio-brand)] text-slate-800 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                   >
                     <span>{q.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />

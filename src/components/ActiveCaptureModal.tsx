@@ -9,7 +9,7 @@ import {
   Bot, 
   Check, 
   Plus, 
-  Sparkles, 
+  Lightbulb, 
   ArrowRight, 
   CheckCircle2, 
   Calendar, 
@@ -96,7 +96,7 @@ export const ActiveCaptureModal: React.FC = () => {
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs border ${
               isCool 
                 ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                : 'bg-red-50 border-red-200 text-[#E0401F]'
+                : 'bg-red-50 border-red-200 text-[var(--taio-brand)]'
             }`}>
               <Clock className="w-4 h-4" />
             </div>
@@ -123,7 +123,7 @@ export const ActiveCaptureModal: React.FC = () => {
             onClick={() => setActiveTab('backfill')}
             className={`pb-2.5 px-3 font-bold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'backfill'
-                ? isCool ? 'border-blue-600 text-blue-600' : 'border-[#E0401F] text-[#E0401F]'
+                ? isCool ? 'border-blue-600 text-blue-600' : 'border-[var(--taio-brand)] text-[var(--taio-brand)]'
                 : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -134,14 +134,14 @@ export const ActiveCaptureModal: React.FC = () => {
             onClick={() => setActiveTab('suggestions')}
             className={`pb-2.5 px-3 font-bold border-b-2 flex items-center gap-1.5 transition-all relative ${
               activeTab === 'suggestions'
-                ? isCool ? 'border-blue-600 text-blue-600' : 'border-[#E0401F] text-[#E0401F]'
+                ? isCool ? 'border-blue-600 text-blue-600' : 'border-[var(--taio-brand)] text-[var(--taio-brand)]'
                 : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             <Bot className="w-3.5 h-3.5" />
             <span>2. AI đoán sẵn</span>
             {passiveSuggestions.filter(s => s.status === 'pending').length > 0 && (
-              <span className={`w-2 h-2 rounded-full inline-block ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`} />
+              <span className={`w-2 h-2 rounded-full inline-block ${isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]'}`} />
             )}
           </button>
           {isNativePlatform && (
@@ -149,7 +149,7 @@ export const ActiveCaptureModal: React.FC = () => {
               onClick={() => setActiveTab('places')}
               className={`pb-2.5 px-3 font-bold border-b-2 flex items-center gap-1.5 transition-all ${
                 activeTab === 'places'
-                  ? isCool ? 'border-blue-600 text-blue-600' : 'border-[#E0401F] text-[#E0401F]'
+                  ? isCool ? 'border-blue-600 text-blue-600' : 'border-[var(--taio-brand)] text-[var(--taio-brand)]'
                   : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -166,7 +166,7 @@ export const ActiveCaptureModal: React.FC = () => {
           {activeTab === 'backfill' && (
             <form onSubmit={handleBackfillSubmit} className="space-y-4">
               <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <span>
                   <strong className="font-bold">Nguyên tắc:</strong> Bạn đã làm việc nhưng quên bật app? Hãy ghi bù lại khoảng thời gian thực tế đã qua để giữ trọn vẹn số liệu Sổ cái 24 giờ.
                 </span>
@@ -295,7 +295,7 @@ export const ActiveCaptureModal: React.FC = () => {
                   className={`w-full py-3 rounded-xl text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
                     isCool 
                       ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20' 
-                      : 'bg-[#E0401F] hover:bg-[#c83515] shadow-red-500/20'
+                      : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-red-500/20'
                   }`}
                 >
                   Xác nhận Ghi bù vào Sổ cái & Thẻ ngày
@@ -371,7 +371,7 @@ export const ActiveCaptureModal: React.FC = () => {
                           )}
 
                           {s.goalName && (
-                            <p className="text-xs text-[#E0401F] mt-1 font-medium">
+                            <p className="text-xs text-[var(--taio-brand)] mt-1 font-medium">
                               → Gắn với: {s.goalName}
                             </p>
                           )}
@@ -391,7 +391,7 @@ export const ActiveCaptureModal: React.FC = () => {
                             type="button"
                             onClick={() => acceptPassiveSuggestion(s.id, currentTitle)}
                             className={`px-4 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
-                              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
+                              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                             }`}
                           >
                             <Check className="w-3.5 h-3.5" />
@@ -461,7 +461,7 @@ export const ActiveCaptureModal: React.FC = () => {
                           key={r.id}
                           className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700"
                         >
-                          <span className={`font-bold shrink-0 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>
+                          <span className={`font-bold shrink-0 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`}>
                             Khi {r.trigger === 'arrive' ? 'ĐẾN' : 'RỜI'}:
                           </span>
                           <span className="flex-1 truncate font-medium">

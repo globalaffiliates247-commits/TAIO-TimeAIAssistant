@@ -339,7 +339,7 @@ export const SwipeReviewModal: React.FC = () => {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-2.5">
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs ${
-              isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+              isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]'
             }`}>
               <Layers className="w-4 h-4 text-white" />
             </div>
@@ -408,7 +408,7 @@ export const SwipeReviewModal: React.FC = () => {
                       </span>
                       {currentCard.goalName && (
                         <span className={`text-[10px] font-semibold flex items-center gap-1 ${
-                          isCool ? 'text-blue-600' : 'text-[#E0401F]'
+                          isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'
                         }`}>
                           <Target className="w-3 h-3" />
                           {currentCard.goalName}
@@ -436,7 +436,7 @@ export const SwipeReviewModal: React.FC = () => {
                       <span>Tồn đọng: {currentCard.ageDays} ngày</span>
                     </div>
                     <p className={`text-[11px] font-semibold flex items-center justify-center gap-1 pt-1 ${
-                      isCool ? 'text-blue-600' : 'text-[#E0401F]'
+                      isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'
                     }`}>
                       <Zap className="w-3 h-3" />
                       <span>Chạm vào thẻ để Làm ngay (có Hoàn tác 3 giây)</span>
@@ -479,7 +479,7 @@ export const SwipeReviewModal: React.FC = () => {
                           }}
                           className={`py-1.5 px-2 rounded-lg border font-medium ${
                             planDuration === opt.val 
-                              ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#E0401F] text-white border-[#E0401F]')
+                              ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-white border-[var(--taio-brand)]')
                               : 'bg-white text-slate-700 border-slate-200'
                           }`}
                         >
@@ -513,7 +513,7 @@ export const SwipeReviewModal: React.FC = () => {
                                 onClick={openNativeDatePicker}
                                 className={`w-full py-1.5 px-2 rounded-lg border font-medium flex items-center justify-center gap-1 truncate ${
                                   isSelected
-                                    ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#E0401F] text-white border-[#E0401F]')
+                                    ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-white border-[var(--taio-brand)]')
                                     : 'bg-white text-slate-700 border-slate-200'
                                 }`}
                               >
@@ -543,7 +543,7 @@ export const SwipeReviewModal: React.FC = () => {
                             onClick={() => setPlanDeadlineMode(chip)}
                             className={`py-1.5 px-2 rounded-lg border font-medium truncate ${
                               isSelected
-                                ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#E0401F] text-white border-[#E0401F]')
+                                ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-white border-[var(--taio-brand)]')
                                 : 'bg-white text-slate-700 border-slate-200'
                             }`}
                             title={label}
@@ -638,7 +638,7 @@ export const SwipeReviewModal: React.FC = () => {
                         type="button"
                         onClick={submitPlan}
                         className={`px-4 py-2 text-xs font-bold text-white rounded-xl shadow-sm ${
-                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
+                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                         }`}
                       >
                         Xếp vào lịch
@@ -671,7 +671,7 @@ export const SwipeReviewModal: React.FC = () => {
                   <button
                     onClick={() => handleAction('plan')}
                     className={`flex-1 py-3 px-4 rounded-2xl text-white flex items-center justify-center gap-2 transition-all font-bold text-xs shadow-sm ${
-                      isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
+                      isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                     }`}
                   >
                     <span>{t('swipe.scheduleNow')}</span>
@@ -728,7 +728,7 @@ export const SwipeReviewModal: React.FC = () => {
               <button
                 onClick={() => setIsSwipeModalOpen(false)}
                 className={`w-full py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
-                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c83515]'
+                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                 }`}
               >
                 Quay lại làm việc

@@ -121,7 +121,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
       <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-            isCool ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-[#E0401F]'
+            isCool ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-[var(--taio-brand)]'
           }`}>
             <Bell className="w-5 h-5" />
           </div>
@@ -140,7 +140,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
           aria-checked={settings.enabled}
           onClick={() => handleToggle(!settings.enabled)}
           className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
-            settings.enabled ? (isCool ? 'bg-blue-600' : 'bg-[#E0401F]') : 'bg-slate-300'
+            settings.enabled ? (isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
           }`}
         >
           <span
@@ -201,19 +201,19 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                 settings.soundType === 'default' && (settings.soundPreset === 'urgent' || !settings.soundPreset)
                   ? isCool
                     ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
-                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                    : 'border-[var(--taio-brand)] bg-orange-50/70 text-slate-900 shadow-2xs'
                   : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
                 <div>
                   <div className="text-xs font-bold text-slate-900">Gấp gáp (Mặc định)</div>
                   <div className="text-[11px] text-slate-500">Nhịp nhanh, dễ đánh thức</div>
                 </div>
               </div>
               {settings.soundType === 'default' && (settings.soundPreset === 'urgent' || !settings.soundPreset) && (
-                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'} shrink-0`} />
               )}
             </button>
 
@@ -228,19 +228,19 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                 settings.soundType === 'default' && settings.soundPreset === 'moderate'
                   ? isCool
                     ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
-                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                    : 'border-[var(--taio-brand)] bg-orange-50/70 text-slate-900 shadow-2xs'
                   : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
                 <div>
                   <div className="text-xs font-bold text-slate-900">Vừa phải (Chuông chuẩn)</div>
                   <div className="text-[11px] text-slate-500">Hòa âm êm ái, rõ ràng</div>
                 </div>
               </div>
               {settings.soundType === 'default' && settings.soundPreset === 'moderate' && (
-                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'} shrink-0`} />
               )}
             </button>
 
@@ -255,19 +255,19 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                 settings.soundType === 'default' && settings.soundPreset === 'gentle'
                   ? isCool
                     ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
-                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                    : 'border-[var(--taio-brand)] bg-orange-50/70 text-slate-900 shadow-2xs'
                   : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
                 <div>
                   <div className="text-xs font-bold text-slate-900">Dịu dàng</div>
                   <div className="text-[11px] text-slate-500">Chuông thiền, thanh thoát</div>
                 </div>
               </div>
               {settings.soundType === 'default' && settings.soundPreset === 'gentle' && (
-                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'} shrink-0`} />
               )}
             </button>
 
@@ -279,12 +279,12 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                 settings.soundType === 'custom'
                   ? isCool
                     ? 'border-blue-500 bg-blue-50/80 text-slate-900 shadow-2xs'
-                    : 'border-[#E0401F] bg-orange-50/70 text-slate-900 shadow-2xs'
+                    : 'border-[var(--taio-brand)] bg-orange-50/70 text-slate-900 shadow-2xs'
                   : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Upload className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <Upload className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
                 <div className="truncate max-w-[140px]">
                   <div className="text-xs font-bold text-slate-900">File của tôi</div>
                   <div className="text-[11px] text-slate-500 truncate">
@@ -293,7 +293,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                 </div>
               </div>
               {settings.soundType === 'custom' && (
-                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+                <Check className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'} shrink-0`} />
               )}
             </button>
           </div>
@@ -312,7 +312,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
               {settings.customSound ? (
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 text-xs">
                   <div className="flex items-center gap-2 truncate">
-                    <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} shrink-0`} />
+                    <Music className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'} shrink-0`} />
                     <span className="font-semibold text-slate-900 truncate">
                       {settings.customSound.name}
                     </span>
@@ -321,7 +321,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className={`px-2 py-1 rounded text-[11px] font-semibold ${isCool ? 'text-blue-600' : 'text-[#E0401F]'} hover:underline`}
+                      className={`px-2 py-1 rounded text-[11px] font-semibold ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'} hover:underline`}
                     >
                       Đổi file
                     </button>
@@ -341,7 +341,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full py-3 px-4 border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-xl text-center text-xs text-slate-600 transition-colors flex items-center justify-center gap-2 bg-white"
                 >
-                  <Upload className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                  <Upload className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
                   <span>Chọn file âm thanh từ điện thoại (MP3, M4A, WAV, AAC)</span>
                 </button>
               )}
@@ -350,7 +350,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
 
           {/* Platform Capability Note */}
           <div className="pt-2 flex items-center gap-2 text-[11px] text-slate-500">
-            <span className={`w-1.5 h-1.5 rounded-full ${isCool ? 'bg-blue-500' : 'bg-[#E0401F]'} shrink-0`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${isCool ? 'bg-blue-500' : 'bg-[var(--taio-brand)]'} shrink-0`} />
             <span>Nền tảng: {platformCap.description}</span>
           </div>
         </div>

@@ -69,7 +69,7 @@ export const OverviewScreen: React.FC = () => {
   };
 
   const PALETTE_COLORS = [
-    '#E0401F', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'
+    'var(--taio-brand)', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'
   ];
 
   // Aggregated view based on dimension: 'goal' | 'project' | 'workArea'
@@ -218,7 +218,7 @@ export const OverviewScreen: React.FC = () => {
       {/* Top Header: Title & Period Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E0401F] to-amber-500 text-white flex items-center justify-center shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--taio-brand)] to-amber-500 text-white flex items-center justify-center shadow-xs">
             <PieChart className="w-4 h-4" />
           </div>
           <div>
@@ -340,7 +340,7 @@ export const OverviewScreen: React.FC = () => {
               <div className="relative w-full h-2 rounded-full bg-slate-100 overflow-visible">
                 <div
                   style={{ width: `${Math.min(100, e.progressPercent)}%` }}
-                  className="h-full rounded-full bg-[#E0401F] transition-all"
+                  className="h-full rounded-full bg-[var(--taio-brand)] transition-all"
                 />
                 {/* Should-be-at marker */}
                 <div
@@ -403,7 +403,7 @@ export const OverviewScreen: React.FC = () => {
                       <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-black shrink-0">
                         {e.size || 'M'}
                       </span>
-                      <span className="truncate group-hover:text-[#E0401F] transition-colors">{e.name}</span>
+                      <span className="truncate group-hover:text-[var(--taio-brand)] transition-colors">{e.name}</span>
                     </div>
                   </td>
                   <td className="py-3.5 pr-4 min-w-[180px]">
@@ -420,7 +420,7 @@ export const OverviewScreen: React.FC = () => {
                       <div className="relative w-full h-2 rounded-full bg-slate-100 overflow-visible">
                         <div
                           style={{ width: `${Math.min(100, e.progressPercent)}%` }}
-                          className="h-full rounded-full bg-[#E0401F] transition-all"
+                          className="h-full rounded-full bg-[var(--taio-brand)] transition-all"
                         />
                         {/* Should-be-at Marker */}
                         <div

@@ -19,7 +19,7 @@ import {
   getAllQuotes,
 } from '../model/motivationStore';
 import { sendQuoteReaction } from '../model/quoteReaction';
-import { Sparkles, Quote, Check, Heart, Pin, Trash2 } from 'lucide-react';
+import { Lightbulb, Quote, Check, Heart, Pin, Trash2 } from 'lucide-react';
 
 export const MotivationSettingsSection: React.FC = () => {
   const { palette, showToast, language } = useApp();
@@ -143,7 +143,7 @@ export const MotivationSettingsSection: React.FC = () => {
       <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <Sparkles className={`w-4 h-4 ${isCool ? 'text-blue-500' : 'text-[#E0401F]'}`} />
+            <Lightbulb className={`w-4 h-4 ${isCool ? 'text-blue-500' : 'text-[var(--taio-brand)]'}`} />
             <h4 className="text-xs font-bold text-slate-900">
               {t('motivation.masterTitle', 'Câu truyền động lực')}
             </h4>
@@ -159,7 +159,7 @@ export const MotivationSettingsSection: React.FC = () => {
           aria-checked={settings.enabled}
           onClick={handleToggleMaster}
           className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
-            settings.enabled ? (isCool ? 'bg-[#007AFF]' : 'bg-[#E0401F]') : 'bg-slate-300'
+            settings.enabled ? (isCool ? 'bg-[#007AFF]' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
           }`}
         >
           <span
@@ -197,7 +197,7 @@ export const MotivationSettingsSection: React.FC = () => {
                     aria-checked={isOn}
                     onClick={() => handleToggleSlot(item.key)}
                     className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
-                      isOn ? (isCool ? 'bg-[#007AFF]' : 'bg-[#E0401F]') : 'bg-slate-300'
+                      isOn ? (isCool ? 'bg-[#007AFF]' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
                     }`}
                   >
                     <span

@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { Goal, Milestone } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { useT } from '@/i18n/useT';
-import { Target, ChevronRight, ChevronDown, Plus, Search, Check, X, Sparkles } from 'lucide-react';
+import { Target, ChevronRight, ChevronDown, Plus, Search, Check, X, Lightbulb } from 'lucide-react';
 import { findGoalSuggestions, recordGoalSuggestionFeedback } from '../model/goalSuggestions';
 
 export interface GoalPickerProps {
@@ -216,7 +216,7 @@ export const GoalPicker: React.FC<GoalPickerProps> = ({
       {suggestions.length > 0 && !search && (
         <div className="p-1.5 border-b border-amber-100 bg-amber-50/50 space-y-1">
           <div className="px-2 py-0.5 text-[10px] font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-amber-600" />
+            <Lightbulb className="w-3 h-3 text-amber-600" />
             <span>Gợi ý cho bạn</span>
           </div>
           <div className="space-y-0.5">

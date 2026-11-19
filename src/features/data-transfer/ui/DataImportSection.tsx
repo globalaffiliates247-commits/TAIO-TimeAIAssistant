@@ -84,7 +84,7 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h5 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
-            <FileJson className="w-4 h-4 text-[#E0401F]" />
+            <FileJson className="w-4 h-4 text-[var(--taio-brand)]" />
             <span>Nhập dữ liệu</span>
           </h5>
           <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
@@ -115,7 +115,7 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="px-3.5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="px-3.5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
         >
           <Upload className="w-3.5 h-3.5 text-white" />
           <span>Chọn file JSON…</span>
@@ -125,9 +125,9 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
           <button
             type="button"
             onClick={handleLoadFounderSample}
-            className="px-3 py-2 rounded-xl bg-white hover:bg-red-50/60 text-[#E0401F] border border-[#E0401F]/30 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-white hover:bg-red-50/60 text-[var(--taio-brand)] border border-[var(--taio-brand)]/30 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#E0401F]" />
+            <Sparkles className="w-3.5 h-3.5 text-[var(--taio-brand)]" />
             <span>Nạp dữ liệu mẫu TAIO-Lee (Nội bộ)</span>
           </button>
         )}
@@ -176,7 +176,7 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
           ) : (
             <>
               {/* Main preview count badge in spec format: "3 mục tiêu, 3 dự án, 21 việc, 5 ngày" */}
-              <div className="p-3 rounded-xl bg-red-50/50 border border-[#E0401F]/25">
+              <div className="p-3 rounded-xl bg-red-50/50 border border-[var(--taio-brand)]/25">
                 <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   Xem trước nội dung sẽ nhập
                 </p>
@@ -222,7 +222,7 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
                     }}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       importMode === 'merge'
-                        ? 'bg-[#E0401F] border-[#E0401F] text-white'
+                        ? 'bg-[var(--taio-brand)] border-[var(--taio-brand)] text-white'
                         : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
@@ -239,7 +239,7 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
                     onClick={() => setImportMode('replace')}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       importMode === 'replace'
-                        ? 'bg-[#E0401F] border-[#E0401F] text-white'
+                        ? 'bg-[var(--taio-brand)] border-[var(--taio-brand)] text-white'
                         : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
@@ -278,7 +278,7 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
                   onClick={handleExecuteImport}
                   className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                     canConfirmImport
-                      ? 'bg-[#E0401F] hover:bg-[#c83516] text-white cursor-pointer'
+                      ? 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white cursor-pointer'
                       : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                   }`}
                 >

@@ -57,7 +57,7 @@ export const ActionNudgeBanner: React.FC = () => {
         {/* Context info */}
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs border ${
-            isCool ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-red-50 border-red-200 text-[#E0401F]'
+            isCool ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-red-50 border-red-200 text-[var(--taio-brand)]'
           }`}>
             <Icon className="w-4 h-4" />
           </div>
@@ -86,7 +86,7 @@ export const ActionNudgeBanner: React.FC = () => {
           <button
             onClick={acceptActionNudge}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-white font-bold text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer ${
-              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#d03515]'
+              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
             }`}
           >
             <span>{actionNudge.ctaText}</span>

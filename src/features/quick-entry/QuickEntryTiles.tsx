@@ -4,7 +4,8 @@
 // 2. Clock: live countdown when in progress, or "Start" with next task name
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime, computeBlockStatus } from '@/core/clock';
+import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime, computeBlockStatus, openClockWindowWithSync } from '@/core/clock';
+import { clockState } from '@/features/clock';
 import { openStickyBoard } from '@/features/sticky';
 import { updateScheduleEntry } from '@/features/tasks';
 import { StickyNote, Clock, Play, ArrowRight, CheckCircle2 } from 'lucide-react';
@@ -13,6 +14,7 @@ import { TimeBlock } from '@/types';
 export const QuickEntryTiles: React.FC = () => {
   const {
     scheduleBlocks,
+    dayTemplate,
     dailyCardItems,
     currentBlock,
     updateDailyCardItem,
@@ -95,7 +97,18 @@ export const QuickEntryTiles: React.FC = () => {
   const handleClockTileClick = () => {
     // If desktop electron has clock window API, trigger it
     if (typeof window !== 'undefined' && (window as any).taioAPI?.openClockWindow) {
-      (window as any).taioAPI.openClockWindow();
+      const st = clockState(scheduleBlocks, dayTemplate, new Date(), language as 'vi' | 'en');
+      openClockWindowWithSync({
+        taskId: st.block?.id || null,
+        title: st.title,
+        subtitle: st.subtitle,
+        startedAt: st.startedAt,
+        endsAt: st.endsAt,
+        mode: st.mode,
+        remaining: `${Math.round(st.remainingSeconds / 60)}p`,
+        lang: language,
+        isCountDown: st.isCountDown ?? true,
+      });
       return;
     }
     // Otherwise open sticky sheet
@@ -168,7 +181,7 @@ export const QuickEntryTiles: React.FC = () => {
                 inProgressBlock
                   ? isCool
                     ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'bg-red-100 text-[#E0401F] border border-red-200'
+                    : 'bg-red-100 text-[var(--taio-brand)] border border-red-200'
                   : 'bg-slate-100 text-slate-600 border border-slate-200'
               }`}
             >
@@ -197,7 +210,7 @@ export const QuickEntryTiles: React.FC = () => {
           {inProgressBlock && (
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                isCool ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-[#E0401F]'
+                isCool ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-[var(--taio-brand)]'
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
@@ -219,7 +232,7 @@ export const QuickEntryTiles: React.FC = () => {
               </div>
               <span
                 className={`text-xs font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform ${
-                  isCool ? 'text-blue-700' : 'text-[#E0401F]'
+                  isCool ? 'text-blue-700' : 'text-[var(--taio-brand)]'
                 }`}
               >
                 {isVi ? 'Mở' : 'View'} <ArrowRight className="w-3.5 h-3.5" />
@@ -241,7 +254,7 @@ export const QuickEntryTiles: React.FC = () => {
                 type="button"
                 onClick={handleStartNext}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs flex items-center gap-1 hover:opacity-95 active:scale-95 transition-all ${
-                  isCool ? 'bg-blue-600' : 'bg-[#E0401F]'
+                  isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]'
                 }`}
               >
                 <Play className="w-3.5 h-3.5 fill-current" />

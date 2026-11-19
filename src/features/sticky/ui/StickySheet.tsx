@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import { STICKY_COLORS, StickyColor, StickyNote } from '../model/stickyTypes';
 import { closeSticky, newFreeSticky, setActiveSticky, updateSticky, trashSticky, toggleStickyListPanel } from '../model/stickyStore';
 import { IconClose, IconCollapse, IconPin, IconPlus, IconShirt } from './StickyIcons';
-import { Sparkles, Trash2, EyeOff, Layers } from 'lucide-react';
+import { Lightbulb, Trash2, EyeOff, Layers } from 'lucide-react';
 import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
@@ -203,7 +203,7 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
             style={note.hasMotivationSticker ? { background: 'rgba(0,0,0,.08)' } : undefined}
             onClick={() => updateSticky(note.id, { hasMotivationSticker: !note.hasMotivationSticker })}
           >
-            <Sparkles size={14} color={c.muted} />
+            <Lightbulb size={14} color={c.muted} />
           </button>
         )}
         <span

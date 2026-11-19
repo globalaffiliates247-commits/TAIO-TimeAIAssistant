@@ -109,7 +109,7 @@ export const ExportDataModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-[#E0401F]">
+            <div className="w-9 h-9 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-[var(--taio-brand)]">
               <Share2 className="w-4 h-4" />
             </div>
             <div>
@@ -137,7 +137,7 @@ export const ExportDataModal: React.FC = () => {
           {/* Share Link Box */}
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#E0401F] uppercase tracking-wide flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[var(--taio-brand)] uppercase tracking-wide flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
                 <span>Link chia sẻ cố định cho trợ lý AI:</span>
               </span>
@@ -153,7 +153,7 @@ export const ExportDataModal: React.FC = () => {
               />
               <button
                 onClick={handleCopyLink}
-                className="py-2 px-3 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="py-2 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5 text-white" />}
                 <span>{copiedLink ? 'Đã sao chép' : 'Sao chép link'}</span>
@@ -196,7 +196,7 @@ export const ExportDataModal: React.FC = () => {
               onClick={exportTaioJsonV1}
               className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Download className="w-4 h-4 text-[#E0401F]" />
+              <Download className="w-4 h-4 text-[var(--taio-brand)]" />
               <span>Tải file .json</span>
             </button>
             <button
@@ -224,7 +224,7 @@ export const ExportDataModal: React.FC = () => {
                 setExportModalOpen(false);
                 setIsProfileModalOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-[#E0401F] border border-slate-200 font-bold text-xs shrink-0 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-[var(--taio-brand)] border border-slate-200 font-bold text-xs shrink-0 cursor-pointer"
             >
               Mở Nhập dữ liệu
             </button>

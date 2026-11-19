@@ -76,7 +76,7 @@ export const InterruptionModal: React.FC = () => {
   const renderIcon = (catId: InterruptionActivityCategory) => {
     switch (catId) {
       case 'calls_messages': return <PhoneCall className="w-5 h-5 text-emerald-500" />;
-      case 'work_came_up': return <Briefcase className={`w-5 h-5 ${isCool ? 'text-blue-500' : 'text-[#E0401F]'}`} />;
+      case 'work_came_up': return <Briefcase className={`w-5 h-5 ${isCool ? 'text-blue-500' : 'text-[var(--taio-brand)]'}`} />;
       case 'family_matter': return <HeartHandshake className="w-5 h-5 text-rose-500" />;
       case 'eating_drinks': return <Utensils className="w-5 h-5 text-amber-500" />;
       case 'travel': return <Car className="w-5 h-5 text-indigo-500" />;
@@ -173,7 +173,7 @@ export const InterruptionModal: React.FC = () => {
           {situation === 'moment' && (
             <div className={`p-3 rounded-2xl border ${isCool ? 'bg-blue-50/50 border-blue-100' : 'bg-amber-50/60 border-amber-100'}`}>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1">
-                <Bookmark className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+                <Bookmark className={`w-3.5 h-3.5 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
                 <span>Điểm quay lại việc đang làm (Return point):</span>
               </div>
               <input
@@ -214,7 +214,7 @@ export const InterruptionModal: React.FC = () => {
                       isSelected
                         ? isCool
                           ? 'border-blue-500 bg-blue-50/80 text-blue-900 ring-2 ring-blue-500/20 shadow-sm'
-                          : 'border-[#E0401F] bg-red-50/80 text-red-950 ring-2 ring-red-500/20 shadow-sm'
+                          : 'border-[var(--taio-brand)] bg-red-50/80 text-red-950 ring-2 ring-red-500/20 shadow-sm'
                         : 'border-slate-200 bg-slate-50/60 text-slate-700 hover:border-slate-300 hover:bg-slate-100/60'
                     }`}
                   >
@@ -284,7 +284,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'postpone'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[#E0401F] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -298,7 +298,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'do_now'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[#E0401F] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -312,7 +312,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'parallel'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[#E0401F] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -326,7 +326,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'delegate'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[#E0401F] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -353,7 +353,7 @@ export const InterruptionModal: React.FC = () => {
             className={`w-full py-3 rounded-2xl text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 mt-3 ${
               isCool
                 ? 'bg-[#007AFF] hover:bg-[#0066d6] shadow-blue-500/20'
-                : 'bg-[#E0401F] hover:bg-[#c93517] shadow-red-500/20'
+                : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-red-500/20'
             }`}
           >
             <Check className="w-4 h-4" />

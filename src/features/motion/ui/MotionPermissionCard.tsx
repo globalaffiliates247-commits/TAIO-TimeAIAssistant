@@ -125,7 +125,7 @@ export const MotionPermissionCard: React.FC<MotionPermissionCardProps> = ({ onPe
               <button
                 type="button"
                 onClick={handleRequest}
-                className="py-2.5 px-5 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                className="py-2.5 px-5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
               >
                 Tiếp tục & Cấp quyền
               </button>

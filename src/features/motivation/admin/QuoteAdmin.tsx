@@ -21,7 +21,7 @@ import {
   Eye,
   ListPlus,
   AlertCircle,
-  Sparkles,
+  Lightbulb,
   ToggleLeft,
   ToggleRight,
   ShieldCheck,
@@ -229,7 +229,7 @@ export const QuoteAdmin: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200">
         <div>
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#E0401F]" />
+            <Lightbulb className="w-5 h-5 text-[var(--taio-brand)]" />
             <span>Kho câu truyền động lực (Quản trị viên)</span>
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -247,7 +247,7 @@ export const QuoteAdmin: React.FC = () => {
           </button>
           <button
             onClick={openAddForm}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#E0401F] hover:bg-[#c73416] text-xs font-bold text-white shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-xs font-bold text-white shadow-xs transition-colors"
           >
             <Plus size={14} />
             <span>Thêm câu mới</span>
@@ -426,7 +426,7 @@ export const QuoteAdmin: React.FC = () => {
                   value={formText}
                   onChange={e => setFormText(e.target.value)}
                   placeholder="Nhập nội dung truyền cảm hứng..."
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                 />
               </div>
 
@@ -464,7 +464,7 @@ export const QuoteAdmin: React.FC = () => {
                       <label
                         key={c.id}
                         className={`flex items-center gap-2 p-2 rounded-xl border text-[11px] cursor-pointer transition-colors ${
-                          checked ? 'bg-orange-50/80 border-[#E0401F] text-[#E0401F] font-bold' : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                          checked ? 'bg-orange-50/80 border-[var(--taio-brand)] text-[var(--taio-brand)] font-bold' : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                       >
                         <input
@@ -507,7 +507,7 @@ export const QuoteAdmin: React.FC = () => {
                     type="checkbox"
                     checked={formVerified}
                     onChange={e => setFormVerified(e.target.checked)}
-                    className="w-4 h-4 rounded text-[#E0401F]"
+                    className="w-4 h-4 rounded text-[var(--taio-brand)]"
                   />
                   <span className="font-semibold text-slate-800">Đã kiểm chứng tác giả</span>
                 </label>
@@ -552,7 +552,7 @@ export const QuoteAdmin: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-[#E0401F] hover:bg-[#c73416] text-white font-bold shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold shadow-xs"
                 >
                   Lưu câu
                 </button>
@@ -586,7 +586,7 @@ export const QuoteAdmin: React.FC = () => {
               value={bulkText}
               onChange={e => setBulkText(e.target.value)}
               placeholder="Dán nội dung vào đây..."
-              className="w-full p-3 rounded-xl border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#E0401F] font-mono"
+              className="w-full p-3 rounded-xl border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[var(--taio-brand)] font-mono"
             />
 
             <div className="flex items-center justify-end gap-2">
@@ -601,7 +601,7 @@ export const QuoteAdmin: React.FC = () => {
                 type="button"
                 onClick={handleBulkImport}
                 disabled={!bulkText.trim()}
-                className="px-4 py-2 rounded-xl bg-[#E0401F] hover:bg-[#c73416] disabled:opacity-40 text-white font-bold text-xs shadow-xs"
+                className="px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] disabled:opacity-40 text-white font-bold text-xs shadow-xs"
               >
                 Nhập vào kho
               </button>

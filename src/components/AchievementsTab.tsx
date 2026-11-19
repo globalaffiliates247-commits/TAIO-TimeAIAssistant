@@ -40,7 +40,7 @@ const GAP_LABELS: { key: GapLabel; label: string }[] = [
 
 const CATEGORY_COLORS: Record<TimeLedgerCategory, { bg: string; hex: string; lightHex: string; text: string; labelVi: string }> = {
   sleep: { bg: 'bg-blue-600', hex: '#2563EB', lightHex: '#60A5FA', text: 'text-blue-700', labelVi: 'Giấc ngủ' },
-  goal_work: { bg: 'bg-[#E0401F]', hex: '#E0401F', lightHex: '#FB7185', text: 'text-red-700', labelVi: 'Việc mục tiêu' },
+  goal_work: { bg: 'bg-[var(--taio-brand)]', hex: 'var(--taio-brand)', lightHex: '#FB7185', text: 'text-red-700', labelVi: 'Việc mục tiêu' },
   meeting: { bg: 'bg-purple-600', hex: '#9333EA', lightHex: '#C084FC', text: 'text-purple-700', labelVi: 'Hội họp' },
   planning: { bg: 'bg-amber-400', hex: '#FBBF24', lightHex: '#FDE68A', text: 'text-amber-700', labelVi: 'Lên kế hoạch' },
   personal: { bg: 'bg-emerald-600', hex: '#059669', lightHex: '#34D399', text: 'text-emerald-700', labelVi: 'Cá nhân & Nghỉ ngơi' },
@@ -182,12 +182,12 @@ export const AchievementsTab: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-[#E0401F]" />
+              <Activity className="w-5 h-5 text-[var(--taio-brand)]" />
               <span>{t('nav.efficiency', 'Hiệu quả')}</span>
             </h2>
             <button
               onClick={() => setMethodLibraryOpen(true)}
-              className="p-1 rounded-full text-slate-500 hover:text-[#E0401F] hover:bg-slate-100 transition-colors"
+              className="p-1 rounded-full text-slate-500 hover:text-[var(--taio-brand)] hover:bg-slate-100 transition-colors"
               title="Mở Thư viện phương pháp khoa học"
             >
               <HelpCircle className="w-4 h-4" />
@@ -205,7 +205,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('time')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'time' 
-                  ? 'bg-[#E0401F] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -216,7 +216,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('tasks')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'tasks' 
-                  ? 'bg-[#E0401F] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -227,7 +227,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('projects')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'projects' 
-                  ? 'bg-[#E0401F] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -238,7 +238,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('habits')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'habits' 
-                  ? 'bg-[#E0401F] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -250,14 +250,14 @@ export const AchievementsTab: React.FC = () => {
           {!isDayClosed(getDeviceCalendarDate()) ? (
             <button
               onClick={() => setCloseDayModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm transition-all"
             >
               <Moon className="w-4 h-4 text-white" />
               <span>{language === 'vi' ? 'Khép lại hôm nay' : 'Wrap Up Today'}</span>
             </button>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-[#E0401F] text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4 text-[#E0401F]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-[var(--taio-brand)] text-xs font-bold">
+              <CheckCircle2 className="w-4 h-4 text-[var(--taio-brand)]" />
               <span>{language === 'vi' ? 'Đã khép ngày' : 'Day Wrapped Up'}</span>
             </div>
           )}
@@ -324,7 +324,7 @@ export const AchievementsTab: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#E0401F]" />
+                  <Clock className="w-4 h-4 text-[var(--taio-brand)]" />
                   <span>Tổng quan 24 giờ thực tế (100% = 24 giờ)</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -344,7 +344,7 @@ export const AchievementsTab: React.FC = () => {
                   }`}
                   title="Một vòng tròn chỉ hiển thị các nhóm lớn"
                 >
-                  <BarChart3 className="w-3.5 h-3.5 text-[#E0401F]" />
+                  <BarChart3 className="w-3.5 h-3.5 text-[var(--taio-brand)]" />
                   <span>Nhóm lớn</span>
                 </button>
                 <button
@@ -357,7 +357,7 @@ export const AchievementsTab: React.FC = () => {
                   }`}
                   title="Hai vòng đồng tâm (Sunburst): vòng trong là nhóm lớn, vòng ngoài là các việc thuộc nhóm đó"
                 >
-                  <Layers className="w-3.5 h-3.5 text-[#E0401F]" />
+                  <Layers className="w-3.5 h-3.5 text-[var(--taio-brand)]" />
                   <span>Chi tiết</span>
                 </button>
               </div>
@@ -449,7 +449,7 @@ export const AchievementsTab: React.FC = () => {
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
                         <span className="text-xl font-mono font-black text-slate-900">24 giờ</span>
                         <span className="text-[11px] font-semibold text-slate-500">1.440 phút</span>
-                        <span className="text-[10px] text-[#E0401F] font-bold mt-0.5">
+                        <span className="text-[10px] text-[var(--taio-brand)] font-bold mt-0.5">
                           {donutMode === 'groups' ? '1 vòng • Nhóm lớn' : '2 vòng • Chi tiết'}
                         </span>
                       </div>
@@ -589,7 +589,7 @@ export const AchievementsTab: React.FC = () => {
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-bold text-slate-900">Thực tế (Actual)</span>
-                  <span className="text-[#E0401F] font-semibold">Vạch đỏ = Bây giờ (17:45)</span>
+                  <span className="text-[var(--taio-brand)] font-semibold">Vạch đỏ = Bây giờ (17:45)</span>
                 </div>
                 <div className="relative w-full h-7 rounded-xl overflow-hidden flex bg-slate-100 border border-slate-200">
                   {ledgerSegments.map((segment) => {
@@ -613,7 +613,7 @@ export const AchievementsTab: React.FC = () => {
                   {/* "Now" line on Actual bar (at 17:45 = 1065 / 1440 = 73.95%) */}
                   <div
                     style={{ left: '74%' }}
-                    className="absolute top-0 bottom-0 w-0.5 bg-[#E0401F] ring-2 ring-white z-10 pointer-events-none"
+                    className="absolute top-0 bottom-0 w-0.5 bg-[var(--taio-brand)] ring-2 ring-white z-10 pointer-events-none"
                     title="Bây giờ"
                   />
                 </div>
@@ -623,7 +623,7 @@ export const AchievementsTab: React.FC = () => {
               {selectedTimelineSeg && (
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs animate-in fade-in">
                   <div>
-                    <span className="font-bold text-[#E0401F]">{selectedTimelineSeg.kind}: </span>
+                    <span className="font-bold text-[var(--taio-brand)]">{selectedTimelineSeg.kind}: </span>
                     <span className="font-semibold text-slate-900">{selectedTimelineSeg.title}</span>
                     <span className="text-slate-500 font-mono ml-2">({selectedTimelineSeg.time})</span>
                   </div>
@@ -647,13 +647,13 @@ export const AchievementsTab: React.FC = () => {
                 Tỷ lệ giờ thức cho mục tiêu
               </span>
               <div className="py-2 flex items-baseline gap-2">
-                <span className="text-4xl font-mono font-extrabold text-[#E0401F]">
+                <span className="text-4xl font-mono font-extrabold text-[var(--taio-brand)]">
                   {goalWorkRatio}%
                 </span>
                 <span className="text-xs text-slate-500 font-medium">của giờ thức</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
-                <div className="h-full bg-[#E0401F] rounded-full" style={{ width: `${goalWorkRatio}%` }} />
+                <div className="h-full bg-[var(--taio-brand)] rounded-full" style={{ width: `${goalWorkRatio}%` }} />
               </div>
               <p className="text-[11px] text-slate-500 mt-2">
                 Đã dùng {categoryTotals.goal_work || 240}p việc mục tiêu trên tổng {wakingMinutes}p thức.
@@ -673,7 +673,7 @@ export const AchievementsTab: React.FC = () => {
               <p className="text-xs text-slate-600">
                 Phát sinh khi timebox kết thúc quá vùng đệm 5 phút mà chưa khai báo việc tiếp theo.
               </p>
-              <span className="text-[11px] text-[#E0401F] font-semibold mt-2 cursor-pointer hover:underline" onClick={() => setCloseDayModalOpen(true)}>
+              <span className="text-[11px] text-[var(--taio-brand)] font-semibold mt-2 cursor-pointer hover:underline" onClick={() => setCloseDayModalOpen(true)}>
                 Có thể gán nhãn lại trong Đóng ngày ↗
               </span>
             </div>
@@ -691,7 +691,7 @@ export const AchievementsTab: React.FC = () => {
               <p className="text-xs text-slate-600">
                 Các khung giờ đã qua nhưng chưa xác nhận hoàn thành hoặc chưa ghi bù.
               </p>
-              <span className="text-[11px] text-[#E0401F] font-semibold mt-2 cursor-pointer hover:underline" onClick={() => setIsActiveCaptureOpen(true)}>
+              <span className="text-[11px] text-[var(--taio-brand)] font-semibold mt-2 cursor-pointer hover:underline" onClick={() => setIsActiveCaptureOpen(true)}>
                 Mở Ghi bù thời gian ↗
               </span>
             </div>
@@ -778,9 +778,9 @@ export const AchievementsTab: React.FC = () => {
 
             <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm">
               <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                <Activity className="w-3.5 h-3.5 text-[#E0401F]" /> Hiệu suất dòng chảy
+                <Activity className="w-3.5 h-3.5 text-[var(--taio-brand)]" /> Hiệu suất dòng chảy
               </span>
-              <p className="text-2xl font-bold text-[#E0401F] mt-1">{avgFlowEfficiency}%</p>
+              <p className="text-2xl font-bold text-[var(--taio-brand)] mt-1">{avgFlowEfficiency}%</p>
               <span className="text-[11px] text-slate-500">Thời gian làm thực / Tổng chu kỳ</span>
             </div>
 
@@ -803,7 +803,7 @@ export const AchievementsTab: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <CheckSquare className="w-4 h-4 text-[#E0401F]" />
+                <CheckSquare className="w-4 h-4 text-[var(--taio-brand)]" />
                 <span>Chi tiết hiệu suất thời gian từng công việc</span>
               </h3>
               <span className="text-xs text-slate-500">Hiệu suất = Thời gian ước lượng ÷ Thời gian thực tế</span>
@@ -818,7 +818,7 @@ export const AchievementsTab: React.FC = () => {
                   <div key={b.id} className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-500' : b.status === 'in_progress' ? 'bg-[#E0401F] animate-pulse' : 'bg-slate-400'}`} />
+                        <span className={`w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-500' : b.status === 'in_progress' ? 'bg-[var(--taio-brand)] animate-pulse' : 'bg-slate-400'}`} />
                         <h4 className="text-sm font-bold text-slate-900">{b.title}</h4>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
@@ -867,7 +867,7 @@ export const AchievementsTab: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4 animate-in fade-in duration-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-50/80 via-white to-orange-50/60 border border-amber-200/70">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E0401F] to-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[var(--taio-brand)] to-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
                 <FolderKanban className="w-5 h-5" />
               </div>
               <div>
@@ -882,7 +882,7 @@ export const AchievementsTab: React.FC = () => {
             <button
               type="button"
               onClick={() => setCurrentTab('goals')}
-              className="px-4 py-2.5 rounded-xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-xs transition-colors shrink-0 flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-xs transition-colors shrink-0 flex items-center gap-2"
             >
               <span>{t('overview.viewOverview', 'Xem Toàn cảnh')}</span>
               <ArrowRight className="w-3.5 h-3.5" />

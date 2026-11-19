@@ -65,7 +65,7 @@ export const NowActions: React.FC = () => {
         >
           <div className="flex items-center gap-2.5">
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-              isCool ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-[#E0401F]'
+              isCool ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-[var(--taio-brand)]'
             }`}>
               <Timer className="w-4 h-4" />
             </div>
@@ -87,7 +87,7 @@ export const NowActions: React.FC = () => {
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4 animate-in fade-in duration-150">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div className="flex items-center gap-2">
-              <Timer className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+              <Timer className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
               <span className="font-bold text-xs text-slate-900">
                 {t('terms.freeTimer', 'Bấm giờ riêng')}
               </span>

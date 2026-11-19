@@ -171,7 +171,7 @@ export const ProfileModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-red-500/25">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--taio-brand)] to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-red-500/25">
               {initials}
             </div>
             <div>
@@ -195,7 +195,7 @@ export const ProfileModal: React.FC = () => {
             onClick={() => setActiveTab('profile')}
             className={`pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'profile'
-                ? 'border-[#E0401F] text-slate-900'
+                ? 'border-[var(--taio-brand)] text-slate-900'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -206,7 +206,7 @@ export const ProfileModal: React.FC = () => {
             onClick={() => setActiveTab('settings')}
             className={`pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'settings'
-                ? 'border-[#E0401F] text-slate-900'
+                ? 'border-[var(--taio-brand)] text-slate-900'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -217,7 +217,7 @@ export const ProfileModal: React.FC = () => {
             onClick={() => setActiveTab('community')}
             className={`pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-all ${
               activeTab === 'community'
-                ? 'border-[#E0401F] text-slate-900'
+                ? 'border-[var(--taio-brand)] text-slate-900'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -236,7 +236,7 @@ export const ProfileModal: React.FC = () => {
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-2">Ảnh đại diện (Avatar)</label>
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-red-500/20 ring-4 ring-slate-800 shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[var(--taio-brand)] to-amber-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-red-500/20 ring-4 ring-slate-800 shrink-0">
                     {initials}
                   </div>
                   <div className="space-y-1.5">
@@ -264,7 +264,7 @@ export const ProfileModal: React.FC = () => {
                   <select
                     value={userProfileDetail.salutation}
                     onChange={(e) => updateUserProfileDetail({ salutation: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                   >
                     <option value="Anh">Anh</option>
                     <option value="Chị">Chị</option>
@@ -278,7 +278,7 @@ export const ProfileModal: React.FC = () => {
                     type="text"
                     value={userProfileDetail.displayName}
                     onChange={(e) => updateUserProfileDetail({ displayName: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                   />
                 </div>
               </div>
@@ -367,7 +367,7 @@ export const ProfileModal: React.FC = () => {
                     onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'inbox' })}
                     className={`p-2.5 rounded-xl border text-left transition-all ${
                       userProfileDetail.defaultHomeScreen === 'inbox'
-                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
+                        ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900'
                         : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                     }`}
                   >
@@ -378,7 +378,7 @@ export const ProfileModal: React.FC = () => {
                     onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'daycard' })}
                     className={`p-2.5 rounded-xl border text-left transition-all ${
                       userProfileDetail.defaultHomeScreen === 'daycard'
-                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
+                        ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900'
                         : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                     }`}
                   >
@@ -389,7 +389,7 @@ export const ProfileModal: React.FC = () => {
                     onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'now' })}
                     className={`p-2.5 rounded-xl border text-left transition-all ${
                       userProfileDetail.defaultHomeScreen === 'now'
-                        ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900'
+                        ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900'
                         : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                     }`}
                   >
@@ -411,7 +411,7 @@ export const ProfileModal: React.FC = () => {
                       onClick={() => setDeviceLook(d)}
                       className={`p-2 rounded-xl border text-center text-xs font-medium transition-all ${
                         deviceLook === d
-                          ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900'
+                          ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900'
                           : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
                       }`}
                     >
@@ -425,7 +425,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setThemeMode('light')}
                     className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'light' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                      themeMode === 'light' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <Sun className="w-3.5 h-3.5" />
@@ -434,7 +434,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setThemeMode('dark')}
                     className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'dark' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                      themeMode === 'dark' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <Moon className="w-3.5 h-3.5" />
@@ -443,7 +443,7 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setThemeMode('system')}
                     className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'system' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                      themeMode === 'system' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
                     <Monitor className="w-3.5 h-3.5" />
@@ -456,11 +456,11 @@ export const ProfileModal: React.FC = () => {
                   <button
                     onClick={() => setPalette('warm')}
                     className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
-                      palette === 'warm' ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                      palette === 'warm' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
                     }`}
                   >
-                    <span>Gam màu Ấm (Warm Red #E0401F)</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#E0401F]" />
+                    <span>Gam màu Ấm (Warm Red var(--taio-brand))</span>
+                    <span className="w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)]" />
                   </button>
                   <button
                     onClick={() => setPalette('cool')}
@@ -515,7 +515,7 @@ export const ProfileModal: React.FC = () => {
                       onClick={() => setToneLevel(t.lvl as ToneLevel)}
                       className={`p-2 rounded-xl border text-center text-xs font-medium transition-all ${
                         toneLevel === t.lvl
-                          ? 'bg-[#E0401F]/20 border-[#E0401F] text-slate-900'
+                          ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900'
                           : 'bg-slate-50/60 border-slate-200 text-slate-500'
                       }`}
                     >
@@ -551,7 +551,7 @@ export const ProfileModal: React.FC = () => {
                     aria-checked={lockScreenClockEnabled}
                     onClick={handleToggleLockScreenClock}
                     className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
-                      lockScreenClockEnabled ? 'bg-[#E0401F]' : 'bg-slate-300'
+                      lockScreenClockEnabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
                     }`}
                   >
                     <span
@@ -600,7 +600,7 @@ export const ProfileModal: React.FC = () => {
                           showToast(next ? 'Đã bật tự ghi nhận chuyển động' : 'Đã tắt và xóa dữ liệu chuyển động thô trên máy');
                         }}
                         className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
-                          motionTrackingState ? (isCool ? 'bg-[#007AFF]' : 'bg-[#E0401F]') : 'bg-slate-300'
+                          motionTrackingState ? (isCool ? 'bg-[#007AFF]' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
                         }`}
                       >
                         <span
@@ -657,7 +657,7 @@ export const ProfileModal: React.FC = () => {
                         setInlineGoalSuggestionEnabled(next);
                       }}
                       className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
-                        inlineGoalSuggestionEnabled ? 'bg-[#E0401F]' : 'bg-slate-300'
+                        inlineGoalSuggestionEnabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
                       }`}
                     >
                       <span
@@ -695,7 +695,7 @@ export const ProfileModal: React.FC = () => {
                     type="checkbox"
                     checked={userProfileDetail.analyticsOptOut}
                     onChange={(e) => updateUserProfileDetail({ analyticsOptOut: e.target.checked })}
-                    className="w-4 h-4 rounded text-[#E0401F] focus:ring-0 cursor-pointer"
+                    className="w-4 h-4 rounded text-[var(--taio-brand)] focus:ring-0 cursor-pointer"
                   />
                 </div>
               </div>
@@ -708,9 +708,9 @@ export const ProfileModal: React.FC = () => {
               
               {/* Talk to Advisor (CTA Zalo / Telegram) */}
               {communityConfig.advisor.visible && (
-                <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#E0401F]/15 via-white to-white border border-[#E0401F]/30 space-y-3">
+                <div className="p-4 rounded-2xl bg-gradient-to-tr from-[var(--taio-brand)]/15 via-white to-white border border-[var(--taio-brand)]/30 space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#E0401F] flex items-center justify-center text-white font-bold shrink-0 shadow-md">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--taio-brand)] flex items-center justify-center text-white font-bold shrink-0 shadow-md">
                       <Sparkles className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -730,7 +730,7 @@ export const ProfileModal: React.FC = () => {
                       className={`flex-1 py-2 px-3 rounded-xl ${
                         isCool
                           ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
-                          : 'bg-[#E0401F] hover:bg-[#c93517] shadow-[#E0401F]/20'
+                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-[var(--taio-brand)]/20'
                       } text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
                     >
                       <span>Nhắn qua Zalo</span>
@@ -743,7 +743,7 @@ export const ProfileModal: React.FC = () => {
                       className={`flex-1 py-2 px-3 rounded-xl ${
                         isCool
                           ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
-                          : 'bg-[#E0401F] hover:bg-[#c93517] shadow-[#E0401F]/20'
+                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-[var(--taio-brand)]/20'
                       } text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
                     >
                       <span>Nhắn qua Telegram</span>

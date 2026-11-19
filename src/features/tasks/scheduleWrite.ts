@@ -88,20 +88,24 @@ export function updateScheduleEntry(
         // When stopped or partly done, close end time to now (or patch.endTime) so it no longer runs in the schedule window
         const nowM = getDeviceTimeMinutes();
         cardPatch.end = patch.endTime || minutesToTime(nowM % 1440);
+      } else if (patch.status === 'in_progress') {
+        cardPatch.status = 'in_progress';
       } else {
         cardPatch.status = 'open';
       }
     }
 
-    if (patch.touchTimeMinutes !== undefined || patch.taskEndType !== undefined || patch.extra !== undefined || patch.type !== undefined || patch.status === 'partly_done') {
+    if (patch.touchTimeMinutes !== undefined || patch.taskEndType !== undefined || patch.extra !== undefined || patch.type !== undefined || patch.status === 'partly_done' || patch.status === 'in_progress' || patch.status === 'done') {
       const existing = ctx.dailyCardItems?.find(it => it.id === id);
       const prevExtra = (existing?.extra as Record<string, unknown> | undefined) || {};
       const newExtra: Record<string, unknown> = {
         ...prevExtra,
         ...(patch.extra || {}),
       };
-      if (patch.status === 'partly_done') {
+      if (patch.status === 'partly_done' || patch.status === 'done' || patch.status === 'dropped') {
         newExtra.startedAt = undefined;
+      } else if (patch.status === 'in_progress' && typeof newExtra.startedAt !== 'number') {
+        newExtra.startedAt = Date.now();
       }
       if (patch.touchTimeMinutes !== undefined) {
         newExtra.actualMinutes = patch.touchTimeMinutes;

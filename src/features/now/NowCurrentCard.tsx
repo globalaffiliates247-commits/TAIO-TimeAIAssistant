@@ -7,7 +7,7 @@ import { updateScheduleEntry, commitQuickLine, SubTaskList, getSubTaskProgress, 
 import { NowClockRing } from './NowClockRing';
 import { MotivationSticker } from '@/features/motivation';
 import { quoteRegistry } from '@/features/motivation/model/quoteRegistry';
-import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime } from '@/core/clock';
+import { getDeviceCalendarDate, getDeviceTimeMinutes, timeToMinutes, minutesToTime, openClockWindowWithSync } from '@/core/clock';
 import { fmtDuration } from '@/features/sticky/model/timeline';
 import { formatDuration, formatDurationClock } from '@/i18n/format';
 import { computeUnassignedTime } from './unassignedTime';
@@ -163,8 +163,18 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
     setIsPinned(next);
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('taio_lockscreen_clock_enabled', String(next));
-      if ((window as any).taioAPI?.openClockWindow) {
-        if (next) (window as any).taioAPI.openClockWindow();
+      if (next) {
+        openClockWindowWithSync({
+          taskId: state.block?.id || null,
+          title: state.title,
+          subtitle: state.subtitle,
+          startedAt: state.startedAt,
+          endsAt: state.endsAt,
+          mode: state.mode,
+          remaining: formatDurationClock(state.remainingSeconds),
+          lang: language,
+          isCountDown: state.isCountDown ?? true,
+        });
       }
     }
     showToast?.(next 
@@ -814,7 +824,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
               </span>
               <div className="flex-1 h-1.5 rounded-full bg-slate-100 border border-slate-200/80 overflow-hidden max-w-[120px]">
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`}
+                  className={`h-full rounded-full transition-all duration-300 ${isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]'}`}
                   style={{ width: `${percent}%` }}
                 />
               </div>
@@ -1033,7 +1043,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
               </div>
               <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
                 <div 
-                  className={`h-full rounded-full transition-all duration-300 ${isCool ? 'bg-blue-600' : 'bg-[#E0401F]'}`}
+                  className={`h-full rounded-full transition-all duration-300 ${isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]'}`}
                   style={{ width: `${Math.min(100, Math.max(0, linkedGoal.progressPercent))}%` }}
                 />
               </div>
@@ -1148,7 +1158,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
               type="button"
               onClick={handleFinish}
               className={`flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs shadow-xs transition-all cursor-pointer ${
-                isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+                isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
               }`}
             >
               {language === 'en' ? 'Finish' : 'Kết thúc'}
@@ -1176,7 +1186,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
                   setShowCustomExtend(false);
                 }}
                 className={`px-3 py-1 rounded-lg text-white font-bold text-xs shadow-2xs cursor-pointer ${
-                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                 }`}
               >
                 {language === 'vi' ? 'Gia hạn' : 'Add'}

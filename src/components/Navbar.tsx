@@ -63,7 +63,7 @@ export const Navbar: React.FC = () => {
                       active
                         ? isCool
                           ? 'bg-blue-50 text-blue-700 shadow-xs'
-                          : 'bg-red-50 text-[#E0401F] shadow-xs'
+                          : 'bg-red-50 text-[var(--taio-brand)] shadow-xs'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                     }`}
                   >
@@ -106,7 +106,7 @@ export const Navbar: React.FC = () => {
                       title={t('terms.quickNote', 'Ghi nhanh')}
                       aria-label="Ghi nhanh"
                       className={`w-11 h-11 -mt-4 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white active:scale-90 transition-all ${
-                        isCool ? 'bg-blue-600 shadow-blue-500/30' : 'bg-[#E0401F] shadow-red-500/30'
+                        isCool ? 'bg-blue-600 shadow-blue-500/30' : 'bg-[var(--taio-brand)] shadow-red-500/30'
                       }`}
                     >
                       <StickyNote className="w-5 h-5 fill-white/20" />
@@ -121,7 +121,7 @@ export const Navbar: React.FC = () => {
                     active
                       ? isCool
                         ? 'text-blue-600'
-                        : 'text-[#E0401F]'
+                        : 'text-[var(--taio-brand)]'
                       : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >

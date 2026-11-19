@@ -53,6 +53,7 @@ import {
   computeBlockStatus,
   timeToMinutes,
   minutesToTime,
+  openClockWindowWithSync,
 } from '../core/clock';
 import {
   ClosedDayRecord,
@@ -2037,9 +2038,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Part A5: When user dismisses prioritized alarm, switch mini clock to this block
     if (dismissedBlockId && typeof window !== 'undefined') {
-      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void } }).taioAPI;
-      if (bridge?.openClockWindow) {
-        bridge.openClockWindow();
+      const targetBlock = scheduleBlocks.find(b => b.id === dismissedBlockId);
+      if (targetBlock) {
+        const nowD = new Date();
+        const startM = timeToMinutes(targetBlock.startTime);
+        const endM = timeToMinutes(targetBlock.endTime);
+        const startTs = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate(), Math.floor(startM / 60), startM % 60).getTime();
+        const endTs = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate(), Math.floor(endM / 60), endM % 60).getTime();
+        openClockWindowWithSync({
+          taskId: targetBlock.id,
+          title: targetBlock.title,
+          subtitle: targetBlock.goalName || 'Bắt đầu ngay',
+          mode: 'task',
+          startedAt: startTs,
+          endsAt: endTs,
+          lang: language,
+        });
+      } else {
+        openClockWindowWithSync();
       }
     }
   };
@@ -3220,9 +3236,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const el = document.getElementById(`daily-card-row-${taskId}`) || document.getElementById(`schedule-block-${taskId}`);
             if (el) {
               el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              el.classList.add('ring-2', 'ring-offset-2', 'ring-[#E0401F]');
+              el.classList.add('ring-2', 'ring-offset-2', 'ring-[var(--taio-brand)]');
               setTimeout(() => {
-                el.classList.remove('ring-2', 'ring-offset-2', 'ring-[#E0401F]');
+                el.classList.remove('ring-2', 'ring-offset-2', 'ring-[var(--taio-brand)]');
               }, 3000);
             }
           }, 200);

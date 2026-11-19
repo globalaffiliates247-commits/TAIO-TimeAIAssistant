@@ -84,7 +84,7 @@ export const CloseDayModal: React.FC = () => {
             <div className={`w-9 h-9 rounded-2xl flex items-center justify-center border ${
               isCool 
                 ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                : 'bg-red-50 border-red-200 text-[#E0401F]'
+                : 'bg-red-50 border-red-200 text-[var(--taio-brand)]'
             }`}>
               <Moon className="w-5 h-5" />
             </div>
@@ -213,7 +213,7 @@ export const CloseDayModal: React.FC = () => {
                     return acc + est;
                   }, 0) || 150;
                   return (
-                    <p className={`font-extrabold text-sm mt-0.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>
+                    <p className={`font-extrabold text-sm mt-0.5 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`}>
                       {formatDuration(deepMinutes, language)} {language === 'vi' ? 'việc sâu' : 'deep work'}
                     </p>
                   );
@@ -252,7 +252,7 @@ export const CloseDayModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleQuickClose}
-                className="w-full py-3 px-4 rounded-xl bg-[#E0401F] hover:bg-[#c93517] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]"
+                className="w-full py-3 px-4 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]"
               >
                 <span>
                   {isPastDay
@@ -327,7 +327,7 @@ export const CloseDayModal: React.FC = () => {
           {/* Tomorrow / Morning's Top Task (Part A2 #10) */}
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
             <div>
-              <label className={`text-xs font-bold flex items-center gap-1.5 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`}>
+              <label className={`text-xs font-bold flex items-center gap-1.5 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`}>
                 <Target className="w-4 h-4 shrink-0" />
                 <span>
                   {isPastDay
@@ -407,7 +407,7 @@ export const CloseDayModal: React.FC = () => {
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition-all cursor-pointer ${
                   isCool
                     ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
-                    : 'bg-[#E0401F] hover:bg-[#c93517] shadow-red-500/20'
+                    : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-red-500/20'
                 }`}
               >
                 <span>

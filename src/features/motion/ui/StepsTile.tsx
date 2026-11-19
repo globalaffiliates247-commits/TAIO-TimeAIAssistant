@@ -33,7 +33,7 @@ export const StepsTile: React.FC<StepsTileProps> = ({
               Vận động hôm nay
             </span>
             {unconfirmedCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-[#E0401F] text-white">
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-[var(--taio-brand)] text-white">
                 +{unconfirmedCount}
               </span>
             )}

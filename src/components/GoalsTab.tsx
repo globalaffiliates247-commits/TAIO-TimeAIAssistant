@@ -106,7 +106,7 @@ export const GoalsTab: React.FC = () => {
       {/* Header: Single Row per Part H1.6 */}
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-red-50 text-[#E0401F] flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-red-50 text-[var(--taio-brand)] flex items-center justify-center shrink-0">
             <Target className="w-4 h-4" />
           </div>
           <div>
@@ -122,7 +122,7 @@ export const GoalsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => handleOpenCreateGoal(activeArea)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#E0401F] hover:bg-[#c83516] text-white font-bold text-xs shadow-sm transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>{t('goals.add_goal', 'Mục tiêu')}</span>
@@ -149,7 +149,7 @@ export const GoalsTab: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-lg shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#E0401F]" />
+                <Sparkles className="w-4 h-4 text-[var(--taio-brand)]" />
                 <h3 className="text-base font-bold text-slate-900">
                   {t('goals.modal_title', 'Thêm mục tiêu mới')} ({activeArea})
                 </h3>
@@ -175,7 +175,7 @@ export const GoalsTab: React.FC = () => {
                   value={newGoalName}
                   onChange={e => setNewGoalName(e.target.value)}
                   placeholder="Ví dụ: Ra mắt phiên bản 1.0..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                 />
               </div>
 
@@ -188,7 +188,7 @@ export const GoalsTab: React.FC = () => {
                   value={measurableResult}
                   onChange={e => setMeasurableResult(e.target.value)}
                   placeholder="Ví dụ: Đạt 100 khách hàng trả phí đầu tiên"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                 />
               </div>
 
@@ -204,7 +204,7 @@ export const GoalsTab: React.FC = () => {
                       onClick={() => setProgressType(opt.id)}
                       className={`w-full p-2.5 rounded-xl border text-left transition-all ${
                         progressType === opt.id
-                          ? 'border-[#E0401F] bg-red-50/60 text-slate-900'
+                          ? 'border-[var(--taio-brand)] bg-red-50/60 text-slate-900'
                           : 'border-slate-200 bg-slate-50 text-slate-700'
                       }`}
                     >
@@ -260,7 +260,7 @@ export const GoalsTab: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white font-bold shadow-xs"
+                  className="px-5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold shadow-xs"
                 >
                   {t('goals.create_submit', 'Tạo mục tiêu')}
                 </button>

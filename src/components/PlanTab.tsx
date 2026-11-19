@@ -151,7 +151,7 @@ export const PlanTab: React.FC = () => {
             onClick={() => setActiveView('card')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'card' 
-                ? 'bg-[#E0401F] text-white shadow-xs' 
+                ? 'bg-[var(--taio-brand)] text-white shadow-xs' 
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
@@ -162,7 +162,7 @@ export const PlanTab: React.FC = () => {
             onClick={() => setActiveView('timeline')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'timeline' 
-                ? 'bg-[#E0401F] text-white shadow-xs' 
+                ? 'bg-[var(--taio-brand)] text-white shadow-xs' 
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
@@ -184,7 +184,7 @@ export const PlanTab: React.FC = () => {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-xs transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-xs transition-all"
           >
             <Plus className="w-4 h-4 text-white" />
             <span>Thêm việc</span>
@@ -199,7 +199,7 @@ export const PlanTab: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-5 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-[#E0401F]" />
+                <Layers className="w-4 h-4 text-[var(--taio-brand)]" />
                 <span>Ngân sách tuần</span>
               </h3>
               <div className="flex items-center gap-3">
@@ -217,7 +217,7 @@ export const PlanTab: React.FC = () => {
             {/* Stacked 40h Progress Bar */}
             <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200/80 flex shadow-inner">
               {goals.map((g, idx) => {
-                const colors = ['bg-[#E0401F]', 'bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-sky-500', 'bg-rose-400'];
+                const colors = ['bg-[var(--taio-brand)]', 'bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-sky-500', 'bg-rose-400'];
                 const slicePercent = Math.min(100, (g.dailyBudgetMins * 5 / 60) / 40 * 100);
                 return (
                   <div
@@ -269,7 +269,7 @@ export const PlanTab: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-24 sm:w-36 bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200">
                         <div
-                          className="h-full bg-[#E0401F] rounded-full transition-all"
+                          className="h-full bg-[var(--taio-brand)] rounded-full transition-all"
                           style={{ width: `${Math.min(100, g.progressPercent)}%` }}
                         />
                       </div>
@@ -308,7 +308,7 @@ export const PlanTab: React.FC = () => {
               <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-5 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#E0401F]" />
+                    <Clock className="w-4 h-4 text-[var(--taio-brand)]" />
                     <span>Thời gian biểu ({todayLabel})</span>
                   </h3>
                   <span className="text-xs text-slate-500">
@@ -356,7 +356,7 @@ export const PlanTab: React.FC = () => {
                               }}
                               className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium border border-slate-200 shadow-2xs transition-colors"
                             >
-                              <Plus className="w-3 h-3 text-[#E0401F]" />
+                              <Plus className="w-3 h-3 text-[var(--taio-brand)]" />
                               <span>{language === 'vi' ? 'Xếp việc' : 'Add task'}</span>
                             </button>
                           </div>
@@ -403,7 +403,7 @@ export const PlanTab: React.FC = () => {
                               isParallel ? 'ml-5 border-l-4 border-l-indigo-400 pl-3 bg-indigo-50/40' : ''
                             } ${
                               isCurrent 
-                                ? 'border-2 border-[#E0401F] bg-orange-50/60 shadow-xs ring-1 ring-[#E0401F]/20'
+                                ? 'border-2 border-[var(--taio-brand)] bg-orange-50/60 shadow-xs ring-1 ring-[var(--taio-brand)]/20'
                                 : 'border border-slate-200 hover:border-slate-300 bg-white shadow-2xs'
                             }`}
                           >
@@ -611,7 +611,7 @@ export const PlanTab: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleAcceptBacklogItem(item)}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-sm transition-all shrink-0"
+                    className="px-3.5 py-1.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-sm transition-all shrink-0"
                   >
                     Làm tuần này
                   </button>
@@ -636,7 +636,7 @@ export const PlanTab: React.FC = () => {
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
                   placeholder="Ví dụ: Rà soát hợp đồng..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
                 />
               </div>
 
@@ -658,7 +658,7 @@ export const PlanTab: React.FC = () => {
                         setNewEndTime(minutesToTime((startM + 30) % 1440));
                       }
                     }}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
                   />
                 </div>
                 <div>
@@ -668,11 +668,20 @@ export const PlanTab: React.FC = () => {
                     required
                     value={newEndTime}
                     onChange={e => {
-                      setNewEndTime(e.target.value);
-                      setAddTimeError('');
+                      const endVal = e.target.value;
+                      setNewEndTime(endVal);
+                      const startM = timeToMinutes(newStartTime);
+                      const endM = timeToMinutes(endVal);
+                      if (startM >= endM) {
+                        setAddTimeError(language === 'vi'
+                          ? 'Giờ bắt đầu phải trước giờ kết thúc'
+                          : 'Start time must be before end time');
+                      } else {
+                        setAddTimeError('');
+                      }
                     }}
                     className={`w-full px-3 py-2 rounded-xl bg-slate-100 border text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 ${
-                      addTimeError ? 'border-red-400 ring-1 ring-red-300' : 'border-slate-200 focus:ring-[#E0401F]'
+                      addTimeError ? 'border-red-400 ring-1 ring-red-300' : 'border-slate-200 focus:ring-[var(--taio-brand)]'
                     }`}
                   />
                 </div>
@@ -686,7 +695,7 @@ export const PlanTab: React.FC = () => {
                 <select
                   value={newType}
                   onChange={e => setNewType(e.target.value as BlockType)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
                 >
                   <option value="deep">Tập trung sâu</option>
                   <option value="meeting">Họp & Trao đổi</option>
@@ -701,7 +710,7 @@ export const PlanTab: React.FC = () => {
                 <select
                   value={newGoalId}
                   onChange={e => setNewGoalId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E0401F]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
                 >
                   <option value="">Không gắn mục tiêu</option>
                   {goals.map(g => (
@@ -720,7 +729,8 @@ export const PlanTab: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#E0401F] hover:bg-[#d03515] text-white text-xs font-bold shadow-md transition-all"
+                  disabled={timeToMinutes(newStartTime) >= timeToMinutes(newEndTime)}
+                  className="px-5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition-all"
                 >
                   Thêm vào lịch
                 </button>

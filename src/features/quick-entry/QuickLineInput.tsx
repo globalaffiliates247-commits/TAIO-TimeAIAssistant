@@ -66,7 +66,7 @@ export const QuickLineInput: React.FC = () => {
               inputVal.trim()
                 ? isCool
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
-                  : 'bg-[#E0401F] hover:bg-[#d03515] text-white shadow-xs'
+                  : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white shadow-xs'
                 : 'text-slate-300 cursor-not-allowed'
             }`}
           >
@@ -101,7 +101,7 @@ export const QuickLineInput: React.FC = () => {
                       : isCurrent
                       ? isCool
                         ? 'bg-blue-50 text-blue-700 border-blue-200 font-bold'
-                        : 'bg-red-50 text-[#E0401F] border-red-200 font-bold'
+                        : 'bg-red-50 text-[var(--taio-brand)] border-red-200 font-bold'
                       : 'bg-slate-50 text-slate-700 border-slate-200'
                   }`}
                   title={`${block.startTime} - ${block.endTime}: ${block.title}`}

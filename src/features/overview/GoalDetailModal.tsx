@@ -128,7 +128,7 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({ goal, entry, o
               <span>{t('overview.burnUpChart', 'Biểu đồ giờ tích lũy (Burn-up)')}</span>
               <div className="flex items-center gap-3 text-[10.5px] font-normal text-slate-500">
                 <span className="flex items-center gap-1">
-                  <span className="w-3 h-0.5 bg-[#E0401F] rounded-full inline-block" /> Thực tế
+                  <span className="w-3 h-0.5 bg-[var(--taio-brand)] rounded-full inline-block" /> Thực tế
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-3 h-0.5 border-t border-dashed border-slate-400 inline-block" /> Kế hoạch
@@ -172,11 +172,11 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({ goal, entry, o
                 y1={chartHeight - padding}
                 x2={todayX}
                 y2={actualY}
-                stroke="#E0401F"
+                stroke="var(--taio-brand)"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
-              <circle cx={todayX} cy={actualY} r="4" fill="#E0401F" stroke="#ffffff" strokeWidth="1.5" />
+              <circle cx={todayX} cy={actualY} r="4" fill="var(--taio-brand)" stroke="#ffffff" strokeWidth="1.5" />
             </svg>
           </div>
 

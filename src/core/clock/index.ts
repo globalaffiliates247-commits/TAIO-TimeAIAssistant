@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { BlockStatus, TimeBlock } from '../../types/index.ts';
+export * from './desktopBridge.ts';
 
 /**
  * Single source of truth for device clock, local calendar dates,

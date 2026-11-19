@@ -118,7 +118,7 @@ export const ListsModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100/80 bg-slate-50/60">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#E0401F] to-amber-500 flex items-center justify-center shadow-md shadow-red-500/20">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[var(--taio-brand)] to-amber-500 flex items-center justify-center shadow-md shadow-red-500/20">
               <FolderKanban className="w-5 h-5 text-slate-900" />
             </div>
             <div>
@@ -167,7 +167,7 @@ export const ListsModal: React.FC = () => {
                     onClick={() => { setActiveListId(lst.id); setIsCreatingList(false); }}
                     className={`group flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all border ${
                       isSelected
-                        ? 'bg-[#E0401F]/15 border-[#E0401F]/40 text-slate-900 shadow-sm'
+                        ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)]/40 text-slate-900 shadow-sm'
                         : 'bg-slate-100/40 hover:bg-slate-100/80 border-slate-200/40 text-slate-700'
                     }`}
                   >
@@ -219,7 +219,7 @@ export const ListsModal: React.FC = () => {
                       placeholder="Ví dụ: Ý tưởng Kịch bản Video AI, Dự án Website MVP..."
                       value={newListName}
                       onChange={(e) => setNewListName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                     />
                   </div>
 
@@ -231,7 +231,7 @@ export const ListsModal: React.FC = () => {
                         onClick={() => setNewListType('idea')}
                         className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                           newListType === 'idea' 
-                            ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900' 
+                            ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900' 
                             : 'bg-slate-50/60 border-slate-100 text-slate-500 hover:border-slate-200'
                         }`}
                       >
@@ -249,7 +249,7 @@ export const ListsModal: React.FC = () => {
                         onClick={() => setNewListType('project')}
                         className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                           newListType === 'project' 
-                            ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900' 
+                            ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900' 
                             : 'bg-slate-50/60 border-slate-100 text-slate-500 hover:border-slate-200'
                         }`}
                       >
@@ -267,7 +267,7 @@ export const ListsModal: React.FC = () => {
                         onClick={() => setNewListType('checklist')}
                         className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                           newListType === 'checklist' 
-                            ? 'bg-[#E0401F]/15 border-[#E0401F] text-slate-900' 
+                            ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900' 
                             : 'bg-slate-50/60 border-slate-100 text-slate-500 hover:border-slate-200'
                         }`}
                       >
@@ -291,7 +291,7 @@ export const ListsModal: React.FC = () => {
                         placeholder="ytuong, duan, shopping..."
                         value={newListTag.replace(/^#/, '')}
                         onChange={(e) => setNewListTag(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#E0401F]"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                       />
                     </div>
                     <p className="text-[11px] text-slate-500 mt-1">
@@ -309,7 +309,7 @@ export const ListsModal: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2 text-xs font-semibold text-white bg-[#E0401F] hover:bg-[#c83515] rounded-xl shadow-md transition-all"
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] rounded-xl shadow-md transition-all"
                     >
                       Tạo danh sách
                     </button>
@@ -367,12 +367,12 @@ export const ListsModal: React.FC = () => {
                       placeholder={`+ Thêm mục mới vào "${currentList.name}" (Nhấn Enter để lưu)...`}
                       value={quickInput}
                       onChange={(e) => setQuickInput(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-[#E0401F] pr-20"
+                      className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-[var(--taio-brand)] pr-20"
                     />
                     <button
                       type="submit"
                       disabled={!quickInput.trim()}
-                      className="absolute right-2 px-3 py-1.5 rounded-lg bg-[#E0401F] text-white text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#c83515] transition-all"
+                      className="absolute right-2 px-3 py-1.5 rounded-lg bg-[var(--taio-brand)] text-white text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--taio-brand-hover)] transition-all"
                     >
                       Lưu
                     </button>
@@ -530,7 +530,7 @@ export const ListsModal: React.FC = () => {
                               </div>
                               <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
                                 <div 
-                                  className="h-full bg-gradient-to-r from-[#E0401F] to-amber-500 rounded-full transition-all duration-300" 
+                                  className="h-full bg-gradient-to-r from-[var(--taio-brand)] to-amber-500 rounded-full transition-all duration-300" 
                                   style={{ width: `${item.progress || 0}%` }}
                                 />
                               </div>

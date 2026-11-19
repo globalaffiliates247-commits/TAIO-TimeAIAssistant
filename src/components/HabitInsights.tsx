@@ -54,8 +54,8 @@ export const HabitInsights: React.FC = () => {
       label: 'Thời gian làm việc sâu (Phút/ngày)',
       unit: 'phút',
       values: [135, 180, 210, 120, 195, 225, 190],
-      color: isCool ? 'bg-blue-600' : 'bg-[#E0401F]',
-      textColor: isCool ? 'text-blue-700' : 'text-[#E0401F]',
+      color: isCool ? 'bg-blue-600' : 'bg-[var(--taio-brand)]',
+      textColor: isCool ? 'text-blue-700' : 'text-[var(--taio-brand)]',
       description: 'Duy trì trên 180 phút tập trung sâu trong 5/7 ngày gần nhất.',
     },
     interruptions: {
@@ -95,7 +95,7 @@ export const HabitInsights: React.FC = () => {
       <div className="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border ${
-            isCool ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-red-50 border-red-200 text-[#E0401F]'
+            isCool ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-red-50 border-red-200 text-[var(--taio-brand)]'
           }`}>
             <Compass className="w-6 h-6" />
           </div>
@@ -110,7 +110,7 @@ export const HabitInsights: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shrink-0">
-          <Moon className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+          <Moon className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
           <div className="text-xs">
             <span className="text-slate-500 block text-[10px]">Neo giấc ngủ cá nhân</span>
             <span className="font-bold text-slate-900">{profile.personalAnchors.windDownTime}</span>
@@ -122,7 +122,7 @@ export const HabitInsights: React.FC = () => {
       <div className="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Clock className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E0401F]'}`} />
+            <Clock className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[var(--taio-brand)]'}`} />
             <span>Kế hoạch vs Thực tế hôm nay (Plan vs Actual Timeline)</span>
           </h3>
           <span className="text-xs text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
@@ -374,7 +374,7 @@ export const HabitInsights: React.FC = () => {
                       <button
                         onClick={() => handleHabitAction(card.id, 'try')}
                         className={`px-3 py-1 text-xs font-semibold rounded-lg text-white shadow-xs flex items-center gap-1 transition-colors ${
-                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                         }`}
                       >
                         Thử tuần này <ChevronRight className="w-3.5 h-3.5" />
@@ -393,7 +393,7 @@ export const HabitInsights: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className={`p-2 rounded-xl border ${
-              isCool ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-red-50 text-[#E0401F] border-red-200'
+              isCool ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-red-50 text-[var(--taio-brand)] border-red-200'
             }`}>
               <RefreshCw className="w-4 h-4" />
             </div>

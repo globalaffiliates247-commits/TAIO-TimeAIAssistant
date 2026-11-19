@@ -94,7 +94,7 @@ export function buildTodaySchedule(
       status = 'partly_done';
     } else if (item.status === 'dropped') {
       status = 'dropped';
-    } else if (typeof extra.startedAt === 'number') {
+    } else if (item.status === 'in_progress' || typeof extra.startedAt === 'number') {
       status = 'in_progress';
     }
 

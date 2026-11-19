@@ -110,7 +110,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
             <div className={`w-9 h-9 rounded-2xl flex items-center justify-center border ${
               isCool 
                 ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                : 'bg-red-50 border-red-200 text-[#E0401F]'
+                : 'bg-red-50 border-red-200 text-[var(--taio-brand)]'
             }`}>
               <RotateCw className="w-5 h-5" />
             </div>
@@ -348,7 +348,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                 <button
                   type="submit"
                   className={`px-4 py-1.5 rounded-xl text-white font-bold text-xs ${
-                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E0401F] hover:bg-[#c93517]'
+                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                   }`}
                 >
                   Thêm
