@@ -45,8 +45,21 @@ export const HeaderClockPill: React.FC = () => {
 
   const handleClick = () => {
     if (typeof window !== 'undefined') {
-      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void } }).taioAPI;
+      const bridge = (window as unknown as { taioAPI?: { openClockWindow?: () => void; updateTimer?: (payload: any) => void } }).taioAPI;
       if (bridge?.openClockWindow) {
+        if (bridge?.updateTimer) {
+          bridge.updateTimer({
+            taskId: st.block?.id || null,
+            title: st.title,
+            subtitle: st.subtitle,
+            mode: st.mode,
+            startedAt: st.startedAt,
+            endsAt: st.endsAt,
+            remaining: displayText,
+            lang: language,
+            isCountDown: st.isCountDown ?? true,
+          });
+        }
         bridge.openClockWindow();
         return;
       }

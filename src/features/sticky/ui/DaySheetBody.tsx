@@ -596,6 +596,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           estimateMins: dur,
           parallelOf: isParallel && currentBlock ? currentBlock.id : undefined,
         },
+        ...((it.date !== day ? { date: day } : {}) as any),
       },
       { updateDailyCardItem, setBlocks, dailyCardItems }
     );

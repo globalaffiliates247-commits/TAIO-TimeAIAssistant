@@ -107,6 +107,24 @@ export const LiveClockStrip: React.FC<{ compact?: boolean; showQuote?: boolean }
   const handleOpenDetachedClock = async () => {
     // 1. macOS Desktop: Open separate floating clock window
     if (typeof window !== 'undefined' && (window as any).taioAPI?.openClockWindow) {
+      if ((window as any).taioAPI?.updateTimer) {
+        (window as any).taioAPI.updateTimer({
+          taskId: state.block?.id || null,
+          title: state.title,
+          subtitle: state.subtitle,
+          startedAt: state.startedAt,
+          endsAt: state.endsAt,
+          mode: state.mode,
+          remaining: formatSeconds(state.remainingSeconds),
+          lang: language,
+          isCountDown: state.isCountDown ?? true,
+          freeTimer: topFreeTimer ? {
+            title: topFreeTimer.title,
+            timeStr: freeTimerRemaining,
+            mode: topFreeTimer.mode,
+          } : null,
+        });
+      }
       (window as any).taioAPI.openClockWindow();
       return;
     }

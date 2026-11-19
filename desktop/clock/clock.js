@@ -4,7 +4,7 @@
   let startedAt = 0;
   let isCountDown = true;
   let isPinned = true;
-  let currentMode = 'task';
+  let currentMode = 'gap';
   let currentTaskId = null;
   let currentQuote = { text: 'Vạn dặm khởi đầu từ một bước chân', author: 'Lão Tử' };
   let currentLang = 'vi';
@@ -244,12 +244,12 @@
   window.updateUI = function(data) {
     if (!data) return;
     lastData = data;
-    currentMode = data.mode || 'task';
+    currentMode = data.mode || (typeof data.endsAt === 'number' && data.endsAt > 0 ? 'task' : 'gap');
     currentTaskId = data.taskId || null;
     if (data.lang) currentLang = data.lang;
 
-    if (data.endsAt) endsAt = data.endsAt;
-    if (data.startedAt) startedAt = data.startedAt;
+    endsAt = typeof data.endsAt === 'number' ? data.endsAt : 0;
+    startedAt = typeof data.startedAt === 'number' ? data.startedAt : 0;
     if (typeof data.isCountDown === 'boolean') isCountDown = data.isCountDown;
 
     if (data.quote) {
@@ -378,6 +378,18 @@
     }
 
     // Active task
+    if (currentMode === 'task' && (!endsAt || endsAt <= 0)) {
+      const nowD = new Date();
+      const curH = String(nowD.getHours()).padStart(2, '0');
+      const curM = String(nowD.getMinutes()).padStart(2, '0');
+      barDigits.innerText = `${curH}:${curM}`;
+      ringDigits.innerText = `${curH}:${curM}`;
+      ringSubText.innerText = currentLang === 'vi' ? 'thời gian trống' : 'free time';
+      barProgress.style.width = '100%';
+      if (ringCircle) ringCircle.style.strokeDashoffset = '0';
+      return;
+    }
+
     const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
     const totalDurationMins = Math.round(totalSec / 60);
 
@@ -434,15 +446,22 @@
   // Live timer tick every second
   setInterval(tick, 1000);
 
-  // Notify main process that clock window is loaded and ready for sync
-  if (window.taioAPI && window.taioAPI.notifyClockReady) {
-    window.taioAPI.notifyClockReady();
-  }
-
-  // PRD v0.3.43 Fix: Direct IPC listener for timer sync (reliable and instant)
+  // 1. Direct IPC listener for timer sync (reliable and instant)
   if (window.taioAPI && window.taioAPI.onSyncTimer) {
     window.taioAPI.onSyncTimer((data) => {
       window.updateUI(data);
     });
+  }
+
+  // 2. Active pull: immediately fetch current timer from main process
+  if (window.taioAPI && window.taioAPI.getTimerData) {
+    window.taioAPI.getTimerData().then((data) => {
+      if (data) window.updateUI(data);
+    }).catch(() => {});
+  }
+
+  // 3. Notify main process that clock window is loaded and ready
+  if (window.taioAPI && window.taioAPI.notifyClockReady) {
+    window.taioAPI.notifyClockReady();
   }
 })();

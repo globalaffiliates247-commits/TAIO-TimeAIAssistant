@@ -39,11 +39,11 @@
 
   <!-- View 1: Bar Mode -->
   <main id="barView" class="view-container">
-    <div class="task-title" id="barTitle" title="Bấm để mở nhật ký">Chưa có việc đang làm</div>
-    <div class="subtitle-line" id="barSubtitle"></div>
+    <div class="task-title" id="barTitle" title="Bấm để mở nhật ký">TAIO Time</div>
+    <div class="subtitle-line" id="barSubtitle">Chưa có việc đang làm</div>
 
     <div class="timer-display">
-      <div class="time-digits" id="barDigits">00:00</div>
+      <div class="time-digits" id="barDigits">--:--</div>
     </div>
 
     <!-- Free Timer secondary line -->
@@ -56,12 +56,12 @@
       <div class="progress-fill" id="barProgress"></div>
     </div>
 
-    <div class="bottom-bar" id="barBottomBar">
+    <div class="bottom-bar" id="barBottomBar" style="display: none;">
       <button class="btn" id="barBtnExtend">+5p</button>
       <button class="btn" id="barBtnExtend15">+15p</button>
       <button class="btn primary" id="barBtnDone">✓ Kết thúc</button>
     </div>
-    <div class="bottom-bar" id="barIdleBottomBar" style="display: none;">
+    <div class="bottom-bar" id="barIdleBottomBar" style="display: flex;">
       <button class="btn" id="barBtnQuick15">+15p việc nhanh</button>
       <button class="btn primary" id="barBtnOpenJournal">📖 Mở nhật ký</button>
     </div>
@@ -75,20 +75,20 @@
         <circle cx="60" cy="60" r="50" class="ring-progress" stroke-width="8" fill="transparent" id="ringCircle" />
       </svg>
       <div class="ring-center">
-        <div class="ring-digits" id="ringDigits">00:00</div>
-        <div class="ring-sub" id="ringSubText">còn lại</div>
+        <div class="ring-digits" id="ringDigits">--:--</div>
+        <div class="ring-sub" id="ringSubText">thời gian trống</div>
       </div>
     </div>
 
-    <div class="task-title" id="ringTitle" title="Bấm để mở nhật ký">Chưa có việc đang làm</div>
-    <div class="subtitle-line" id="ringSubtitle"></div>
+    <div class="task-title" id="ringTitle" title="Bấm để mở nhật ký">TAIO Time</div>
+    <div class="subtitle-line" id="ringSubtitle">Chưa có việc đang làm</div>
 
-    <div class="bottom-bar" id="ringBottomBar">
+    <div class="bottom-bar" id="ringBottomBar" style="display: none;">
       <button class="btn" id="ringBtnExtend">+5p</button>
       <button class="btn" id="ringBtnExtend15">+15p</button>
       <button class="btn primary" id="ringBtnDone">✓ Kết thúc</button>
     </div>
-    <div class="bottom-bar" id="ringIdleBottomBar" style="display: none;">
+    <div class="bottom-bar" id="ringIdleBottomBar" style="display: flex;">
       <button class="btn" id="ringBtnQuick15">+15p việc nhanh</button>
       <button class="btn primary" id="ringBtnOpenJournal">📖 Mở nhật ký</button>
     </div>

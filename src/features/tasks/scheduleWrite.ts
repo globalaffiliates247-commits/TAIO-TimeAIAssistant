@@ -51,6 +51,7 @@ export function updateScheduleEntry(
   const isCardItem = id.startsWith('dc-') || ctx.dailyCardItems?.some(it => it.id === id);
   if (isCardItem) {
     const cardPatch: Partial<DailyCardItem> = {};
+    if ((patch as any).date !== undefined) cardPatch.date = (patch as any).date;
     if (patch.title !== undefined) cardPatch.text = patch.title;
     if (patch.startTime !== undefined) cardPatch.start = patch.startTime;
     if (patch.endTime !== undefined) cardPatch.end = patch.endTime;

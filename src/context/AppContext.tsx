@@ -3143,6 +3143,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         onQuickNoteReceived?: (cb: (text: string) => void) => (() => void) | void;
         onTimerAction?: (cb: (action: { type: string; minutes?: number }) => void) => (() => void) | void;
         onOpenTodayJournal?: (cb: (taskId?: string) => void) => (() => void) | void;
+        updateTimer?: (payload: any) => void;
       };
     }).taioAPI;
 
@@ -3171,6 +3172,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             showToast?.(language === 'vi' ? 'Chưa có việc đang làm để thêm giờ' : 'No active task to extend');
           }
         } else if (action.type === 'start-quick') {
+          if (cur) {
+            shiftTaskTime(cur.id, action.minutes || 15);
+            showToast?.(language === 'vi' ? `+${action.minutes || 15}p cho "${cur.title}"` : `+${action.minutes || 15}m for "${cur.title}"`);
+            return;
+          }
           const mins = action.minutes || 15;
           const startStr = getDeviceTimeString();
           const startM = getDeviceTimeMinutes();
@@ -3185,6 +3191,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             extra: { startedAt: Date.now(), estimateMins: mins },
           };
           addDailyCardItem(newItem);
+          bridge.updateTimer?.({
+            taskId: newItem.id,
+            title: newItem.text,
+            subtitle: language === 'vi' ? 'Đang thực hiện' : 'In progress',
+            mode: 'task',
+            startedAt: Date.now(),
+            endsAt: Date.now() + mins * 60000,
+            remaining: `${mins}p`,
+            lang: language,
+            isCountDown: true,
+          });
           showToast?.(language === 'vi' ? `▶ Bắt đầu việc nhanh (${mins}p)` : `▶ Started quick task (${mins}m)`);
         } else if (action.type === 'open-journal') {
           setCurrentTab('plan');

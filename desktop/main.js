@@ -159,6 +159,7 @@ function createClockWindow() {
   if (clockWindow && !clockWindow.isDestroyed()) {
     clockWindow.show();
     clockWindow.focus();
+    syncClockWindowData();
     return;
   }
 
@@ -219,6 +220,11 @@ ipcMain.on("taio-clock-ready", () => {
   syncClockWindowData();
 });
 
+// Active pull handler: mini clock window fetches current timer data immediately upon load
+ipcMain.handle("taio-get-timer", () => {
+  return currentTimerData;
+});
+
 ipcMain.on("taio-open-today-journal", (_event, taskId) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     if (process.platform === 'darwin') {
@@ -241,10 +247,19 @@ function syncClockWindowData() {
   } catch (err) {
     console.error('[main] syncClockWindowData IPC send failed', err);
   }
-  // 2. JavaScript execution fallback
-  clockWindow.webContents.executeJavaScript(
-    `if (typeof updateUI === 'function') updateUI(${JSON.stringify(currentTimerData)});`
-  ).catch(() => {});
+  // 2. JavaScript execution fallback: safely checking both window.updateUI and updateUI
+  try {
+    const jsonStr = JSON.stringify(currentTimerData);
+    clockWindow.webContents.executeJavaScript(
+      `if (typeof window !== 'undefined' && typeof window.updateUI === 'function') {
+        window.updateUI(${jsonStr});
+      } else if (typeof updateUI === 'function') {
+        updateUI(${jsonStr});
+      }`
+    ).catch(() => {});
+  } catch (err) {
+    console.error('[main] syncClockWindowData executeJavaScript failed', err);
+  }
 }
 
 // B35.5: Tray with timer display

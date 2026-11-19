@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('taioAPI', {
   openTodayJournal: (taskId) => ipcRenderer.send('taio-open-today-journal', taskId),
   sendTimerAction: (action) => ipcRenderer.send('taio-timer-action', action),
   notifyClockReady: () => ipcRenderer.send('taio-clock-ready'),
+  getTimerData: () => ipcRenderer.invoke('taio-get-timer'),
   onQuickNoteReceived: (callback) => {
     const listener = (_event, text) => callback(text);
     ipcRenderer.on('taio-quick-note-received', listener);
