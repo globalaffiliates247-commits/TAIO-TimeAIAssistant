@@ -155,18 +155,28 @@ body {
 }
 
 /* Brand Color Aliases for legacy #E0401F */
-.bg-\\[\\#E0401F\\] { background-color: var(--taio-brand); }
-.hover\\:bg-\\[\\#E0401F\\]:hover { background-color: var(--taio-brand); }
-.hover\\:bg-\\[\\#d03515\\]:hover { background-color: var(--taio-brand-hover); }
-.hover\\:bg-\\[\\#cc3515\\]:hover { background-color: var(--taio-brand-hover); }
-.hover\\:bg-\\[\\#c53314\\]:hover { background-color: var(--taio-brand-hover); }
-.hover\\:bg-\\[\\#c93517\\]:hover { background-color: var(--taio-brand-hover); }
-.text-\\[\\#E0401F\\] { color: var(--taio-brand); }
-.border-\\[\\#E0401F\\] { border-color: var(--taio-brand); }
-.ring-\\[\\#E0401F\\] { --tw-ring-color: var(--taio-brand); }
-.focus\\:ring-\\[\\#E0401F\\]:focus { --tw-ring-color: var(--taio-brand); }
-.stroke-\\[\\#E0401F\\] { stroke: var(--taio-brand); }
-.fill-\\[\\#E0401F\\] { fill: var(--taio-brand); }
+.bg-\\[\\#E0401F\\] { background-color: #E8311C; background-color: var(--taio-brand); }
+.hover\\:bg-\\[\\#E0401F\\]:hover { background-color: #d02512; background-color: var(--taio-brand); }
+.hover\\:bg-\\[\\#d03515\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
+.hover\\:bg-\\[\\#cc3515\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
+.hover\\:bg-\\[\\#c53314\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
+.hover\\:bg-\\[\\#c93517\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
+.text-\\[\\#E0401F\\] { color: #E8311C; color: var(--taio-brand); }
+.border-\\[\\#E0401F\\] { border-color: #E8311C; border-color: var(--taio-brand); }
+.ring-\\[\\#E0401F\\] { --tw-ring-color: #E8311C; --tw-ring-color: var(--taio-brand); }
+.focus\\:ring-\\[\\#E0401F\\]:focus { --tw-ring-color: #E8311C; --tw-ring-color: var(--taio-brand); }
+.stroke-\\[\\#E0401F\\] { stroke: #E8311C; stroke: var(--taio-brand); }
+.fill-\\[\\#E0401F\\] { fill: #E8311C; fill: var(--taio-brand); }
+
+/* Bulletproof Brand color variable fallbacks */
+.bg-\\[var\\(--taio-brand\\)\\] { background-color: #E8311C !important; background-color: var(--taio-brand, #E8311C) !important; }
+.hover\\:bg-\\[var\\(--taio-brand-hover\\)\\]:hover { background-color: #d02512 !important; background-color: var(--taio-brand-hover, #d02512) !important; }
+.text-\\[var\\(--taio-brand\\)\\] { color: #E8311C !important; color: var(--taio-brand, #E8311C) !important; }
+.border-\\[var\\(--taio-brand\\)\\] { border-color: #E8311C !important; border-color: var(--taio-brand, #E8311C) !important; }
+.focus\\:border-\\[var\\(--taio-brand\\)\\]:focus { border-color: #E8311C !important; border-color: var(--taio-brand, #E8311C) !important; }
+.ring-\\[var\\(--taio-brand\\)\\] { --tw-ring-color: #E8311C !important; --tw-ring-color: var(--taio-brand, #E8311C) !important; }
+.focus\\:ring-\\[var\\(--taio-brand\\)\\]:focus { --tw-ring-color: #E8311C !important; --tw-ring-color: var(--taio-brand, #E8311C) !important; }
+.shadow-\\[var\\(--taio-brand\\)\\]\\/20 { --tw-shadow-color: rgba(232, 49, 28, 0.2) !important; }
 `;
 
   const finalCss = generatedCss + "\n" + customCss;

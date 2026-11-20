@@ -35,8 +35,36 @@ export const GoalsTab: React.FC = () => {
     openDrilldown,
     deviceLook,
     showToast,
+    palette,
+    language,
   } = useApp();
   const { t } = useT();
+
+  const isCool = palette === 'cool';
+
+  const progressTypeOptions: { id: GoalProgressType; label: string; desc: string }[] = [
+    {
+      id: 'tasks',
+      label: language === 'en' ? 'Task Completion' : 'Hoàn thành các việc',
+      desc: language === 'en'
+        ? 'Tasks done divided by total goal tasks (1 unit per task)'
+        : 'Số việc đã xong chia cho tổng số việc của mục tiêu (mỗi việc tính là 1 đơn vị)',
+    },
+    {
+      id: 'key_result',
+      label: language === 'en' ? 'Measurable Result' : 'Kết quả đo được',
+      desc: language === 'en'
+        ? 'Actual metric reached divided by target metric (one-tap update)'
+        : 'Con số thực tế đạt được chia cho con số mục tiêu (cập nhật 1 chạm)',
+    },
+    {
+      id: 'time_commitment',
+      label: language === 'en' ? 'Time Commitment' : 'Có mặt đủ thời gian',
+      desc: language === 'en'
+        ? 'Hours spent divided by total committed hours (for practice, habits)'
+        : 'Số giờ đã dành ra chia cho tổng số giờ cam kết (dành cho rèn luyện, thói quen)',
+    },
+  ];
 
   const [activeArea, setActiveArea] = useState<WorkAreaType>('Product');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
@@ -106,7 +134,7 @@ export const GoalsTab: React.FC = () => {
       {/* Header: Single Row per Part H1.6 */}
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-red-50 text-[var(--taio-brand)] flex items-center justify-center shrink-0">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isCool ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-[#E8311C]'}`}>
             <Target className="w-4 h-4" />
           </div>
           <div>
@@ -122,9 +150,11 @@ export const GoalsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => handleOpenCreateGoal(activeArea)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm transition-all"
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl text-white font-bold text-xs shadow-sm transition-all ${
+            isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
+          }`}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-white" />
           <span>{t('goals.add_goal', 'Mục tiêu')}</span>
         </button>
       </div>
@@ -149,7 +179,7 @@ export const GoalsTab: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-lg shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[var(--taio-brand)]" />
+                <Sparkles className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E8311C]'}`} />
                 <h3 className="text-base font-bold text-slate-900">
                   {t('goals.modal_title', 'Thêm mục tiêu mới')} ({activeArea})
                 </h3>
@@ -174,8 +204,10 @@ export const GoalsTab: React.FC = () => {
                   autoFocus
                   value={newGoalName}
                   onChange={e => setNewGoalName(e.target.value)}
-                  placeholder="Ví dụ: Ra mắt phiên bản 1.0..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
+                  placeholder={language === 'en' ? 'e.g. Launch version 1.0...' : 'Ví dụ: Ra mắt phiên bản 1.0...'}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none ${
+                    isCool ? 'focus:border-blue-600 focus:ring-1 focus:ring-blue-600' : 'focus:border-[#E8311C] focus:ring-1 focus:ring-[#E8311C]'
+                  }`}
                 />
               </div>
 
@@ -187,8 +219,10 @@ export const GoalsTab: React.FC = () => {
                   type="text"
                   value={measurableResult}
                   onChange={e => setMeasurableResult(e.target.value)}
-                  placeholder="Ví dụ: Đạt 100 khách hàng trả phí đầu tiên"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
+                  placeholder={language === 'en' ? 'e.g. Reach 100 paying customers' : 'Ví dụ: Đạt 100 khách hàng trả phí đầu tiên'}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none ${
+                    isCool ? 'focus:border-blue-600 focus:ring-1 focus:ring-blue-600' : 'focus:border-[#E8311C] focus:ring-1 focus:ring-[#E8311C]'
+                  }`}
                 />
               </div>
 
@@ -197,15 +231,17 @@ export const GoalsTab: React.FC = () => {
                   {t('goals.input_progress_type', 'Cách tính tiến độ')}
                 </label>
                 <div className="space-y-1.5">
-                  {PROGRESS_TYPE_OPTIONS.map(opt => (
+                  {progressTypeOptions.map(opt => (
                     <button
                       key={opt.id}
                       type="button"
                       onClick={() => setProgressType(opt.id)}
                       className={`w-full p-2.5 rounded-xl border text-left transition-all ${
                         progressType === opt.id
-                          ? 'border-[var(--taio-brand)] bg-red-50/60 text-slate-900'
-                          : 'border-slate-200 bg-slate-50 text-slate-700'
+                          ? isCool
+                            ? 'border-blue-500 bg-blue-50/70 text-slate-900 shadow-2xs'
+                            : 'border-[#E8311C] bg-red-50/70 text-slate-900 shadow-2xs'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100/70'
                       }`}
                     >
                       <div className="font-bold">{opt.label}</div>
@@ -225,11 +261,11 @@ export const GoalsTab: React.FC = () => {
                     onChange={e => setHorizonDays(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
                   >
-                    <option value={30}>30 ngày (1 tháng)</option>
-                    <option value={60}>60 ngày (2 tháng)</option>
-                    <option value={90}>90 ngày (1 quý)</option>
-                    <option value={180}>180 ngày (6 tháng)</option>
-                    <option value={365}>365 ngày (1 năm)</option>
+                    <option value={30}>{language === 'en' ? '30 days (1 month)' : '30 ngày (1 tháng)'}</option>
+                    <option value={60}>{language === 'en' ? '60 days (2 months)' : '60 ngày (2 tháng)'}</option>
+                    <option value={90}>{language === 'en' ? '90 days (1 quarter)' : '90 ngày (1 quý)'}</option>
+                    <option value={180}>{language === 'en' ? '180 days (6 months)' : '180 ngày (6 tháng)'}</option>
+                    <option value={365}>{language === 'en' ? '365 days (1 year)' : '365 ngày (1 năm)'}</option>
                   </select>
                 </div>
                 <div>
@@ -241,11 +277,11 @@ export const GoalsTab: React.FC = () => {
                     onChange={e => setDailyBudgetMins(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
                   >
-                    <option value={30}>30 phút / ngày</option>
-                    <option value={45}>45 phút / ngày</option>
-                    <option value={60}>60 phút / ngày</option>
-                    <option value={90}>90 phút / ngày</option>
-                    <option value={120}>120 phút / ngày</option>
+                    <option value={30}>{language === 'en' ? '30 mins / day' : '30 phút / ngày'}</option>
+                    <option value={45}>{language === 'en' ? '45 mins / day' : '45 phút / ngày'}</option>
+                    <option value={60}>{language === 'en' ? '60 mins / day' : '60 phút / ngày'}</option>
+                    <option value={90}>{language === 'en' ? '90 mins / day' : '90 phút / ngày'}</option>
+                    <option value={120}>{language === 'en' ? '120 mins / day' : '120 phút / ngày'}</option>
                   </select>
                 </div>
               </div>
@@ -254,13 +290,15 @@ export const GoalsTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 font-semibold"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 font-semibold transition-colors"
                 >
                   {t('terms.cancel', 'Hủy')}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold shadow-xs"
+                  className={`px-5 py-2 rounded-xl text-white font-bold shadow-xs transition-all ${
+                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
+                  }`}
                 >
                   {t('goals.create_submit', 'Tạo mục tiêu')}
                 </button>

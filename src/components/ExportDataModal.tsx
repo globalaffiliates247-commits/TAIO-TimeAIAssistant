@@ -24,8 +24,11 @@ export const ExportDataModal: React.FC = () => {
     rotateShareToken,
     generateMarkdownSnapshot,
     exportTaioJsonV1,
-    setIsProfileModalOpen
+    setIsProfileModalOpen,
+    palette,
+    language
   } = useApp();
+  const isCool = palette === 'cool';
 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<boolean>(false);
@@ -153,10 +156,16 @@ export const ExportDataModal: React.FC = () => {
               />
               <button
                 onClick={handleCopyLink}
-                className="py-2 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className={`py-2 px-3 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs transition-all ${
+                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
+                }`}
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5 text-white" />}
-                <span>{copiedLink ? 'Đã sao chép' : 'Sao chép link'}</span>
+                <span>
+                  {copiedLink 
+                    ? (language === 'en' ? 'Copied' : 'Đã sao chép') 
+                    : (language === 'en' ? 'Copy Link' : 'Sao chép link')}
+                </span>
               </button>
             </div>
 

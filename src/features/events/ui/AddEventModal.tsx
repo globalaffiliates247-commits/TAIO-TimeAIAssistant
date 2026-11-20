@@ -24,7 +24,8 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   onClose,
   initialDate,
 }) => {
-  const { language, addScheduledEvent, showToast } = useApp();
+  const { language, addScheduledEvent, showToast, palette } = useApp();
+  const isCool = palette === 'cool';
 
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(initialDate || getDeviceCalendarDate());
@@ -387,7 +388,9 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-md transition-all"
+              className={`px-5 py-2 rounded-xl text-white text-xs font-bold shadow-md transition-all ${
+                isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
+              }`}
             >
               {language === 'vi' ? 'Lưu sự kiện' : 'Save Event'}
             </button>

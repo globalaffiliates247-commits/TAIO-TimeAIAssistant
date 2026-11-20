@@ -294,9 +294,11 @@ export const AppearanceModal: React.FC = () => {
         <div className="px-5 py-3 border-t border-slate-200 bg-white/50 flex justify-end">
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className="px-5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-md transition-all"
+            className={`px-5 py-2 rounded-xl text-white text-xs font-bold shadow-md transition-all ${
+              palette === 'cool' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
+            }`}
           >
-            Áp dụng và Đóng
+            {language === 'en' ? 'Apply and Close' : 'Áp dụng và Đóng'}
           </button>
         </div>
 
