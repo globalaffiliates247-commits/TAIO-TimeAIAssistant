@@ -3760,6 +3760,12 @@
       --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-blue-500) 20%, transparent) var(--tw-shadow-alpha), transparent);
     }
   }
+  .shadow-blue-500\/25 {
+    --tw-shadow-color: color-mix(in srgb, oklch(62.3% 0.214 259.815) 25%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-blue-500) 25%, transparent) var(--tw-shadow-alpha), transparent);
+    }
+  }
   .shadow-blue-500\/30 {
     --tw-shadow-color: color-mix(in srgb, oklch(62.3% 0.214 259.815) 30%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -4376,6 +4382,9 @@
       .hover\:bg-blue-100\/90:hover {
         background-color: color-mix(in oklab, var(--color-blue-100) 90%, transparent);
       }
+    }
+    .hover\:bg-blue-500:hover {
+      background-color: var(--color-blue-500);
     }
     .hover\:bg-blue-700:hover {
       background-color: var(--color-blue-700);

@@ -2771,6 +2771,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         savedDayTemplate,
         savedImportedDays,
         savedClosedDays,
+        savedThemeMode,
       ] = await Promise.all([
         loadDurableState<TimeBlock[]>('blocks'),
         loadDurableState<DailyCardItem[]>('dailyCardItems'),
@@ -2789,6 +2790,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loadDurableState<DayTemplateSlot[]>('dayTemplate'),
         loadDurableState<ExportedDayRecord[]>('importedDays'),
         loadDurableState<ClosedDaysMap>('closedDays'),
+        loadDurableState<ThemeMode>('themeMode'),
       ]);
 
       if (cancelled) return;
@@ -2976,6 +2978,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (savedPalette?.value) {
         setPalette(savedPalette.value);
       }
+      if (savedThemeMode?.value) {
+        setThemeMode(savedThemeMode.value);
+      }
       if (savedDayTemplate?.value) {
         setDayTemplate(savedDayTemplate.value);
       }
@@ -3096,6 +3101,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isHydratedRef.current) return;
     saveDurableState('palette', palette, Date.now());
   }, [palette]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    saveDurableState('themeMode', themeMode, Date.now());
+  }, [themeMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isDark = themeMode === 'dark' || (themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', isDark);
+
+    if (themeMode === 'system') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = (e: MediaQueryListEvent) => {
+        document.documentElement.classList.toggle('dark', e.matches);
+      };
+      mq.addEventListener('change', listener);
+      return () => mq.removeEventListener('change', listener);
+    }
+  }, [themeMode]);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;

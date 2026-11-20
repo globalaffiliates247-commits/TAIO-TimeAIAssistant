@@ -9,12 +9,14 @@ interface SnoozePickerProps {
   currentMinutes: number;
   onMinutesChange: (mins: number) => void;
   onSnooze: (mins: number) => void;
+  isDark?: boolean;
 }
 
 export const SnoozePicker: React.FC<SnoozePickerProps> = ({
   currentMinutes,
   onMinutesChange,
   onSnooze,
+  isDark = true,
 }) => {
   const { t } = useT();
 
@@ -38,14 +40,22 @@ export const SnoozePicker: React.FC<SnoozePickerProps> = ({
   };
 
   return (
-    <div className="w-full flex items-center bg-zinc-900/90 border border-zinc-800 rounded-2xl p-1 text-zinc-300 transition-all shadow-md">
+    <div className={`w-full flex items-center border rounded-2xl p-1 transition-all shadow-md ${
+      isDark 
+        ? 'bg-zinc-900/90 border-zinc-800 text-zinc-300' 
+        : 'bg-white border-slate-200 text-slate-700'
+    }`}>
       {/* Decrease button (-) */}
       <button
         type="button"
         onClick={handleDecrease}
         disabled={activeIndex <= 0}
         aria-label="Giảm số phút báo lại"
-        className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-zinc-800 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all text-zinc-400 hover:text-white"
+        className={`w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all ${
+          isDark 
+            ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white' 
+            : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
+        }`}
       >
         <Minus className="w-5 h-5 stroke-[2.5]" />
       </button>
@@ -54,9 +64,13 @@ export const SnoozePicker: React.FC<SnoozePickerProps> = ({
       <button
         type="button"
         onClick={handleSnooze}
-        className="flex-1 py-3 px-2 flex items-center justify-center gap-2 hover:bg-zinc-800/60 rounded-xl transition-all font-semibold text-sm active:scale-[0.99]"
+        className={`flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-xl transition-all font-semibold text-sm active:scale-[0.99] ${
+          isDark 
+            ? 'hover:bg-zinc-800/60' 
+            : 'hover:bg-slate-50 text-slate-800'
+        }`}
       >
-        <Clock className="w-4 h-4 text-amber-400" />
+        <Clock className={`w-4 h-4 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
         <span>
           {t('alarm.snooze_after', {
             mins: SNOOZE_PRESETS[activeIndex],
@@ -71,7 +85,11 @@ export const SnoozePicker: React.FC<SnoozePickerProps> = ({
         onClick={handleIncrease}
         disabled={activeIndex >= SNOOZE_PRESETS.length - 1}
         aria-label="Tăng số phút báo lại"
-        className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-zinc-800 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all text-zinc-400 hover:text-white"
+        className={`w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all ${
+          isDark 
+            ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white' 
+            : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
+        }`}
       >
         <Plus className="w-5 h-5 stroke-[2.5]" />
       </button>

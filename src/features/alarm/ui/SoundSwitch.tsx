@@ -10,6 +10,7 @@ interface SoundSwitchProps {
   settings: AlarmSettings;
   onSwitch: () => void;
   onOpenSettings?: () => void;
+  isDark?: boolean;
 }
 
 export const SoundSwitch: React.FC<SoundSwitchProps> = ({
@@ -17,6 +18,7 @@ export const SoundSwitch: React.FC<SoundSwitchProps> = ({
   settings,
   onSwitch,
   onOpenSettings,
+  isDark = true,
 }) => {
   const totalCount = getSoundOptionsCount(settings);
   const normalizedIndex = ((currentIndex % totalCount) + totalCount) % totalCount;
@@ -57,7 +59,11 @@ export const SoundSwitch: React.FC<SoundSwitchProps> = ({
         onPointerCancel={handlePointerUp}
         aria-label="Đổi nhạc chuông"
         title="Bấm để đổi âm thanh, bấm giữ để chọn file nhạc riêng"
-        className="w-10 h-10 rounded-full bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700/80 flex items-center justify-center text-amber-400 hover:text-amber-300 transition-all shadow-md active:scale-95"
+        className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all shadow-md active:scale-95 ${
+          isDark
+            ? 'bg-zinc-800/90 hover:bg-zinc-700 border-zinc-700/80 text-amber-400 hover:text-amber-300'
+            : 'bg-white hover:bg-slate-100 border-slate-200 text-amber-600 hover:text-amber-700 shadow-2xs'
+        }`}
       >
         <Music className="w-5 h-5" />
       </button>
@@ -69,8 +75,8 @@ export const SoundSwitch: React.FC<SoundSwitchProps> = ({
             key={idx}
             className={`w-1.5 h-1.5 rounded-full transition-all ${
               idx === normalizedIndex
-                ? 'bg-amber-400 scale-125'
-                : 'bg-zinc-600/70'
+                ? isDark ? 'bg-amber-400 scale-125' : 'bg-amber-600 scale-125'
+                : isDark ? 'bg-zinc-600/70' : 'bg-slate-300'
             }`}
           />
         ))}

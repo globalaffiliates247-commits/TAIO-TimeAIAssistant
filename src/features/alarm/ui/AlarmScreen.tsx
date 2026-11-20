@@ -8,6 +8,7 @@ import { SnoozePicker } from './SnoozePicker';
 import { SoundSwitch } from './SoundSwitch';
 import { playSoundByIndex, stopRingSessionAudio } from '../model/ringSession';
 import { useT } from '@/i18n/useT';
+import { useApp } from '@/context/AppContext';
 import { MotivationSticker } from '@/features/motivation';
 
 interface AlarmScreenProps {
@@ -28,6 +29,23 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
   onOpenSettings,
 }) => {
   const { t } = useT();
+  const { themeMode, palette, language } = useApp();
+
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark);
+  const isCool = palette === 'cool';
 
   // Local state for snooze minutes & sound index
   const [snoozeMins, setSnoozeMins] = useState<number>(() => alarmSettings.snoozeDurationMins || 5);
@@ -110,7 +128,9 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
 
   return (
     <div
-      className="fixed inset-0 flex flex-col justify-between bg-zinc-950/95 backdrop-blur-xl text-white animate-in fade-in duration-300"
+      className={`fixed inset-0 flex flex-col justify-between backdrop-blur-xl animate-in fade-in duration-300 ${
+        isDark ? 'bg-zinc-950/95 text-white' : 'bg-slate-50/95 text-slate-900'
+      }`}
       style={{
         zIndex: Z_LAYERS.ALARM_FULLSCREEN,
         paddingTop: 'calc(var(--sat, 0px) + 20px)',
@@ -121,9 +141,17 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
     >
       {/* Top Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold tracking-wider uppercase">
-          <span className={`w-2 h-2 rounded-full bg-amber-400 ${isStoppedAfter15Mins ? '' : 'animate-ping'}`} />
-          <span>{isStoppedAfter15Mins ? 'Báo thức đã ngừng' : 'Báo thức bắt đầu khối'}</span>
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase border ${
+          isDark 
+            ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' 
+            : 'bg-amber-100 text-amber-900 border-amber-300 shadow-2xs'
+        }`}>
+          <span className={`w-2 h-2 rounded-full ${isDark ? 'bg-amber-400' : 'bg-amber-600'} ${isStoppedAfter15Mins ? '' : 'animate-ping'}`} />
+          <span>
+            {isStoppedAfter15Mins 
+              ? (language === 'en' ? 'Alarm Stopped' : 'Báo thức đã ngừng') 
+              : (language === 'en' ? 'Block Start Alarm' : 'Báo thức bắt đầu khối')}
+          </span>
         </div>
 
         {/* Top Right: Sound Switch button */}
@@ -132,6 +160,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
           settings={alarmSettings}
           onSwitch={handleSwitchSound}
           onOpenSettings={onOpenSettings}
+          isDark={isDark}
         />
       </div>
 
@@ -139,16 +168,22 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
       <div className="flex flex-col items-center text-center my-auto px-4 max-w-md mx-auto">
         {/* Bell Icon: animates while ringing, stops when 15-min limit reached */}
         <div className="relative mb-6">
-          <div className={`w-24 h-24 rounded-full bg-amber-500/20 flex items-center justify-center ${isStoppedAfter15Mins ? '' : 'animate-pulse'}`}>
-            <div className="w-16 h-16 rounded-full bg-amber-500/30 flex items-center justify-center">
-              <Bell className={`w-9 h-9 text-amber-400 ${isStoppedAfter15Mins ? 'opacity-80' : 'animate-bounce'}`} />
+          <div className={`w-24 h-24 rounded-full flex items-center justify-center ${
+            isDark ? 'bg-amber-500/20' : 'bg-amber-100'
+          } ${isStoppedAfter15Mins ? '' : 'animate-pulse'}`}>
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+              isDark ? 'bg-amber-500/30' : 'bg-amber-200'
+            }`}>
+              <Bell className={`w-9 h-9 ${isDark ? 'text-amber-400' : 'text-amber-600'} ${isStoppedAfter15Mins ? 'opacity-80' : 'animate-bounce'}`} />
             </div>
           </div>
         </div>
 
         {/* Task Title */}
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
-          {alarmState.blockTitle || 'Đến giờ bắt đầu khối thời gian'}
+        <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight mb-2 ${
+          isDark ? 'text-white' : 'text-slate-900'
+        }`}>
+          {alarmState.blockTitle || (language === 'en' ? 'Time to start scheduled block' : 'Đến giờ bắt đầu khối thời gian')}
         </h1>
 
         {/* PRD FEATURE v0.3.31 B5: Motivation line under task title */}
@@ -156,30 +191,43 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
           slotKey="alarm_start"
           context="start_task"
           size="line"
-          className="mb-4 max-w-sm bg-white/5 border-white/10 text-zinc-300"
+          className={`mb-4 max-w-sm ${
+            isDark ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-white border-slate-200 text-slate-700 shadow-2xs'
+          }`}
         />
 
         {/* Status Line: if stopped after 15 mins, report accurately (spec F2.3) */}
         {isStoppedAfter15Mins ? (
-          <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-amber-400 text-xs font-medium mb-5">
+          <div className={`p-3 rounded-xl border text-xs font-medium mb-5 ${
+            isDark ? 'bg-zinc-900 border-zinc-800 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-900'
+          }`}>
             {t('alarm.stopped_after_15m', {
               time: alarmState.startTime || '',
-              defaultValue: `Chuông đã ngừng sau 15 phút · báo lúc ${alarmState.startTime || ''}`
+              defaultValue: language === 'en'
+                ? `Alarm stopped after 15 minutes · rang at ${alarmState.startTime || ''}`
+                : `Chuông đã ngừng sau 15 phút · báo lúc ${alarmState.startTime || ''}`
             })}
           </div>
         ) : (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800 text-zinc-300 text-sm mb-4">
-            <Clock className="w-4 h-4 text-amber-400" />
-            <span>Bắt đầu lúc {alarmState.startTime || 'ngay bây giờ'}</span>
+          <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-sm mb-4 ${
+            isDark ? 'bg-zinc-900/80 border-zinc-800 text-zinc-300' : 'bg-white border-slate-200 text-slate-700 shadow-2xs'
+          }`}>
+            <Clock className={`w-4 h-4 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+            <span>
+              {language === 'en' ? 'Starts at ' : 'Bắt đầu lúc '}
+              {alarmState.startTime || (language === 'en' ? 'right now' : 'ngay bây giờ')}
+            </span>
           </div>
         )}
 
         {/* Snooze repeat count indicator if > 0 (spec F2.1.5) */}
         {(alarmState.snoozeCount || 0) > 0 && (
-          <p className="text-xs text-amber-400/90 font-medium mb-4">
+          <p className={`text-xs font-medium mb-4 ${isDark ? 'text-amber-400/90' : 'text-amber-700'}`}>
             {t('alarm.snooze_count', {
               count: alarmState.snoozeCount,
-              defaultValue: `Đã báo lại ${alarmState.snoozeCount} lần`
+              defaultValue: language === 'en'
+                ? `Snoozed ${alarmState.snoozeCount} time(s)`
+                : `Đã báo lại ${alarmState.snoozeCount} lần`
             })}
           </p>
         )}
@@ -199,7 +247,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
                     }}
                     className="mt-2 text-rose-300 underline font-semibold hover:text-rose-100"
                   >
-                    Chọn lại file âm thanh ngay
+                    {language === 'en' ? 'Reselect audio file now' : 'Chọn lại file âm thanh ngay'}
                   </button>
                 )}
               </div>
@@ -213,7 +261,13 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
         {/* Primary Action Button: "Vào việc ngay" (spec F2.5) */}
         <button
           onClick={onDismiss}
-          className="w-full py-4 px-6 rounded-2xl bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-zinc-950 font-bold text-base shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2"
+          className={`w-full py-4 px-6 rounded-2xl font-bold text-base shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.98] ${
+            isCool
+              ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25'
+              : isDark
+                ? 'bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-500/25'
+                : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white shadow-red-500/25'
+          }`}
         >
           <BellOff className="w-5 h-5" />
           <span>{t('alarm.dismiss', 'Vào việc ngay')}</span>
@@ -224,6 +278,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
           currentMinutes={snoozeMins}
           onMinutesChange={handleSnoozeMinutesChange}
           onSnooze={onSnooze}
+          isDark={isDark}
         />
       </div>
     </div>
