@@ -9,7 +9,13 @@ contextBridge.exposeInMainWorld('taioAPI', {
   openTodayJournal: (taskId) => ipcRenderer.send('taio-open-today-journal', taskId),
   sendTimerAction: (action) => ipcRenderer.send('taio-timer-action', action),
   notifyClockReady: () => ipcRenderer.send('taio-clock-ready'),
+  sendClockError: (err) => ipcRenderer.send('taio-clock-error', err),
   getTimerData: () => ipcRenderer.invoke('taio-get-timer'),
+  onClockError: (callback) => {
+    const listener = (_event, err) => callback(err);
+    ipcRenderer.on('taio-clock-error', listener);
+    return () => ipcRenderer.removeListener('taio-clock-error', listener);
+  },
   onQuickNoteReceived: (callback) => {
     const listener = (_event, text) => callback(text);
     ipcRenderer.on('taio-quick-note-received', listener);

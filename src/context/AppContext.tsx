@@ -12,6 +12,7 @@ import {
   TAIONative,
   scheduleNativeNotification
 } from '../features/native';
+import { logAppError } from '../core/errorLogger';
 import { computeGoalMetrics } from '../features/goals/goalMetrics';
 import {
   parseAndValidateTaioExport,
@@ -3304,6 +3305,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         onQuickNoteReceived?: (cb: (text: string) => void) => (() => void) | void;
         onTimerAction?: (cb: (action: { type: string; minutes?: number }) => void) => (() => void) | void;
         onOpenTodayJournal?: (cb: (taskId?: string) => void) => (() => void) | void;
+        onClockError?: (cb: (err: { message?: string; stack?: string }) => void) => (() => void) | void;
         updateTimer?: (payload: any) => void;
       };
     }).taioAPI;
@@ -3388,6 +3390,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
           }, 200);
         }
+      });
+      if (typeof unsub === 'function') cleanups.push(unsub);
+    }
+
+    // v0.3.46 Part A4: Log clock window runtime error to 20-line error journal
+    if (bridge?.onClockError) {
+      const unsub = bridge.onClockError((err: { message?: string; stack?: string }) => {
+        logAppError({
+          tab: 'clock-window',
+          message: err?.message || 'Clock window runtime error',
+          stack: err?.stack || '',
+        });
       });
       if (typeof unsub === 'function') cleanups.push(unsub);
     }

@@ -33,6 +33,7 @@ let currentTimerData = {
 let clockWindowBounds = null;
 let quickNoteWindowBounds = null;
 let clockIsPinned = true;
+let clockReadyWatchdog = null;
 
 function resolveFile(urlPath) {
   let rel = decodeURIComponent(urlPath.split('?')[0]);
@@ -204,6 +205,30 @@ function createClockWindow() {
   // Load external clean HTML file (Part I2.5)
   clockWindow.loadFile(path.join(__dirname, "clock/clock.html"));
 
+  // Watchdog (v0.3.46 Part A5: If clock window not ready after 3s, reload once and log error)
+  if (clockReadyWatchdog) {
+    clearTimeout(clockReadyWatchdog);
+    clockReadyWatchdog = null;
+  }
+  let clockReadyReceived = false;
+  let hasAttemptedReload = false;
+
+  clockReadyWatchdog = setTimeout(() => {
+    if (!clockReadyReceived && clockWindow && !clockWindow.isDestroyed() && !hasAttemptedReload) {
+      hasAttemptedReload = true;
+      console.warn("[main] Clock window not ready after 3s, reloading once...");
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("taio-clock-error", {
+          message: "Clock window not ready after 3s, reloading",
+          stack: "createClockWindow watchdog"
+        });
+      }
+      try {
+        clockWindow.reload();
+      } catch (e) {}
+    }
+  }, 3000);
+
   clockWindow.once("ready-to-show", () => {
     clockWindow.show();
     syncClockWindowData();
@@ -213,11 +238,28 @@ function createClockWindow() {
     syncClockWindowData();
   });
 
-  clockWindow.on("closed", () => { clockWindow = null; });
+  clockWindow.on("closed", () => {
+    if (clockReadyWatchdog) {
+      clearTimeout(clockReadyWatchdog);
+      clockReadyWatchdog = null;
+    }
+    clockWindow = null;
+  });
 }
 
 ipcMain.on("taio-clock-ready", () => {
+  if (clockReadyWatchdog) {
+    clearTimeout(clockReadyWatchdog);
+    clockReadyWatchdog = null;
+  }
   syncClockWindowData();
+});
+
+ipcMain.on("taio-clock-error", (_event, errorData) => {
+  console.error("[main] Clock window error:", errorData);
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("taio-clock-error", errorData);
+  }
 });
 
 // Active pull handler: mini clock window fetches current timer data immediately upon load

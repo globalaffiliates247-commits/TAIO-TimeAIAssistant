@@ -1,6 +1,7 @@
 // TAIO Time Domain — Golden Test Vector Runner (PRD v0.3.38 Part F2.5)
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { validateWorkNode, rollUpNodeMinutes } from '../src/domain/workNode.ts';
 import { computeEvmPacing, computeEstimationEfficiency, extractTaskActualMinutes } from '../src/domain/goalLedger.ts';
@@ -409,6 +410,106 @@ if (fs.existsSync(goalLedgerPath)) {
   } else {
     console.error(`[FAIL] Part C.4 Day 30 clamp mismatch:`, { d29, d30 });
     failed++;
+  }
+}
+
+// 6. Clock Window Controller test vectors (PRD v0.3.46 Part A6)
+const clockJsPath = path.resolve(__dirname, '../desktop/clock/clock.js');
+if (fs.existsSync(clockJsPath)) {
+  const clockCode = fs.readFileSync(clockJsPath, 'utf8');
+  const modesToTest = [undefined, 'remaining', 'elapsed', 'goal', 'corrupted_state_!#$'];
+
+  for (const mode of modesToTest) {
+    try {
+      const store = {};
+      if (mode !== undefined) {
+        store['taio_clock_three_view_mode'] = mode;
+      }
+
+      const elements = {};
+      function getEl(id) {
+        if (!elements[id]) {
+          elements[id] = {
+            id,
+            style: {},
+            classList: { toggle: () => {}, add: () => {}, remove: () => {} },
+            innerText: '',
+            addEventListener: () => {}
+          };
+        }
+        return elements[id];
+      }
+
+      const mockDocument = {
+        getElementById: (id) => getEl(id),
+        documentElement: { clientWidth: 260, clientHeight: 140 }
+      };
+
+      const mockWindow = {
+        addEventListener: () => {},
+        innerWidth: 260,
+        innerHeight: 140,
+        updateUI: null,
+        close: () => {},
+        taioAPI: {
+          onSyncTimer: () => {},
+          getTimerData: () => Promise.resolve(null),
+          notifyClockReady: () => {},
+          sendTimerAction: () => {},
+          sendClockError: () => {}
+        }
+      };
+
+      const mockLocalStorage = {
+        getItem: (k) => store[k] || null,
+        setItem: (k, v) => { store[k] = String(v); },
+        removeItem: (k) => { delete store[k]; }
+      };
+
+      const sandbox = {
+        window: mockWindow,
+        document: mockDocument,
+        localStorage: mockLocalStorage,
+        setInterval: () => {},
+        console: { ...console, error: () => {} },
+        Date,
+        Math
+      };
+
+      vm.createContext(sandbox);
+      vm.runInContext(clockCode, sandbox);
+
+      if (typeof mockWindow.updateUI !== 'function') {
+        throw new Error(`window.updateUI was not created for mode: ${mode}`);
+      }
+
+      // Test active task update
+      const endsAt = Date.now() + 52 * 60 * 1000;
+      const startedAt = Date.now() - 8 * 60 * 1000;
+      mockWindow.updateUI({
+        title: 'Khoá học Claude',
+        subtitle: 'Học AI',
+        mode: 'task',
+        endsAt,
+        startedAt,
+        goalHours: 2,
+        goalMins: 15,
+        goalTitle: 'Khóa học Claude',
+        goalTargetHours: 40
+      });
+
+      const barTitle = getEl('barTitle').innerText;
+      const barDigits = getEl('barDigits').innerText;
+      if (barTitle === 'Khoá học Claude' && barDigits.length > 0) {
+        passed++;
+      } else {
+        console.error(`[FAIL] Clock test for mode ${mode}: barTitle=${barTitle}, barDigits=${barDigits}`);
+        failed++;
+      }
+    } catch (err) {
+      console.error(`[FAIL] Clock test crashed for mode ${mode}:`, err);
+      failed++;
+    }
   }
 }
 

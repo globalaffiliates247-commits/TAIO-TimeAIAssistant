@@ -1,5 +1,6 @@
-// TAIO Clock Window Controller (PRD v0.3.33 Part I)
+// TAIO Clock Window Controller (PRD v0.3.33 Part I & v0.3.46 Part A)
 (() => {
+  // State variables (v0.3.46 Part A1: ALL declared at top before any functions or calls)
   let endsAt = 0;
   let startedAt = 0;
   let isCountDown = true;
@@ -8,6 +9,29 @@
   let currentTaskId = null;
   let currentQuote = { text: 'Vạn dặm khởi đầu từ một bước chân', author: 'Lão Tử' };
   let currentLang = 'vi';
+  let viewMode = 'bar';
+  let threeViewMode = 'remaining';
+  let lastData = null;
+
+  // Error reporter (v0.3.46 Part A4: Report clock errors back to main window error log)
+  function reportError(err, context = '') {
+    try {
+      console.error(`[ClockWindow Error${context ? ' in ' + context : ''}]`, err);
+      if (window.taioAPI && window.taioAPI.sendClockError) {
+        window.taioAPI.sendClockError({
+          message: err && err.message ? `[Clock ${context}] ${err.message}` : String(err),
+          stack: err && err.stack ? err.stack : String(context || '')
+        });
+      }
+    } catch {}
+  }
+
+  window.addEventListener('error', (event) => {
+    reportError(event.error || event.message, 'window.onerror');
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    reportError(event.reason, 'unhandledrejection');
+  });
 
   // Elements
   const barView = document.getElementById('barView');
@@ -43,6 +67,8 @@
   const btnQuoteClose = document.getElementById('btnQuoteClose');
   const btnQuoteNext = document.getElementById('btnQuoteNext');
   const btnQuoteFav = document.getElementById('btnQuoteFav');
+  const ringWrapper = document.getElementById('ringWrapper');
+  const motivationFooter = document.getElementById('motivationFooter');
 
   // Ring geometry
   const ringRadius = 50;
@@ -51,114 +77,149 @@
     ringCircle.style.strokeDasharray = `${ringCircumference} ${ringCircumference}`;
   }
 
-  // Dynamic Ring Geometry (PRD v0.3.38 Part E: responsive ring without edge clipping)
-  const ringWrapper = document.getElementById('ringWrapper');
-  const motivationFooter = document.getElementById('motivationFooter');
-
   function updateRingDimensions() {
-    if (!ringView || ringView.style.display === 'none') return;
-    const winW = window.innerWidth || document.documentElement.clientWidth;
-    const winH = window.innerHeight || document.documentElement.clientHeight;
+    try {
+      if (!ringView || ringView.style.display === 'none') return;
+      const winW = window.innerWidth || document.documentElement?.clientWidth || 260;
+      const winH = window.innerHeight || document.documentElement?.clientHeight || 140;
 
-    const headerH = 22;
-    const footerH = (motivationFooter && motivationFooter.style.display !== 'none') ? 16 : 0;
-    const titleH = 18;
-    const bottomBarH = (ringBottomBar && ringBottomBar.style.display !== 'none') ? 28 : 0;
-    const overheadH = headerH + footerH + titleH + bottomBarH + 16;
+      const headerH = 22;
+      const footerH = (motivationFooter && motivationFooter.style.display !== 'none') ? 16 : 0;
+      const titleH = 18;
+      const bottomBarH = (ringBottomBar && ringBottomBar.style.display !== 'none') ? 28 : 0;
+      const overheadH = headerH + footerH + titleH + bottomBarH + 16;
 
-    const availH = Math.max(48, winH - overheadH);
-    const availW = Math.max(48, winW - 24);
-    const ringSize = Math.max(50, Math.min(availH, availW, 130));
+      const availH = Math.max(48, winH - overheadH);
+      const availW = Math.max(48, winW - 24);
+      const ringSize = Math.max(50, Math.min(availH, availW, 130));
 
-    if (ringWrapper) {
-      ringWrapper.style.width = `${ringSize}px`;
-      ringWrapper.style.height = `${ringSize}px`;
-    }
-
-    if (ringDigits) {
-      const dSize = Math.max(12, Math.min(20, Math.floor(ringSize * 0.22)));
-      ringDigits.style.fontSize = `${dSize}px`;
-    }
-
-    if (ringSubText) {
-      if (ringSize < 65) {
-        ringSubText.style.display = 'none';
-      } else {
-        ringSubText.style.display = 'block';
-        const sSize = Math.max(7.5, Math.min(9.5, Math.floor(ringSize * 0.1)));
-        ringSubText.style.fontSize = `${sSize}px`;
+      if (ringWrapper) {
+        ringWrapper.style.width = `${ringSize}px`;
+        ringWrapper.style.height = `${ringSize}px`;
       }
+
+      if (ringDigits) {
+        const dSize = Math.max(12, Math.min(20, Math.floor(ringSize * 0.22)));
+        ringDigits.style.fontSize = `${dSize}px`;
+      }
+
+      if (ringSubText) {
+        if (ringSize < 65) {
+          ringSubText.style.display = 'none';
+        } else {
+          ringSubText.style.display = 'block';
+          const sSize = Math.max(7.5, Math.min(9.5, Math.floor(ringSize * 0.1)));
+          ringSubText.style.fontSize = `${sSize}px`;
+        }
+      }
+    } catch (err) {
+      reportError(err, 'updateRingDimensions');
     }
   }
 
   window.addEventListener('resize', updateRingDimensions);
 
-  // Load persisted view mode (bar vs ring)
-  let viewMode = 'bar';
-  try {
-    const saved = localStorage.getItem('taio_clock_view_mode');
-    if (saved === 'ring' || saved === 'bar') viewMode = saved;
-  } catch {}
-
+  // View mode switcher (bar vs ring)
   function setViewMode(mode) {
-    viewMode = mode;
-    try { localStorage.setItem('taio_clock_view_mode', mode); } catch {}
-    if (viewMode === 'ring') {
-      barView.style.display = 'none';
-      ringView.style.display = 'flex';
-      btnViewMode.title = currentLang === 'en' ? 'Switch to Bar view (V)' : 'Đổi sang kiểu Thanh (V)';
-      updateRingDimensions();
-    } else {
-      ringView.style.display = 'none';
-      barView.style.display = 'flex';
-      btnViewMode.title = currentLang === 'en' ? 'Switch to Ring view (V)' : 'Đổi sang kiểu Vòng tròn (V)';
+    try {
+      viewMode = mode === 'ring' ? 'ring' : 'bar';
+      try { localStorage.setItem('taio_clock_view_mode', viewMode); } catch {}
+      if (viewMode === 'ring') {
+        if (barView) barView.style.display = 'none';
+        if (ringView) ringView.style.display = 'flex';
+        if (btnViewMode) btnViewMode.title = currentLang === 'en' ? 'Switch to Bar view (V)' : 'Đổi sang kiểu Thanh (V)';
+        updateRingDimensions();
+      } else {
+        if (ringView) ringView.style.display = 'none';
+        if (barView) barView.style.display = 'flex';
+        if (btnViewMode) btnViewMode.title = currentLang === 'en' ? 'Switch to Ring view (V)' : 'Đổi sang kiểu Vòng tròn (V)';
+      }
+    } catch (err) {
+      reportError(err, 'setViewMode');
     }
   }
-  setViewMode(viewMode);
 
-  // Toggle view mode
-  btnViewMode.addEventListener('click', () => {
-    setViewMode(viewMode === 'bar' ? 'ring' : 'bar');
-  });
+  // 1=remaining, 2=elapsed, 3=goal switcher
+  function setThreeViewMode(mode) {
+    try {
+      if (mode !== 'remaining' && mode !== 'elapsed' && mode !== 'goal') {
+        mode = 'remaining';
+      }
+      threeViewMode = mode;
+      try { localStorage.setItem('taio_clock_three_view_mode', mode); } catch {}
+      btnModeRemaining?.classList.toggle('active', mode === 'remaining');
+      btnModeElapsed?.classList.toggle('active', mode === 'elapsed');
+      btnModeGoal?.classList.toggle('active', mode === 'goal');
+      tick();
+    } catch (err) {
+      reportError(err, 'setThreeViewMode');
+      threeViewMode = 'remaining';
+      try { localStorage.removeItem('taio_clock_three_view_mode'); } catch {}
+      tick();
+    }
+  }
 
   // Open Today's Journal
   function triggerOpenJournal() {
-    if (window.taioAPI && window.taioAPI.openTodayJournal) {
-      window.taioAPI.openTodayJournal(currentTaskId);
+    try {
+      if (window.taioAPI && window.taioAPI.openTodayJournal) {
+        window.taioAPI.openTodayJournal(currentTaskId);
+      }
+    } catch (err) {
+      reportError(err, 'triggerOpenJournal');
     }
   }
-  btnJournal.addEventListener('click', triggerOpenJournal);
-  barTitle.addEventListener('click', triggerOpenJournal);
-  ringTitle.addEventListener('click', triggerOpenJournal);
+
+  btnJournal?.addEventListener('click', triggerOpenJournal);
+  barTitle?.addEventListener('click', triggerOpenJournal);
+  ringTitle?.addEventListener('click', triggerOpenJournal);
 
   // Pin toggle
-  btnPin.addEventListener('click', () => {
-    isPinned = !isPinned;
-    btnPin.classList.toggle('active', isPinned);
-    if (window.taioAPI && window.taioAPI.sendTimerAction) {
-      window.taioAPI.sendTimerAction({ type: 'toggle-pin', pinned: isPinned });
+  btnPin?.addEventListener('click', () => {
+    try {
+      isPinned = !isPinned;
+      btnPin.classList.toggle('active', isPinned);
+      if (window.taioAPI && window.taioAPI.sendTimerAction) {
+        window.taioAPI.sendTimerAction({ type: 'toggle-pin', pinned: isPinned });
+      }
+    } catch (err) {
+      reportError(err, 'btnPin click');
     }
   });
 
   // Close window
-  btnClose.addEventListener('click', () => {
-    window.close();
+  btnClose?.addEventListener('click', () => {
+    try {
+      window.close();
+    } catch {}
   });
 
   // Action buttons
   function triggerExtend(mins) {
-    if (window.taioAPI && window.taioAPI.sendTimerAction) {
-      window.taioAPI.sendTimerAction({ type: 'extend', minutes: mins });
+    try {
+      if (window.taioAPI && window.taioAPI.sendTimerAction) {
+        window.taioAPI.sendTimerAction({ type: 'extend', minutes: mins });
+      }
+    } catch (err) {
+      reportError(err, 'triggerExtend');
     }
   }
   function triggerDone() {
-    if (window.taioAPI && window.taioAPI.sendTimerAction) {
-      window.taioAPI.sendTimerAction({ type: 'done' });
+    try {
+      if (window.taioAPI && window.taioAPI.sendTimerAction) {
+        window.taioAPI.sendTimerAction({ type: 'done' });
+      }
+    } catch (err) {
+      reportError(err, 'triggerDone');
     }
   }
   function triggerStartQuick(mins = 15) {
-    if (window.taioAPI && window.taioAPI.sendTimerAction) {
-      window.taioAPI.sendTimerAction({ type: 'start-quick', minutes: mins });
+    try {
+      if (window.taioAPI && window.taioAPI.sendTimerAction) {
+        window.taioAPI.sendTimerAction({ type: 'start-quick', minutes: mins });
+      }
+    } catch (err) {
+      reportError(err, 'triggerStartQuick');
     }
   }
 
@@ -168,300 +229,342 @@
   document.getElementById('ringBtnExtend15')?.addEventListener('click', () => triggerExtend(15));
   document.getElementById('barBtnDone')?.addEventListener('click', triggerDone);
   document.getElementById('ringBtnDone')?.addEventListener('click', triggerDone);
-
   document.getElementById('barBtnQuick15')?.addEventListener('click', () => triggerStartQuick(15));
   document.getElementById('ringBtnQuick15')?.addEventListener('click', () => triggerStartQuick(15));
   document.getElementById('barBtnOpenJournal')?.addEventListener('click', triggerOpenJournal);
   document.getElementById('ringBtnOpenJournal')?.addEventListener('click', triggerOpenJournal);
 
-  // Three view modes (v0.3.34 Part E4: 1=remaining, 2=elapsed, 3=goal)
-  let threeViewMode = 'remaining';
-  try {
-    const saved3 = localStorage.getItem('taio_clock_three_view_mode');
-    if (saved3 === 'remaining' || saved3 === 'elapsed' || saved3 === 'goal') threeViewMode = saved3;
-  } catch {}
-
-  function setThreeViewMode(mode) {
-    threeViewMode = mode;
-    try { localStorage.setItem('taio_clock_three_view_mode', mode); } catch {}
-    btnModeRemaining?.classList.toggle('active', mode === 'remaining');
-    btnModeElapsed?.classList.toggle('active', mode === 'elapsed');
-    btnModeGoal?.classList.toggle('active', mode === 'goal');
-    tick();
-  }
-  setThreeViewMode(threeViewMode);
+  btnViewMode?.addEventListener('click', () => {
+    setViewMode(viewMode === 'bar' ? 'ring' : 'bar');
+  });
 
   btnModeRemaining?.addEventListener('click', () => setThreeViewMode('remaining'));
   btnModeElapsed?.addEventListener('click', () => setThreeViewMode('elapsed'));
   btnModeGoal?.addEventListener('click', () => setThreeViewMode('goal'));
 
-  // Quote interactions
-  quoteText.addEventListener('click', () => {
-    let content = `"${currentQuote.text}"`;
-    if (currentQuote.originalText && currentQuote.originalText !== currentQuote.text) {
-      content += `\n\n(Nguyên văn [${currentQuote.originalLang || 'en'}]: "${currentQuote.originalText}")`;
+  // Quote modal interactions
+  quoteText?.addEventListener('click', () => {
+    try {
+      let content = `"${currentQuote.text}"`;
+      if (currentQuote.originalText && currentQuote.originalText !== currentQuote.text) {
+        content += `\n\n(Nguyên văn [${currentQuote.originalLang || 'en'}]: "${currentQuote.originalText}")`;
+      }
+      if (modalQuoteContent) modalQuoteContent.innerText = content;
+      if (modalQuoteAuthor) modalQuoteAuthor.innerText = currentQuote.author ? `— ${currentQuote.author}` : '';
+      if (quoteModal) quoteModal.style.display = 'flex';
+    } catch (err) {
+      reportError(err, 'quoteText click');
     }
-    modalQuoteContent.innerText = content;
-    modalQuoteAuthor.innerText = currentQuote.author ? `— ${currentQuote.author}` : '';
-    quoteModal.style.display = 'flex';
   });
-  btnQuoteClose?.addEventListener('click', () => { quoteModal.style.display = 'none'; });
+  btnQuoteClose?.addEventListener('click', () => { if (quoteModal) quoteModal.style.display = 'none'; });
   btnQuoteNext?.addEventListener('click', () => {
-    if (window.taioAPI && window.taioAPI.sendTimerAction) {
-      window.taioAPI.sendTimerAction({ type: 'next-quote' });
+    try {
+      if (window.taioAPI && window.taioAPI.sendTimerAction) {
+        window.taioAPI.sendTimerAction({ type: 'next-quote' });
+      }
+      if (quoteModal) quoteModal.style.display = 'none';
+    } catch (err) {
+      reportError(err, 'btnQuoteNext click');
     }
-    quoteModal.style.display = 'none';
   });
   btnQuoteFav?.addEventListener('click', () => {
-    btnQuoteFav.style.color = '#e0401f';
-    if (window.taioAPI && window.taioAPI.sendTimerAction) {
-      window.taioAPI.sendTimerAction({ type: 'fav-quote', quote: currentQuote });
+    try {
+      btnQuoteFav.style.color = '#e0401f';
+      if (window.taioAPI && window.taioAPI.sendTimerAction) {
+        window.taioAPI.sendTimerAction({ type: 'fav-quote', quote: currentQuote });
+      }
+    } catch (err) {
+      reportError(err, 'btnQuoteFav click');
     }
   });
 
   // Keyboard shortcuts (N, V, P, 1, 2, 3)
   window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    const key = e.key.toLowerCase();
-    if (key === 'n') {
-      triggerOpenJournal();
-    } else if (key === 'v') {
-      setViewMode(viewMode === 'bar' ? 'ring' : 'bar');
-    } else if (key === 'p') {
-      btnPin.click();
-    } else if (key === '1') {
-      setThreeViewMode('remaining');
-    } else if (key === '2') {
-      setThreeViewMode('elapsed');
-    } else if (key === '3') {
-      setThreeViewMode('goal');
+    try {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+      const key = e.key ? e.key.toLowerCase() : '';
+      if (key === 'n') {
+        triggerOpenJournal();
+      } else if (key === 'v') {
+        setViewMode(viewMode === 'bar' ? 'ring' : 'bar');
+      } else if (key === 'p') {
+        btnPin?.click();
+      } else if (key === '1') {
+        setThreeViewMode('remaining');
+      } else if (key === '2') {
+        setThreeViewMode('elapsed');
+      } else if (key === '3') {
+        setThreeViewMode('goal');
+      }
+    } catch (err) {
+      reportError(err, 'keydown');
     }
   });
 
-  let lastData = null;
-
-  // UI Update called from main.js syncClockWindowData
+  // UI Update called from main.js syncClockWindowData (v0.3.46: guaranteed to be defined unconditionally)
   window.updateUI = function(data) {
-    if (!data) return;
-    lastData = data;
-    currentMode = data.mode || (typeof data.endsAt === 'number' && data.endsAt > 0 ? 'task' : 'gap');
-    currentTaskId = data.taskId || null;
-    if (data.lang) currentLang = data.lang;
+    try {
+      if (!data) return;
+      lastData = data;
+      currentMode = data.mode || (typeof data.endsAt === 'number' && data.endsAt > 0 ? 'task' : 'gap');
+      currentTaskId = data.taskId || null;
+      if (data.lang) currentLang = data.lang;
 
-    endsAt = typeof data.endsAt === 'number' ? data.endsAt : 0;
-    startedAt = typeof data.startedAt === 'number' ? data.startedAt : 0;
-    if (typeof data.isCountDown === 'boolean') isCountDown = data.isCountDown;
+      endsAt = typeof data.endsAt === 'number' ? data.endsAt : 0;
+      startedAt = typeof data.startedAt === 'number' ? data.startedAt : 0;
+      if (typeof data.isCountDown === 'boolean') isCountDown = data.isCountDown;
 
-    if (data.quote) {
-      currentQuote = typeof data.quote === 'string' ? { text: data.quote, author: '' } : data.quote;
-      quoteText.innerText = currentQuote.text;
-    }
+      if (data.quote) {
+        currentQuote = typeof data.quote === 'string' ? { text: data.quote, author: '' } : data.quote;
+        if (quoteText) quoteText.innerText = currentQuote.text;
+      }
 
-    // Free timer row
-    if (data.freeTimer && barFreeTimerRow) {
-      barFreeTimerRow.style.display = 'flex';
-      barFreeTimerTitle.innerText = data.freeTimer.title;
-      barFreeTimerDigits.innerText = data.freeTimer.timeStr;
-    } else if (barFreeTimerRow) {
-      barFreeTimerRow.style.display = 'none';
-    }
+      // Free timer row
+      if (data.freeTimer && barFreeTimerRow) {
+        barFreeTimerRow.style.display = 'flex';
+        if (barFreeTimerTitle) barFreeTimerTitle.innerText = data.freeTimer.title;
+        if (barFreeTimerDigits) barFreeTimerDigits.innerText = data.freeTimer.timeStr;
+      } else if (barFreeTimerRow) {
+        barFreeTimerRow.style.display = 'none';
+      }
 
-    // Display strings per I2.3
-    if (currentMode === 'template_or_current') {
-      const title = currentLang === 'en' ? 'Today Scheduled Done' : 'Hết việc có giờ hôm nay';
-      const sub = data.subtitle || (data.title ? `Hiện tại: ${data.title}` : '');
-      barTitle.innerText = title;
-      ringTitle.innerText = title;
-      barSubtitle.innerText = sub;
-      ringSubtitle.innerText = sub;
-      barDigits.innerText = data.title || '00:00';
-      ringDigits.innerText = data.title || '00:00';
-      ringSubText.innerText = currentLang === 'en' ? 'milestone' : 'mốc kế tiếp';
+      // Display strings per I2.3
+      if (currentMode === 'template_or_current') {
+        const title = currentLang === 'en' ? 'Today Scheduled Done' : 'Hết việc có giờ hôm nay';
+        const sub = data.subtitle || (data.title ? `Hiện tại: ${data.title}` : '');
+        if (barTitle) barTitle.innerText = title;
+        if (ringTitle) ringTitle.innerText = title;
+        if (barSubtitle) barSubtitle.innerText = sub;
+        if (ringSubtitle) ringSubtitle.innerText = sub;
+        if (barDigits) barDigits.innerText = data.title || '00:00';
+        if (ringDigits) ringDigits.innerText = data.title || '00:00';
+        if (ringSubText) ringSubText.innerText = currentLang === 'en' ? 'milestone' : 'mốc kế tiếp';
 
-      barBottomBar.style.display = 'none';
-      ringBottomBar.style.display = 'none';
-      if (barIdleBottomBar) barIdleBottomBar.style.display = 'flex';
-      if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'flex';
-      barProgressTrack.style.display = 'none';
-      tick();
-    } else if (currentMode === 'gap') {
-      const title = data.title || (currentLang === 'vi' ? 'Trống' : 'Free');
-      const sub = data.subtitle || (currentLang === 'vi' ? 'Chưa có việc đang làm' : 'No active task');
-      barTitle.innerText = title;
-      ringTitle.innerText = title;
-      barSubtitle.innerText = sub;
-      ringSubtitle.innerText = sub;
+        if (barBottomBar) barBottomBar.style.display = 'none';
+        if (ringBottomBar) ringBottomBar.style.display = 'none';
+        if (barIdleBottomBar) barIdleBottomBar.style.display = 'flex';
+        if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'flex';
+        if (barProgressTrack) barProgressTrack.style.display = 'none';
+        tick();
+      } else if (currentMode === 'gap') {
+        const title = data.title || (currentLang === 'vi' ? 'Trống' : 'Free');
+        const sub = data.subtitle || (currentLang === 'vi' ? 'Chưa có việc đang làm' : 'No active task');
+        if (barTitle) barTitle.innerText = title;
+        if (ringTitle) ringTitle.innerText = title;
+        if (barSubtitle) barSubtitle.innerText = sub;
+        if (ringSubtitle) ringSubtitle.innerText = sub;
 
-      barBottomBar.style.display = 'none';
-      ringBottomBar.style.display = 'none';
-      if (barIdleBottomBar) barIdleBottomBar.style.display = 'flex';
-      if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'flex';
-      barProgressTrack.style.display = 'block';
-      tick();
-    } else {
-      // In Task
-      const title = data.title || (currentLang === 'en' ? 'In progress' : 'Đang làm');
-      const sub = data.subtitle || '';
-      barTitle.innerText = title;
-      ringTitle.innerText = title;
-      barSubtitle.innerText = sub;
-      ringSubtitle.innerText = sub;
+        if (barBottomBar) barBottomBar.style.display = 'none';
+        if (ringBottomBar) ringBottomBar.style.display = 'none';
+        if (barIdleBottomBar) barIdleBottomBar.style.display = 'flex';
+        if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'flex';
+        if (barProgressTrack) barProgressTrack.style.display = 'block';
+        tick();
+      } else {
+        // In Task
+        const title = data.title || (currentLang === 'en' ? 'In progress' : 'Đang làm');
+        const sub = data.subtitle || '';
+        if (barTitle) barTitle.innerText = title;
+        if (ringTitle) ringTitle.innerText = title;
+        if (barSubtitle) barSubtitle.innerText = sub;
+        if (ringSubtitle) ringSubtitle.innerText = sub;
 
-      barBottomBar.style.display = 'flex';
-      ringBottomBar.style.display = 'flex';
-      if (barIdleBottomBar) barIdleBottomBar.style.display = 'none';
-      if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'none';
-      barProgressTrack.style.display = 'block';
-      tick();
+        if (barBottomBar) barBottomBar.style.display = 'flex';
+        if (ringBottomBar) ringBottomBar.style.display = 'flex';
+        if (barIdleBottomBar) barIdleBottomBar.style.display = 'none';
+        if (ringIdleBottomBar) ringIdleBottomBar.style.display = 'none';
+        if (barProgressTrack) barProgressTrack.style.display = 'block';
+        tick();
+      }
+    } catch (err) {
+      reportError(err, 'updateUI');
     }
   };
 
+  // Live timer tick function (v0.3.46 Part A3: isolated try/catch per tick)
   function tick() {
-    const now = Date.now();
-    let digitsStr = '00:00';
-    let sublineStr = '';
-    let fraction = 1;
+    try {
+      const now = Date.now();
+      let digitsStr = '00:00';
+      let sublineStr = '';
+      let fraction = 1;
 
-    if (currentMode === 'template_or_current') {
-      const nowD = new Date();
-      const curH = String(nowD.getHours()).padStart(2, '0');
-      const curM = String(nowD.getMinutes()).padStart(2, '0');
-      const curTime = `${curH}:${curM}`;
-      barDigits.innerText = curTime;
-      ringDigits.innerText = curTime;
-      ringSubText.innerText = currentLang === 'vi' ? 'giờ hiện tại' : 'current time';
-      barProgress.style.width = '100%';
-      if (ringCircle) ringCircle.style.strokeDashoffset = '0';
-      return;
-    }
-
-    if (currentMode === 'gap') {
-      if (endsAt > now && endsAt > 0) {
-        const secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
-        const m = Math.floor(secRemaining / 60);
-        const s = secRemaining % 60;
-        digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        sublineStr = currentLang === 'vi' ? 'tới việc kế tiếp' : 'until next task';
-        const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
-        fraction = Math.max(0, Math.min(1, secRemaining / totalSec));
-      } else {
+      if (currentMode === 'template_or_current') {
         const nowD = new Date();
         const curH = String(nowD.getHours()).padStart(2, '0');
         const curM = String(nowD.getMinutes()).padStart(2, '0');
-        digitsStr = `${curH}:${curM}`;
-        sublineStr = currentLang === 'vi' ? 'thời gian trống' : 'free time';
-        fraction = 1;
+        const curTime = `${curH}:${curM}`;
+        if (barDigits) barDigits.innerText = curTime;
+        if (ringDigits) ringDigits.innerText = curTime;
+        if (ringSubText) ringSubText.innerText = currentLang === 'vi' ? 'giờ hiện tại' : 'current time';
+        if (barProgress) barProgress.style.width = '100%';
+        if (ringCircle) ringCircle.style.strokeDashoffset = '0';
+        return;
       }
 
-      if (threeViewMode === 'elapsed') {
+      if (currentMode === 'gap') {
+        if (endsAt > now && endsAt > 0) {
+          const secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
+          const m = Math.floor(secRemaining / 60);
+          const s = secRemaining % 60;
+          digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+          sublineStr = currentLang === 'vi' ? 'tới việc kế tiếp' : 'until next task';
+          const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
+          fraction = Math.max(0, Math.min(1, secRemaining / totalSec));
+        } else {
+          const nowD = new Date();
+          const curH = String(nowD.getHours()).padStart(2, '0');
+          const curM = String(nowD.getMinutes()).padStart(2, '0');
+          digitsStr = `${curH}:${curM}`;
+          sublineStr = currentLang === 'vi' ? 'thời gian trống' : 'free time';
+          fraction = 1;
+        }
+
+        if (threeViewMode === 'elapsed') {
+          const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
+          const em = Math.floor(secElapsed / 60);
+          const es = secElapsed % 60;
+          digitsStr = `${String(em).padStart(2, '0')}:${String(es).padStart(2, '0')}`;
+          sublineStr = currentLang === 'vi' ? 'thời gian trống' : 'gap time';
+        } else if (threeViewMode === 'goal') {
+          const gh = (lastData && typeof lastData.goalHours === 'number') ? lastData.goalHours : 0;
+          const gm = (lastData && typeof lastData.goalMins === 'number') ? lastData.goalMins : 0;
+          digitsStr = `${gh}g${gm > 0 ? (gm < 10 ? '0' : '') + gm : '00'}`;
+          sublineStr = lastData?.goalTitle ? `${lastData.goalTitle}` : (currentLang === 'vi' ? 'Tiến độ mục tiêu' : 'Goal progress');
+        }
+
+        if (barDigits) barDigits.innerText = digitsStr;
+        if (ringDigits) ringDigits.innerText = digitsStr;
+        if (ringSubText) ringSubText.innerText = sublineStr;
+        if (barProgress) barProgress.style.width = `${Math.round(fraction * 100)}%`;
+        if (ringCircle) {
+          const offset = ringCircumference - fraction * ringCircumference;
+          ringCircle.style.strokeDashoffset = offset;
+        }
+        return;
+      }
+
+      // Active task
+      if (currentMode === 'task' && (!endsAt || endsAt <= 0)) {
+        const nowD = new Date();
+        const curH = String(nowD.getHours()).padStart(2, '0');
+        const curM = String(nowD.getMinutes()).padStart(2, '0');
+        if (barDigits) barDigits.innerText = `${curH}:${curM}`;
+        if (ringDigits) ringDigits.innerText = `${curH}:${curM}`;
+        if (ringSubText) ringSubText.innerText = currentLang === 'vi' ? 'thời gian trống' : 'free time';
+        if (barProgress) barProgress.style.width = '100%';
+        if (ringCircle) ringCircle.style.strokeDashoffset = '0';
+        return;
+      }
+
+      const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
+      const totalDurationMins = Math.round(totalSec / 60);
+
+      if (threeViewMode === 'remaining') {
+        if (now > endsAt && endsAt > 0) {
+          const overrunMins = Math.max(1, Math.floor((now - endsAt) / 60000));
+          digitsStr = currentLang === 'vi' ? `quá ${overrunMins}p` : `over ${overrunMins}m`;
+          sublineStr = currentLang === 'vi' ? 'đã quá hạn' : 'overrun';
+          fraction = 1;
+        } else {
+          const secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
+          const m = Math.floor(secRemaining / 60);
+          const s = secRemaining % 60;
+          digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+          sublineStr = `${currentLang === 'vi' ? 'còn lại' : 'remaining'} / ${totalDurationMins}p`;
+          fraction = totalSec > 0 ? Math.max(0, Math.min(1, secRemaining / totalSec)) : 0;
+        }
+      } else if (threeViewMode === 'elapsed') {
         const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
-        const em = Math.floor(secElapsed / 60);
-        const es = secElapsed % 60;
-        digitsStr = `${String(em).padStart(2, '0')}:${String(es).padStart(2, '0')}`;
-        sublineStr = currentLang === 'vi' ? 'thời gian trống' : 'gap time';
+        const m = Math.floor(secElapsed / 60);
+        const s = secElapsed % 60;
+        digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        sublineStr = `${currentLang === 'vi' ? 'đã dùng' : 'elapsed'} / ${totalDurationMins}p`;
+        fraction = totalSec > 0 ? Math.max(0, Math.min(1, secElapsed / totalSec)) : 0;
       } else if (threeViewMode === 'goal') {
-        const gh = lastData?.goalHours || 0;
-        const gm = lastData?.goalMins || 0;
-        digitsStr = `${gh}g${gm > 0 ? (gm < 10 ? '0' : '') + gm : '00'}`;
-        sublineStr = lastData?.goalTitle ? `${lastData.goalTitle}` : (currentLang === 'vi' ? 'Tiến độ mục tiêu' : 'Goal progress');
+        const gh = (lastData && typeof lastData.goalHours === 'number') ? lastData.goalHours : 0;
+        const gm = (lastData && typeof lastData.goalMins === 'number') ? lastData.goalMins : 0;
+        digitsStr = `${gh}g${gm > 0 ? (gm < 10 ? '0' : '') + gm : ''}`;
+        if (lastData?.goalTitle) {
+          sublineStr = lastData?.goalSize
+            ? `/ ${lastData.goalTargetHours || 40}g · ${lastData.goalSize}`
+            : `/ ${lastData.goalTargetHours || 40}g`;
+          fraction = Math.min(1, ((gh * 60 + gm) / ((lastData.goalTargetHours || 40) * 60)));
+        } else {
+          sublineStr = currentLang === 'vi' ? 'Chưa gắn mục tiêu' : 'No goal';
+          fraction = 0;
+        }
       }
 
-      barDigits.innerText = digitsStr;
-      ringDigits.innerText = digitsStr;
-      ringSubText.innerText = sublineStr;
-      barProgress.style.width = `${Math.round(fraction * 100)}%`;
+      if (barDigits) barDigits.innerText = digitsStr;
+      if (ringDigits) ringDigits.innerText = digitsStr;
+      if (ringSubText) ringSubText.innerText = sublineStr;
+
+      // Bar progress width
+      if (barProgress) barProgress.style.width = `${Math.round(fraction * 100)}%`;
+
+      // Ring progress circle
       if (ringCircle) {
         const offset = ringCircumference - fraction * ringCircumference;
         ringCircle.style.strokeDashoffset = offset;
       }
-      return;
-    }
-
-    // Active task
-    if (currentMode === 'task' && (!endsAt || endsAt <= 0)) {
-      const nowD = new Date();
-      const curH = String(nowD.getHours()).padStart(2, '0');
-      const curM = String(nowD.getMinutes()).padStart(2, '0');
-      barDigits.innerText = `${curH}:${curM}`;
-      ringDigits.innerText = `${curH}:${curM}`;
-      ringSubText.innerText = currentLang === 'vi' ? 'thời gian trống' : 'free time';
-      barProgress.style.width = '100%';
-      if (ringCircle) ringCircle.style.strokeDashoffset = '0';
-      return;
-    }
-
-    const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
-    const totalDurationMins = Math.round(totalSec / 60);
-
-    if (threeViewMode === 'remaining') {
-      if (now > endsAt && endsAt > 0) {
-        const overrunMins = Math.max(1, Math.floor((now - endsAt) / 60000));
-        digitsStr = currentLang === 'vi' ? `quá ${overrunMins}p` : `over ${overrunMins}m`;
-        sublineStr = currentLang === 'vi' ? 'đã quá hạn' : 'overrun';
-        fraction = 1;
-      } else {
-        const secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
-        const m = Math.floor(secRemaining / 60);
-        const s = secRemaining % 60;
-        digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        sublineStr = `${currentLang === 'vi' ? 'còn lại' : 'remaining'} / ${totalDurationMins}p`;
-        fraction = totalSec > 0 ? Math.max(0, Math.min(1, secRemaining / totalSec)) : 0;
-      }
-    } else if (threeViewMode === 'elapsed') {
-      const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
-      const m = Math.floor(secElapsed / 60);
-      const s = secElapsed % 60;
-      digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-      sublineStr = `${currentLang === 'vi' ? 'đã dùng' : 'elapsed'} / ${totalDurationMins}p`;
-      fraction = totalSec > 0 ? Math.max(0, Math.min(1, secElapsed / totalSec)) : 0;
-    } else if (threeViewMode === 'goal') {
-      const gh = lastData?.goalHours || 0;
-      const gm = lastData?.goalMins || 0;
-      digitsStr = `${gh}g${gm > 0 ? (gm < 10 ? '0' : '') + gm : ''}`;
-      if (lastData?.goalTitle) {
-        sublineStr = lastData?.goalSize
-          ? `/ ${lastData.goalTargetHours || 40}g · ${lastData.goalSize}`
-          : `/ ${lastData.goalTargetHours || 40}g`;
-        fraction = Math.min(1, ((gh * 60 + gm) / ((lastData.goalTargetHours || 40) * 60)));
-      } else {
-        sublineStr = currentLang === 'vi' ? 'Chưa gắn mục tiêu' : 'No goal';
-        fraction = 0;
-      }
-    }
-
-    barDigits.innerText = digitsStr;
-    ringDigits.innerText = digitsStr;
-    ringSubText.innerText = sublineStr;
-
-    // Bar progress width
-    barProgress.style.width = `${Math.round(fraction * 100)}%`;
-
-    // Ring progress circle
-    if (ringCircle) {
-      const offset = ringCircumference - fraction * ringCircumference;
-      ringCircle.style.strokeDashoffset = offset;
+    } catch (err) {
+      reportError(err, 'tick');
     }
   }
 
-  // Live timer tick every second
+  // Initialization (v0.3.46 Part A2: fully protected by try/catch)
+  try {
+    const saved = localStorage.getItem('taio_clock_view_mode');
+    if (saved === 'ring' || saved === 'bar') viewMode = saved;
+  } catch {}
+  setViewMode(viewMode);
+
+  try {
+    const saved3 = localStorage.getItem('taio_clock_three_view_mode');
+    if (saved3 === 'remaining' || saved3 === 'elapsed' || saved3 === 'goal') {
+      threeViewMode = saved3;
+    } else {
+      threeViewMode = 'remaining';
+    }
+  } catch {
+    threeViewMode = 'remaining';
+  }
+  setThreeViewMode(threeViewMode);
+
+  // Live timer tick every second (unconditionally started)
   setInterval(tick, 1000);
 
   // 1. Direct IPC listener for timer sync (reliable and instant)
   if (window.taioAPI && window.taioAPI.onSyncTimer) {
-    window.taioAPI.onSyncTimer((data) => {
-      window.updateUI(data);
-    });
+    try {
+      window.taioAPI.onSyncTimer((data) => {
+        window.updateUI(data);
+      });
+    } catch (err) {
+      reportError(err, 'onSyncTimer setup');
+    }
   }
 
   // 2. Active pull: immediately fetch current timer from main process
   if (window.taioAPI && window.taioAPI.getTimerData) {
-    window.taioAPI.getTimerData().then((data) => {
-      if (data) window.updateUI(data);
-    }).catch(() => {});
+    try {
+      window.taioAPI.getTimerData().then((data) => {
+        if (data) window.updateUI(data);
+      }).catch((err) => {
+        reportError(err, 'getTimerData');
+      });
+    } catch (err) {
+      reportError(err, 'getTimerData setup');
+    }
   }
 
   // 3. Notify main process that clock window is loaded and ready
   if (window.taioAPI && window.taioAPI.notifyClockReady) {
-    window.taioAPI.notifyClockReady();
+    try {
+      window.taioAPI.notifyClockReady();
+    } catch (err) {
+      reportError(err, 'notifyClockReady');
+    }
   }
 })();

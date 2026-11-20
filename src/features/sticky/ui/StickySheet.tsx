@@ -4,13 +4,14 @@ import React, { useRef, useState } from 'react';
 import { STICKY_COLORS, StickyColor, StickyNote } from '../model/stickyTypes';
 import { closeSticky, newFreeSticky, setActiveSticky, updateSticky, trashSticky, toggleStickyListPanel } from '../model/stickyStore';
 import { IconClose, IconCollapse, IconPin, IconPlus, IconShirt } from './StickyIcons';
-import { Lightbulb, Trash2, EyeOff, Layers } from 'lucide-react';
+import { Lightbulb, Trash2, EyeOff, Layers, Calendar, FileText } from 'lucide-react';
 import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { useApp } from '@/context/AppContext';
 import { toLunar } from '@/domain/lunar';
+import { AddEventModal } from '@/features/events';
 
 const dayTitle = (date: string, lang: 'vi' | 'en' = 'vi') => {
   const [y, m, d] = date.split('-').map(Number);
@@ -49,6 +50,8 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
   const { language, showToast } = useApp();
   const c = STICKY_COLORS[note.color];
   const [palette, setPalette] = useState(false);
+  const [plusMenuOpen, setPlusMenuOpen] = useState(false);
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
 
   const handleTrash = () => {
     const { undo } = trashSticky(note.id);
@@ -228,10 +231,62 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
         >
           {note.kind === 'day' ? dayTitle(note.date!, language) : note.title}
         </span>
-        <button className={btn} aria-label="Tờ mới" onClick={() => newFreeSticky('pink')}>
-          <IconPlus color={c.muted} size={17} />
-        </button>
+        <div className="relative">
+          <button
+            className={btn}
+            aria-label="Tùy chọn tạo mới"
+            title={language === 'vi' ? 'Thêm mới...' : 'Add new...'}
+            onClick={() => setPlusMenuOpen(!plusMenuOpen)}
+          >
+            <IconPlus color={c.muted} size={17} />
+          </button>
+
+          {plusMenuOpen && (
+            <>
+              {/* Backdrop to close menu on click outside */}
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setPlusMenuOpen(false)} 
+              />
+              <div 
+                className="absolute right-0 top-full mt-1.5 z-50 w-44 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/80 p-1.5 text-xs text-slate-800 animate-in fade-in zoom-in-95 duration-150"
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100/90 text-left font-medium transition-colors cursor-pointer text-slate-700"
+                  onClick={() => {
+                    setPlusMenuOpen(false);
+                    newFreeSticky('pink');
+                  }}
+                >
+                  <FileText size={15} className="text-slate-500 shrink-0" />
+                  <span>{language === 'vi' ? 'Tờ ghi chú mới' : 'New note sheet'}</span>
+                </button>
+                <button
+                  type="button"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-left font-medium transition-colors cursor-pointer text-slate-700 hover:text-orange-900"
+                  onClick={() => {
+                    setPlusMenuOpen(false);
+                    setShowAddEventModal(true);
+                  }}
+                >
+                  <Calendar size={15} className="text-orange-600 shrink-0" />
+                  <span>{language === 'vi' ? 'Thêm sự kiện' : 'Add event'}</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
+
+      {showAddEventModal && (
+        <AddEventModal
+          isOpen={showAddEventModal}
+          onClose={() => setShowAddEventModal(false)}
+          initialDate={note.kind === 'day' ? note.date : getDeviceCalendarDate()}
+        />
+      )}
 
       {/* Body */}
       {!note.collapsed && (
