@@ -39,7 +39,8 @@ export const DailyCardView: React.FC = () => {
     setIsSwipeModalOpen,
     setIsQuestionsModalOpen,
     setIsActiveCaptureOpen,
-    activeQuestion
+    activeQuestion,
+    language
   } = useApp();
 
   const [newText, setNewText] = useState<string>('');
@@ -110,11 +111,13 @@ export const DailyCardView: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                  Thẻ ngày
+                  {language === 'en' ? 'Daily Card' : 'Thẻ ngày'}
                 </h3>
               </div>
               <p className="text-xs text-slate-500">
-                Ghi nhanh các việc trong ngày • Gạch ngang khi xong • Dời việc có chủ đích
+                {language === 'en' 
+                  ? 'Quickly log tasks for today • Strike through when done • Move tasks with intent' 
+                  : 'Ghi nhanh các việc trong ngày • Gạch ngang khi xong • Dời việc có chủ đích'}
               </p>
             </div>
           </div>
@@ -124,7 +127,7 @@ export const DailyCardView: React.FC = () => {
             <button 
               onClick={handlePrevDay} 
               className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white"
-              title="Ngày trước"
+              title={language === 'en' ? 'Previous day' : 'Ngày trước'}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -132,12 +135,12 @@ export const DailyCardView: React.FC = () => {
               onClick={handleToday}
               className="px-2.5 py-1 rounded-lg font-bold text-slate-800 hover:text-slate-900 bg-white shadow-xs"
             >
-              {selectedCardDate === getDeviceCalendarDate() ? 'Hôm nay' : selectedCardDate}
+              {selectedCardDate === getDeviceCalendarDate() ? (language === 'en' ? 'Today' : 'Hôm nay') : selectedCardDate}
             </button>
             <button 
               onClick={handleNextDay} 
               className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white"
-              title="Ngày sau"
+              title={language === 'en' ? 'Next day' : 'Ngày sau'}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -154,7 +157,7 @@ export const DailyCardView: React.FC = () => {
               ?
             </span>
             <span className="text-xs text-amber-900 font-bold group-hover:underline">
-              {activeQuestion ? activeQuestion.text : '3 việc quan trọng nhất bạn cần làm hôm nay là gì?'}
+              {activeQuestion ? activeQuestion.text : (language === 'en' ? 'What are the 3 most important tasks you need to do today?' : '3 việc quan trọng nhất bạn cần làm hôm nay là gì?')}
             </span>
           </button>
           <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
@@ -163,9 +166,9 @@ export const DailyCardView: React.FC = () => {
             <button
               onClick={() => setIsActiveCaptureOpen(true)}
               className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-[var(--taio-brand)] text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
-              title="Thu thập chủ động & Ghi bù"
+              title={language === 'en' ? 'Active Capture & Backfill' : 'Thu thập chủ động & Ghi bù'}
             >
-              <span>Ghi bù</span>
+              <span>{language === 'en' ? 'Backfill' : 'Ghi bù'}</span>
             </button>
           </div>
         </div>
@@ -175,11 +178,13 @@ export const DailyCardView: React.FC = () => {
           <div className="flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
             <span>
-              <strong>Nhịp năng suất:</strong> Bạn thường hoàn thành trung bình <strong>{usualDailyCapacity} việc/ngày</strong>. Thẻ hôm nay đang có <strong>{currentTotal} việc</strong> {currentTotal > usualDailyCapacity ? '(chú ý nguy cơ quá tải)' : '(vừa vặn, khả thi)'}.
+              <strong>{language === 'en' ? 'Productivity Rhythm:' : 'Nhịp năng suất:'}</strong> {language === 'en'
+                ? `You usually complete an average of ${usualDailyCapacity} tasks/day. Today has ${currentTotal} tasks ${currentTotal > usualDailyCapacity ? '(watch out for overload)' : '(well-balanced, feasible)'}.`
+                : `Bạn thường hoàn thành trung bình ${usualDailyCapacity} việc/ngày. Thẻ hôm nay đang có ${currentTotal} việc ${currentTotal > usualDailyCapacity ? '(chú ý nguy cơ quá tải)' : '(vừa vặn, khả thi)'}.`}
             </span>
           </div>
           <span className="text-[11px] font-mono text-emerald-600 font-bold shrink-0">
-            {doneItems.length}/{currentTotal} xong ({currentTotal > 0 ? Math.round((doneItems.length / currentTotal) * 100) : 0}%)
+            {doneItems.length}/{currentTotal} {language === 'en' ? 'done' : 'xong'} ({currentTotal > 0 ? Math.round((doneItems.length / currentTotal) * 100) : 0}%)
           </span>
         </div>
 
@@ -191,7 +196,7 @@ export const DailyCardView: React.FC = () => {
                 type="text"
                 value={newText}
                 onChange={e => setNewText(e.target.value)}
-                placeholder="Ghi nhanh 1 việc (nhập tên việc rồi nhấn Enter)..."
+                placeholder={language === 'en' ? 'Quickly log 1 task (enter task name then press Enter)...' : 'Ghi nhanh 1 việc (nhập tên việc rồi nhấn Enter)...'}
                 className="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
               />
             </div>
@@ -204,10 +209,10 @@ export const DailyCardView: React.FC = () => {
                   ? 'bg-orange-500/20 text-orange-700 border-orange-500/40'
                   : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
               }`}
-              title="Tùy chọn: Việc phát sinh ngoài kế hoạch (Unplanned on goal)"
+              title={language === 'en' ? 'Options: Unplanned on goal' : 'Tùy chọn: Việc phát sinh ngoài kế hoạch (Unplanned on goal)'}
             >
               <Zap className="w-3.5 h-3.5 inline mr-1" />
-              <span>{newOrigin === 'unplanned_goal' ? 'Phát sinh' : 'Tùy chọn'}</span>
+              <span>{newOrigin === 'unplanned_goal' ? (language === 'en' ? 'Unplanned' : 'Phát sinh') : (language === 'en' ? 'Options' : 'Tùy chọn')}</span>
             </button>
 
             <button
@@ -215,7 +220,7 @@ export const DailyCardView: React.FC = () => {
               className="py-2.5 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4 text-white" />
-              <span>Thêm</span>
+              <span>{language === 'en' ? 'Add' : 'Thêm'}</span>
             </button>
           </div>
 
@@ -225,29 +230,29 @@ export const DailyCardView: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1">
                   <label className="text-[11px] text-slate-400 font-bold uppercase block mb-1">
-                    Nguồn gốc công việc:
+                    {language === 'en' ? 'Task Origin:' : 'Nguồn gốc công việc:'}
                   </label>
                   <select
                     value={newOrigin}
                     onChange={e => setNewOrigin(e.target.value as ItemOrigin)}
                     className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none shadow-xs"
                   >
-                    <option value="planned">Theo kế hoạch</option>
-                    <option value="unplanned_goal">Ngoài kế hoạch, có phục vụ mục tiêu</option>
-                    <option value="interruption">Việc chen ngang ngoài mục tiêu</option>
+                    <option value="planned">{language === 'en' ? 'Planned' : 'Theo kế hoạch'}</option>
+                    <option value="unplanned_goal">{language === 'en' ? 'Unplanned, supports goal' : 'Ngoài kế hoạch, có phục vụ mục tiêu'}</option>
+                    <option value="interruption">{language === 'en' ? 'Interruption, non-goal' : 'Việc chen ngang ngoài mục tiêu'}</option>
                   </select>
                 </div>
 
                 <div className="flex-1">
                   <label className="text-[11px] text-slate-400 font-bold uppercase block mb-1">
-                    Mục tiêu phục vụ (Tùy chọn):
+                    {language === 'en' ? 'Linked Goal (Optional):' : 'Mục tiêu phục vụ (Tùy chọn):'}
                   </label>
                   <select
                     value={selectedGoalId}
                     onChange={e => setSelectedGoalId(e.target.value)}
                     className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none shadow-xs"
                   >
-                    <option value="">Ngoài mục tiêu</option>
+                    <option value="">{language === 'en' ? 'No linked goal' : 'Ngoài mục tiêu'}</option>
                     {goals.map(g => (
                       <option key={g.id} value={g.id}>{g.name}</option>
                     ))}
@@ -258,14 +263,14 @@ export const DailyCardView: React.FC = () => {
               {newOrigin === 'unplanned_goal' && (
                 <div>
                   <label className="text-[11px] text-amber-700 font-bold block mb-1">
-                    Việc này chiếm thời gian của khối nào? (Bị đẩy lùi):
+                    {language === 'en' ? 'Which block does this displace? (Delayed):' : 'Việc này chiếm thời gian của khối nào? (Bị đẩy lùi):'}
                   </label>
                   <select
                     value={displacedBlockId}
                     onChange={e => setDisplacedBlockId(e.target.value)}
                     className="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none shadow-xs"
                   >
-                    <option value="">Không làm lùi việc nào (dùng thời gian trống)</option>
+                    <option value="">{language === 'en' ? 'Does not delay any task (use free time)' : 'Không làm lùi việc nào (dùng thời gian trống)'}</option>
                     {blocks.map(b => (
                       <option key={b.id} value={b.id}>
                         {b.title} ({b.startTime} - {b.endTime})
@@ -287,17 +292,19 @@ export const DailyCardView: React.FC = () => {
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 pl-2">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-              Danh sách việc trong ngày ({currentItems.length} việc)
+              {language === 'en' ? `Today's Task List (${currentItems.length} tasks)` : `Danh sách việc trong ngày (${currentItems.length} việc)`}
             </h4>
           </div>
           <span className="text-xs text-slate-500 italic">
-            Chạm vào để gạch ngang • Việc đã xong vẫn giữ nguyên để ghi nhận thành quả
+            {language === 'en' ? 'Tap to strike through • Completed tasks stay to record achievements' : 'Chạm vào để gạch ngang • Việc đã xong vẫn giữ nguyên để ghi nhận thành quả'}
           </span>
         </div>
 
         {currentItems.length === 0 ? (
           <div className="py-12 text-center text-slate-400 text-xs">
-            Chưa có công việc nào trên thẻ ngày {selectedCardDate}. Hãy nhập một dòng phía trên để bắt đầu!
+            {language === 'en'
+              ? `No tasks on daily card for ${selectedCardDate}. Type a line above to get started!`
+              : `Chưa có công việc nào trên thẻ ngày ${selectedCardDate}. Hãy nhập một dòng phía trên để bắt đầu!`}
           </div>
         ) : (
           <div className="space-y-2.5 pl-2">
@@ -339,7 +346,7 @@ export const DailyCardView: React.FC = () => {
                                 ? 'bg-rose-50 text-rose-700 border border-rose-200' 
                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
                             }`}
-                            title={`Việc đã dời ${item.carryCount} lần từ các ngày trước`}
+                            title={language === 'en' ? `Task postponed ${item.carryCount} times from previous days` : `Việc đã dời ${item.carryCount} lần từ các ngày trước`}
                           >
                             ↻{item.carryCount}
                           </span>
@@ -348,13 +355,13 @@ export const DailyCardView: React.FC = () => {
                         {/* Origin Badge */}
                         {item.origin === 'unplanned_goal' && (
                           <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
-                            Ngoài KH (Có MT)
+                            {language === 'en' ? 'Unplanned (Goal)' : 'Ngoài KH (Có MT)'}
                           </span>
                         )}
 
                         {item.origin === 'interruption' && (
                           <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                            Chen ngang
+                            {language === 'en' ? 'Interruption' : 'Chen ngang'}
                           </span>
                         )}
                       </div>
@@ -362,7 +369,7 @@ export const DailyCardView: React.FC = () => {
                       {/* Displaced task note */}
                       {item.displacedItemTitle && (
                         <p className="text-[10px] text-amber-700 mt-0.5">
-                          ↳ Chiếm thời gian của: <strong>{item.displacedItemTitle}</strong> (+{item.displacedMinutes || 45}p)
+                          ↳ {language === 'en' ? 'Displaced time of:' : 'Chiếm thời gian của:'} <strong>{item.displacedItemTitle}</strong> (+{item.displacedMinutes || 45}{language === 'en' ? 'm' : 'p'})
                         </p>
                       )}
                     </div>
@@ -387,7 +394,7 @@ export const DailyCardView: React.FC = () => {
                       <button
                         onClick={() => carryOverItem(item.id, 'tomorrow')}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-slate-100 transition-colors"
-                        title="Dời việc sang ngày mai (Bullet Journal Migration)"
+                        title={language === 'en' ? 'Move task to tomorrow (Bullet Journal Migration)' : 'Dời việc sang ngày mai (Bullet Journal Migration)'}
                       >
                         <RotateCw className="w-3.5 h-3.5" />
                       </button>
@@ -405,17 +412,23 @@ export const DailyCardView: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase text-slate-400">Đã xong hôm nay</span>
-            <p className="text-2xl font-bold text-emerald-600 mt-1">{doneItems.length} việc</p>
+            <span className="text-[11px] font-bold uppercase text-slate-400">
+              {language === 'en' ? 'Done Today' : 'Đã xong hôm nay'}
+            </span>
+            <p className="text-2xl font-bold text-emerald-600 mt-1">
+              {doneItems.length} {language === 'en' ? 'tasks' : 'việc'}
+            </p>
           </div>
           <CheckCircle2 className="w-7 h-7 text-emerald-500/20" />
         </div>
 
         <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase text-slate-400">Việc đã dời</span>
+            <span className="text-[11px] font-bold uppercase text-slate-400">
+              {language === 'en' ? 'Migrated Tasks' : 'Việc đã dời'}
+            </span>
             <p className="text-2xl font-bold text-amber-600 mt-1">
-              {currentItems.filter(i => i.carryCount > 0).length} việc
+              {currentItems.filter(i => i.carryCount > 0).length} {language === 'en' ? 'tasks' : 'việc'}
             </p>
           </div>
           <RotateCw className="w-7 h-7 text-amber-500/20" />
@@ -423,9 +436,11 @@ export const DailyCardView: React.FC = () => {
 
         <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase text-slate-400">Ngoài kế hoạch (có mục tiêu)</span>
+            <span className="text-[11px] font-bold uppercase text-slate-400">
+              {language === 'en' ? 'Unplanned (on goal)' : 'Ngoài kế hoạch (có mục tiêu)'}
+            </span>
             <p className="text-2xl font-bold text-[var(--taio-brand)] mt-1">
-              {currentItems.filter(i => i.origin === 'unplanned_goal').length} việc
+              {currentItems.filter(i => i.origin === 'unplanned_goal').length} {language === 'en' ? 'tasks' : 'việc'}
             </p>
           </div>
           <Zap className="w-7 h-7 text-red-500/20" />

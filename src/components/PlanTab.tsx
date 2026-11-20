@@ -36,12 +36,12 @@ import { updateScheduleEntry } from '@/features/tasks';
 import { TemplateScheduleModal } from '@/features/schedule-template';
 import { AddEventModal } from '@/features/events';
 
-const TYPE_CONFIG: Record<BlockType, { label: string; bg: string; text: string; border: string }> = {
-  deep: { label: 'Tập trung sâu', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200/70' },
-  meeting: { label: 'Họp & Trao đổi', bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200/70' },
-  interruption: { label: 'Quỹ gián đoạn', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200/70' },
-  personal: { label: 'Cá nhân & Nghỉ', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200/70' },
-  planning: { label: 'Lập kế hoạch', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200/70' },
+const TYPE_CONFIG: Record<BlockType, { labelVi: string; labelEn: string; bg: string; text: string; border: string }> = {
+  deep: { labelVi: 'Tập trung sâu', labelEn: 'Deep Work', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200/70' },
+  meeting: { labelVi: 'Họp & Trao đổi', labelEn: 'Meeting', bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200/70' },
+  interruption: { labelVi: 'Quỹ gián đoạn', labelEn: 'Interruption', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200/70' },
+  personal: { labelVi: 'Cá nhân & Nghỉ', labelEn: 'Personal & Rest', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200/70' },
+  planning: { labelVi: 'Lập kế hoạch', labelEn: 'Planning', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200/70' },
 };
 
 export const PlanTab: React.FC = () => {
@@ -135,7 +135,9 @@ export const PlanTab: React.FC = () => {
         typeExplicitlyChosen: true,
       },
     });
-    alert(`Đã đưa "${item.title}" vào lịch hôm nay lúc 17:30!`);
+    alert(language === 'en'
+      ? `Added "${item.title}" to today's schedule at 17:30!`
+      : `Đã đưa "${item.title}" vào lịch hôm nay lúc 17:30!`);
   };
 
   const sortedBlocks = [...scheduleBlocks]
@@ -158,7 +160,7 @@ export const PlanTab: React.FC = () => {
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Thẻ ngày</span>
+            <span>{language === 'en' ? 'Daily Card' : 'Thẻ ngày'}</span>
           </button>
           <button
             onClick={() => setActiveView('timeline')}
@@ -169,7 +171,7 @@ export const PlanTab: React.FC = () => {
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span>Thời gian biểu</span>
+            <span>{language === 'en' ? 'Timeline' : 'Thời gian biểu'}</span>
           </button>
         </div>
 
@@ -178,19 +180,19 @@ export const PlanTab: React.FC = () => {
           <button
             onClick={() => setTemplateModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all"
-            title="Quản lý lịch ngày mẫu cố định"
+            title={language === 'en' ? 'Manage recurring template schedule' : 'Quản lý lịch ngày mẫu cố định'}
           >
             <RotateCw className="w-3.5 h-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Lịch mẫu</span>
+            <span className="hidden sm:inline">{language === 'en' ? 'Template' : 'Lịch mẫu'}</span>
           </button>
 
           <button
             onClick={() => setShowAddEventModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all"
-            title="Thêm sự kiện, sinh nhật, ngày lễ, giỗ..."
+            title={language === 'en' ? 'Add event, birthday, holiday, anniversary...' : 'Thêm sự kiện, sinh nhật, ngày lễ, giỗ...'}
           >
             <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            <span>Thêm sự kiện</span>
+            <span>{language === 'en' ? 'Add Event' : 'Thêm sự kiện'}</span>
           </button>
 
           <button
@@ -198,7 +200,7 @@ export const PlanTab: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-xs transition-all"
           >
             <Plus className="w-4 h-4 text-white" />
-            <span>Thêm việc</span>
+            <span>{language === 'en' ? 'Add Task' : 'Thêm việc'}</span>
           </button>
         </div>
       </div>
@@ -211,15 +213,15 @@ export const PlanTab: React.FC = () => {
             <div className="flex items-center justify-between">
               <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Layers className="w-4 h-4 text-[var(--taio-brand)]" />
-                <span>Ngân sách tuần</span>
+                <span>{language === 'en' ? 'Weekly Budget' : 'Ngân sách tuần'}</span>
               </h3>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-600 font-medium">18 / 40 giờ</span>
+                <span className="text-xs text-slate-600 font-medium">18 / 40 {language === 'en' ? 'hours' : 'giờ'}</span>
                 <button
                   onClick={() => setIsBudgetExpanded(prev => !prev)}
                   className="text-xs text-slate-500 hover:text-slate-900 font-medium flex items-center gap-1 transition-colors"
                 >
-                  <span>{isBudgetExpanded ? 'Thu gọn' : 'Xem tất cả'}</span>
+                  <span>{isBudgetExpanded ? (language === 'en' ? 'Collapse' : 'Thu gọn') : (language === 'en' ? 'View all' : 'Xem tất cả')}</span>
                   {isBudgetExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
               </div>
@@ -240,20 +242,20 @@ export const PlanTab: React.FC = () => {
                 );
               })}
               {/* Interruption reserve slice */}
-              <div className="h-full bg-amber-400/80" style={{ width: '8.75%' }} title="Quỹ gián đoạn: 3.5h / 40h" />
+              <div className="h-full bg-amber-400/80" style={{ width: '8.75%' }} title={language === 'en' ? 'Interruption reserve: 3.5h / 40h' : 'Quỹ gián đoạn: 3.5h / 40h'} />
             </div>
 
             {/* Collapsed view: Top 3 pace lag goals */}
             {!isBudgetExpanded ? (
               <div className="flex items-center gap-2 flex-wrap text-xs text-slate-600 pt-1">
-                <span className="font-semibold text-slate-700">Cần chú ý:</span>
+                <span className="font-semibold text-slate-700">{language === 'en' ? 'Focus on:' : 'Cần chú ý:'}</span>
                 {goals.slice(0, 3).map((g) => (
                   <span
                     key={g.id}
                     onClick={() => openDrilldown({
                       type: 'goal_tasks',
-                      title: `Ngân sách & Nhiệm vụ: ${g.name}`,
-                      subtitle: `Ngân sách tuần: ${g.dailyBudgetMins * 5 / 60} giờ/tuần`,
+                      title: language === 'en' ? `Budget & Tasks: ${g.name}` : `Ngân sách & Nhiệm vụ: ${g.name}`,
+                      subtitle: language === 'en' ? `Weekly budget: ${g.dailyBudgetMins * 5 / 60} hours/week` : `Ngân sách tuần: ${g.dailyBudgetMins * 5 / 60} giờ/tuần`,
                       goalId: g.id,
                     })}
                     className="px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium cursor-pointer transition-colors"
@@ -270,8 +272,8 @@ export const PlanTab: React.FC = () => {
                     key={g.id}
                     onClick={() => openDrilldown({
                       type: 'goal_tasks',
-                      title: `Ngân sách & Nhiệm vụ: ${g.name}`,
-                      subtitle: `Ngân sách tuần: ${g.dailyBudgetMins * 5 / 60} giờ/tuần`,
+                      title: language === 'en' ? `Budget & Tasks: ${g.name}` : `Ngân sách & Nhiệm vụ: ${g.name}`,
+                      subtitle: language === 'en' ? `Weekly budget: ${g.dailyBudgetMins * 5 / 60} hours/week` : `Ngân sách tuần: ${g.dailyBudgetMins * 5 / 60} giờ/tuần`,
                       goalId: g.id,
                     })}
                     className="h-9 px-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center justify-between text-xs cursor-pointer group transition-colors"
@@ -284,7 +286,7 @@ export const PlanTab: React.FC = () => {
                           style={{ width: `${Math.min(100, g.progressPercent)}%` }}
                         />
                       </div>
-                      <span className="text-slate-500 font-medium w-16 text-right">{g.dailyBudgetMins * 5 / 60}h/tuần</span>
+                      <span className="text-slate-500 font-medium w-16 text-right">{g.dailyBudgetMins * 5 / 60}{language === 'en' ? 'h/week' : 'h/tuần'}</span>
                     </div>
                   </div>
                 ))}
@@ -293,12 +295,12 @@ export const PlanTab: React.FC = () => {
                 <div
                   onClick={() => openDrilldown({
                     type: 'interruptions',
-                    title: 'Quỹ dự phòng gián đoạn tuần (3.5 giờ / 7.5 giờ)',
-                    subtitle: 'Bấm để xem danh sách việc chen ngang',
+                    title: language === 'en' ? 'Weekly Interruption Reserve (3.5 hrs / 7.5 hrs)' : 'Quỹ dự phòng gián đoạn tuần (3.5 giờ / 7.5 giờ)',
+                    subtitle: language === 'en' ? 'Click to view interruptions list' : 'Bấm để xem danh sách việc chen ngang',
                   })}
                   className="h-9 px-3 rounded-xl hover:bg-amber-50/50 border border-transparent hover:border-amber-200 flex items-center justify-between text-xs cursor-pointer group transition-colors"
                 >
-                  <span className="text-amber-800 font-medium">Quỹ dự phòng gián đoạn</span>
+                  <span className="text-amber-800 font-medium">{language === 'en' ? 'Interruption Reserve' : 'Quỹ dự phòng gián đoạn'}</span>
                   <div className="flex items-center gap-3">
                     <div className="w-24 sm:w-36 bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200">
                       <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: '47%' }} />
@@ -320,10 +322,10 @@ export const PlanTab: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[var(--taio-brand)]" />
-                    <span>Thời gian biểu ({todayLabel})</span>
+                    <span>{language === 'en' ? 'Schedule' : 'Thời gian biểu'} ({todayLabel})</span>
                   </h3>
                   <span className="text-xs text-slate-500">
-                    Hồ sơ: <strong className="text-slate-900">{profile.title}</strong>
+                    {language === 'en' ? 'Profile:' : 'Hồ sơ:'} <strong className="text-slate-900">{profile.title}</strong>
                   </span>
                 </div>
 
@@ -339,7 +341,7 @@ export const PlanTab: React.FC = () => {
                     const isTemplate = block.isTemplateBlock || block.blockKind === 'ritual' || block.id === 'b-10' || block.id === 'b-user-dayclose' || block.id === 'b-ritual-close';
                     const conf = TYPE_CONFIG[block.type] || TYPE_CONFIG.deep;
                     const computedStatus = computeBlockStatus(block, nowMinutes, getDeviceCalendarDate());
-                    const statusDisplay = getBlockStatusDisplay(computedStatus);
+                    const statusDisplay = getBlockStatusDisplay(computedStatus, language);
                     const isCurrent = computedStatus === 'in_progress';
                     const isEditingTitle = editingId === block.id;
                     const isEditingTime = editingTimeId === block.id;
@@ -382,7 +384,7 @@ export const PlanTab: React.FC = () => {
                               </span>
                               <span className="text-[10px] font-medium text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
                                 <span>🔁</span>
-                                <span>Cố định</span>
+                                <span>{language === 'en' ? 'Fixed' : 'Cố định'}</span>
                               </span>
                               <span className="text-xs font-medium text-slate-700 truncate" title={block.title}>
                                 {block.title}
@@ -394,16 +396,16 @@ export const PlanTab: React.FC = () => {
                               <button
                                 onClick={() => updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems })}
                                 className="px-2 py-0.5 rounded-md bg-white hover:bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200 transition-colors shadow-2xs"
-                                title="Bỏ qua khung này cho riêng hôm nay"
+                                title={language === 'en' ? 'Skip this slot for today only' : 'Bỏ qua khung này cho riêng hôm nay'}
                               >
-                                Bỏ qua
+                                {language === 'en' ? 'Skip' : 'Bỏ qua'}
                               </button>
                               <button
                                 onClick={() => setTemplateModalOpen(true)}
                                 className="px-2 py-0.5 rounded-md bg-white hover:bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200 transition-colors shadow-2xs"
-                                title="Sửa lịch mẫu"
+                                title={language === 'en' ? 'Edit template' : 'Sửa lịch mẫu'}
                               >
-                                Sửa mẫu
+                                {language === 'en' ? 'Edit template' : 'Sửa mẫu'}
                               </button>
                             </div>
                           </div>
@@ -425,7 +427,7 @@ export const PlanTab: React.FC = () => {
                               <div className="flex items-center gap-2 flex-wrap">
                                 {isParallel && (
                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
-                                    ∥ Song song
+                                    ∥ {language === 'en' ? 'Parallel' : 'Song song'}
                                   </span>
                                 )}
 
@@ -468,7 +470,7 @@ export const PlanTab: React.FC = () => {
                                       setEditingStart(block.startTime);
                                       setEditingEnd(block.endTime);
                                     }}
-                                    title="Bấm để đổi giờ"
+                                    title={language === 'en' ? 'Click to change time' : 'Bấm để đổi giờ'}
                                     className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-700 text-xs font-mono font-semibold transition-colors shrink-0"
                                   >
                                     {block.startTime} – {block.endTime}
@@ -478,7 +480,7 @@ export const PlanTab: React.FC = () => {
                                 {/* Type tag */}
                                 {typeExplicitlyChosen && (
                                   <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${conf.bg} ${conf.text} ${conf.border}`}>
-                                    {conf.label}
+                                    {language === 'en' ? conf.labelEn : conf.labelVi}
                                   </span>
                                 )}
 
@@ -498,12 +500,12 @@ export const PlanTab: React.FC = () => {
                               <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex items-center gap-1 shrink-0 ml-auto transition-opacity">
                                 <button
                                   onClick={() => {
-                                    if (confirm('Xóa công việc này khỏi lịch?')) {
+                                    if (confirm(language === 'en' ? 'Remove this task from schedule?' : 'Xóa công việc này khỏi lịch?')) {
                                       updateScheduleEntry(block.id, { status: 'dropped' }, { updateDailyCardItem, setBlocks, dailyCardItems });
                                     }
                                   }}
                                   className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                                  title="Xóa công việc"
+                                  title={language === 'en' ? 'Delete task' : 'Xóa công việc'}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -545,7 +547,7 @@ export const PlanTab: React.FC = () => {
                                     setEditingId(block.id);
                                     setEditingTitle(block.title);
                                   }}
-                                  title="Bấm để sửa tên"
+                                  title={language === 'en' ? 'Click to edit title' : 'Bấm để sửa tên'}
                                   className="text-sm font-semibold text-slate-900 cursor-pointer hover:text-blue-600 transition-colors leading-snug"
                                 >
                                   {block.title}
@@ -556,7 +558,7 @@ export const PlanTab: React.FC = () => {
                             {/* Row 3: Next step (if any) */}
                             {block.nextStep && (
                               <p className="text-amber-800 bg-amber-50 border border-amber-200/60 rounded-md px-2 py-0.5 text-xs font-medium inline-block">
-                                Bước kế tiếp: {block.nextStep}
+                                {language === 'en' ? 'Next step:' : 'Bước kế tiếp:'} {block.nextStep}
                               </p>
                             )}
                           </div>
@@ -575,7 +577,7 @@ export const PlanTab: React.FC = () => {
                     >
                       <span className="flex items-center gap-1.5">
                         <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Đã hoàn thành ({completedBlocks.length} việc)</span>
+                        <span>{language === 'en' ? `Completed (${completedBlocks.length} tasks)` : `Đã hoàn thành (${completedBlocks.length} việc)`}</span>
                       </span>
                       {isCompletedCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                     </button>
@@ -589,7 +591,7 @@ export const PlanTab: React.FC = () => {
                               <span className="line-through text-slate-400 truncate">{block.title}</span>
                             </div>
                             <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/70 text-[10px] font-semibold shrink-0">
-                              ✓ Xong
+                              {language === 'en' ? '✓ Done' : '✓ Xong'}
                             </span>
                           </div>
                         ))}
@@ -607,10 +609,12 @@ export const PlanTab: React.FC = () => {
               <div>
                 <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Việc quan trọng, chưa khẩn</span>
+                  <span>{language === 'en' ? 'Important, Not Urgent' : 'Việc quan trọng, chưa khẩn'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Các đầu việc định kỳ giúp duy trì đà phát triển dài hạn. Bấm "Làm tuần này" để đưa vào lịch.
+                  {language === 'en'
+                    ? 'Recurring items that maintain long-term momentum. Click "Do this week" to schedule.'
+                    : 'Các đầu việc định kỳ giúp duy trì đà phát triển dài hạn. Bấm "Làm tuần này" để đưa vào lịch.'}
                 </p>
               </div>
             </div>
@@ -620,13 +624,15 @@ export const PlanTab: React.FC = () => {
                 <div key={item.id} className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-xs hover:border-slate-300 transition-all">
                   <div>
                     <h4 className="text-xs sm:text-sm font-bold text-slate-900">{item.title}</h4>
-                    <span className="text-[11px] text-slate-500 font-mono mt-0.5 block">Dự kiến: {item.defaultMinutes} phút</span>
+                    <span className="text-[11px] text-slate-500 font-mono mt-0.5 block">
+                      {language === 'en' ? 'Est:' : 'Dự kiến:'} {item.defaultMinutes} {language === 'en' ? 'mins' : 'phút'}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleAcceptBacklogItem(item)}
                     className="px-3.5 py-1.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold shadow-sm transition-all shrink-0"
                   >
-                    Làm tuần này
+                    {language === 'en' ? 'Do this week' : 'Làm tuần này'}
                   </button>
                 </div>
               ))}
@@ -639,23 +645,23 @@ export const PlanTab: React.FC = () => {
       {showAddModal && (
         <div className="fixed app-overlay-safe z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl text-slate-900">
-            <h3 className="text-base font-bold mb-4">Thêm công việc mới</h3>
+            <h3 className="text-base font-bold mb-4">{language === 'en' ? 'Add New Task' : 'Thêm công việc mới'}</h3>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Tên công việc</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">{language === 'en' ? 'Task Title' : 'Tên công việc'}</label>
                 <input
                   type="text"
                   required
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
-                  placeholder="Ví dụ: Rà soát hợp đồng..."
+                  placeholder={language === 'en' ? 'e.g. Review contract...' : 'Ví dụ: Rà soát hợp đồng...'}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Giờ bắt đầu</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">{language === 'en' ? 'Start Time' : 'Giờ bắt đầu'}</label>
                   <input
                     type="time"
                     required
@@ -675,7 +681,7 @@ export const PlanTab: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Giờ kết thúc</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">{language === 'en' ? 'End Time' : 'Giờ kết thúc'}</label>
                   <input
                     type="time"
                     required
@@ -704,28 +710,28 @@ export const PlanTab: React.FC = () => {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Loại khối</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">{language === 'en' ? 'Block Type' : 'Loại khối'}</label>
                 <select
                   value={newType}
                   onChange={e => setNewType(e.target.value as BlockType)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
                 >
-                  <option value="deep">Tập trung sâu</option>
-                  <option value="meeting">Họp & Trao đổi</option>
-                  <option value="interruption">Quỹ gián đoạn</option>
-                  <option value="personal">Cá nhân & Nghỉ</option>
-                  <option value="planning">Lập kế hoạch</option>
+                  <option value="deep">{language === 'en' ? 'Deep Work' : 'Tập trung sâu'}</option>
+                  <option value="meeting">{language === 'en' ? 'Meeting' : 'Họp & Trao đổi'}</option>
+                  <option value="interruption">{language === 'en' ? 'Interruption Reserve' : 'Quỹ gián đoạn'}</option>
+                  <option value="personal">{language === 'en' ? 'Personal & Rest' : 'Cá nhân & Nghỉ'}</option>
+                  <option value="planning">{language === 'en' ? 'Planning' : 'Lập kế hoạch'}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Mục tiêu liên kết (tùy chọn)</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">{language === 'en' ? 'Linked Goal (optional)' : 'Mục tiêu liên kết (tùy chọn)'}</label>
                 <select
                   value={newGoalId}
                   onChange={e => setNewGoalId(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
                 >
-                  <option value="">Không gắn mục tiêu</option>
+                  <option value="">{language === 'en' ? 'No linked goal' : 'Không gắn mục tiêu'}</option>
                   {goals.map(g => (
                     <option key={g.id} value={g.id}>{g.name}</option>
                   ))}
@@ -738,14 +744,14 @@ export const PlanTab: React.FC = () => {
                   onClick={() => { setShowAddModal(false); setAddTimeError(''); }}
                   className="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-semibold transition-colors"
                 >
-                  Hủy
+                  {language === 'en' ? 'Cancel' : 'Hủy'}
                 </button>
                 <button
                   type="submit"
                   disabled={timeToMinutes(newStartTime) >= timeToMinutes(newEndTime)}
                   className="px-5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition-all"
                 >
-                  Thêm vào lịch
+                  {language === 'en' ? 'Add to schedule' : 'Thêm vào lịch'}
                 </button>
               </div>
             </form>

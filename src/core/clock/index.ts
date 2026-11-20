@@ -176,52 +176,53 @@ export function computeBlockStatus(
   return 'unconfirmed';
 }
 
-export function getBlockStatusDisplay(status: BlockStatus): {
+export function getBlockStatusDisplay(status: BlockStatus, language: 'vi' | 'en' = 'vi'): {
   label: string;
   badgeClass: string;
   dotColor: string;
 } {
+  const isEn = language === 'en';
   switch (status) {
     case 'in_progress':
       return {
-        label: '● Đang diễn ra',
+        label: isEn ? '● In Progress' : '● Đang diễn ra',
         badgeClass: 'bg-emerald-50 text-emerald-950 border border-emerald-300 font-semibold',
         dotColor: 'bg-emerald-600',
       };
     case 'unconfirmed':
       return {
-        label: 'Chờ xác nhận',
+        label: isEn ? 'Awaiting Confirm' : 'Chờ xác nhận',
         badgeClass: 'bg-amber-50 text-amber-950 border border-amber-300 font-semibold',
         dotColor: 'bg-amber-600',
       };
     case 'done':
       return {
-        label: 'Đã xong',
+        label: isEn ? 'Done' : 'Đã xong',
         badgeClass: 'bg-slate-100 text-slate-800 border border-slate-300 font-medium',
         dotColor: 'bg-emerald-600',
       };
     case 'partly_done':
       return {
-        label: 'Xong 1 phần',
+        label: isEn ? 'Partly Done' : 'Xong 1 phần',
         badgeClass: 'bg-blue-50 text-blue-950 border border-blue-300 font-semibold',
         dotColor: 'bg-blue-600',
       };
     case 'dropped':
       return {
-        label: 'Chưa làm',
+        label: isEn ? 'Not Done' : 'Chưa làm',
         badgeClass: 'bg-rose-50 text-rose-950 border border-rose-300 font-medium',
         dotColor: 'bg-rose-600',
       };
     case 'extended':
       return {
-        label: 'Đã gia hạn',
+        label: isEn ? 'Extended' : 'Đã gia hạn',
         badgeClass: 'bg-indigo-50 text-indigo-950 border border-indigo-300 font-medium',
         dotColor: 'bg-indigo-600',
       };
     case 'planned':
     default:
       return {
-        label: 'Sắp tới',
+        label: isEn ? 'Upcoming' : 'Sắp tới',
         badgeClass: 'bg-sky-50 text-sky-800 border border-sky-300 font-semibold',
         dotColor: 'bg-sky-500',
       };

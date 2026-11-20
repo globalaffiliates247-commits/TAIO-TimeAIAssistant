@@ -229,7 +229,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                     />
                     <div className="flex items-center gap-2 text-xs">
                       <div className="flex items-center gap-1">
-                        <span className="text-slate-500 text-[11px]">Bắt đầu:</span>
+                        <span className="text-slate-500 text-[11px]">{language === 'vi' ? 'Bắt đầu:' : 'Start:'}</span>
                         <input
                           type="time"
                           value={editStart}
@@ -238,7 +238,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                         />
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-slate-500 text-[11px]">Kết thúc:</span>
+                        <span className="text-slate-500 text-[11px]">{language === 'vi' ? 'Kết thúc:' : 'End:'}</span>
                         <input
                           type="time"
                           value={editEnd}
@@ -251,13 +251,13 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                           onClick={() => setEditingId(null)}
                           className="px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-200 text-xs"
                         >
-                          Hủy
+                          {language === 'vi' ? 'Hủy' : 'Cancel'}
                         </button>
                         <button
                           onClick={() => handleSaveEdit(b.id)}
                           className="px-3 py-1 rounded-lg bg-emerald-600 text-white font-bold text-xs"
                         >
-                          Lưu
+                          {language === 'vi' ? 'Lưu' : 'Save'}
                         </button>
                       </div>
                     </div>
@@ -320,7 +320,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
             />
             <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-1">
-                <span className="text-slate-500 text-[11px]">Bắt đầu:</span>
+                <span className="text-slate-500 text-[11px]">{language === 'vi' ? 'Bắt đầu:' : 'Start:'}</span>
                 <input
                   type="time"
                   value={newStart}
@@ -329,7 +329,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                 />
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-slate-500 text-[11px]">Kết thúc:</span>
+                <span className="text-slate-500 text-[11px]">{language === 'vi' ? 'Kết thúc:' : 'End:'}</span>
                 <input
                   type="time"
                   value={newEnd}
@@ -343,7 +343,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                   onClick={() => setIsAdding(false)}
                   className="px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-200 text-xs"
                 >
-                  Hủy
+                  {language === 'vi' ? 'Hủy' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
@@ -351,7 +351,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                     isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
                   }`}
                 >
-                  Thêm
+                  {language === 'vi' ? 'Thêm' : 'Add'}
                 </button>
               </div>
             </div>
