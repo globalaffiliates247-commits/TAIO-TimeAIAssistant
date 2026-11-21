@@ -22,7 +22,7 @@ export const NowActions: React.FC = () => {
   const { t } = useT();
 
   const [timersOpen, setTimersOpen] = useState(false);
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const activeCount = (freeTimers || []).filter(t => t.status === 'running').length;
 
   return (

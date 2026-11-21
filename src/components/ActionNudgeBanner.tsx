@@ -17,7 +17,7 @@ const NUDGE_ICONS: Record<ActionNudgeType, any> = {
 
 export const ActionNudgeBanner: React.FC = () => {
   const { actionNudge, acceptActionNudge, dismissActionNudge, palette } = useApp();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const touchStartYRef = React.useRef<number | null>(null);
 
   // B14 v0.3.17: Banner auto-hides after 15 seconds if the user does nothing (counts as ignored)

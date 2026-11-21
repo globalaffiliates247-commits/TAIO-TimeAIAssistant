@@ -28,7 +28,7 @@ export const ExportDataModal: React.FC = () => {
     palette,
     language
   } = useApp();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<boolean>(false);

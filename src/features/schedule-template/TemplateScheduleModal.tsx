@@ -25,7 +25,7 @@ export interface TemplateScheduleModalProps {
 
 export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ isOpen, onClose }) => {
   const { blocks, setBlocks, language, palette, dayCloseConfig, setDayCloseConfig } = useApp();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');

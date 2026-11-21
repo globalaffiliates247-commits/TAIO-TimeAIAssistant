@@ -20,7 +20,7 @@ export const HighlightSettings: React.FC = () => {
   const { color, bold, highlightStyle } = useHighlight();
   const { language, palette } = useApp();
   const isEn = language === 'en';
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const customInputRef = useRef<HTMLInputElement>(null);
 
   const handleSelectColor = (newColor: string | null) => {

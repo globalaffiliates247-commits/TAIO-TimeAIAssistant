@@ -95,7 +95,7 @@ const MainAppContent: React.FC = () => {
   React.useEffect(() => {
     setActiveTabForLogging(currentTab);
   }, [currentTab]);
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const touchStartYRef = React.useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {

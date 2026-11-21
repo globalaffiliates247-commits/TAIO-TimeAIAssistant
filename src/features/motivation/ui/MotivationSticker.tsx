@@ -55,7 +55,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   const effectiveKey = instanceKey || slotKey;
   const { language, palette } = useApp();
   const { t } = useT();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const { highlightStyle } = useHighlight();
 
   const [settings, setSettings] = useState(() => loadMotivationSettings());
@@ -190,7 +190,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             className="flex-1 cursor-pointer truncate"
             onClick={() => setIsExpanded(!isExpanded)}
           >
-            <span className="font-normal italic" style={highlightStyle}>
+            <span className="font-normal italic text-slate-800 dark:text-slate-100">
               "{currentQuote.text}"
             </span>
             {currentQuote.author && (
@@ -254,7 +254,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             className="absolute left-0 top-full mt-1 z-30 w-full max-w-md p-3 rounded-xl bg-[var(--surface-card,#FFFFFF)] text-[var(--text-primary,#0F172A)] shadow-xl border border-[var(--border-subtle,#E2E8F0)] dark:bg-neutral-800 dark:text-neutral-200 text-xs"
             onClick={e => e.stopPropagation()}
           >
-            <div className="font-normal italic leading-relaxed" style={highlightStyle}>
+            <div className="font-normal italic leading-relaxed text-slate-800 dark:text-slate-100">
               "{currentQuote.text}"
             </div>
             {currentQuote.author && (
@@ -281,11 +281,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
       >
         <div className="flex items-start justify-between gap-2">
           <div
-            className={`flex-1 cursor-pointer text-xs text-neutral-700 dark:text-neutral-300 font-normal italic leading-relaxed ${
+            className={`flex-1 cursor-pointer text-xs text-neutral-800 dark:text-neutral-100 font-normal italic leading-relaxed ${
               isExpanded ? '' : 'line-clamp-3'
             }`}
             onClick={() => setIsExpanded(!isExpanded)}
-            style={highlightStyle}
           >
             "{currentQuote.text}"
           </div>
@@ -348,7 +347,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   // Card size (e.g. GoalsTab, CloseDayModal)
   return (
     <div
-      className={`group relative p-3.5 rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-800 shadow-2xs transition-all ${className}`}
+      className={`group relative p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 shadow-2xs transition-all ${className}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5 flex-1 min-w-0">
@@ -356,11 +355,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             <Lightbulb className="w-4 h-4 text-[var(--taio-brand)] stroke-[1.75]" />
           </div>
           <div
-            className={`flex-1 cursor-pointer text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 font-normal italic leading-relaxed ${
+            className={`flex-1 cursor-pointer text-xs sm:text-sm text-slate-800 dark:text-slate-100 font-normal italic leading-relaxed ${
               isExpanded ? '' : 'line-clamp-3'
             }`}
             onClick={() => setIsExpanded(!isExpanded)}
-            style={highlightStyle}
           >
             "{currentQuote.text}"
 

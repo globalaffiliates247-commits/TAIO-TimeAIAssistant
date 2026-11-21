@@ -352,6 +352,10 @@ export type DeviceLook = 'auto' | 'macos' | 'windows' | 'phone';
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type ColorPalette = 'red' | 'gold' | 'bright-blue' | 'calm-blue' | 'warm' | 'cool' | 'neutral';
 
+export function isCoolPalette(palette?: string): boolean {
+  return palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
+}
+
 export interface PaletteColors {
   name: ColorPalette;
   brandAccent: string;

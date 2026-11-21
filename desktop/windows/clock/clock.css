@@ -172,9 +172,10 @@ body {
 }
 
 .icon-btn.active {
-  background: var(--taio-brand-soft);
-  color: var(--taio-brand);
+  background: var(--taio-brand);
+  color: var(--taio-on-brand, #ffffff);
   font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 /* Views */
@@ -458,8 +459,9 @@ html[data-theme="dark"] .icon-btn:hover {
 
 html.dark .icon-btn.active,
 html[data-theme="dark"] .icon-btn.active {
-  background: var(--taio-brand-soft);
-  color: var(--taio-brand);
+  background: var(--taio-brand);
+  color: var(--taio-on-brand, #ffffff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 html.dark .quote-modal,

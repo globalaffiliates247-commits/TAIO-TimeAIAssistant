@@ -164,7 +164,7 @@ export const AppearanceModal: React.FC = () => {
                   onClick={() => setThemeMode(t.id)}
                   className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                     themeMode === t.id
-                      ? 'border-[var(--taio-brand)] bg-red-50 text-slate-900'
+                      ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] text-slate-900'
                       : 'border-slate-200 bg-white/60 text-slate-500 hover:border-slate-300 hover:text-slate-900'
                   }`}
                 >

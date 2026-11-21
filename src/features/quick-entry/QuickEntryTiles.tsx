@@ -25,7 +25,7 @@ export const QuickEntryTiles: React.FC = () => {
     palette,
   } = useApp();
 
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const isVi = language === 'vi';
   const today = getDeviceCalendarDate();
 

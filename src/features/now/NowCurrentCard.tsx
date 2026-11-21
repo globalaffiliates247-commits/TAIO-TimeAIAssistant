@@ -69,7 +69,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
   } = useApp();
 
   const { t } = useT();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const { highlightStyle } = useHighlight();
 
   // 1-second live clock ticker for active countdown / countup (PRD v0.3.36 & v0.3.42)

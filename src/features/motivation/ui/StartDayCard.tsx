@@ -36,7 +36,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
     addDailyCardItem
   } = useApp();
   const { t } = useT();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [visible, setVisible] = useState(false);
   const [quote, setQuote] = useState<MotivationQuote | null>(null);

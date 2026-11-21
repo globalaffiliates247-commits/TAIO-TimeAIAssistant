@@ -34,14 +34,16 @@ import {
   Hourglass,
   Zap,
   Droplets,
-  Minimize2
+  Minimize2,
+  Inbox,
+  Smile
 } from 'lucide-react';
 import { isIOSCalendarConnected, setIOSCalendarConnected, requestIOSCalendarAccess } from '@/features/events/service/calendarSync';
 import { isGoalSuggestionInlineChipEnabled, setGoalSuggestionInlineChipEnabled } from '@/features/goals';
 import { startNativeLiveActivity, stopNativeLiveActivity, openNativeAppSettings } from '../features/native';
 import { isMotionTrackingEnabled, setMotionTrackingEnabled, getMotionCapability } from '@/features/motion';
 import { PROFILES } from '../data/mockData';
-import { DeviceLook, ThemeMode, ColorPalette, ToneLevel } from '../types';
+import { DeviceLook, ThemeMode, ColorPalette, ToneLevel, isCoolPalette } from '../types';
 import { DataSettingsPanel } from '../features/profile/DataSettingsPanel';
 import { AlarmSettingsSection } from '../features/alarm';
 import { MotivationSettingsSection } from '@/features/motivation';
@@ -81,7 +83,7 @@ export const ProfileModal: React.FC = () => {
     deleteGoal,
   } = useApp();
 
-  const isCool = palette === 'cool';
+  const isCool = isCoolPalette(palette);
 
   const [lockScreenClockEnabled, setLockScreenClockEnabled] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -206,6 +208,7 @@ export const ProfileModal: React.FC = () => {
     { id: 'avatar-3', label: 'Kỹ thuật', bg: 'from-sky-500 to-teal-500' },
     { id: 'avatar-4', label: 'Năng động', bg: 'from-emerald-500 to-lime-500' },
   ];
+  const activeAvatarBg = illustratedAvatars.find(a => a.id === userProfileDetail.avatarPreset)?.bg || 'from-[var(--taio-brand)] to-amber-500';
 
   return (
     <div className="fixed app-overlay-safe z-50 flex items-center justify-center bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
@@ -214,7 +217,7 @@ export const ProfileModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--taio-brand)] to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-red-500/25">
+            <div className={`w-9 h-9 rounded-full bg-gradient-to-tr ${activeAvatarBg} flex items-center justify-center text-white font-bold text-sm shadow-md shadow-[var(--taio-brand)]/20 ring-2 ring-white/80`}>
               {initials}
             </div>
             <div>
@@ -279,7 +282,7 @@ export const ProfileModal: React.FC = () => {
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-2">Ảnh đại diện (Avatar)</label>
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[var(--taio-brand)] to-amber-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-red-500/20 ring-4 ring-slate-800 shrink-0">
+                  <div className={`w-16 h-16 rounded-full bg-gradient-to-tr ${activeAvatarBg} flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[var(--taio-brand)]/20 ring-4 ring-slate-100 dark:ring-slate-700 shrink-0`}>
                     {initials}
                   </div>
                   <div className="space-y-1.5">
@@ -288,9 +291,12 @@ export const ProfileModal: React.FC = () => {
                       {illustratedAvatars.map(av => (
                         <button
                           key={av.id}
+                          type="button"
                           onClick={() => updateUserProfileDetail({ avatarPreset: av.id, avatarType: 'preset' })}
-                          className={`w-7 h-7 rounded-full bg-gradient-to-tr ${av.bg} transition-all ring-2 ${
-                            userProfileDetail.avatarPreset === av.id ? 'ring-white scale-110' : 'ring-transparent opacity-70 hover:opacity-100'
+                          className={`w-7 h-7 rounded-full bg-gradient-to-tr ${av.bg} transition-all ${
+                            userProfileDetail.avatarPreset === av.id 
+                              ? 'ring-2 ring-[var(--taio-brand)] ring-offset-2 ring-offset-white scale-110 shadow-sm' 
+                              : 'opacity-70 hover:opacity-100 hover:scale-105'
                           }`}
                           title={av.label}
                         />
@@ -404,223 +410,179 @@ export const ProfileModal: React.FC = () => {
               
               {/* Default Home Screen */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">Màn hình mở đầu mặc định</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'inbox' })}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
-                      userProfileDetail.defaultHomeScreen === 'inbox'
-                        ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900'
-                        : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-800">Rổ công việc</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Ghi nhanh và xử lý việc chờ</p>
-                  </button>
-                  <button
-                    onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'daycard' })}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
-                      userProfileDetail.defaultHomeScreen === 'daycard'
-                        ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900'
-                        : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-800">Thẻ ngày</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Danh sách việc cần làm hôm nay</p>
-                  </button>
-                  <button
-                    onClick={() => updateUserProfileDetail({ defaultHomeScreen: 'now' })}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
-                      userProfileDetail.defaultHomeScreen === 'now'
-                        ? 'bg-[var(--taio-brand)]/15 border-[var(--taio-brand)] text-slate-900'
-                        : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-800">Bây giờ</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Đồng hồ nhiệm vụ hiện tại</p>
-                  </button>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  {language === 'vi' ? 'Màn hình mở đầu mặc định' : 'Default Start Screen'}
+                </label>
+                <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-2xl flex flex-col sm:flex-row gap-1">
+                  {[
+                    { id: 'inbox', label: language === 'vi' ? 'Rổ công việc' : 'Inbox', desc: language === 'vi' ? 'Ghi nhanh & việc chờ' : 'Capture & queue', icon: Inbox },
+                    { id: 'daycard', label: language === 'vi' ? 'Thẻ ngày' : 'Daily Card', desc: language === 'vi' ? 'Danh sách việc hôm nay' : 'Today task list', icon: Calendar },
+                    { id: 'now', label: language === 'vi' ? 'Bây giờ' : 'Now Focus', desc: language === 'vi' ? 'Đồng hồ nhiệm vụ' : 'Current task clock', icon: Clock },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    const isSelected = userProfileDetail.defaultHomeScreen === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => updateUserProfileDetail({ defaultHomeScreen: item.id as any })}
+                        className={`flex-1 p-2.5 rounded-xl flex items-center gap-2.5 transition-all text-left ${
+                          isSelected
+                            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs font-bold'
+                            : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected 
+                            ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)]' 
+                            : 'bg-slate-200/70 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                        }`}>
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">{item.label}</p>
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{item.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Appearance: Device & Theme & Palette */}
-              <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-700">Giao diện thiết bị & Màu sắc</label>
-                
+              <div className="space-y-4">
                 {/* Device style */}
-                <div className="grid grid-cols-4 gap-2">
-                  {(['auto', 'macos', 'windows', 'phone'] as DeviceLook[]).map(d => (
-                    <button
-                      key={d}
-                      onClick={() => setDeviceLook(d)}
-                      className={`p-2 rounded-xl border text-center text-xs font-medium transition-all ${
-                        deviceLook === d
-                          ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900'
-                          : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-200'
-                      }`}
-                    >
-                      {d === 'auto' ? 'Tự động' : d === 'macos' ? 'macOS' : d === 'windows' ? 'Windows' : 'Điện thoại'}
-                    </button>
-                  ))}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    {language === 'vi' ? 'Giao diện thiết bị' : 'Device Interface'}
+                  </label>
+                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
+                    {[
+                      { id: 'auto', label: language === 'vi' ? 'Tự động' : 'Auto', icon: Sparkles },
+                      { id: 'macos', label: 'macOS', icon: Laptop },
+                      { id: 'windows', label: 'Windows', icon: Monitor },
+                      { id: 'phone', label: language === 'vi' ? 'Điện thoại' : 'Phone', icon: Smartphone },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = deviceLook === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setDeviceLook(item.id as DeviceLook)}
+                          className={`flex-1 py-2 px-1.5 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
+                            isSelected
+                              ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
+                              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Light / Dark Mode */}
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => setThemeMode('light')}
-                    className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'light' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
-                    }`}
-                  >
-                    <Sun className="w-3.5 h-3.5" />
-                    <span>Sáng (Light)</span>
-                  </button>
-                  <button
-                    onClick={() => setThemeMode('dark')}
-                    className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'dark' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
-                    }`}
-                  >
-                    <Moon className="w-3.5 h-3.5" />
-                    <span>Tối (Dark)</span>
-                  </button>
-                  <button
-                    onClick={() => setThemeMode('system')}
-                    className={`p-2 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
-                      themeMode === 'system' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
-                    }`}
-                  >
-                    <Monitor className="w-3.5 h-3.5" />
-                    <span>Hệ thống</span>
-                  </button>
-                </div>
-
-                {/* Palette (PRD v0.3.47 Part A1 & v0.3.49 Part B1) */}
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      {language === 'en' ? 'Warm Tones' : 'Gam nóng'}
-                    </span>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      <button
-                        type="button"
-                        onClick={() => setPalette('red')}
-                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                          (palette === 'red' || palette === 'warm')
-                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
-                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-[#E11D2E] text-white flex items-center justify-center shadow-xs">
-                          <Hourglass className="w-4 h-4 stroke-[1.75]" />
-                        </div>
-                        <span className="text-[11px] leading-tight">
-                          {language === 'en' ? 'TAIO Red' : 'Đỏ TAIO'}
-                        </span>
-                        {(palette === 'red' || palette === 'warm') && (
-                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-[var(--taio-on-brand)] flex items-center justify-center text-[9px]">
-                            ✓
-                          </span>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setPalette('gold')}
-                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                          palette === 'gold'
-                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
-                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-[#F7C531] text-[#14161A] flex items-center justify-center shadow-xs font-black">
-                          <Sparkles className="w-4 h-4 stroke-[2]" />
-                        </div>
-                        <span className="text-[11px] leading-tight">
-                          {language === 'en' ? 'TAIO Gold' : 'Vàng TAIO'}
-                        </span>
-                        {palette === 'gold' && (
-                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#14161A] text-white flex items-center justify-center text-[9px]">
-                            ✓
-                          </span>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      {language === 'en' ? 'Cool Tones' : 'Gam mát'}
-                    </span>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      <button
-                        type="button"
-                        onClick={() => setPalette('bright-blue')}
-                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                          (palette === 'bright-blue' || palette === 'cool')
-                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
-                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-[#0068FF] text-white flex items-center justify-center shadow-xs">
-                          <Zap className="w-4 h-4 stroke-[1.75]" />
-                        </div>
-                        <span className="text-[11px] leading-tight">
-                          {language === 'en' ? 'Bright Blue' : 'Xanh sáng'}
-                        </span>
-                        {(palette === 'bright-blue' || palette === 'cool') && (
-                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-[var(--taio-on-brand)] flex items-center justify-center text-[9px]">
-                            ✓
-                          </span>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setPalette('calm-blue')}
-                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                          palette === 'calm-blue'
-                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
-                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-[#1C78C0] text-white flex items-center justify-center shadow-xs">
-                          <Droplets className="w-4 h-4 stroke-[1.75]" />
-                        </div>
-                        <span className="text-[11px] leading-tight">
-                          {language === 'en' ? 'Calm Blue' : 'Xanh dịu'}
-                        </span>
-                        {palette === 'calm-blue' && (
-                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-[var(--taio-on-brand)] flex items-center justify-center text-[9px]">
-                            ✓
-                          </span>
-                        )}
-                      </button>
-                    </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    {language === 'vi' ? 'Chế độ hiển thị' : 'Display Mode'}
+                  </label>
+                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
+                    {[
+                      { id: 'light', label: language === 'vi' ? 'Sáng (Light)' : 'Light', icon: Sun },
+                      { id: 'dark', label: language === 'vi' ? 'Tối (Dark)' : 'Dark', icon: Moon },
+                      { id: 'system', label: language === 'vi' ? 'Hệ thống' : 'System', icon: Monitor },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = themeMode === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setThemeMode(item.id as ThemeMode)}
+                          className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
+                            isSelected
+                              ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
+                              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{item.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Language Switcher (Part C1.5) */}
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setLanguage('vi')}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
-                      language === 'vi' ? 'bg-amber-50 border-amber-500 text-slate-900 font-bold' : 'bg-slate-50/60 border-slate-200 text-slate-500'
-                    }`}
-                  >
-                    <span>Tiếng Việt</span>
-                    <span className="text-xs">🇻🇳</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLanguage('en')}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
-                      language === 'en' ? 'bg-amber-50 border-amber-500 text-slate-900 font-bold' : 'bg-slate-50/60 border-slate-200 text-slate-500'
-                    }`}
-                  >
-                    <span>English</span>
-                    <span className="text-xs">🇬🇧</span>
-                  </button>
+                {/* Palette */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    {language === 'vi' ? 'Tông màu chủ đạo' : 'Color Palette'}
+                  </label>
+                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-1">
+                    {[
+                      { id: 'red', label: language === 'en' ? 'TAIO Red' : 'Đỏ TAIO', color: '#E11D2E', textColor: '#ffffff', icon: Hourglass },
+                      { id: 'gold', label: language === 'en' ? 'TAIO Gold' : 'Vàng TAIO', color: '#F7C531', textColor: '#14161A', icon: Sparkles },
+                      { id: 'bright-blue', label: language === 'en' ? 'Bright Blue' : 'Xanh sáng', color: '#0068FF', textColor: '#ffffff', icon: Zap },
+                      { id: 'calm-blue', label: language === 'en' ? 'Calm Blue' : 'Xanh dịu', color: '#1C78C0', textColor: '#ffffff', icon: Droplets },
+                    ].map((p) => {
+                      const Icon = p.icon;
+                      const isSelected = palette === p.id || (p.id === 'red' && palette === 'warm') || (p.id === 'bright-blue' && palette === 'cool');
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setPalette(p.id as ColorPalette)}
+                          className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
+                            isSelected
+                              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs font-bold'
+                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-white/40 font-medium'
+                          }`}
+                        >
+                          <div 
+                            className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 shadow-2xs"
+                            style={{ backgroundColor: p.color, color: p.textColor }}
+                          >
+                            <Icon className="w-3 h-3 stroke-[2.2]" />
+                          </div>
+                          <span className="truncate">{p.label}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[var(--taio-brand)] shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Language Switcher */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    {language === 'vi' ? 'Ngôn ngữ hiển thị' : 'Language'}
+                  </label>
+                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
+                    {[
+                      { id: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+                      { id: 'en', label: 'English', flag: '🇬🇧' },
+                    ].map((l) => {
+                      const isSelected = language === l.id;
+                      return (
+                        <button
+                          key={l.id}
+                          type="button"
+                          onClick={() => setLanguage(l.id as any)}
+                          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 text-xs transition-all ${
+                            isSelected
+                              ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
+                              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                          }`}
+                        >
+                          <span className="text-sm">{l.flag}</span>
+                          <span>{l.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* PRD v0.3.35 Part C: Highlight Settings & Preview */}
@@ -629,25 +591,33 @@ export const ProfileModal: React.FC = () => {
 
               {/* Tone of Voice */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">Tông giọng nhắc nhở (Adaptive Tone)</label>
-                <div className="grid grid-cols-3 gap-2">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  {language === 'vi' ? 'Tông giọng nhắc nhở (Adaptive Tone)' : 'Adaptive Reminder Tone'}
+                </label>
+                <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
                   {[
-                    { lvl: 1, label: 'Dịu dàng (Gentle)' },
-                    { lvl: 2, label: 'Rõ ràng (Clear)' },
-                    { lvl: 3, label: 'Quyết liệt (Firm)' },
-                  ].map(t => (
-                    <button
-                      key={t.lvl}
-                      onClick={() => setToneLevel(t.lvl as ToneLevel)}
-                      className={`p-2 rounded-xl border text-center text-xs font-medium transition-all ${
-                        toneLevel === t.lvl
-                          ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900'
-                          : 'bg-slate-50/60 border-slate-200 text-slate-500'
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
+                    { lvl: 1, label: language === 'vi' ? 'Dịu dàng (Gentle)' : 'Gentle', icon: Smile },
+                    { lvl: 2, label: language === 'vi' ? 'Rõ ràng (Clear)' : 'Clear', icon: Bell },
+                    { lvl: 3, label: language === 'vi' ? 'Quyết liệt (Firm)' : 'Firm', icon: Zap },
+                  ].map((t) => {
+                    const Icon = t.icon;
+                    const isSelected = toneLevel === t.lvl;
+                    return (
+                      <button
+                        key={t.lvl}
+                        type="button"
+                        onClick={() => setToneLevel(t.lvl as ToneLevel)}
+                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
+                          isSelected
+                            ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
+                            : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{t.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -873,7 +843,7 @@ export const ProfileModal: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">{communityConfig.advisor.name}</h4>
-                      <p className="text-xs font-medium text-[#ff7556]">{communityConfig.advisor.title}</p>
+                      <p className="text-xs font-semibold text-[var(--taio-brand)]">{communityConfig.advisor.title}</p>
                       <p className="text-xs text-slate-700 mt-1 leading-relaxed">
                         {communityConfig.advisor.description}
                       </p>
@@ -885,11 +855,7 @@ export const ProfileModal: React.FC = () => {
                       href={communityConfig.advisor.zaloUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex-1 py-2 px-3 rounded-xl ${
-                        isCool
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
-                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-[var(--taio-brand)]/20 taio-btn-primary'
-                      } text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
+                      className="flex-1 py-2 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-sm font-bold text-xs flex items-center justify-center gap-1.5 transition-all taio-btn-primary"
                     >
                       <span>Nhắn qua Zalo</span>
                       <ExternalLink className="w-3 h-3 opacity-80" />
@@ -898,11 +864,7 @@ export const ProfileModal: React.FC = () => {
                       href={communityConfig.advisor.telegramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex-1 py-2 px-3 rounded-xl ${
-                        isCool
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
-                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-[var(--taio-brand)]/20 taio-btn-primary'
-                      } text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
+                      className="flex-1 py-2 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-sm font-bold text-xs flex items-center justify-center gap-1.5 transition-all taio-btn-primary"
                     >
                       <span>Nhắn qua Telegram</span>
                       <ExternalLink className="w-3 h-3 opacity-80" />
@@ -938,7 +900,7 @@ export const ProfileModal: React.FC = () => {
                         href={grp.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#ff7556] hover:text-slate-900 text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors"
+                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[var(--taio-brand)] hover:text-slate-900 text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors"
                       >
                         <span>Tham gia</span>
                         <ExternalLink className="w-3 h-3" />
@@ -960,7 +922,7 @@ export const ProfileModal: React.FC = () => {
                       className="p-3 rounded-xl border bg-slate-50/40 border-slate-200/80 flex items-center justify-between gap-3 hover:border-slate-200 transition-all"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[#ff7556] shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[var(--taio-brand)] shrink-0">
                           <Wand2 className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">

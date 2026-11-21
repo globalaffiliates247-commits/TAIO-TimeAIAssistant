@@ -62,7 +62,7 @@ export const PlanTab: React.FC = () => {
   } = useApp();
   const { t } = useT();
   const { nowMinutes, todayLabel } = useDeviceClock();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [activeView, setActiveView] = useState<'card' | 'timeline' | 'matrix'>('card');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);

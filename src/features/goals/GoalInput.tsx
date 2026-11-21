@@ -12,7 +12,7 @@ import { Target, Lightbulb, Calendar, Hash, Clock } from 'lucide-react';
 export const GoalInput: React.FC = () => {
   const { addGoalWithBackplanning, showToast, language, palette } = useApp();
   const { t } = useT();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const [text, setText] = useState('');
 
   const parsed: ParsedGoal | null = useMemo(() => {

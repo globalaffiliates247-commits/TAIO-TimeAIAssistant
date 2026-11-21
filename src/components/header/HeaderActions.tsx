@@ -32,7 +32,7 @@ export const HeaderActions: React.FC = () => {
 
   const [bellOpen, setBellOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const toggleBell = () => {
     const next = !bellOpen;

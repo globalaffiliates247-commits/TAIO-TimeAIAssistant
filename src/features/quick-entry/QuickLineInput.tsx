@@ -18,7 +18,7 @@ export const QuickLineInput: React.FC = () => {
   } = useApp();
 
   const [inputVal, setInputVal] = useState('');
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const isVi = language === 'vi';
   const today = getDeviceCalendarDate();
   const nowMins = getDeviceTimeMinutes();

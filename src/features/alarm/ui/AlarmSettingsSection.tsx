@@ -23,7 +23,7 @@ export const AlarmSettingsSection: React.FC<AlarmSettingsSectionProps> = ({
   onSettingsChange,
 }) => {
   const { palette } = useApp();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [isPlayingTest, setIsPlayingTest] = useState(false);
   const [testWarning, setTestWarning] = useState<string | null>(null);

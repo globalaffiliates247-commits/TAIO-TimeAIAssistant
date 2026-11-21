@@ -24,7 +24,7 @@ import { Lightbulb, Quote, Check, Heart, Pin, Trash2 } from 'lucide-react';
 export const MotivationSettingsSection: React.FC = () => {
   const { palette, showToast, language } = useApp();
   const { t } = useT();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const isEn = language === 'en';
 
   const [settings, setSettings] = useState<MotivationSettings>(() => loadMotivationSettings());

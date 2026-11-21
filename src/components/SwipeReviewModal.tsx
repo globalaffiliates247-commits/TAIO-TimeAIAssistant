@@ -66,7 +66,7 @@ export const SwipeReviewModal: React.FC = () => {
   } = useApp();
   const { t } = useT();
 
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sessionCards, setSessionCards] = useState<SwipeDeckCard[]>([]);
   const [sessionHistory, setSessionHistory] = useState<Array<{ card: SwipeDeckCard; action: 'plan' | 'later' | 'done_now' | 'drop' }>>([]);

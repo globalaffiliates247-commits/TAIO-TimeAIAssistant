@@ -45,7 +45,7 @@ export const LiveClockStrip: React.FC<{ compact?: boolean; showQuote?: boolean }
   const { scheduleBlocks, dayTemplate, goals, language, palette, isNativePlatform, showToast, freeTimers } = useApp();
   const [nowSec, setNowSec] = useState(() => Date.now());
 
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const isVi = language === 'vi';
   const { highlightStyle } = useHighlight();
 

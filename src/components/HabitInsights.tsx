@@ -35,7 +35,7 @@ export const HabitInsights: React.FC = () => {
     palette
   } = useApp();
 
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [activeMetric, setActiveMetric] = useState<'completion' | 'deep' | 'interruptions' | 'bedtime'>('completion');
 

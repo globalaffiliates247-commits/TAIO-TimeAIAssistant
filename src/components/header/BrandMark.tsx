@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 
 export const BrandMark: React.FC = () => {
   const { setCurrentTab, palette } = useApp();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   return (
     <div 

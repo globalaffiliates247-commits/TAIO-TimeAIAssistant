@@ -103,8 +103,9 @@ header {
 }
 
 .icon-btn.active {
-  color: var(--brand);
-  background: rgba(225, 29, 46, 0.1);
+  color: var(--on-brand, #ffffff);
+  background: var(--brand);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 /* Quote content */

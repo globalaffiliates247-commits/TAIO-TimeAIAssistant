@@ -45,7 +45,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
   }, []);
 
   const isDark = themeMode === 'dark' || (themeMode === 'system' && (typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false));
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   // Local state for snooze minutes & sound index
   const [snoozeMins, setSnoozeMins] = useState<number>(() => alarmSettings.snoozeDurationMins || 5);

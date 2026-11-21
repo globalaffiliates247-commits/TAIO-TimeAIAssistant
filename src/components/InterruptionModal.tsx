@@ -54,7 +54,7 @@ export const InterruptionModal: React.FC = () => {
     currentPaletteColors 
   } = useApp();
 
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const brandColor = currentPaletteColors.brandAccent;
 
   // : Situation 1 (Declared in moment) vs Situation 2 (Recalled on review)

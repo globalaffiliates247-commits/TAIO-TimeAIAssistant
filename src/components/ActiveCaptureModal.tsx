@@ -41,7 +41,7 @@ export const ActiveCaptureModal: React.FC = () => {
     isNativePlatform
   } = useApp();
 
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [activeTab, setActiveTab] = useState<'backfill' | 'suggestions' | 'places'>('backfill');
   const [editingTitles, setEditingTitles] = useState<Record<string, string>>({});

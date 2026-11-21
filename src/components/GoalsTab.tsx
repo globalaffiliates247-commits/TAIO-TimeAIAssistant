@@ -41,7 +41,7 @@ export const GoalsTab: React.FC = () => {
   } = useApp();
   const { t } = useT();
 
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const progressTypeOptions: { id: GoalProgressType; label: string; desc: string }[] = [
     {

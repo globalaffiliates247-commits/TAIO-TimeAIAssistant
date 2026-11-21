@@ -25,7 +25,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   initialDate,
 }) => {
   const { language, addScheduledEvent, showToast, palette } = useApp();
-  const isCool = palette === 'cool';
+  const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(initialDate || getDeviceCalendarDate());
