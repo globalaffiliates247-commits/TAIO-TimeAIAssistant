@@ -1792,7 +1792,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   {dragOverTarget?.type === 'gap' && dragOverTarget.time === gap.start ? (
                     <div className="flex items-center gap-2 w-full text-[var(--taio-brand)] font-semibold text-xs">
                       <div className="h-0.5 flex-1 bg-[var(--taio-brand)] rounded-full" />
-                      <span className="px-2 py-0.5 bg-[var(--taio-brand)] text-white font-mono rounded font-bold shadow-2xs">
+                      <span className="px-2 py-0.5 bg-[var(--taio-brand)] text-[var(--taio-on-brand)] font-mono rounded font-bold shadow-2xs">
                         {gap.start}
                       </span>
                       <span className="text-[11px]">{language === 'vi' ? 'Thả vào khoảng trống' : 'Drop into gap'}</span>
@@ -2157,7 +2157,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   <button
                     type="button"
                     onClick={() => handleStartItemNow(startConflictModal.item, { mode: 'replace' })}
-                    className="w-full py-2.5 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs taio-btn-primary"
                   >
                     <span>{language === 'vi' ? 'Thay việc đang làm (Tạm dừng việc cũ)' : 'Replace (Pause previous)'}</span>
                   </button>

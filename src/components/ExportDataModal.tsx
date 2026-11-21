@@ -156,9 +156,9 @@ export const ExportDataModal: React.FC = () => {
               />
               <button
                 onClick={handleCopyLink}
-                className="py-2 px-3 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+                className="py-2 px-3 rounded-xl text-[var(--taio-on-brand)] font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] taio-btn-primary"
               >
-                {copiedLink ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5 text-white" />}
+                {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>
                   {copiedLink 
                     ? (language === 'en' ? 'Copied' : 'Đã sao chép') 

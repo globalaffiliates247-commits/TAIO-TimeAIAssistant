@@ -479,7 +479,7 @@ export const SwipeReviewModal: React.FC = () => {
                           }}
                           className={`py-1.5 px-2 rounded-lg border font-medium ${
                             planDuration === opt.val 
-                              ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-white border-[var(--taio-brand)]')
+                              ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] border-[var(--taio-brand)] taio-btn-primary')
                               : 'bg-white text-slate-700 border-slate-200'
                           }`}
                         >
@@ -513,7 +513,7 @@ export const SwipeReviewModal: React.FC = () => {
                                 onClick={openNativeDatePicker}
                                 className={`w-full py-1.5 px-2 rounded-lg border font-medium flex items-center justify-center gap-1 truncate ${
                                   isSelected
-                                    ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-white border-[var(--taio-brand)]')
+                                    ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] border-[var(--taio-brand)] taio-btn-primary')
                                     : 'bg-white text-slate-700 border-slate-200'
                                 }`}
                               >
@@ -543,7 +543,7 @@ export const SwipeReviewModal: React.FC = () => {
                             onClick={() => setPlanDeadlineMode(chip)}
                             className={`py-1.5 px-2 rounded-lg border font-medium truncate ${
                               isSelected
-                                ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-white border-[var(--taio-brand)]')
+                                ? (isCool ? 'bg-blue-600 text-white border-blue-600' : 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] border-[var(--taio-brand)] taio-btn-primary')
                                 : 'bg-white text-slate-700 border-slate-200'
                             }`}
                             title={label}

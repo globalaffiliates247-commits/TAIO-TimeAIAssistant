@@ -12,8 +12,22 @@ html[data-palette="red"] {
   --taio-brand-hover: #C4182A;
   --taio-brand-soft: #FDE8EA;
   --taio-brand-accent: #E11D2E;
+  --taio-on-brand: #FFFFFF;
   --bg-main: #ffffff;
   --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-main: #e2e8f0;
+}
+
+html[data-palette="gold"] {
+  --taio-brand: #F7C531;
+  --taio-brand-hover: #E5B21E;
+  --taio-brand-soft: #FEF6DC;
+  --taio-brand-accent: #F7C531;
+  --taio-on-brand: #14161A;
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
   --border-main: #e2e8f0;
 }
 
@@ -22,8 +36,10 @@ html[data-palette="bright-blue"] {
   --taio-brand-hover: #0055D4;
   --taio-brand-soft: #E6F0FF;
   --taio-brand-accent: #0068FF;
+  --taio-on-brand: #FFFFFF;
   --bg-main: #ffffff;
   --text-main: #0f172a;
+  --text-muted: #64748b;
   --border-main: #e2e8f0;
 }
 
@@ -32,8 +48,22 @@ html[data-palette="calm-blue"] {
   --taio-brand-hover: #17669F;
   --taio-brand-soft: #E8F4FC;
   --taio-brand-accent: #2AABEE;
+  --taio-on-brand: #FFFFFF;
   --bg-main: #ffffff;
   --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-main: #e2e8f0;
+}
+
+html[data-palette="neutral"] {
+  --taio-brand: #334155;
+  --taio-brand-hover: #1E293B;
+  --taio-brand-soft: #F1F5F9;
+  --taio-brand-accent: #334155;
+  --taio-on-brand: #FFFFFF;
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
   --border-main: #e2e8f0;
 }
 
@@ -42,6 +72,7 @@ html.dark,
 html[data-theme="dark"] {
   --bg-main: #0f172a;
   --text-main: #f8fafc;
+  --text-muted: #94a3b8;
   --border-main: #334155;
 }
 html.dark[data-palette="red"],
@@ -49,18 +80,35 @@ html[data-theme="dark"][data-palette="red"] {
   --taio-brand: #EF3042;
   --taio-brand-hover: #E11D2E;
   --taio-brand-soft: rgba(225, 29, 46, 0.22);
+  --taio-on-brand: #FFFFFF;
+}
+html.dark[data-palette="gold"],
+html[data-theme="dark"][data-palette="gold"] {
+  --taio-brand: #F7C531;
+  --taio-brand-hover: #E5B21E;
+  --taio-brand-soft: rgba(247, 197, 49, 0.18);
+  --taio-on-brand: #14161A;
 }
 html.dark[data-palette="bright-blue"],
 html[data-theme="dark"][data-palette="bright-blue"] {
   --taio-brand: #2B7FFF;
   --taio-brand-hover: #0068FF;
   --taio-brand-soft: rgba(0, 104, 255, 0.22);
+  --taio-on-brand: #FFFFFF;
 }
 html.dark[data-palette="calm-blue"],
 html[data-theme="dark"][data-palette="calm-blue"] {
   --taio-brand: #2AABEE;
   --taio-brand-hover: #1C78C0;
   --taio-brand-soft: rgba(28, 120, 192, 0.22);
+  --taio-on-brand: #FFFFFF;
+}
+html.dark[data-palette="neutral"],
+html[data-theme="dark"][data-palette="neutral"] {
+  --taio-brand: #64748B;
+  --taio-brand-hover: #475569;
+  --taio-brand-soft: rgba(100, 116, 139, 0.22);
+  --taio-on-brand: #FFFFFF;
 }
 
 body {
@@ -153,7 +201,7 @@ body {
 .task-title {
   font-size: 12px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-main);
   text-align: center;
   line-height: 1.25;
   white-space: nowrap;
@@ -172,7 +220,7 @@ body {
 .subtitle-line {
   font-size: 10px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -192,7 +240,7 @@ body {
   font-size: clamp(22px, 6vw, 32px);
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #0f172a;
+  color: var(--text-main);
 }
 
 .progress-track {
@@ -327,7 +375,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', monospace;
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-main);
   letter-spacing: -0.5px;
   line-height: 1.15;
 }
@@ -335,7 +383,7 @@ body {
 .ring-sub {
   font-size: 8.5px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 2px;
   line-height: 1.1;
   max-width: 85%;
@@ -358,7 +406,7 @@ body {
   flex: 1;
   height: 24px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-main);
   background: #f8fafc;
   font-size: 11px;
   font-weight: 600;
@@ -376,14 +424,83 @@ body {
   border-color: #cbd5e1;
 }
 
+html.dark .btn,
+html[data-theme="dark"] .btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+html.dark .btn:hover,
+html[data-theme="dark"] .btn:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
 .btn.primary {
   background: var(--taio-brand);
-  color: #ffffff;
+  color: var(--taio-on-brand, #ffffff);
   border: none;
 }
 
 .btn.primary:hover {
   background: var(--taio-brand-hover);
+}
+
+html.dark .free-timer-item,
+html[data-theme="dark"] .free-timer-item {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+html.dark .icon-btn,
+html[data-theme="dark"] .icon-btn {
+  color: #94a3b8;
+}
+
+html.dark .icon-btn:hover,
+html[data-theme="dark"] .icon-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+html.dark .icon-btn.active,
+html[data-theme="dark"] .icon-btn.active {
+  background: var(--taio-brand-soft);
+  color: var(--taio-brand);
+}
+
+html.dark .quote-modal,
+html[data-theme="dark"] .quote-modal {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark .quote-content,
+html[data-theme="dark"] .quote-content {
+  color: #f8fafc;
+}
+
+html.dark .quote-author,
+html[data-theme="dark"] .quote-author {
+  color: #94a3b8;
+}
+
+html.dark .quote-actions,
+html[data-theme="dark"] .quote-actions {
+  border-top-color: #334155;
+}
+
+html.dark .quote-action-btn,
+html[data-theme="dark"] .quote-action-btn {
+  color: #94a3b8;
+}
+
+html.dark .quote-action-btn:hover,
+html[data-theme="dark"] .quote-action-btn:hover {
+  background: #334155;
+  color: #f8fafc;
 }
 
 /* Motivation Line at Bottom (PRD Part I4) */

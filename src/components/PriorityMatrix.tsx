@@ -431,7 +431,7 @@ export const PriorityMatrix: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <button
                   type="submit"
-                  className="px-3.5 py-2 rounded-xl bg-[var(--taio-brand)] text-white text-xs font-bold"
+                  className="px-3.5 py-2 rounded-xl bg-[var(--taio-brand)] text-[var(--taio-on-brand)] text-xs font-bold taio-btn-primary"
                 >
                   Lưu việc
                 </button>

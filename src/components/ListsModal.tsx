@@ -309,7 +309,7 @@ export const ListsModal: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2 text-xs font-semibold text-white bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] rounded-xl shadow-md transition-all"
+                      className="px-5 py-2 text-xs font-semibold text-[var(--taio-on-brand)] bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] rounded-xl shadow-md transition-all taio-btn-primary"
                     >
                       Tạo danh sách
                     </button>
@@ -372,7 +372,7 @@ export const ListsModal: React.FC = () => {
                     <button
                       type="submit"
                       disabled={!quickInput.trim()}
-                      className="absolute right-2 px-3 py-1.5 rounded-lg bg-[var(--taio-brand)] text-white text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--taio-brand-hover)] transition-all"
+                      className="absolute right-2 px-3 py-1.5 rounded-lg bg-[var(--taio-brand)] text-[var(--taio-on-brand)] text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--taio-brand-hover)] transition-all taio-btn-primary"
                     >
                       Lưu
                     </button>

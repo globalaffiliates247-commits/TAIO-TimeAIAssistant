@@ -252,7 +252,7 @@ export const CloseDayModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleQuickClose}
-                className="w-full py-3 px-4 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]"
+                className="w-full py-3 px-4 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99] taio-btn-primary"
               >
                 <span>
                   {isPastDay

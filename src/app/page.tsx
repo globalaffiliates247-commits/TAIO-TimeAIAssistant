@@ -149,7 +149,7 @@ const MainAppContent: React.FC = () => {
                     toastUndoAction();
                     dismissToast();
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-[var(--taio-brand)] text-white font-bold text-[11px] shrink-0"
+                  className="px-2.5 py-1 rounded-lg bg-[var(--taio-brand)] text-[var(--taio-on-brand)] font-bold text-[11px] shrink-0 taio-btn-primary"
                 >
                   {toastActionLabel || 'Hoàn tác'}
                 </button>
@@ -205,7 +205,7 @@ const MainAppContent: React.FC = () => {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => resolveServerBackupChoice('restore')}
-                className="px-3 py-1.5 rounded-xl bg-[var(--taio-brand)] text-white font-bold text-xs shadow-xs"
+                className="px-3 py-1.5 rounded-xl bg-[var(--taio-brand)] text-[var(--taio-on-brand)] font-bold text-xs shadow-xs taio-btn-primary"
               >
                 Khôi phục dữ liệu cũ
               </button>

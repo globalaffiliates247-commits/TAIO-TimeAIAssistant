@@ -284,7 +284,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'postpone'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -298,7 +298,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'do_now'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -312,7 +312,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'parallel'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -326,7 +326,7 @@ export const InterruptionModal: React.FC = () => {
                     decision === 'delegate'
                       ? isCool
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-[var(--taio-brand)] text-white shadow-sm'
+                        : 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >

@@ -202,7 +202,7 @@ export const AppearanceModal: React.FC = () => {
                         {p.icon}
                       </div>
                       {isSelected && (
-                        <span className="w-4 h-4 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[10px] font-bold">
+                        <span className="w-4 h-4 rounded-full bg-[var(--taio-brand)] text-[var(--taio-on-brand)] flex items-center justify-center text-[10px] font-bold">
                           ✓
                         </span>
                       )}
@@ -287,7 +287,7 @@ export const AppearanceModal: React.FC = () => {
         <div className="px-5 py-3 border-t border-slate-200 bg-white/50 flex justify-end">
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className="px-5 py-2 rounded-xl text-white text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+            className="px-5 py-2 rounded-xl text-[var(--taio-on-brand)] text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] taio-btn-primary"
           >
             {language === 'en' ? 'Apply and Close' : 'Áp dụng và Đóng'}
           </button>

@@ -66,7 +66,7 @@ export const QuickLineInput: React.FC = () => {
               inputVal.trim()
                 ? isCool
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
-                  : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white shadow-xs'
+                  : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-xs taio-btn-primary'
                 : 'text-slate-300 cursor-not-allowed'
             }`}
           >

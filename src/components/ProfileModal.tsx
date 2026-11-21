@@ -517,7 +517,7 @@ export const ProfileModal: React.FC = () => {
                           {language === 'en' ? 'TAIO Red' : 'Đỏ TAIO'}
                         </span>
                         {(palette === 'red' || palette === 'warm') && (
-                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-[var(--taio-on-brand)] flex items-center justify-center text-[9px]">
                             ✓
                           </span>
                         )}
@@ -568,7 +568,7 @@ export const ProfileModal: React.FC = () => {
                           {language === 'en' ? 'Bright Blue' : 'Xanh sáng'}
                         </span>
                         {(palette === 'bright-blue' || palette === 'cool') && (
-                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-[var(--taio-on-brand)] flex items-center justify-center text-[9px]">
                             ✓
                           </span>
                         )}
@@ -590,7 +590,7 @@ export const ProfileModal: React.FC = () => {
                           {language === 'en' ? 'Calm Blue' : 'Xanh dịu'}
                         </span>
                         {palette === 'calm-blue' && (
-                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-[var(--taio-on-brand)] flex items-center justify-center text-[9px]">
                             ✓
                           </span>
                         )}
@@ -868,8 +868,8 @@ export const ProfileModal: React.FC = () => {
               {communityConfig.advisor.visible && (
                 <div className="p-4 rounded-2xl bg-gradient-to-tr from-[var(--taio-brand)]/15 via-white to-white border border-[var(--taio-brand)]/30 space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--taio-brand)] flex items-center justify-center text-white font-bold shrink-0 shadow-md">
-                      <Sparkles className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-xl bg-[var(--taio-brand)] flex items-center justify-center text-[var(--taio-on-brand)] font-bold shrink-0 shadow-md taio-btn-primary">
+                      <Sparkles className="w-5 h-5 text-[var(--taio-on-brand)]" />
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">{communityConfig.advisor.name}</h4>
@@ -887,12 +887,12 @@ export const ProfileModal: React.FC = () => {
                       rel="noopener noreferrer"
                       className={`flex-1 py-2 px-3 rounded-xl ${
                         isCool
-                          ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
-                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-[var(--taio-brand)]/20'
-                      } text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-[var(--taio-brand)]/20 taio-btn-primary'
+                      } text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
                     >
                       <span>Nhắn qua Zalo</span>
-                      <ExternalLink className="w-3 h-3 text-white/80" />
+                      <ExternalLink className="w-3 h-3 opacity-80" />
                     </a>
                     <a
                       href={communityConfig.advisor.telegramUrl}
@@ -900,12 +900,12 @@ export const ProfileModal: React.FC = () => {
                       rel="noopener noreferrer"
                       className={`flex-1 py-2 px-3 rounded-xl ${
                         isCool
-                          ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
-                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-[var(--taio-brand)]/20'
-                      } text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                          : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-[var(--taio-brand)]/20 taio-btn-primary'
+                      } text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm`}
                     >
                       <span>Nhắn qua Telegram</span>
-                      <ExternalLink className="w-3 h-3 text-white/80" />
+                      <ExternalLink className="w-3 h-3 opacity-80" />
                     </a>
                   </div>
                 </div>
@@ -1010,7 +1010,7 @@ export const ProfileModal: React.FC = () => {
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0 ${
                       iosCalConnected
                         ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
-                        : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white'
+                        : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                     }`}
                   >
                     {iosCalConnected 

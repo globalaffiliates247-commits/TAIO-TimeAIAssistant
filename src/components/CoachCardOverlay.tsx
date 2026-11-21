@@ -61,7 +61,7 @@ export const CoachCardOverlay: React.FC = () => {
           </button>
           <button
             onClick={handleLearnMore}
-            className="px-3 py-1 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold flex items-center gap-1 shadow-sm"
+            className="px-3 py-1 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] text-xs font-bold flex items-center gap-1 shadow-sm taio-btn-primary"
           >
             <BookOpen className="w-3 h-3" />
             <span>Tìm hiểu thêm</span>

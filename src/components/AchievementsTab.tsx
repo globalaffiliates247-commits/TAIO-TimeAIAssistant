@@ -205,7 +205,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('time')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'time' 
-                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -216,7 +216,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('tasks')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'tasks' 
-                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -227,7 +227,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('projects')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'projects' 
-                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -238,7 +238,7 @@ export const AchievementsTab: React.FC = () => {
               onClick={() => setViewMode('habits')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'habits' 
-                  ? 'bg-[var(--taio-brand)] text-white shadow-sm' 
+                  ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -250,9 +250,9 @@ export const AchievementsTab: React.FC = () => {
           {!isDayClosed(getDeviceCalendarDate()) ? (
             <button
               onClick={() => setCloseDayModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-xs shadow-sm transition-all taio-btn-primary"
             >
-              <Moon className="w-4 h-4 text-white" />
+              <Moon className="w-4 h-4 text-[var(--taio-on-brand)]" />
               <span>{language === 'vi' ? 'Khép lại hôm nay' : 'Wrap Up Today'}</span>
             </button>
           ) : (
@@ -882,7 +882,7 @@ export const AchievementsTab: React.FC = () => {
             <button
               type="button"
               onClick={() => setCurrentTab('goals')}
-              className="px-4 py-2.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-xs transition-colors shrink-0 flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-xs shadow-xs transition-colors shrink-0 flex items-center gap-2 taio-btn-primary"
             >
               <span>{t('overview.viewOverview', 'Xem Toàn cảnh')}</span>
               <ArrowRight className="w-3.5 h-3.5" />

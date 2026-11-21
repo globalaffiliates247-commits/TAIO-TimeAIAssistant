@@ -445,7 +445,9 @@
         document.documentElement.setAttribute('data-palette', data.palette);
       }
       if (data.theme) {
-        document.documentElement.classList.toggle('dark', data.theme === 'dark');
+        const isDark = data.theme === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
       }
 
       endsAt = typeof data.endsAt === 'number' ? data.endsAt : 0;

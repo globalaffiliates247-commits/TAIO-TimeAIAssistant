@@ -115,9 +115,9 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="px-3.5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="px-3.5 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer taio-btn-primary"
         >
-          <Upload className="w-3.5 h-3.5 text-white" />
+          <Upload className="w-3.5 h-3.5" />
           <span>Chọn file JSON…</span>
         </button>
 
@@ -222,14 +222,14 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
                     }}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       importMode === 'merge'
-                        ? 'bg-[var(--taio-brand)] border-[var(--taio-brand)] text-white'
+                        ? 'bg-[var(--taio-brand)] border-[var(--taio-brand)] text-[var(--taio-on-brand)] taio-btn-primary'
                         : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <p className={`text-xs font-bold ${importMode === 'merge' ? 'text-white' : 'text-slate-900'}`}>
+                    <p className={`text-xs font-bold ${importMode === 'merge' ? 'text-[var(--taio-on-brand)]' : 'text-slate-900'}`}>
                       Gộp (Mặc định)
                     </p>
-                    <p className={`text-[11px] mt-0.5 leading-snug ${importMode === 'merge' ? 'text-white/90' : 'text-slate-500'}`}>
+                    <p className={`text-[11px] mt-0.5 leading-snug ${importMode === 'merge' ? 'opacity-90' : 'text-slate-500'}`}>
                       Giữ dữ liệu hiện có, thêm mục mới và chỉ cập nhật mục trùng mã khi file mới hơn.
                     </p>
                   </button>
@@ -239,14 +239,14 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
                     onClick={() => setImportMode('replace')}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       importMode === 'replace'
-                        ? 'bg-[var(--taio-brand)] border-[var(--taio-brand)] text-white'
+                        ? 'bg-[var(--taio-brand)] border-[var(--taio-brand)] text-[var(--taio-on-brand)] taio-btn-primary'
                         : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <p className={`text-xs font-bold ${importMode === 'replace' ? 'text-white' : 'text-slate-900'}`}>
+                    <p className={`text-xs font-bold ${importMode === 'replace' ? 'text-[var(--taio-on-brand)]' : 'text-slate-900'}`}>
                       Thay thế toàn bộ
                     </p>
-                    <p className={`text-[11px] mt-0.5 leading-snug ${importMode === 'replace' ? 'text-white/90' : 'text-slate-500'}`}>
+                    <p className={`text-[11px] mt-0.5 leading-snug ${importMode === 'replace' ? 'opacity-90' : 'text-slate-500'}`}>
                       Xóa dữ liệu cũ trên máy và thay hoàn toàn bằng dữ liệu trong file.
                     </p>
                   </button>
@@ -278,7 +278,7 @@ export const DataImportSection: React.FC<DataImportSectionProps> = ({
                   onClick={handleExecuteImport}
                   className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                     canConfirmImport
-                      ? 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white cursor-pointer'
+                      ? 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] cursor-pointer taio-btn-primary'
                       : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                   }`}
                 >

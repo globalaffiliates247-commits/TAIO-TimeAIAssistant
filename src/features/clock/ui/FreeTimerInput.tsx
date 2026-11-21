@@ -168,7 +168,7 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                       isLimitReached
                         ? 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'
-                        : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white shadow-xs hover:scale-105 active:scale-95 cursor-pointer'
+                        : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-xs hover:scale-105 active:scale-95 cursor-pointer taio-btn-primary'
                     }`}
                     title={isLimitReached ? (language === 'en' ? 'Max 3 active timers reached' : 'Đã đủ 3 đồng hồ đang chạy') : (language === 'en' ? 'Run now' : 'Chạy ngay')}
                   >

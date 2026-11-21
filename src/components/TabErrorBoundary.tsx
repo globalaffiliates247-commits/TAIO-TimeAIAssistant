@@ -165,7 +165,7 @@ export class TabErrorBoundary extends Component<Props, State> {
 
               <button
                 onClick={this.handleReload}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm taio-btn-primary"
               >
                 <RotateCw className="w-4 h-4" />
                 <span>{isEn ? 'Reload' : 'Tải lại'}</span>

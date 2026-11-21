@@ -92,7 +92,7 @@ export const ReminderQuestionsModal: React.FC = () => {
               onClick={() => setActiveCategory(tab.id as any)}
               className={`px-3 py-1.5 rounded-xl font-semibold transition-all shrink-0 ${
                 activeCategory === tab.id
-                  ? 'bg-[var(--taio-brand)] text-white shadow-sm'
+                  ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary'
                   : 'bg-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
@@ -152,7 +152,7 @@ export const ReminderQuestionsModal: React.FC = () => {
                 <div className="flex items-center justify-end pt-1">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleAction(q); }}
-                    className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[var(--taio-brand)] text-slate-800 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[var(--taio-brand)] text-slate-800 hover:text-[var(--taio-on-brand)] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                   >
                     <span>{q.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />

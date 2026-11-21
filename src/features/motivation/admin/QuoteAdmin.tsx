@@ -247,7 +247,7 @@ export const QuoteAdmin: React.FC = () => {
           </button>
           <button
             onClick={openAddForm}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-xs font-bold text-white shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-xs font-bold text-[var(--taio-on-brand)] shadow-xs transition-colors taio-btn-primary"
           >
             <Plus size={14} />
             <span>Thêm câu mới</span>
@@ -552,7 +552,7 @@ export const QuoteAdmin: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold shadow-xs taio-btn-primary"
                 >
                   Lưu câu
                 </button>
@@ -601,7 +601,7 @@ export const QuoteAdmin: React.FC = () => {
                 type="button"
                 onClick={handleBulkImport}
                 disabled={!bulkText.trim()}
-                className="px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] disabled:opacity-40 text-white font-bold text-xs shadow-xs"
+                className="px-4 py-2 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] disabled:opacity-40 text-[var(--taio-on-brand)] font-bold text-xs shadow-xs taio-btn-primary"
               >
                 Nhập vào kho
               </button>
