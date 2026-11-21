@@ -1,6 +1,6 @@
 // PRD FIX v0.3.28 Part A1 & A3: Unified Quick Line Commit with Goal & Duration Parser
-import type { Goal, ItemOrigin } from '@/types';
-import { parseTimedText, toMins, toTime } from '@/features/sticky/model/timeline';
+import type { Goal, ItemOrigin } from '../../types/index.ts';
+import { parseTimedText, toMins, toTime } from '../sticky/model/timeline.ts';
 
 export interface QuickLineDeps {
   addDailyCardItem: (item: {

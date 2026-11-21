@@ -33,6 +33,7 @@ import { ActiveCaptureModal } from '../components/ActiveCaptureModal';
 import { useLockScreenClock, useFreeTimerLiveActivities } from '../features/quick-entry';
 import { Sparkles, X, Smartphone, AlertCircle } from 'lucide-react';
 import { TabErrorBoundary } from '../components/TabErrorBoundary';
+import { initAppUsageTracker } from '@/features/app-usage';
 import { initGlobalErrorListeners, setActiveTabForLogging } from '../core/errorLogger';
 
 const OrientationHint: React.FC = () => {
@@ -58,6 +59,7 @@ const MainAppContent: React.FC = () => {
   const [isDaySheetMode, setIsDaySheetMode] = React.useState(false);
 
   React.useEffect(() => {
+    initAppUsageTracker();
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'day_sheet_window') {

@@ -6,7 +6,8 @@ import { useApp } from '@/context/AppContext';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, computeBlockStatus } from '@/core/clock';
 import { commitQuickLine } from '@/features/tasks';
 import { openStickyBoard } from '@/features/sticky';
-import { Plus, ArrowUpRight, Clock, CheckCircle2 } from 'lucide-react';
+import { Plus, ArrowUpRight, Clock, CheckCircle2, Mic, MicOff, Square } from 'lucide-react';
+import { getSpeechEngine, normalizeSpokenVi, normalizeSpokenEn, normalizeGoalVoice } from '@/features/intake';
 
 export const QuickLineInput: React.FC = () => {
   const {
@@ -18,16 +19,54 @@ export const QuickLineInput: React.FC = () => {
   } = useApp();
 
   const [inputVal, setInputVal] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const isVi = language === 'vi';
   const today = getDeviceCalendarDate();
   const nowMins = getDeviceTimeMinutes();
 
+  const handleToggleVoice = async () => {
+    const engine = getSpeechEngine();
+    if (isListening) {
+      engine.stop();
+      setIsListening(false);
+      return;
+    }
+
+    setSpeechError(null);
+    const started = await engine.start({
+      onPartial: (text) => {
+        setInputVal(text);
+      },
+      onFinal: (text) => {
+        const spokenNorm = isVi ? normalizeSpokenVi(text) : normalizeSpokenEn(text);
+        const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
+        setInputVal(withGoal);
+        setIsListening(false);
+      },
+      onError: (err) => {
+        setSpeechError(err);
+        setIsListening(false);
+      },
+      onStateChange: (state) => {
+        setIsListening(state);
+      }
+    }, isVi ? 'vi-VN' : 'en-US');
+
+    if (!started && !speechError) {
+      setSpeechError(isVi ? 'Không thể khởi động micro.' : 'Could not start microphone.');
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && inputVal.trim()) {
       e.preventDefault();
-      commitQuickLine(inputVal.trim(), today, { addDailyCardItem, goals });
+      const spokenNorm = isVi ? normalizeSpokenVi(inputVal.trim()) : normalizeSpokenEn(inputVal.trim());
+      const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
+      commitQuickLine(withGoal, today, { addDailyCardItem, goals });
       setInputVal('');
+      setSpeechError(null);
     }
   };
 
@@ -51,30 +90,60 @@ export const QuickLineInput: React.FC = () => {
                 ? 'Gõ việc nhanh (vd: 14:00 Họp dự án #congviec 45p) rồi nhấn Enter...'
                 : 'Quick add (e.g. 14:00 Team sync #work 45m) then press Enter...'
             }
-            className="w-full h-11 pl-4 pr-10 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all"
+            className="w-full h-11 pl-4 pr-24 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all"
           />
-          <button
-            type="button"
-            onClick={() => {
-              if (inputVal.trim()) {
-                commitQuickLine(inputVal.trim(), today, { addDailyCardItem, goals });
-                setInputVal('');
-              }
-            }}
-            disabled={!inputVal.trim()}
-            className={`absolute right-1.5 top-1.5 h-8 px-2.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all ${
-              inputVal.trim()
-                ? isCool
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
-                  : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-xs taio-btn-primary'
-                : 'text-slate-300 cursor-not-allowed'
-            }`}
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isVi ? 'Thêm' : 'Add'}</span>
-          </button>
+          <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleToggleVoice}
+              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all ${
+                isListening
+                  ? 'bg-rose-500 text-white animate-pulse shadow-xs ring-2 ring-rose-200'
+                  : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60'
+              }`}
+              title={isListening ? (isVi ? 'Đang nghe... bấm để dừng' : 'Listening... click to stop') : (isVi ? 'Nói để nhập việc' : 'Voice input')}
+            >
+              {isListening ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (inputVal.trim()) {
+                  const spokenNorm = isVi ? normalizeSpokenVi(inputVal.trim()) : normalizeSpokenEn(inputVal.trim());
+                  const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
+                  commitQuickLine(withGoal, today, { addDailyCardItem, goals });
+                  setInputVal('');
+                  setSpeechError(null);
+                }
+              }}
+              disabled={!inputVal.trim()}
+              className={`h-8 px-2.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all ${
+                inputVal.trim()
+                  ? isCool
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
+                    : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-xs taio-btn-primary'
+                  : 'text-slate-300 cursor-not-allowed'
+              }`}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{isVi ? 'Thêm' : 'Add'}</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Voice status or error notice */}
+      {speechError && (
+        <div className="mt-2 text-xs text-rose-500 flex items-center gap-1.5 px-1">
+          <span>⚠️ {speechError}</span>
+        </div>
+      )}
+      {isListening && !speechError && (
+        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 px-1 animate-pulse">
+          <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
+          <span>{isVi ? 'Đang lắng nghe... Nói tự nhiên rồi nhấn Enter' : 'Listening... Speak naturally then press Enter'}</span>
+        </div>
+      )}
 
       {/* Today's scheduled timeline preview & link */}
       <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">

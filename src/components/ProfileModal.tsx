@@ -49,6 +49,8 @@ import { AlarmSettingsSection } from '../features/alarm';
 import { MotivationSettingsSection } from '@/features/motivation';
 import { HighlightSettings } from '@/features/prefs';
 import { VersionLabel } from '@/components/header/VersionLabel';
+import { getAppUsageSettings, setAppUsageSettings, clearAllAppUsage, type AppUsageSettings } from '@/features/app-usage';
+import { ScreenTimeSettingsSection } from '@/features/screentime';
 
 export const ProfileModal: React.FC = () => {
   const { 
@@ -96,6 +98,20 @@ export const ProfileModal: React.FC = () => {
   const [motionTrackingState, setMotionTrackingState] = useState<boolean>(() => isMotionTrackingEnabled());
   const [motionAuthStatus, setMotionAuthStatus] = useState<string>('unknown');
   const [iosCalConnected, setIosCalConnected] = useState<boolean>(() => isIOSCalendarConnected());
+  const [appUsageSettings, setAppUsageSettingsState] = useState<AppUsageSettings>(() => getAppUsageSettings());
+
+  const handleToggleAppUsage = () => {
+    const next = !appUsageSettings.enabled;
+    setAppUsageSettings({ enabled: next });
+    setAppUsageSettingsState(prev => ({ ...prev, enabled: next }));
+  };
+
+  const handleClearAppUsage = () => {
+    if (confirm(language === 'vi' ? 'Xoá toàn bộ dữ liệu đo lường ứng dụng đã ghi trên máy này?' : 'Clear all recorded app telemetry on this device?')) {
+      clearAllAppUsage();
+      showToast(language === 'vi' ? 'Đã xoá toàn bộ dữ liệu máy đo' : 'Cleared all machine usage telemetry');
+    }
+  };
 
   const handleToggleIOSCalendar = async () => {
     if (iosCalConnected) {
@@ -795,6 +811,61 @@ export const ProfileModal: React.FC = () => {
                       />
                     </button>
                   </div>
+                </div>
+
+                {/* PRD v0.3.53 Part B: Family Controls / ScreenTime Module */}
+                <ScreenTimeSettingsSection language={language} />
+
+                {/* PRD v0.3.53 Part A6: Đo thời gian thật trên máy (Mac App Telemetry) */}
+                <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <Laptop className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                          {language === 'vi' ? 'Đo lường ứng dụng trên máy (Mac Telemetry)' : 'Machine App Usage Telemetry'}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                          {language === 'vi'
+                            ? 'Tự động đo thời gian khi bạn chuyển sang ứng dụng khác để đối chiếu kế hoạch. Dữ liệu chỉ lưu trên máy này, tuyệt đối không gửi lên mạng.'
+                            : 'Automatically logs active app transitions to compare plan vs reality. Data remains strictly local on this machine.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={appUsageSettings.enabled}
+                      onClick={handleToggleAppUsage}
+                      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
+                        appUsageSettings.enabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+                          appUsageSettings.enabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {appUsageSettings.enabled && (
+                    <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        {language === 'vi' ? 'Dữ liệu đo lường cục bộ:' : 'Local telemetry data:'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleClearAppUsage}
+                        className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 text-xs font-bold transition-colors"
+                      >
+                        {language === 'vi' ? 'Xoá toàn bộ dữ liệu máy đo' : 'Clear Telemetry'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

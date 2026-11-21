@@ -16,6 +16,11 @@ import { newFreeSticky, updateSticky, closeSticky, getStickyNotesForExport } fro
 import { computeRingArc } from '../src/domain/clockRing.ts';
 import { clockState } from '../src/features/clock/model/clockState.ts';
 import { mergeCollectionsByUpdatedAt } from '../src/core/storage/durableStorage.ts';
+import { normalizeSpokenVi } from '../src/features/intake/normalizeSpokenVi.ts';
+import { normalizeSpokenEn } from '../src/features/intake/normalizeSpokenEn.ts';
+import { normalizeGoalVoice } from '../src/features/intake/normalizeGoalVoice.ts';
+import { intakeTask } from '../src/features/intake/intakeTask.ts';
+import { coalesceAppUsageRecords } from '../src/features/app-usage/coalesce.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -655,6 +660,125 @@ for (const rt of ringTests) {
     passed++;
   } else {
     console.error(`[FAIL] Part F3 Quote parity test: missing in EN: ${missingKeys.join(', ')} (VI: ${viQuotes.length}, EN: ${enQuotes.length})`);
+    failed++;
+  }
+}
+
+// PRD v0.3.52 Part A5: Vietnamese spoken speech normalization (20 test cases)
+{
+  const viCases = [
+    ['tám giờ', '8h'],
+    ['tám giờ ba mươi', '8h30'],
+    ['tám giờ rưỡi', '8h30'],
+    ['mười lăm phút', '15 phút'],
+    ['một tiếng rưỡi', '1h30'],
+    ['hai mươi phút', '20 phút'],
+    ['nửa tiếng', '30 phút'],
+    ['bảy giờ tối', '19h'],
+    ['bảy giờ sáng', '7h'],
+    ['mười hai giờ trưa', '12h'],
+    ['mười hai giờ đêm', '0h'],
+    ['hai giờ chiều', '14h'],
+    ['năm giờ chiều', '17h'],
+    ['mười giờ đêm', '22h'],
+    ['nửa giờ', '30 phút'],
+    ['hai tiếng', '2h'],
+    ['hai tiếng rưỡi', '2h30'],
+    ['ba tiếng', '3h'],
+    ['tám giờ rưỡi họp với anh Minh ba mươi phút', '8h30 họp với anh Minh 30 phút'],
+    ['bảy giờ tối gọi khách', '19h gọi khách']
+  ];
+
+  let viPassed = 0;
+  for (const [input, expected] of viCases) {
+    const res = normalizeSpokenVi(input);
+    if (res === expected) {
+      viPassed++;
+    } else {
+      console.error(`[FAIL] normalizeSpokenVi('${input}'): got '${res}', expected '${expected}'`);
+    }
+  }
+
+  if (viPassed === viCases.length) {
+    passed++;
+  } else {
+    failed++;
+  }
+}
+
+// PRD v0.3.52 Part A5: English spoken speech normalization (10 test cases)
+{
+  const enCases = [
+    ['eight thirty', '8:30'],
+    ['seven pm', '19:00'],
+    ['seven am', '7:00'],
+    ['half an hour', '30m'],
+    ['one and a half hours', '1h30'],
+    ['fifteen minutes', '15m'],
+    ['twenty minutes', '20m'],
+    ['quarter past eight', '8:15'],
+    ['quarter to nine', '8:45'],
+    ['two and a half hours', '2h30']
+  ];
+
+  let enPassed = 0;
+  for (const [input, expected] of enCases) {
+    const res = normalizeSpokenEn(input);
+    if (res === expected) {
+      enPassed++;
+    } else {
+      console.error(`[FAIL] normalizeSpokenEn('${input}'): got '${res}', expected '${expected}'`);
+    }
+  }
+
+  if (enPassed === enCases.length) {
+    passed++;
+  } else {
+    failed++;
+  }
+}
+
+// PRD v0.3.52 Part A6: Goal voice reference normalization
+{
+  const sampleGoals = [{ id: 'g1', name: 'Kênh AI' }, { id: 'g2', name: 'Sức khỏe' }];
+  const res1 = normalizeGoalVoice('làm clip cho mục tiêu Kênh AI', sampleGoals);
+  const res2 = normalizeGoalVoice('viết bài cho mục tiêu không tồn tại', sampleGoals);
+
+  if (res1 === 'làm clip #KênhAI' && res2 === 'viết bài cho mục tiêu không tồn tại') {
+    passed++;
+  } else {
+    console.error(`[FAIL] normalizeGoalVoice test failed: res1='${res1}', res2='${res2}'`);
+    failed++;
+  }
+}
+
+// PRD v0.3.52 Part B3: External intake deduplication
+{
+  const extId = `test-ext-${Date.now()}`;
+  const first = intakeTask({ source: 'voice', rawText: 'việc thử nghiệm', externalId: extId });
+  const second = intakeTask({ source: 'voice', rawText: 'việc thử nghiệm', externalId: extId });
+
+  if (first.status === 'committed' && second.status === 'duplicate') {
+    passed++;
+  } else {
+    console.error(`[FAIL] intakeTask deduplication failed: first=${first.status}, second=${second.status}`);
+    failed++;
+  }
+}
+
+// PRD v0.3.53 Part A3: Coalesce sub-10s intervals
+{
+  const recs = [
+    { id: '1', date: '2026-11-21', startTime: '10:00:00', endTime: '10:05:00', durationSeconds: 300, appName: 'Safari', bundleId: 'com.apple.Safari', state: 'in_taio', source: 'mac-focus' },
+    { id: '2', date: '2026-11-21', startTime: '10:05:00', endTime: '10:05:05', durationSeconds: 5, appName: 'Finder', bundleId: 'com.apple.finder', state: 'in_taio', source: 'mac-focus' },
+    { id: '3', date: '2026-11-21', startTime: '10:05:05', endTime: '10:20:00', durationSeconds: 895, appName: 'Figma', bundleId: 'com.figma.Desktop', state: 'left_clock_running', source: 'mac-focus' }
+  ];
+  const coalesced = coalesceAppUsageRecords(recs);
+
+  if (coalesced.length === 2 && coalesced[0].durationSeconds === 305 && coalesced[1].durationSeconds === 895) {
+    passed++;
+  } else {
+    console.error(`[FAIL] coalesceAppUsageRecords test failed: ${JSON.stringify(coalesced)}`);
     failed++;
   }
 }

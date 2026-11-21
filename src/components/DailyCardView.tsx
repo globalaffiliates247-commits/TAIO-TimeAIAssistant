@@ -21,10 +21,13 @@ import {
   CheckCircle2,
   Clock,
   Zap,
-  Tag
+  Tag,
+  Mic,
+  Square as SquareIcon
 } from 'lucide-react';
 import { SwipeEntryCard } from '@/features/swipe';
 import { useT } from '@/i18n/useT';
+import { getSpeechEngine, normalizeSpokenVi, normalizeSpokenEn, normalizeGoalVoice } from '@/features/intake';
 
 export const DailyCardView: React.FC = () => {
   const { t } = useT();
@@ -50,6 +53,35 @@ export const DailyCardView: React.FC = () => {
   const [newOrigin, setNewOrigin] = useState<ItemOrigin>('planned');
   const [displacedBlockId, setDisplacedBlockId] = useState<string>('');
   const [showUnplannedOptions, setShowUnplannedOptions] = useState<boolean>(false);
+  const [isVoiceListening, setIsVoiceListening] = useState<boolean>(false);
+
+  const handleToggleVoice = async () => {
+    const engine = getSpeechEngine();
+    if (isVoiceListening) {
+      engine.stop();
+      setIsVoiceListening(false);
+      return;
+    }
+
+    const isVi = language === 'vi';
+    await engine.start({
+      onPartial: (text) => {
+        setNewText(text);
+      },
+      onFinal: (text) => {
+        const spokenNorm = isVi ? normalizeSpokenVi(text) : normalizeSpokenEn(text);
+        const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
+        setNewText(withGoal);
+        setIsVoiceListening(false);
+      },
+      onError: () => {
+        setIsVoiceListening(false);
+      },
+      onStateChange: (state) => {
+        setIsVoiceListening(state);
+      }
+    }, isVi ? 'vi-VN' : 'en-US');
+  };
 
   // Filter items for current selected date (defaults to today)
   const currentItems = dailyCardItems.filter(i => i.date === selectedCardDate);
@@ -197,8 +229,20 @@ export const DailyCardView: React.FC = () => {
                 value={newText}
                 onChange={e => setNewText(e.target.value)}
                 placeholder={t('card.quick_input_placeholder', 'Ghi nhanh 1 việc (nhập tên việc rồi nhấn Enter)...')}
-                className="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
+                className="w-full bg-white border border-slate-300 rounded-2xl pl-4 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
               />
+              <button
+                type="button"
+                onClick={handleToggleVoice}
+                className={`absolute right-1.5 top-1.5 h-8 w-8 rounded-xl flex items-center justify-center transition-all ${
+                  isVoiceListening
+                    ? 'bg-rose-500 text-white animate-pulse shadow-xs ring-2 ring-rose-200'
+                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                }`}
+                title={isVoiceListening ? (language === 'vi' ? 'Đang nghe... bấm để dừng' : 'Listening... click to stop') : (language === 'vi' ? 'Nói để nhập việc' : 'Voice input')}
+              >
+                {isVoiceListening ? <SquareIcon className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
+              </button>
             </div>
 
             <button

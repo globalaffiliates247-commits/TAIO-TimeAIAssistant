@@ -86,5 +86,9 @@
 	<string>TAIO Time cần quyền truy cập Lịch để hiển thị các sự kiện cá nhân cùng với thời gian biểu trong ngày.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>TAIO Time cần quyền truy cập Lịch để hiển thị các sự kiện cá nhân cùng với thời gian biểu trong ngày.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TAIO.CLUB cần truy cập micro để bạn có thể đọc và nhập việc nhanh bằng giọng nói. / TAIO.CLUB requires microphone access to quickly capture tasks via voice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>TAIO.CLUB cần nhận dạng giọng nói để chuyển lời nói của bạn thành công việc. / TAIO.CLUB requires speech recognition to transcribe spoken tasks.</string>
 </dict>
 </plist>

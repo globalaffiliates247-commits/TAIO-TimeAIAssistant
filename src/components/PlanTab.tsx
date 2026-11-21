@@ -31,10 +31,12 @@ import {
   RotateCw,
   ChevronDown,
   ChevronUp,
+  BarChart3,
 } from 'lucide-react';
 import { updateScheduleEntry } from '@/features/tasks';
 import { TemplateScheduleModal } from '@/features/schedule-template';
 import { AddEventModal } from '@/features/events';
+import { PlanVsRealityView } from '@/features/plan-reality';
 import { useT } from '@/i18n/useT';
 
 const TYPE_CONFIG: Record<BlockType, { labelVi: string; labelEn: string; bg: string; text: string; border: string }> = {
@@ -64,7 +66,7 @@ export const PlanTab: React.FC = () => {
   const { nowMinutes, todayLabel } = useDeviceClock();
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
-  const [activeView, setActiveView] = useState<'card' | 'timeline' | 'matrix'>('card');
+  const [activeView, setActiveView] = useState<'card' | 'timeline' | 'reality' | 'matrix'>('card');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showAddEventModal, setShowAddEventModal] = useState<boolean>(false);
   const [templateModalOpen, setTemplateModalOpen] = useState<boolean>(false);
@@ -177,6 +179,17 @@ export const PlanTab: React.FC = () => {
             <Clock className="w-3.5 h-3.5" />
             <span>{t('terms.timetable', 'Thời gian biểu')}</span>
           </button>
+          <button
+            onClick={() => setActiveView('reality')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeView === 'reality' 
+                ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-xs taio-btn-primary'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>{language === 'vi' ? 'So với thực tế' : 'Plan vs Reality'}</span>
+          </button>
         </div>
 
         {/* Action buttons */}
@@ -210,6 +223,7 @@ export const PlanTab: React.FC = () => {
       </div>
 
       {activeView === 'card' && <DailyCardView />}
+      {activeView === 'reality' && <PlanVsRealityView />}
       {activeView === 'timeline' && (
         <>
           {/* v0.3.40 Part B3: Weekly Budget Progress (Phương án A - Stacked 40h bar, collapsible < 140px) */}
