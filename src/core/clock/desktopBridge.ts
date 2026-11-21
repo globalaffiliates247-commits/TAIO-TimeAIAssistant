@@ -1,6 +1,6 @@
 /**
- * Unified desktop clock window synchronization & launcher (PRD v0.3.44 Part B3)
- * Guarantees timer state is synced to Electron main process before opening the window.
+ * Unified desktop clock window synchronization & launcher (PRD v0.3.44 Part B3 & v0.3.47 Part A3)
+ * Guarantees timer state & color palette is synced to Electron main process before opening the window.
  */
 
 export interface DesktopTimerPayload {
@@ -12,6 +12,8 @@ export interface DesktopTimerPayload {
   endsAt?: number;
   remaining?: string;
   lang?: string;
+  palette?: string;
+  theme?: string;
   isCountDown?: boolean;
   freeTimer?: {
     title: string;
@@ -30,9 +32,17 @@ export function openClockWindowWithSync(payload?: DesktopTimerPayload): void {
   const bridge = (window as any).taioAPI;
   if (!bridge) return;
 
-  if (payload && typeof bridge.updateTimer === 'function') {
+  const currentPalette = document.documentElement.getAttribute('data-palette') || 'red';
+  const isDark = document.documentElement.classList.contains('dark');
+  const enrichedPayload: DesktopTimerPayload = {
+    palette: currentPalette,
+    theme: isDark ? 'dark' : 'light',
+    ...(payload || {}),
+  };
+
+  if (typeof bridge.updateTimer === 'function') {
     try {
-      bridge.updateTimer(payload);
+      bridge.updateTimer(enrichedPayload);
     } catch (err) {
       console.warn('[desktopBridge] updateTimer failed', err);
     }

@@ -157,7 +157,7 @@ export const PlanTab: React.FC = () => {
             onClick={() => setActiveView('card')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'card' 
-                ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E8311C] text-white shadow-xs'
+                ? 'bg-[var(--taio-brand)] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
@@ -168,7 +168,7 @@ export const PlanTab: React.FC = () => {
             onClick={() => setActiveView('timeline')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'timeline' 
-                ? isCool ? 'bg-blue-600 text-white shadow-xs' : 'bg-[#E8311C] text-white shadow-xs'
+                ? 'bg-[var(--taio-brand)] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
@@ -199,9 +199,7 @@ export const PlanTab: React.FC = () => {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs transition-all ${
-              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
-            }`}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
           >
             <Plus className="w-4 h-4 text-white" />
             <span>{language === 'en' ? 'Add Task' : 'Thêm việc'}</span>
@@ -634,9 +632,7 @@ export const PlanTab: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleAcceptBacklogItem(item)}
-                    className={`px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-sm transition-all shrink-0 ${
-                      isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
-                    }`}
+                    className="px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-sm transition-all shrink-0 bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
                   >
                     {language === 'en' ? 'Do this week' : 'Làm tuần này'}
                   </button>
@@ -755,9 +751,7 @@ export const PlanTab: React.FC = () => {
                 <button
                   type="submit"
                   disabled={timeToMinutes(newStartTime) >= timeToMinutes(newEndTime)}
-                  className={`px-5 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition-all ${
-                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
-                  }`}
+                  className="px-5 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
                 >
                   {language === 'en' ? 'Add to schedule' : 'Thêm vào lịch'}
                 </button>

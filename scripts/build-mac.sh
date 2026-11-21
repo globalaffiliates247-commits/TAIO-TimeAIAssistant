@@ -26,8 +26,8 @@ cp -R out "$STAGE/app/web"
 
 # Icon (.icns)
 SRC_PNG="ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
-if command -v iconutil >/dev/null 2>&1 && [ -f "$SRC_PNG" ]; then
-  echo "Generating .icns using sips & iconutil..."
+if [ -f "$SRC_PNG" ]; then
+  echo "Generating .icns using sips & python3..."
   ICONSET="$STAGE/icon.iconset"
   mkdir -p "$ICONSET"
   sips -z 16 16     "$SRC_PNG" --out "$ICONSET/icon_16x16.png" >/dev/null
@@ -40,7 +40,36 @@ if command -v iconutil >/dev/null 2>&1 && [ -f "$SRC_PNG" ]; then
   sips -z 512 512   "$SRC_PNG" --out "$ICONSET/icon_256x256@2x.png" >/dev/null
   sips -z 512 512   "$SRC_PNG" --out "$ICONSET/icon_512x512.png" >/dev/null
   sips -z 1024 1024 "$SRC_PNG" --out "$ICONSET/icon_512x512@2x.png" >/dev/null
-  iconutil -c icns "$ICONSET" -o "$STAGE/icon.icns"
+
+  python3 -c "
+import struct, os
+mapping = {
+    'icon_16x16.png': b'icp4',
+    'icon_16x16@2x.png': b'ic11',
+    'icon_32x32.png': b'icp5',
+    'icon_32x32@2x.png': b'ic12',
+    'icon_128x128.png': b'ic07',
+    'icon_128x128@2x.png': b'ic13',
+    'icon_256x256.png': b'ic08',
+    'icon_256x256@2x.png': b'ic14',
+    'icon_512x512.png': b'ic09',
+    'icon_512x512@2x.png': b'ic10',
+}
+entries = []
+total_size = 8
+for fname, ostype in mapping.items():
+    fpath = os.path.join('$ICONSET', fname)
+    if os.path.exists(fpath):
+        with open(fpath, 'rb') as f:
+            data = f.read()
+        entry_len = 8 + len(data)
+        entries.append((ostype, entry_len, data))
+        total_size += entry_len
+with open('$STAGE/icon.icns', 'wb') as f:
+    f.write(b'icns' + struct.pack('>I', total_size))
+    for ostype, elen, data in entries:
+        f.write(ostype + struct.pack('>I', elen) + data)
+" || (command -v iconutil >/dev/null 2>&1 && iconutil -c icns "$ICONSET" -o "$STAGE/icon.icns")
 fi
 
 for ARCH in ${ARCHS:-arm64}; do

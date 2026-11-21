@@ -159,6 +159,13 @@ import {
 
 export type AppTab = 'now' | 'plan' | 'efficiency' | 'achievements' | 'goals' | 'admin';
 
+// B17: Appearance & Color Palettes (PRD v0.3.47 Part A)
+export function normalizePalette(p?: string | null): ColorPalette {
+  if (p === 'cool' || p === 'bright-blue') return 'bright-blue';
+  if (p === 'calm-blue') return 'calm-blue';
+  return 'red';
+}
+
 interface AppContextType {
   profile: UserProfile;
   setProfile: (p: UserProfile) => void;
@@ -502,7 +509,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // v0.12 - v0.20: Appearance & Device Settings (B17)
   const [deviceLook, setDeviceLook] = useState<DeviceLook>('auto');
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
-  const [palette, setPalette] = useState<ColorPalette>('warm');
+  const [palette, setPaletteState] = useState<ColorPalette>('red');
+  const setPalette = (p: ColorPalette) => {
+    const norm = normalizePalette(p);
+    setPaletteState(norm);
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-palette', norm);
+    }
+    if (typeof window !== 'undefined' && (window as any).taioAPI?.updateTimer) {
+      try {
+        const isDark = document.documentElement.classList.contains('dark');
+        (window as any).taioAPI.updateTimer({ palette: norm, theme: isDark ? 'dark' : 'light' });
+      } catch {}
+    }
+  };
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
 
   // v0.20: Inbox Mini App State
@@ -2977,7 +2997,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setUserProfileDetail(savedProfileDetail.value);
       }
       if (savedPalette?.value) {
-        setPalette(savedPalette.value);
+        setPalette(normalizePalette(savedPalette.value));
       }
       if (savedThemeMode?.value) {
         setThemeMode(savedThemeMode.value);
@@ -3099,6 +3119,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [userProfileDetail]);
 
   useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const norm = normalizePalette(palette);
+      document.documentElement.setAttribute('data-palette', norm);
+    }
     if (!isHydratedRef.current) return;
     saveDurableState('palette', palette, Date.now());
   }, [palette]);
@@ -3113,17 +3137,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isDark = themeMode === 'dark' || (themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.classList.toggle('dark', isDark);
 
+    if (typeof window !== 'undefined' && (window as any).taioAPI?.updateTimer) {
+      try {
+        const norm = normalizePalette(palette);
+        (window as any).taioAPI.updateTimer({ palette: norm, theme: isDark ? 'dark' : 'light' });
+      } catch {}
+    }
+
     if (themeMode === 'system') {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
       const listener = (e: MediaQueryListEvent) => {
         document.documentElement.classList.toggle('dark', e.matches);
+        if (typeof window !== 'undefined' && (window as any).taioAPI?.updateTimer) {
+          try {
+            const norm = normalizePalette(palette);
+            (window as any).taioAPI.updateTimer({ palette: norm, theme: e.matches ? 'dark' : 'light' });
+          } catch {}
+        }
       };
       mq.addEventListener('change', listener);
       return () => mq.removeEventListener('change', listener);
     }
-  }, [themeMode]);
+  }, [themeMode, palette]);
 
   useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-device-look', deviceLook);
+    }
     if (!isHydratedRef.current) return;
     saveDurableState('deviceLook', deviceLook, Date.now());
   }, [deviceLook]);

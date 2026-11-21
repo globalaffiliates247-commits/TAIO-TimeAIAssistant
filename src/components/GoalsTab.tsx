@@ -134,7 +134,7 @@ export const GoalsTab: React.FC = () => {
       {/* Header: Single Row per Part H1.6 */}
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isCool ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-[#E8311C]'}`}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-[var(--taio-brand-soft)] text-[var(--taio-brand)]">
             <Target className="w-4 h-4" />
           </div>
           <div>
@@ -150,9 +150,7 @@ export const GoalsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => handleOpenCreateGoal(activeArea)}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl text-white font-bold text-xs shadow-sm transition-all ${
-            isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
-          }`}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-white font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
         >
           <Plus className="w-4 h-4 text-white" />
           <span>{t('goals.add_goal', 'Mục tiêu')}</span>
@@ -179,7 +177,7 @@ export const GoalsTab: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-lg shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-2">
-                <Sparkles className={`w-4 h-4 ${isCool ? 'text-blue-600' : 'text-[#E8311C]'}`} />
+                <Sparkles className="w-4 h-4 text-[var(--taio-brand)]" />
                 <h3 className="text-base font-bold text-slate-900">
                   {t('goals.modal_title', 'Thêm mục tiêu mới')} ({activeArea})
                 </h3>
@@ -205,9 +203,7 @@ export const GoalsTab: React.FC = () => {
                   value={newGoalName}
                   onChange={e => setNewGoalName(e.target.value)}
                   placeholder={language === 'en' ? 'e.g. Launch version 1.0...' : 'Ví dụ: Ra mắt phiên bản 1.0...'}
-                  className={`w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none ${
-                    isCool ? 'focus:border-blue-600 focus:ring-1 focus:ring-blue-600' : 'focus:border-[#E8311C] focus:ring-1 focus:ring-[#E8311C]'
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)] focus:ring-1 focus:ring-[var(--taio-brand)]"
                 />
               </div>
 
@@ -220,9 +216,7 @@ export const GoalsTab: React.FC = () => {
                   value={measurableResult}
                   onChange={e => setMeasurableResult(e.target.value)}
                   placeholder={language === 'en' ? 'e.g. Reach 100 paying customers' : 'Ví dụ: Đạt 100 khách hàng trả phí đầu tiên'}
-                  className={`w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none ${
-                    isCool ? 'focus:border-blue-600 focus:ring-1 focus:ring-blue-600' : 'focus:border-[#E8311C] focus:ring-1 focus:ring-[#E8311C]'
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)] focus:ring-1 focus:ring-[var(--taio-brand)]"
                 />
               </div>
 
@@ -238,9 +232,7 @@ export const GoalsTab: React.FC = () => {
                       onClick={() => setProgressType(opt.id)}
                       className={`w-full p-2.5 rounded-xl border text-left transition-all ${
                         progressType === opt.id
-                          ? isCool
-                            ? 'border-blue-500 bg-blue-50/70 text-slate-900 shadow-2xs'
-                            : 'border-[#E8311C] bg-red-50/70 text-slate-900 shadow-2xs'
+                          ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] text-slate-900 shadow-2xs'
                           : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100/70'
                       }`}
                     >
@@ -296,9 +288,7 @@ export const GoalsTab: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className={`px-5 py-2 rounded-xl text-white font-bold shadow-xs transition-all ${
-                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
-                  }`}
+                  className="px-5 py-2 rounded-xl text-white font-bold shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
                 >
                   {t('goals.create_submit', 'Tạo mục tiêu')}
                 </button>

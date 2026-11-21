@@ -1,6 +1,6 @@
 // TAIO Time — macOS desktop shell (Electron) with mini tools (PRD B35.5 / v0.3.27 / FIX v0.3.28).
 // Quick Note (⌥⌘N), Frameless Clock Window (⌥⌘T), Tray timer, keeps alive on macOS when main window closed.
-const { app, BrowserWindow, protocol, shell, net, globalShortcut, Tray, Menu, ipcMain, nativeImage } = require('electron');
+const { app, BrowserWindow, protocol, shell, net, globalShortcut, Tray, Menu, ipcMain, nativeImage, screen } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const fs = require('fs');
@@ -34,6 +34,90 @@ let clockWindowBounds = null;
 let quickNoteWindowBounds = null;
 let clockIsPinned = true;
 let clockReadyWatchdog = null;
+
+// PRD v0.3.47 Part B2 & B3: Persistent bounds with multi-monitor safety & top-right default
+function getPersistedBounds(filename, defaultWidth, defaultHeight) {
+  let saved = null;
+  try {
+    const filePath = path.join(app.getPath('userData'), filename);
+    if (fs.existsSync(filePath)) {
+      saved = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    }
+  } catch (e) {
+    console.warn(`[main] Failed to read ${filename}:`, e);
+  }
+
+  let defaultX = 100;
+  let defaultY = 100;
+  try {
+    const primary = screen.getPrimaryDisplay();
+    const primaryWorkArea = primary.workArea; // { x, y, width, height }
+    defaultX = Math.round(primaryWorkArea.x + primaryWorkArea.width - defaultWidth - 24);
+    defaultY = Math.round(primaryWorkArea.y + 24);
+  } catch (e) {}
+
+  if (!saved || typeof saved.x !== 'number' || typeof saved.y !== 'number') {
+    return { x: defaultX, y: defaultY, width: defaultWidth, height: defaultHeight };
+  }
+
+  // Multi-monitor visibility check (Part B3)
+  try {
+    const displays = screen.getAllDisplays();
+    const isVisible = displays.some(d => {
+      const wa = d.workArea;
+      return (
+        saved.x + (saved.width || defaultWidth) - 50 >= wa.x &&
+        saved.x + 50 <= wa.x + wa.width &&
+        saved.y + (saved.height || defaultHeight) - 50 >= wa.y &&
+        saved.y + 50 <= wa.y + wa.height
+      );
+    });
+
+    if (!isVisible) {
+      return {
+        x: defaultX,
+        y: defaultY,
+        width: saved.width || defaultWidth,
+        height: saved.height || defaultHeight,
+      };
+    }
+  } catch (e) {}
+
+  return {
+    x: saved.x,
+    y: saved.y,
+    width: saved.width || defaultWidth,
+    height: saved.height || defaultHeight,
+  };
+}
+
+let saveClockBoundsTimeout = null;
+function persistClockBounds(bounds) {
+  clockWindowBounds = bounds;
+  if (saveClockBoundsTimeout) clearTimeout(saveClockBoundsTimeout);
+  saveClockBoundsTimeout = setTimeout(() => {
+    try {
+      const filePath = path.join(app.getPath('userData'), 'clock-window.json');
+      fs.writeFileSync(filePath, JSON.stringify(bounds, null, 2), 'utf8');
+    } catch (e) {
+      console.warn('[main] Failed to write clock-window.json:', e);
+    }
+  }, 500);
+}
+
+let saveQuickNoteBoundsTimeout = null;
+function persistQuickNoteBounds(bounds) {
+  quickNoteWindowBounds = bounds;
+  if (saveQuickNoteBoundsTimeout) clearTimeout(saveQuickNoteBoundsTimeout);
+  saveQuickNoteBoundsTimeout = setTimeout(() => {
+    try {
+      const filePath = path.join(app.getPath('userData'), 'quick-note-window.json');
+      fs.writeFileSync(filePath, JSON.stringify(bounds, null, 2), 'utf8');
+    } catch (e) {
+      console.warn('[main] Failed to write quick-note-window.json:', e);
+    }
+  }, 500);
+}
 
 function resolveFile(urlPath) {
   let rel = decodeURIComponent(urlPath.split('?')[0]);
@@ -84,7 +168,7 @@ function createQuickNoteWindow() {
     return;
   }
 
-  const bounds = quickNoteWindowBounds || { width: 420, height: 180 };
+  const bounds = quickNoteWindowBounds || getPersistedBounds('quick-note-window.json', 420, 180);
 
   quickNoteWindow = new BrowserWindow({
     width: bounds.width,
@@ -106,12 +190,12 @@ function createQuickNoteWindow() {
 
   quickNoteWindow.on('resize', () => {
     if (quickNoteWindow && !quickNoteWindow.isDestroyed()) {
-      quickNoteWindowBounds = quickNoteWindow.getBounds();
+      persistQuickNoteBounds(quickNoteWindow.getBounds());
     }
   });
   quickNoteWindow.on('move', () => {
     if (quickNoteWindow && !quickNoteWindow.isDestroyed()) {
-      quickNoteWindowBounds = quickNoteWindow.getBounds();
+      persistQuickNoteBounds(quickNoteWindow.getBounds());
     }
   });
 
@@ -164,7 +248,7 @@ function createClockWindow() {
     return;
   }
 
-  const bounds = clockWindowBounds || { width: 260, height: 140 };
+  const bounds = clockWindowBounds || getPersistedBounds('clock-window.json', 260, 140);
 
   clockWindow = new BrowserWindow({
     width: bounds.width,
@@ -193,12 +277,12 @@ function createClockWindow() {
 
   clockWindow.on("resize", () => {
     if (clockWindow && !clockWindow.isDestroyed()) {
-      clockWindowBounds = clockWindow.getBounds();
+      persistClockBounds(clockWindow.getBounds());
     }
   });
   clockWindow.on("move", () => {
     if (clockWindow && !clockWindow.isDestroyed()) {
-      clockWindowBounds = clockWindow.getBounds();
+      persistClockBounds(clockWindow.getBounds());
     }
   });
 

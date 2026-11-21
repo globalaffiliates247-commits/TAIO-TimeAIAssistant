@@ -16,7 +16,10 @@ import {
   Palette,
   Check,
   Globe,
-  RotateCw
+  RotateCw,
+  Hourglass,
+  Zap,
+  Droplets
 } from 'lucide-react';
 import { useT } from '../i18n/useT';
 import { TemplateScheduleModal } from '@/features/schedule-template';
@@ -72,18 +75,27 @@ export const AppearanceModal: React.FC = () => {
     { id: 'light', label: 'Giao diện Sáng', icon: <Sun className="w-4 h-4" /> },
   ];
 
-  const palettesList: { id: ColorPalette; label: string; desc: string; icon: string }[] = [
+  const palettesList: { id: ColorPalette; label: string; desc: string; icon: React.ReactNode; colorHex: string }[] = [
     { 
-      id: 'cool', 
-      label: '❄️ Tông màu Lạnh (Xanh & Trắng)', 
-      desc: 'Nền không gian làm việc sáng, thẻ trắng, điểm nhấn xanh #007AFF.',
-      icon: '❄️'
+      id: 'red', 
+      label: language === 'en' ? 'TAIO Red' : 'Đỏ TAIO', 
+      desc: language === 'en' ? 'Deep crimson brand red (WCAG AA 4.75 contrast)' : 'Màu son nhận diện đặc trưng TAIO, tương phản 4.75 chuẩn WCAG AA',
+      icon: <Hourglass className="w-4 h-4 text-white stroke-[1.75]" />,
+      colorHex: '#E11D2E',
     },
     { 
-      id: 'warm', 
-      label: '🔥 Tông màu Nóng (Đỏ cam & Trắng)', 
-      desc: 'Nền ấm, thẻ trắng, điểm nhấn đỏ cam thương hiệu var(--taio-brand) nổi bật.',
-      icon: '🔥'
+      id: 'bright-blue', 
+      label: language === 'en' ? 'Bright Blue' : 'Xanh sáng', 
+      desc: language === 'en' ? 'High-contrast bright blue (WCAG AA 4.75 contrast)' : 'Tông xanh sáng nổi bật, rõ nét, tương phản 4.75 chuẩn WCAG AA',
+      icon: <Zap className="w-4 h-4 text-white stroke-[1.75]" />,
+      colorHex: '#0068FF',
+    },
+    { 
+      id: 'calm-blue', 
+      label: language === 'en' ? 'Calm Blue' : 'Xanh dịu', 
+      desc: language === 'en' ? 'Refined calm blue with cyan accents (WCAG AA 4.67)' : 'Tông xanh dịu nhã nhặn, tương phản 4.67 chuẩn WCAG AA',
+      icon: <Droplets className="w-4 h-4 text-white stroke-[1.75]" />,
+      colorHex: '#1C78C0',
     },
   ];
 
@@ -163,60 +175,41 @@ export const AppearanceModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Setting 3: Color Palette */}
+          {/* Setting 3: Color Palette (PRD v0.3.47 Part A1 & A4) */}
           <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              Bảng màu hệ thống
+              {language === 'en' ? 'Brand Color Palette' : 'Bảng màu nhận diện'}
             </label>
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {palettesList.map(p => {
-                const palObj = PALETTES[p.id];
-                const isSelected = palette === p.id;
+                const isSelected = palette === p.id || (p.id === 'red' && palette === 'warm') || (p.id === 'bright-blue' && palette === 'cool');
                 return (
                   <button
                     key={p.id}
+                    type="button"
                     onClick={() => setPalette(p.id)}
-                    className={`w-full p-3 rounded-xl border text-left transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                    className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2.5 relative ${
                       isSelected
-                        ? 'border-[var(--taio-brand)] bg-red-50 text-slate-900'
+                        ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] text-slate-900 shadow-xs'
                         : 'border-slate-200 bg-white/60 text-slate-700 hover:border-slate-300'
                     }`}
                   >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold">{p.label}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[var(--taio-brand)]" />}
+                    <div className="flex items-center justify-between w-full">
+                      <div
+                        className="w-8 h-8 rounded-xl flex items-center justify-center shadow-xs"
+                        style={{ backgroundColor: p.colorHex }}
+                      >
+                        {p.icon}
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{p.desc}</p>
+                      {isSelected && (
+                        <span className="w-4 h-4 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[10px] font-bold">
+                          ✓
+                        </span>
+                      )}
                     </div>
-
-                    {/* Color swatches preview */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <div 
-                        className="w-5 h-5 rounded-full border border-black/40 shadow-sm" 
-                        style={{ backgroundColor: palObj.deepWork }}
-                        title={`Việc sâu: ${palObj.deepWork}`}
-                      />
-                      <div 
-                        className="w-5 h-5 rounded-full border border-black/40 shadow-sm" 
-                        style={{ backgroundColor: palObj.interruption }}
-                        title={`Gián đoạn: ${palObj.interruption}`}
-                      />
-                      <div 
-                        className="w-5 h-5 rounded-full border border-black/40 shadow-sm" 
-                        style={{ backgroundColor: palObj.meeting }}
-                        title={`Họp: ${palObj.meeting}`}
-                      />
-                      <div 
-                        className="w-5 h-5 rounded-full border border-black/40 shadow-sm" 
-                        style={{ backgroundColor: palObj.personal }}
-                        title={`Cá nhân: ${palObj.personal}`}
-                      />
-                      <div 
-                        className="w-5 h-5 rounded-full border border-black/40 shadow-sm" 
-                        style={{ backgroundColor: palObj.planning }}
-                        title={`Lập kế hoạch: ${palObj.planning}`}
-                      />
+                    <div>
+                      <span className="text-xs font-bold block">{p.label}</span>
+                      <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">{p.desc}</p>
                     </div>
                   </button>
                 );
@@ -294,9 +287,7 @@ export const AppearanceModal: React.FC = () => {
         <div className="px-5 py-3 border-t border-slate-200 bg-white/50 flex justify-end">
           <button
             onClick={() => setSettingsModalOpen(false)}
-            className={`px-5 py-2 rounded-xl text-white text-xs font-bold shadow-md transition-all ${
-              palette === 'cool' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
-            }`}
+            className="px-5 py-2 rounded-xl text-white text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
           >
             {language === 'en' ? 'Apply and Close' : 'Áp dụng và Đóng'}
           </button>

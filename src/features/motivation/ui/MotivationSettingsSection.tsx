@@ -159,7 +159,7 @@ export const MotivationSettingsSection: React.FC = () => {
           aria-checked={settings.enabled}
           onClick={handleToggleMaster}
           className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
-            settings.enabled ? (isCool ? 'bg-[#007AFF]' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
+            settings.enabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
           }`}
         >
           <span
@@ -197,7 +197,7 @@ export const MotivationSettingsSection: React.FC = () => {
                     aria-checked={isOn}
                     onClick={() => handleToggleSlot(item.key)}
                     className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
-                      isOn ? (isCool ? 'bg-[#007AFF]' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
+                      isOn ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
                     }`}
                   >
                     <span

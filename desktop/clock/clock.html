@@ -20,18 +20,34 @@
           <line x1="16" y1="17" x2="8" y2="17"></line>
         </svg>
       </button>
-      <!-- 3 View Modes (v0.3.34 Part E4) -->
-      <button id="btnModeRemaining" class="icon-btn active" title="Còn lại (1)" aria-label="Còn lại">⏳</button>
-      <button id="btnModeElapsed" class="icon-btn" title="Đã dùng (2)" aria-label="Đã dùng">⏱️</button>
-      <button id="btnModeGoal" class="icon-btn" title="Tiến độ mục tiêu (3)" aria-label="Mục tiêu">🎯</button>
+      <!-- 3 View Modes (v0.3.34 Part E4 & v0.3.47 Part D1 Lucide stroke 1.75px) -->
+      <button id="btnModeRemaining" class="icon-btn active" title="Còn lại (1)" aria-label="Còn lại">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+        </svg>
+      </button>
+      <button id="btnModeElapsed" class="icon-btn" title="Đã dùng (2)" aria-label="Đã dùng">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle>
+        </svg>
+      </button>
+      <button id="btnModeGoal" class="icon-btn" title="Tiến độ mục tiêu (3)" aria-label="Mục tiêu">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
+        </svg>
+      </button>
       <!-- Nút đổi kiểu xem: Thanh / Vòng -->
       <button id="btnViewMode" class="icon-btn" title="Đổi kiểu xem: Thanh / Vòng (V)" aria-label="Kiểu xem">
-        <svg id="viewModeIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg id="viewModeIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
         </svg>
       </button>
       <!-- Nút Ghim -->
-      <button id="btnPin" class="icon-btn active" title="Ghim luôn nổi trên cùng (P)" aria-label="Ghim">📌</button>
+      <button id="btnPin" class="icon-btn active" title="Ghim luôn nổi trên cùng (P)" aria-label="Ghim">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+        </svg>
+      </button>
       <!-- Nút Đóng -->
       <button id="btnClose" class="icon-btn" title="Đóng" aria-label="Đóng">&times;</button>
     </div>

@@ -42,7 +42,7 @@ async function build() {
 
   console.log(`Found ${candidateSet.size} candidate tokens across ${files.length} source files.`);
 
-  const compiler = await tw.compile('@import "tailwindcss"; @theme { --color-brand: var(--taio-brand); --color-brand-hover: var(--taio-brand-hover); }', {
+  const compiler = await tw.compile('@import "tailwindcss"; @theme { --color-brand: var(--taio-brand); --color-brand-hover: var(--taio-brand-hover); --color-brand-soft: var(--taio-brand-soft); }', {
     base: path.resolve(__dirname, '..'),
     loadStylesheet: async (id, base) => {
       let resolvedPath;
@@ -62,9 +62,13 @@ async function build() {
   console.log(`Generated CSS size: ${generatedCss.length} bytes.`);
 
   const customCss = `
-:root {
-  --taio-brand: #E8311C;
-  --taio-brand-hover: #d02512;
+:root,
+html,
+html[data-palette="red"] {
+  --taio-brand: #E11D2E;
+  --taio-brand-hover: #C4182A;
+  --taio-brand-soft: #FDE8EA;
+  --taio-brand-accent: #E11D2E;
   --background: #ffffff;
   --foreground: #0f172a;
   --native-sat: 0px;
@@ -73,6 +77,69 @@ async function build() {
   --sab: max(env(safe-area-inset-bottom, 0px), var(--native-sab, 0px));
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
+}
+
+html[data-palette="bright-blue"] {
+  --taio-brand: #0068FF;
+  --taio-brand-hover: #0055D4;
+  --taio-brand-soft: #E6F0FF;
+  --taio-brand-accent: #0068FF;
+}
+
+html[data-palette="calm-blue"] {
+  --taio-brand: #1C78C0;
+  --taio-brand-hover: #17669F;
+  --taio-brand-soft: #E8F4FC;
+  --taio-brand-accent: #2AABEE;
+}
+
+/* Dark mode adjustments */
+html.dark[data-palette="red"],
+html[data-theme="dark"][data-palette="red"] {
+  --taio-brand: #EF3042;
+  --taio-brand-hover: #E11D2E;
+  --taio-brand-soft: rgba(225, 29, 46, 0.22);
+  --taio-brand-accent: #EF3042;
+}
+html.dark[data-palette="bright-blue"],
+html[data-theme="dark"][data-palette="bright-blue"] {
+  --taio-brand: #2B7FFF;
+  --taio-brand-hover: #0068FF;
+  --taio-brand-soft: rgba(0, 104, 255, 0.22);
+  --taio-brand-accent: #2B7FFF;
+}
+html.dark[data-palette="calm-blue"],
+html[data-theme="dark"][data-palette="calm-blue"] {
+  --taio-brand: #2AABEE;
+  --taio-brand-hover: #1C78C0;
+  --taio-brand-soft: rgba(28, 120, 192, 0.22);
+  --taio-brand-accent: #2AABEE;
+}
+
+/* Platform Corner Radii (PRD v0.3.47 Part D3) */
+:root,
+html,
+html[data-device-look="auto"],
+html[data-device-look="macos"],
+html[data-device-look="phone"] {
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-overlay: 16px;
+  --radius-tile: 14px;
+}
+
+html[data-device-look="windows"] {
+  --radius-control: 4px;
+  --radius-card: 8px;
+  --radius-overlay: 8px;
+  --radius-tile: 4px;
+}
+
+@supports (corner-shape: squircle) {
+  .squircle-tile,
+  [data-squircle="true"] {
+    corner-shape: squircle;
+  }
 }
 
 /* Guaranteed hardware safe-area floor on iPhone portrait (iOS WebKit / WKWebView / IPA) */
@@ -154,29 +221,16 @@ body {
   animation: pulse-slow 3s ease-in-out infinite;
 }
 
-/* Brand Color Aliases for legacy #E0401F */
-.bg-\\[\\#E0401F\\] { background-color: #E8311C; background-color: var(--taio-brand); }
-.hover\\:bg-\\[\\#E0401F\\]:hover { background-color: #d02512; background-color: var(--taio-brand); }
-.hover\\:bg-\\[\\#d03515\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
-.hover\\:bg-\\[\\#cc3515\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
-.hover\\:bg-\\[\\#c53314\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
-.hover\\:bg-\\[\\#c93517\\]:hover { background-color: #d02512; background-color: var(--taio-brand-hover); }
-.text-\\[\\#E0401F\\] { color: #E8311C; color: var(--taio-brand); }
-.border-\\[\\#E0401F\\] { border-color: #E8311C; border-color: var(--taio-brand); }
-.ring-\\[\\#E0401F\\] { --tw-ring-color: #E8311C; --tw-ring-color: var(--taio-brand); }
-.focus\\:ring-\\[\\#E0401F\\]:focus { --tw-ring-color: #E8311C; --tw-ring-color: var(--taio-brand); }
-.stroke-\\[\\#E0401F\\] { stroke: #E8311C; stroke: var(--taio-brand); }
-.fill-\\[\\#E0401F\\] { fill: #E8311C; fill: var(--taio-brand); }
-
-/* Bulletproof Brand color variable fallbacks */
-.bg-\\[var\\(--taio-brand\\)\\] { background-color: #E8311C !important; background-color: var(--taio-brand, #E8311C) !important; }
-.hover\\:bg-\\[var\\(--taio-brand-hover\\)\\]:hover { background-color: #d02512 !important; background-color: var(--taio-brand-hover, #d02512) !important; }
-.text-\\[var\\(--taio-brand\\)\\] { color: #E8311C !important; color: var(--taio-brand, #E8311C) !important; }
-.border-\\[var\\(--taio-brand\\)\\] { border-color: #E8311C !important; border-color: var(--taio-brand, #E8311C) !important; }
-.focus\\:border-\\[var\\(--taio-brand\\)\\]:focus { border-color: #E8311C !important; border-color: var(--taio-brand, #E8311C) !important; }
-.ring-\\[var\\(--taio-brand\\)\\] { --tw-ring-color: #E8311C !important; --tw-ring-color: var(--taio-brand, #E8311C) !important; }
-.focus\\:ring-\\[var\\(--taio-brand\\)\\]:focus { --tw-ring-color: #E8311C !important; --tw-ring-color: var(--taio-brand, #E8311C) !important; }
-.shadow-\\[var\\(--taio-brand\\)\\]\\/20 { --tw-shadow-color: rgba(232, 49, 28, 0.2) !important; }
+/* Bulletproof Brand color variable classes */
+.bg-\\[var\\(--taio-brand\\)\\] { background-color: var(--taio-brand) !important; }
+.hover\\:bg-\\[var\\(--taio-brand-hover\\)\\]:hover { background-color: var(--taio-brand-hover) !important; }
+.bg-\\[var\\(--taio-brand-soft\\)\\] { background-color: var(--taio-brand-soft) !important; }
+.text-\\[var\\(--taio-brand\\)\\] { color: var(--taio-brand) !important; }
+.border-\\[var\\(--taio-brand\\)\\] { border-color: var(--taio-brand) !important; }
+.focus\\:border-\\[var\\(--taio-brand\\)\\]:focus { border-color: var(--taio-brand) !important; }
+.ring-\\[var\\(--taio-brand\\)\\] { --tw-ring-color: var(--taio-brand) !important; }
+.focus\\:ring-\\[var\\(--taio-brand\\)\\]:focus { --tw-ring-color: var(--taio-brand) !important; }
+.shadow-\\[var\\(--taio-brand\\)\\]\\/20 { --tw-shadow-color: var(--taio-brand) !important; }
 `;
 
   const finalCss = generatedCss + "\n" + customCss;

@@ -350,11 +350,7 @@ export const InterruptionModal: React.FC = () => {
           <button
             type="button"
             onClick={handleSave}
-            className={`w-full py-3 rounded-2xl text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 mt-3 ${
-              isCool
-                ? 'bg-[#007AFF] hover:bg-[#0066d6] shadow-blue-500/20'
-                : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-red-500/20'
-            }`}
+            className="w-full py-3 rounded-2xl text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 mt-3 bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-[var(--taio-brand)]/20"
           >
             <Check className="w-4 h-4" />
             <span>Xác nhận & Áp dụng</span>

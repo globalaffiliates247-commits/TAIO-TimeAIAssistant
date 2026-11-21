@@ -30,7 +30,10 @@ import {
   TrendingUp,
   Compass,
   Target,
-  Calendar
+  Calendar,
+  Hourglass,
+  Zap,
+  Droplets
 } from 'lucide-react';
 import { isIOSCalendarConnected, setIOSCalendarConnected, requestIOSCalendarAccess } from '@/features/events/service/calendarSync';
 import { isGoalSuggestionInlineChipEnabled, setGoalSuggestionInlineChipEnabled } from '@/features/goals';
@@ -470,25 +473,72 @@ export const ProfileModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Palette */}
-                <div className="grid grid-cols-2 gap-2">
+                {/* Palette (PRD v0.3.47 Part A1 & A4) */}
+                <div className="grid grid-cols-3 gap-2">
                   <button
-                    onClick={() => setPalette('warm')}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
-                      palette === 'warm' ? 'bg-[var(--taio-brand)]/20 border-[var(--taio-brand)] text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                    type="button"
+                    onClick={() => setPalette('red')}
+                    className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
+                      (palette === 'red' || palette === 'warm')
+                        ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
+                        : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    <span>Gam màu Ấm (Warm Red var(--taio-brand))</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)]" />
+                    <div className="w-8 h-8 rounded-xl bg-[#E11D2E] text-white flex items-center justify-center shadow-xs">
+                      <Hourglass className="w-4 h-4 stroke-[1.75]" />
+                    </div>
+                    <span className="text-[11px] leading-tight">
+                      {language === 'en' ? 'TAIO Red' : 'Đỏ TAIO'}
+                    </span>
+                    {(palette === 'red' || palette === 'warm') && (
+                      <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                        ✓
+                      </span>
+                    )}
                   </button>
+
                   <button
-                    onClick={() => setPalette('cool')}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-medium transition-all ${
-                      palette === 'cool' ? 'bg-sky-500/20 border-sky-500 text-slate-900' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+                    type="button"
+                    onClick={() => setPalette('bright-blue')}
+                    className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
+                      (palette === 'bright-blue' || palette === 'cool')
+                        ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
+                        : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    <span>Gam màu Mát (Cool Blue #007aff)</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#007aff]" />
+                    <div className="w-8 h-8 rounded-xl bg-[#0068FF] text-white flex items-center justify-center shadow-xs">
+                      <Zap className="w-4 h-4 stroke-[1.75]" />
+                    </div>
+                    <span className="text-[11px] leading-tight">
+                      {language === 'en' ? 'Bright Blue' : 'Xanh sáng'}
+                    </span>
+                    {(palette === 'bright-blue' || palette === 'cool') && (
+                      <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                        ✓
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPalette('calm-blue')}
+                    className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
+                      palette === 'calm-blue'
+                        ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
+                        : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-[#1C78C0] text-white flex items-center justify-center shadow-xs">
+                      <Droplets className="w-4 h-4 stroke-[1.75]" />
+                    </div>
+                    <span className="text-[11px] leading-tight">
+                      {language === 'en' ? 'Calm Blue' : 'Xanh dịu'}
+                    </span>
+                    {palette === 'calm-blue' && (
+                      <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                        ✓
+                      </span>
+                    )}
                   </button>
                 </div>
 
@@ -619,7 +669,7 @@ export const ProfileModal: React.FC = () => {
                           showToast(next ? 'Đã bật tự ghi nhận chuyển động' : 'Đã tắt và xóa dữ liệu chuyển động thô trên máy');
                         }}
                         className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 cursor-pointer focus:outline-none ${
-                          motionTrackingState ? (isCool ? 'bg-[#007AFF]' : 'bg-[var(--taio-brand)]') : 'bg-slate-300'
+                          motionTrackingState ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
                         }`}
                       >
                         <span

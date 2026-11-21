@@ -49,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" suppressHydrationWarning>
+    <html lang="vi" data-palette="red" data-device-look="auto" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: SAFE_AREA_BOOTSTRAP_SCRIPT }} />
       </head>

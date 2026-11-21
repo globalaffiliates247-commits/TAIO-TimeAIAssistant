@@ -647,6 +647,33 @@ export const INITIAL_AI_SUGGESTIONS: SuperAdminAISuggestion[] = [
 import { ColorPalette, PaletteColors, InterruptionActivityCategory } from '../types';
 
 export const PALETTES: Record<ColorPalette, PaletteColors> = {
+  red: {
+    name: 'red',
+    brandAccent: 'var(--taio-brand)',
+    deepWork: 'var(--taio-brand)',
+    interruption: '#F59E0B',
+    meeting: '#8A6248',
+    personal: '#5E8C31',
+    planning: '#FCD34D',
+  },
+  'bright-blue': {
+    name: 'bright-blue',
+    brandAccent: 'var(--taio-brand)',
+    deepWork: 'var(--taio-brand)',
+    interruption: '#0E9FB3',
+    meeting: '#5856D6',
+    personal: '#2E8B57',
+    planning: '#7DB8F5',
+  },
+  'calm-blue': {
+    name: 'calm-blue',
+    brandAccent: 'var(--taio-brand)',
+    deepWork: 'var(--taio-brand)',
+    interruption: '#0E9FB3',
+    meeting: '#5856D6',
+    personal: '#2E8B57',
+    planning: '#7DB8F5',
+  },
   warm: {
     name: 'warm',
     brandAccent: 'var(--taio-brand)',
@@ -658,8 +685,8 @@ export const PALETTES: Record<ColorPalette, PaletteColors> = {
   },
   cool: {
     name: 'cool',
-    brandAccent: '#007AFF', // PRD v0.3.9 D4: Apple System Blue
-    deepWork: '#007AFF',
+    brandAccent: 'var(--taio-brand)',
+    deepWork: 'var(--taio-brand)',
     interruption: '#0E9FB3',
     meeting: '#5856D6',
     personal: '#2E8B57',

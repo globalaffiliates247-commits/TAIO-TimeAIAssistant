@@ -156,9 +156,7 @@ export const ExportDataModal: React.FC = () => {
               />
               <button
                 onClick={handleCopyLink}
-                className={`py-2 px-3 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs transition-all ${
-                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#E8311C] hover:bg-[#d02512]'
-                }`}
+                className="py-2 px-3 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5 text-white" />}
                 <span>

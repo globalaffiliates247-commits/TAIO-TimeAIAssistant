@@ -13,6 +13,7 @@ import { computeBlockStatus, getDeviceCalendarDate } from '../src/core/clock/ind
 import { expandOccurrences } from '../src/domain/events/index.ts';
 import { defaultLunarProvider } from '../src/domain/lunar/index.ts';
 import { newFreeSticky, updateSticky, closeSticky, getStickyNotesForExport } from '../src/features/sticky/model/stickyStore.ts';
+import { computeRingArc } from '../src/domain/clockRing.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -510,6 +511,33 @@ if (fs.existsSync(clockJsPath)) {
       console.error(`[FAIL] Clock test crashed for mode ${mode}:`, err);
       failed++;
     }
+  }
+}
+
+// 10. Clock Ring & Bar Geometry test vectors (PRD v0.3.47 Part C)
+const ringCirc = 100;
+const ringTests = [
+  { e: 0, remDash: 100, remOffset: 0, elapDash: 0, elapOffset: 0, isOverrun: false },
+  { e: 0.25, remDash: 75, remOffset: -25, elapDash: 25, elapOffset: 0, isOverrun: false },
+  { e: 0.5, remDash: 50, remOffset: -50, elapDash: 50, elapOffset: 0, isOverrun: false },
+  { e: 1.0, remDash: 0, remOffset: -100, elapDash: 100, elapOffset: 0, isOverrun: false },
+  { e: 0.8, remDash: 100, remOffset: 0, elapDash: 100, elapOffset: 0, isOverrun: true },
+];
+
+for (const rt of ringTests) {
+  const rem = computeRingArc('remaining', rt.e, ringCirc, rt.isOverrun);
+  const elap = computeRingArc('elapsed', rt.e, ringCirc, rt.isOverrun);
+
+  if (
+    rem.dashLength === rt.remDash &&
+    rem.dashOffset === rt.remOffset &&
+    elap.dashLength === rt.elapDash &&
+    elap.dashOffset === rt.elapOffset
+  ) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Ring test for e=${rt.e}, overrun=${rt.isOverrun}: got rem=(${rem.dashLength}, ${rem.dashOffset}), elap=(${elap.dashLength}, ${elap.dashOffset})`);
+    failed++;
   }
 }
 

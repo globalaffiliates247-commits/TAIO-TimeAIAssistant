@@ -269,7 +269,7 @@
   });
   btnQuoteFav?.addEventListener('click', () => {
     try {
-      btnQuoteFav.style.color = '#e0401f';
+      btnQuoteFav.style.color = 'var(--taio-brand)';
       if (window.taioAPI && window.taioAPI.sendTimerAction) {
         window.taioAPI.sendTimerAction({ type: 'fav-quote', quote: currentQuote });
       }
@@ -309,6 +309,13 @@
       currentMode = data.mode || (typeof data.endsAt === 'number' && data.endsAt > 0 ? 'task' : 'gap');
       currentTaskId = data.taskId || null;
       if (data.lang) currentLang = data.lang;
+
+      if (data.palette) {
+        document.documentElement.setAttribute('data-palette', data.palette);
+      }
+      if (data.theme) {
+        document.documentElement.classList.toggle('dark', data.theme === 'dark');
+      }
 
       endsAt = typeof data.endsAt === 'number' ? data.endsAt : 0;
       startedAt = typeof data.startedAt === 'number' ? data.startedAt : 0;
@@ -459,9 +466,12 @@
 
       const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
       const totalDurationMins = Math.round(totalSec / 60);
+      const isOverrun = endsAt > 0 && now > endsAt;
+      const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
+      const e = totalSec > 0 ? Math.max(0, Math.min(1, secElapsed / totalSec)) : 0;
 
       if (threeViewMode === 'remaining') {
-        if (now > endsAt && endsAt > 0) {
+        if (isOverrun) {
           const overrunMins = Math.max(1, Math.floor((now - endsAt) / 60000));
           digitsStr = currentLang === 'vi' ? `quá ${overrunMins}p` : `over ${overrunMins}m`;
           sublineStr = currentLang === 'vi' ? 'đã quá hạn' : 'overrun';
@@ -472,15 +482,14 @@
           const s = secRemaining % 60;
           digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
           sublineStr = `${currentLang === 'vi' ? 'còn lại' : 'remaining'} / ${totalDurationMins}p`;
-          fraction = totalSec > 0 ? Math.max(0, Math.min(1, secRemaining / totalSec)) : 0;
+          fraction = 1 - e;
         }
       } else if (threeViewMode === 'elapsed') {
-        const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
         const m = Math.floor(secElapsed / 60);
         const s = secElapsed % 60;
         digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         sublineStr = `${currentLang === 'vi' ? 'đã dùng' : 'elapsed'} / ${totalDurationMins}p`;
-        fraction = totalSec > 0 ? Math.max(0, Math.min(1, secElapsed / totalSec)) : 0;
+        fraction = e;
       } else if (threeViewMode === 'goal') {
         const gh = (lastData && typeof lastData.goalHours === 'number') ? lastData.goalHours : 0;
         const gm = (lastData && typeof lastData.goalMins === 'number') ? lastData.goalMins : 0;
@@ -500,13 +509,39 @@
       if (ringDigits) ringDigits.innerText = digitsStr;
       if (ringSubText) ringSubText.innerText = sublineStr;
 
-      // Bar progress width
-      if (barProgress) barProgress.style.width = `${Math.round(fraction * 100)}%`;
+      // Bar progress: Part C3
+      if (barProgress) {
+        if (isOverrun) {
+          barProgress.style.left = '0%';
+          barProgress.style.width = '100%';
+        } else if (threeViewMode === 'remaining') {
+          barProgress.style.left = `${Math.round(e * 100)}%`;
+          barProgress.style.width = `${Math.round((1 - e) * 100)}%`;
+        } else if (threeViewMode === 'goal') {
+          barProgress.style.left = '0%';
+          barProgress.style.width = `${Math.round(fraction * 100)}%`;
+        } else {
+          barProgress.style.left = '0%';
+          barProgress.style.width = `${Math.round(e * 100)}%`;
+        }
+      }
 
-      // Ring progress circle
+      // Ring progress circle: Part C1
       if (ringCircle) {
-        const offset = ringCircumference - fraction * ringCircumference;
-        ringCircle.style.strokeDashoffset = offset;
+        if (isOverrun) {
+          ringCircle.style.strokeDasharray = `${ringCircumference} ${ringCircumference}`;
+          ringCircle.style.strokeDashoffset = '0';
+        } else if (threeViewMode === 'remaining') {
+          const rem = 1 - e;
+          ringCircle.style.strokeDasharray = `${rem * ringCircumference} ${ringCircumference}`;
+          ringCircle.style.strokeDashoffset = `${-e * ringCircumference}`;
+        } else if (threeViewMode === 'goal') {
+          ringCircle.style.strokeDasharray = `${fraction * ringCircumference} ${ringCircumference}`;
+          ringCircle.style.strokeDashoffset = '0';
+        } else {
+          ringCircle.style.strokeDasharray = `${e * ringCircumference} ${ringCircumference}`;
+          ringCircle.style.strokeDashoffset = '0';
+        }
       }
     } catch (err) {
       reportError(err, 'tick');

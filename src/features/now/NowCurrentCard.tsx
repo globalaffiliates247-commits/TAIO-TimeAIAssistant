@@ -531,13 +531,13 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
         {/* Ring Clock for Gap state */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-5 py-1">
           <NowClockRing
-            isCountDown={viewMode === 'elapsed'}
-            percent={
+            mode={viewMode}
+            elapsedFraction={
               viewMode === 'remaining'
-                ? Math.min(100, (unassignedMins / 60) * 100)
+                ? Math.min(1, Math.max(0, unassignedMins / 60))
                 : viewMode === 'elapsed'
-                ? (state.next ? Math.min(100, Math.max(0, 100 - (timeToMinutes(state.next.startTime) - nowMins))) : 100)
-                : Math.min(100, (unassignedMins / (9 * 60)) * 100)
+                ? (state.next ? Math.min(1, Math.max(0, 1 - (timeToMinutes(state.next.startTime) - nowMins) / 60)) : 1)
+                : Math.min(1, unassignedMins / (9 * 60))
             }
             timeText={
               viewMode === 'remaining'
@@ -969,13 +969,11 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
         {/* Ring Clock with Subline */}
         <div className="flex flex-col items-center">
           <NowClockRing
-            isCountDown={viewMode === 'remaining'}
-            percent={
-              viewMode === 'remaining'
-                ? (isOverrunTime ? 100 : percent)
-                : viewMode === 'elapsed'
-                ? Math.min(100, (elapsedSec / (totalDurationMins * 60)) * 100)
-                : goalPercent
+            mode={viewMode}
+            elapsedFraction={
+              viewMode === 'goal'
+                ? goalPercent / 100
+                : totalDurationMins > 0 ? Math.min(1, Math.max(0, elapsedSec / (totalDurationMins * 60))) : 0
             }
             timeText={
               viewMode === 'remaining'

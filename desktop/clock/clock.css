@@ -5,19 +5,78 @@
   user-select: none;
 }
 
+:root,
+html,
+html[data-palette="red"] {
+  --taio-brand: #E11D2E;
+  --taio-brand-hover: #C4182A;
+  --taio-brand-soft: #FDE8EA;
+  --taio-brand-accent: #E11D2E;
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --border-main: #e2e8f0;
+}
+
+html[data-palette="bright-blue"] {
+  --taio-brand: #0068FF;
+  --taio-brand-hover: #0055D4;
+  --taio-brand-soft: #E6F0FF;
+  --taio-brand-accent: #0068FF;
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --border-main: #e2e8f0;
+}
+
+html[data-palette="calm-blue"] {
+  --taio-brand: #1C78C0;
+  --taio-brand-hover: #17669F;
+  --taio-brand-soft: #E8F4FC;
+  --taio-brand-accent: #2AABEE;
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --border-main: #e2e8f0;
+}
+
+/* Dark mode */
+html.dark,
+html[data-theme="dark"] {
+  --bg-main: #0f172a;
+  --text-main: #f8fafc;
+  --border-main: #334155;
+}
+html.dark[data-palette="red"],
+html[data-theme="dark"][data-palette="red"] {
+  --taio-brand: #EF3042;
+  --taio-brand-hover: #E11D2E;
+  --taio-brand-soft: rgba(225, 29, 46, 0.22);
+}
+html.dark[data-palette="bright-blue"],
+html[data-theme="dark"][data-palette="bright-blue"] {
+  --taio-brand: #2B7FFF;
+  --taio-brand-hover: #0068FF;
+  --taio-brand-soft: rgba(0, 104, 255, 0.22);
+}
+html.dark[data-palette="calm-blue"],
+html[data-theme="dark"][data-palette="calm-blue"] {
+  --taio-brand: #2AABEE;
+  --taio-brand-hover: #1C78C0;
+  --taio-brand-soft: rgba(28, 120, 192, 0.22);
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--bg-main);
+  color: var(--text-main);
   height: 100vh;
   width: 100vw;
   display: flex;
   flex-direction: column;
   padding: 8px 12px 6px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-main);
   border-radius: 16px;
   overflow: hidden;
   position: relative;
+  -webkit-app-region: drag; /* PRD v0.3.47 Part B1: Entire window body is draggable */
 }
 
 /* Header */
@@ -42,7 +101,6 @@ body {
 .drag-region {
   flex: 1;
   height: 100%;
-  -webkit-app-region: drag;
 }
 
 .header-actions {
@@ -58,8 +116,8 @@ body {
   cursor: pointer;
   font-size: 11px;
   color: #64748b;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -75,7 +133,8 @@ body {
 }
 
 .icon-btn.active {
-  color: #e0401f;
+  background: var(--taio-brand-soft);
+  color: var(--taio-brand);
   font-weight: 700;
 }
 
@@ -107,7 +166,7 @@ body {
 }
 
 .task-title:hover {
-  color: #007aff;
+  color: var(--taio-brand);
 }
 
 .subtitle-line {
@@ -138,18 +197,23 @@ body {
 
 .progress-track {
   width: 100%;
-  height: 3px;
-  background: #f1f5f9;
+  height: 4px;
+  background: var(--taio-brand-soft);
   border-radius: 2px;
   overflow: hidden;
   margin: 2px 0 4px;
+  position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  background: #e0401f;
+  background: var(--taio-brand);
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  transition: width 1s linear;
+  border-radius: 2px;
+  transition: width 0.8s ease-out, left 0.8s ease-out;
 }
 
 /* Free Timer Row */
@@ -165,6 +229,7 @@ body {
   align-items: center;
   justify-content: space-between;
   border: 1px solid #fef3c7;
+  -webkit-app-region: no-drag;
 }
 
 .free-timer-title {
@@ -200,13 +265,13 @@ body {
 }
 
 .ring-track {
-  stroke: #fee2e2;
+  stroke: var(--taio-brand-soft);
 }
 
 .ring-progress {
-  stroke: #e0401f;
+  stroke: var(--taio-brand);
   stroke-linecap: round;
-  transition: stroke-dashoffset 0.8s ease-out;
+  transition: stroke-dashoffset 0.8s ease-out, stroke-dasharray 0.8s ease-out;
 }
 
 .ring-center {
@@ -266,6 +331,7 @@ body {
   align-items: center;
   justify-content: center;
   transition: all 0.15s;
+  -webkit-app-region: no-drag;
 }
 
 .btn:hover {
@@ -274,13 +340,13 @@ body {
 }
 
 .btn.primary {
-  background: #e0401f;
+  background: var(--taio-brand);
   color: #ffffff;
   border: none;
 }
 
 .btn.primary:hover {
-  background: #c83618;
+  background: var(--taio-brand-hover);
 }
 
 /* Motivation Line at Bottom (PRD Part I4) */
@@ -300,6 +366,7 @@ body {
   text-overflow: ellipsis;
   flex-shrink: 0;
   transition: color 0.15s;
+  -webkit-app-region: no-drag;
 }
 
 .motivation-line:hover {
@@ -326,6 +393,11 @@ body {
   justify-content: space-between;
   z-index: 50;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  -webkit-app-region: no-drag;
+}
+
+.quote-modal button {
+  -webkit-app-region: no-drag;
 }
 
 .quote-content {
@@ -351,6 +423,7 @@ body {
   margin-top: 6px;
   border-top: 1px solid #f1f5f9;
   padding-top: 6px;
+  -webkit-app-region: no-drag;
 }
 
 .quote-action-btn {
@@ -361,6 +434,7 @@ body {
   color: #64748b;
   padding: 2px 6px;
   border-radius: 6px;
+  -webkit-app-region: no-drag;
 }
 
 .quote-action-btn:hover {

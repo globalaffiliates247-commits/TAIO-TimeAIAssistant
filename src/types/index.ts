@@ -350,7 +350,7 @@ export interface SuperAdminAISuggestion {
 // B17: Appearance & Device Settings
 export type DeviceLook = 'auto' | 'macos' | 'windows' | 'phone';
 export type ThemeMode = 'system' | 'light' | 'dark';
-export type ColorPalette = 'warm' | 'cool' | 'neutral';
+export type ColorPalette = 'red' | 'bright-blue' | 'calm-blue' | 'warm' | 'cool' | 'neutral';
 
 export interface PaletteColors {
   name: ColorPalette;

@@ -2,36 +2,42 @@
 
 import React from 'react';
 import { useHighlight } from '@/features/prefs';
+import { computeRingArc, ClockRingMode } from '@/domain/clockRing';
 
 export interface NowClockRingProps {
-  isCountDown: boolean;
-  percent: number; // 0 to 100
+  isCountDown?: boolean;
+  percent?: number; // legacy fallback (0 to 100)
+  mode?: ClockRingMode;
+  elapsedFraction?: number; // 0 to 1
   timeText: string;
   subText: string;
   isOverrun?: boolean;
   size?: number;
-  isCool?: boolean;
+  isCool?: boolean; // deprecated legacy prop
   onClick?: () => void;
 }
 
 export const NowClockRing: React.FC<NowClockRingProps> = ({
   isCountDown,
-  percent,
+  percent = 0,
+  mode,
+  elapsedFraction,
   timeText,
   subText,
   isOverrun = false,
   size = 140,
-  isCool = false,
   onClick,
 }) => {
   const strokeWidth = 9;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const clampedPercent = Math.min(100, Math.max(0, percent));
-  const strokeDashoffset = circumference - (clampedPercent / 100) * circumference;
 
-  const colorPrimary = isCool ? '#007aff' : 'var(--taio-brand)';
-  const colorTrack = isCool ? '#e0f2fe' : '#fee2e2';
+  // PRD v0.3.47 Part C: Stationary boundary point & identical geometry
+  const effectiveMode: ClockRingMode = mode || (isCountDown ? 'remaining' : 'elapsed');
+  const e = typeof elapsedFraction === 'number' ? elapsedFraction : Math.min(1, Math.max(0, percent / 100));
+
+  const arc = computeRingArc(effectiveMode, e, circumference, isOverrun);
+
   const { highlightStyle } = useHighlight();
 
   return (
@@ -41,12 +47,12 @@ export const NowClockRing: React.FC<NowClockRingProps> = ({
       onClick={onClick}
     >
       <svg width={size} height={size} className="transform -rotate-90">
-        {/* Track circle */}
+        {/* Track circle (soft brand tint) */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={colorTrack}
+          stroke="var(--taio-brand-soft)"
           strokeWidth={strokeWidth}
           fill="transparent"
         />
@@ -55,10 +61,10 @@ export const NowClockRing: React.FC<NowClockRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={colorPrimary}
+          stroke="var(--taio-brand)"
           strokeWidth={strokeWidth}
-          strokeDasharray={isOverrun ? '6, 4' : `${circumference} ${circumference}`}
-          strokeDashoffset={strokeDashoffset}
+          strokeDasharray={isOverrun ? '6, 4' : `${arc.dashLength} ${circumference}`}
+          strokeDashoffset={arc.dashOffset}
           strokeLinecap="round"
           fill="transparent"
           className="transition-all duration-500 ease-out"
