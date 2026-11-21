@@ -4,9 +4,10 @@ import { MotivationQuote, QuoteContext } from './types';
 export interface PickQuoteOptions {
   quotes: MotivationQuote[];
   context: QuoteContext;
-  lang: 'vi' | 'en';
+  lang: 'vi' | 'en' | 'zh' | 'th' | string;
   favorites?: string[];
   pinnedQuoteId?: string;
+  pinnedGoalQuotes?: Record<string, string>; // v0.3.48 Part B3
   activeGoalName?: string;
   activeGoalId?: string;
   recentQuoteIds?: string[]; // Quotes shown in last 7 days
@@ -21,6 +22,7 @@ export function pickQuote(options: PickQuoteOptions): MotivationQuote | null {
     lang,
     favorites = [],
     pinnedQuoteId,
+    pinnedGoalQuotes,
     activeGoalName,
     activeGoalId,
     recentQuoteIds = [],
@@ -41,14 +43,36 @@ export function pickQuote(options: PickQuoteOptions): MotivationQuote | null {
   const activeQuotes = quotes.filter(q => q.active);
   if (activeQuotes.length === 0) return null;
 
-  // 1. Pinned quote takes absolute top priority (B5.3: "câu của tôi" luôn hiện ở Bắt đầu ngày, không bị ↻ thay)
+  // 1. Goal-specific pinned quote takes absolute priority for this goal (PRD v0.3.48 Part B3)
+  if (activeGoalId && pinnedGoalQuotes && pinnedGoalQuotes[activeGoalId]) {
+    const goalPinnedId = pinnedGoalQuotes[activeGoalId];
+    const goalPinned = activeQuotes.find(q => q.id === goalPinnedId);
+    if (goalPinned) return goalPinned;
+  }
+
+  // 2. Global pinned quote takes absolute top priority (B5.3: "câu của tôi" luôn hiện ở Bắt đầu ngày, không bị ↻ thay)
   if (pinnedQuoteId && (context === 'start_day' || !allExcluded.has(pinnedQuoteId))) {
     const pinned = activeQuotes.find(q => q.id === pinnedQuoteId);
     if (pinned) return pinned;
   }
 
-  // Language matching pool: match target lang, fallback to vi if empty
+  // Language matching pool: match target lang
   let langPool = activeQuotes.filter(q => q.lang === lang);
+  if (lang === 'zh') {
+    // When Chinese is selected, also map quotes with original Chinese text if not already in pool
+    const zhOrigs = activeQuotes.filter(q => q.originalLang === 'zh');
+    for (const zo of zhOrigs) {
+      if (!langPool.some(p => p.id === zo.id)) {
+        langPool.push({
+          ...zo,
+          text: zo.originalText || zo.text,
+        });
+      }
+    }
+  }
+  if (langPool.length === 0) {
+    langPool = activeQuotes.filter(q => q.lang === 'en');
+  }
   if (langPool.length === 0) {
     langPool = activeQuotes.filter(q => q.lang === 'vi');
   }

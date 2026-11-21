@@ -22,7 +22,8 @@ import {
 import { quoteRegistry } from '../model/quoteRegistry';
 import { sendQuoteReaction } from '../model/quoteReaction';
 import { useHighlight } from '@/features/prefs';
-import { RefreshCw, Heart, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, Heart, X, ChevronDown, ChevronUp, Lightbulb, Pin } from 'lucide-react';
+import { togglePinGoalQuote } from '../model/motivationStore';
 
 export interface MotivationStickerProps {
   slotKey: keyof MotivationSettings['slots'];
@@ -152,40 +153,68 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   }
 
   const isFavorited = userState.favorites.includes(currentQuote.id);
+  const isGoalPinned = Boolean(activeGoalId && currentQuote && userState.pinnedGoalQuotes?.[activeGoalId] === currentQuote.id);
+
+  const handleTogglePinGoal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!activeGoalId || !currentQuote) return;
+    const nextPinned = togglePinGoalQuote(activeGoalId, currentQuote.id);
+    const updatedMap = { ...(userState.pinnedGoalQuotes || {}) };
+    if (nextPinned) {
+      updatedMap[activeGoalId] = currentQuote.id;
+    } else {
+      delete updatedMap[activeGoalId];
+    }
+    setUserState({ ...userState, pinnedGoalQuotes: updatedMap });
+  };
 
   // Render by size
   if (size === 'line') {
     return (
       <div
-        className={`group relative flex items-center justify-between gap-2 px-2 py-1 text-xs text-neutral-600 dark:text-neutral-400 bg-black/[0.02] dark:bg-white/[0.02] rounded border border-black/5 dark:border-white/5 transition-colors ${className}`}
+        className={`group relative flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl border border-black/5 dark:border-white/5 transition-colors ${className}`}
         title={currentQuote.text}
       >
-        <div
-          className="flex-1 cursor-pointer truncate"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <span className="font-normal italic" style={highlightStyle}>
-            "{currentQuote.text}"
-          </span>
-          {currentQuote.author && (
-            <span className="ml-1 text-[10px] text-neutral-400 dark:text-neutral-500 not-italic">
-              — {currentQuote.author}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <Lightbulb className="w-3.5 h-3.5 shrink-0 text-[var(--taio-brand)] stroke-[1.75]" />
+          <div
+            className="flex-1 cursor-pointer truncate"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <span className="font-normal italic" style={highlightStyle}>
+              "{currentQuote.text}"
             </span>
-          )}
+            {currentQuote.author && (
+              <span className="ml-1 text-[10px] text-neutral-400 dark:text-neutral-500 not-italic">
+                — {currentQuote.author}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Action icons */}
-        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity shrink-0">
+          {activeGoalId && (
+            <button
+              onClick={handleTogglePinGoal}
+              className={`p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${
+                isGoalPinned ? 'text-[var(--taio-brand)] font-bold' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              }`}
+              title={isGoalPinned ? (language === 'en' ? 'Unpin from this goal' : 'Bỏ gắn cho mục tiêu này') : (language === 'en' ? 'Pin to this goal' : 'Gắn cho mục tiêu này')}
+            >
+              <Pin size={12} className={isGoalPinned ? 'fill-current' : ''} />
+            </button>
+          )}
           <button
             onClick={handleRefresh}
-            className="p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
             title={t('motivation.refresh', 'Đổi câu khác')}
           >
             <RefreshCw size={11} />
           </button>
           <button
             onClick={handleToggleFavorite}
-            className={`p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${
+            className={`p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${
               isFavorited ? 'text-red-500 hover:text-red-600' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
             }`}
             title={t('motivation.favorite', 'Lưu vào kho của tôi')}
@@ -194,7 +223,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           </button>
           <button
             onClick={handleHideToday}
-            className="p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
             title={t('motivation.hideToday', 'Ẩn hết hôm nay')}
           >
             <X size={11} />
@@ -202,7 +231,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           {collapsible && isCollapsed && onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
-              className="p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+              className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
               title={t('common.expand', 'Mở rộng')}
             >
               <ChevronDown size={11} />
@@ -310,30 +339,40 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   // Card size (e.g. GoalsTab, CloseDayModal)
   return (
     <div
-      className={`group relative p-3.5 rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-800 shadow-sm transition-all ${className}`}
+      className={`group relative p-3.5 rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-800 shadow-2xs transition-all ${className}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div
-          className={`flex-1 cursor-pointer text-sm text-neutral-800 dark:text-neutral-200 font-normal italic leading-relaxed ${
-            isExpanded ? '' : 'line-clamp-4'
-          }`}
-          onClick={() => setIsExpanded(!isExpanded)}
-          style={highlightStyle}
-        >
-          "{currentQuote.text}"
+        <div className="flex items-start gap-2.5 flex-1 min-w-0">
+          <div className="w-7 h-7 rounded-xl bg-[var(--taio-brand-soft)] flex items-center justify-center shrink-0 mt-0.5">
+            <Lightbulb className="w-4 h-4 text-[var(--taio-brand)] stroke-[1.75]" />
+          </div>
+          <div
+            className={`flex-1 cursor-pointer text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 font-normal italic leading-relaxed ${
+              isExpanded ? '' : 'line-clamp-3'
+            }`}
+            onClick={() => setIsExpanded(!isExpanded)}
+            style={highlightStyle}
+          >
+            "{currentQuote.text}"
 
-          {/* v0.3.34 Part C5: Original quote text when viewing a translation */}
-          {currentQuote.originalText && isExpanded && (
-            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400 italic font-normal">
-              <span className="font-semibold not-italic text-neutral-700 dark:text-neutral-300">
-                {t('motivation.original', 'Nguyên văn')} ({currentQuote.originalLang || 'en'}):
-              </span> "{currentQuote.originalText}"
-            </div>
-          )}
+            {/* v0.3.34 Part C5: Original quote text when viewing a translation */}
+            {currentQuote.originalText && isExpanded && (
+              <div className="mt-2 pt-2 border-t border-slate-100 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400 italic font-normal">
+                <span className="font-semibold not-italic text-neutral-700 dark:text-neutral-300">
+                  {t('motivation.original', 'Nguyên văn')} ({currentQuote.originalLang || 'en'}):
+                </span> "{currentQuote.originalText}"
+              </div>
+            )}
+            {currentQuote.author && (
+              <div className="mt-1.5 text-right text-xs text-neutral-500 dark:text-neutral-400 not-italic">
+                — {currentQuote.author}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Action icons */}
-        <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity shrink-0">
           <button
             onClick={handleRefresh}
             className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
@@ -359,12 +398,6 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           </button>
         </div>
       </div>
-
-      {currentQuote.author && (
-        <div className="mt-2 text-right text-xs text-neutral-500 dark:text-neutral-400 not-italic">
-          — {currentQuote.author}
-        </div>
-      )}
     </div>
   );
 };

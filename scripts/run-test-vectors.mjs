@@ -14,6 +14,7 @@ import { expandOccurrences } from '../src/domain/events/index.ts';
 import { defaultLunarProvider } from '../src/domain/lunar/index.ts';
 import { newFreeSticky, updateSticky, closeSticky, getStickyNotesForExport } from '../src/features/sticky/model/stickyStore.ts';
 import { computeRingArc } from '../src/domain/clockRing.ts';
+import { clockState } from '../src/features/clock/model/clockState.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -537,6 +538,60 @@ for (const rt of ringTests) {
     passed++;
   } else {
     console.error(`[FAIL] Ring test for e=${rt.e}, overrun=${rt.isOverrun}: got rem=(${rem.dashLength}, ${rem.dashOffset}), elap=(${elap.dashLength}, ${elap.dashOffset})`);
+    failed++;
+  }
+}
+
+// 11. Gap Time Stability & StartedAt Non-Reset Test Vector (PRD v0.3.48 Part A4)
+{
+  const testBlocks = [
+    {
+      id: 'block-prev',
+      title: 'Khối sâu 1',
+      startTime: '09:00',
+      endTime: '10:00',
+      status: 'completed',
+    },
+    {
+      id: 'block-next',
+      title: 'Khối sâu 2',
+      startTime: '10:30',
+      endTime: '11:30',
+      status: 'planned',
+    },
+  ];
+
+  // At T1 = 10:01:00 (1 minute after previous block ended at 10:00)
+  const t1Date = new Date();
+  t1Date.setHours(10, 1, 0, 0);
+  const state1 = clockState(testBlocks, [], t1Date);
+
+  const tPrevEnd = new Date(t1Date);
+  tPrevEnd.setHours(10, 0, 0, 0);
+  const expectedStartMs = tPrevEnd.getTime();
+  const elapsedSec1 = Math.floor((t1Date.getTime() - state1.startedAt) / 1000);
+
+  // At T2 = 10:01:02 (2 seconds later, mimicking the 2000ms syncTimer pulse)
+  const t2Date = new Date();
+  t2Date.setHours(10, 1, 2, 0);
+  const state2 = clockState(testBlocks, [], t2Date);
+  const elapsedSec2 = Math.floor((t2Date.getTime() - state2.startedAt) / 1000);
+
+  if (
+    state1.mode === 'gap' &&
+    state2.mode === 'gap' &&
+    state1.startedAt === expectedStartMs &&
+    state2.startedAt === expectedStartMs &&
+    state1.startedAt === state2.startedAt &&
+    elapsedSec1 === 60 &&
+    elapsedSec2 === 62
+  ) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Gap clockState test A4: 
+      mode1=${state1.mode}, mode2=${state2.mode},
+      startedAt1=${state1.startedAt}, startedAt2=${state2.startedAt}, expectedStartMs=${expectedStartMs},
+      elapsedSec1=${elapsedSec1} (expected 60), elapsedSec2=${elapsedSec2} (expected 62)`);
     failed++;
   }
 }

@@ -1,7 +1,7 @@
 // PRD FIX v0.3.30 Part E1: Pure clockState function (Universal 3-state clock)
-import type { TimeBlock } from '@/types';
-import type { DayTemplateSlot } from '@/features/data-transfer';
-import { timeToMinutes, computeBlockStatus } from '@/core/clock';
+import type { TimeBlock } from '../../../types';
+import type { DayTemplateSlot } from '../../data-transfer';
+import { timeToMinutes, computeBlockStatus } from '../../../core/clock/index.ts';
 
 export type ClockMode = 'task' | 'gap' | 'template_or_current';
 
@@ -32,7 +32,7 @@ export function clockState(
   scheduleBlocks: TimeBlock[] = [],
   dayTemplate: DayTemplateSlot[] = [],
   now: Date = new Date(),
-  lang: 'vi' | 'en' = 'vi'
+  lang: 'vi' | 'en' | string = 'vi'
 ): ClockStateResult {
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -114,12 +114,62 @@ export function clockState(
     };
   }
 
+  // Helper to determine the true start of a gap / untracked period (PRD v0.3.48 Part A1)
+  const findGapStartMs = (): number => {
+    // 1. Find the latest block that finished before or at nowMins
+    const finishedBlocks = scheduleBlocks
+      .filter(b => {
+        if (b.status === 'dropped') return false;
+        const bEndMins = timeToMinutes(b.endTime);
+        return bEndMins <= nowMins;
+      })
+      .sort((a, b) => timeToMinutes(b.endTime) - timeToMinutes(a.endTime));
+
+    if (finishedBlocks.length > 0) {
+      return helperToTimestamp(finishedBlocks[0].endTime);
+    }
+
+    // 2. If no prior scheduled block today, look for prior day template slot
+    if (Array.isArray(dayTemplate) && dayTemplate.length > 0) {
+      const finishedSlots = dayTemplate
+        .filter(s => timeToMinutes(s.end) <= nowMins)
+        .sort((a, b) => timeToMinutes(b.end) - timeToMinutes(a.end));
+
+      if (finishedSlots.length > 0) {
+        return helperToTimestamp(finishedSlots[0].end);
+      }
+
+      // First slot start of the day
+      const sortedSlots = [...dayTemplate].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+      const firstSlotMins = timeToMinutes(sortedSlots[0].start);
+      if (firstSlotMins <= nowMins) {
+        return helperToTimestamp(sortedSlots[0].start);
+      }
+    }
+
+    // 3. Earliest planned block today
+    const allValidBlocks = scheduleBlocks
+      .filter(b => b.status !== 'dropped')
+      .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+    if (allValidBlocks.length > 0) {
+      const firstBlockStartMins = timeToMinutes(allValidBlocks[0].startTime);
+      if (firstBlockStartMins <= nowMins) {
+        return helperToTimestamp(allValidBlocks[0].startTime);
+      }
+    }
+
+    // 4. Fallback anchor: start of work day (08:00) or beginning of day (06:00)
+    const fallbackHour = nowMins >= 480 ? '08:00' : '06:00';
+    return helperToTimestamp(fallbackHour);
+  };
+
   // Case 2: In a gap between tasks
   if (nextPlannedBlock) {
     const nextStartMins = timeToMinutes(nextPlannedBlock.startTime);
     const endsAt = helperToTimestamp(nextPlannedBlock.startTime, nextStartMins < nowMins);
     const remainingSeconds = Math.max(0, Math.floor((endsAt - nowMs) / 1000));
-    const startedAt = nowMs;
+    const startedAt = findGapStartMs();
 
     const remH = Math.floor(remainingSeconds / 3600);
     const remM = Math.floor((remainingSeconds % 3600) / 60);
@@ -178,7 +228,7 @@ export function clockState(
       subtitle: lang === 'en'
         ? `${timeFormatted} until ${nextTemplateSlot.title || 'next milestone'}`
         : `còn ${timeFormatted} đến ${nextTemplateSlot.title || 'mốc tiếp theo'}`,
-      startedAt: nowMs,
+      startedAt: findGapStartMs(),
       endsAt,
       remainingSeconds,
       isCountDown: false,
@@ -203,7 +253,7 @@ export function clockState(
     subtitle: lang === 'en'
       ? `${timeFormatted} until bedtime`
       : `còn ${timeFormatted} đến giờ ngủ`,
-    startedAt: nowMs,
+    startedAt: findGapStartMs(),
     endsAt,
     remainingSeconds,
     isCountDown: false,

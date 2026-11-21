@@ -6,7 +6,7 @@ export interface MotivationQuote {
   id: string;
   text: string;
   author?: string;
-  lang: 'vi' | 'en';
+  lang: 'vi' | 'en' | 'zh' | 'th' | string;
   contexts: QuoteContext[];
   goalKeywords?: string[];
   weight: number; // 1-3
@@ -18,7 +18,7 @@ export interface MotivationQuote {
   linkedGoalId?: string;
 
   // v0.3.34 Part C5: Multi-language Quote metadata
-  originalLang?: string; // Ngôn ngữ gốc của câu (ví dụ 'en', 'vi')
+  originalLang?: string; // Ngôn ngữ gốc của câu (ví dụ 'en', 'vi', 'zh', 'fr', 'la', 'grc', 'de')
   originalText?: string; // Nguyên văn câu gốc của tác giả
   translationOf?: string; // ID của câu gốc nếu đây là bản dịch
 
@@ -31,6 +31,7 @@ export interface UserMotivationState {
   customQuotes: MotivationQuote[];
   favorites: string[]; // quote ids
   pinnedQuoteId?: string;
+  pinnedGoalQuotes?: Record<string, string>; // goalId -> quoteId (v0.3.48 Part B3)
   hiddenTodaySlots: Record<string, string>; // slotKey -> dateString YYYY-MM-DD
   historySlots: Record<string, { quoteId: string; date: string }>; // slotKey -> { quoteId, date }
   recentQuoteIds: { quoteId: string; date: string }[]; // last 7 days history

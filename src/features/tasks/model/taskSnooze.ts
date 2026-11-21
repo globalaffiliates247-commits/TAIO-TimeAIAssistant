@@ -28,7 +28,7 @@ export interface TaskSnoozeContext {
   }>>>;
   scheduleNativeNotification?: (opts: { id: string; title: string; body: string; delaySeconds: number }) => void;
   showToast?: (msg: string) => void;
-  language?: 'vi' | 'en';
+  language?: 'vi' | 'en' | string;
 }
 
 export interface SnoozeResult {

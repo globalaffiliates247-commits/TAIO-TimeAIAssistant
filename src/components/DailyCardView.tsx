@@ -24,8 +24,10 @@ import {
   Tag
 } from 'lucide-react';
 import { SwipeEntryCard } from '@/features/swipe';
+import { useT } from '@/i18n/useT';
 
 export const DailyCardView: React.FC = () => {
+  const { t } = useT();
   const { 
     dailyCardItems, 
     addDailyCardItem, 
@@ -111,13 +113,11 @@ export const DailyCardView: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                  {language === 'en' ? 'Daily Card' : 'Thẻ ngày'}
+                  {t('terms.dailyCard', 'Thẻ ngày')}
                 </h3>
               </div>
               <p className="text-xs text-slate-500">
-                {language === 'en' 
-                  ? 'Quickly log tasks for today • Strike through when done • Move tasks with intent' 
-                  : 'Ghi nhanh các việc trong ngày • Gạch ngang khi xong • Dời việc có chủ đích'}
+                {t('card.daily_card_subtitle', 'Ghi nhanh các việc trong ngày • Gạch ngang khi xong • Dời việc có chủ đích')}
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export const DailyCardView: React.FC = () => {
             <button 
               onClick={handlePrevDay} 
               className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white"
-              title={language === 'en' ? 'Previous day' : 'Ngày trước'}
+              title={t('card.prev_day', 'Ngày trước')}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -135,12 +135,12 @@ export const DailyCardView: React.FC = () => {
               onClick={handleToday}
               className="px-2.5 py-1 rounded-lg font-bold text-slate-800 hover:text-slate-900 bg-white shadow-xs"
             >
-              {selectedCardDate === getDeviceCalendarDate() ? (language === 'en' ? 'Today' : 'Hôm nay') : selectedCardDate}
+              {selectedCardDate === getDeviceCalendarDate() ? t('terms.today', 'Hôm nay') : selectedCardDate}
             </button>
             <button 
               onClick={handleNextDay} 
               className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white"
-              title={language === 'en' ? 'Next day' : 'Ngày sau'}
+              title={t('card.next_day', 'Ngày sau')}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -157,7 +157,7 @@ export const DailyCardView: React.FC = () => {
               ?
             </span>
             <span className="text-xs text-amber-900 font-bold group-hover:underline">
-              {activeQuestion ? activeQuestion.text : (language === 'en' ? 'What are the 3 most important tasks you need to do today?' : '3 việc quan trọng nhất bạn cần làm hôm nay là gì?')}
+              {activeQuestion ? activeQuestion.text : t('card.active_question_default', '3 việc quan trọng nhất bạn cần làm hôm nay là gì?')}
             </span>
           </button>
           <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
@@ -166,9 +166,9 @@ export const DailyCardView: React.FC = () => {
             <button
               onClick={() => setIsActiveCaptureOpen(true)}
               className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-[var(--taio-brand)] text-[11px] font-semibold border border-slate-200 shadow-xs flex items-center gap-1 transition-all"
-              title={language === 'en' ? 'Active Capture & Backfill' : 'Thu thập chủ động & Ghi bù'}
+              title={t('card.active_capture_title', 'Thu thập chủ động & Ghi bù')}
             >
-              <span>{language === 'en' ? 'Backfill' : 'Ghi bù'}</span>
+              <span>{t('card.backfill', 'Ghi bù')}</span>
             </button>
           </div>
         </div>
@@ -178,13 +178,13 @@ export const DailyCardView: React.FC = () => {
           <div className="flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
             <span>
-              <strong>{language === 'en' ? 'Productivity Rhythm:' : 'Nhịp năng suất:'}</strong> {language === 'en'
+              <strong>{t('card.productivity_rhythm', 'Nhịp năng suất:')}</strong> {language === 'en'
                 ? `You usually complete an average of ${usualDailyCapacity} tasks/day. Today has ${currentTotal} tasks ${currentTotal > usualDailyCapacity ? '(watch out for overload)' : '(well-balanced, feasible)'}.`
                 : `Bạn thường hoàn thành trung bình ${usualDailyCapacity} việc/ngày. Thẻ hôm nay đang có ${currentTotal} việc ${currentTotal > usualDailyCapacity ? '(chú ý nguy cơ quá tải)' : '(vừa vặn, khả thi)'}.`}
             </span>
           </div>
           <span className="text-[11px] font-mono text-emerald-600 font-bold shrink-0">
-            {doneItems.length}/{currentTotal} {language === 'en' ? 'done' : 'xong'} ({currentTotal > 0 ? Math.round((doneItems.length / currentTotal) * 100) : 0}%)
+            {doneItems.length}/{currentTotal} {t('journal.swipe.done', 'xong')} ({currentTotal > 0 ? Math.round((doneItems.length / currentTotal) * 100) : 0}%)
           </span>
         </div>
 
@@ -196,7 +196,7 @@ export const DailyCardView: React.FC = () => {
                 type="text"
                 value={newText}
                 onChange={e => setNewText(e.target.value)}
-                placeholder={language === 'en' ? 'Quickly log 1 task (enter task name then press Enter)...' : 'Ghi nhanh 1 việc (nhập tên việc rồi nhấn Enter)...'}
+                placeholder={t('card.quick_input_placeholder', 'Ghi nhanh 1 việc (nhập tên việc rồi nhấn Enter)...')}
                 className="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
               />
             </div>
@@ -209,18 +209,18 @@ export const DailyCardView: React.FC = () => {
                   ? 'bg-orange-500/20 text-orange-700 border-orange-500/40'
                   : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
               }`}
-              title={language === 'en' ? 'Options: Unplanned on goal' : 'Tùy chọn: Việc phát sinh ngoài kế hoạch (Unplanned on goal)'}
+              title={t('card.options', 'Tùy chọn')}
             >
               <Zap className="w-3.5 h-3.5 inline mr-1" />
-              <span>{newOrigin === 'unplanned_goal' ? (language === 'en' ? 'Unplanned' : 'Phát sinh') : (language === 'en' ? 'Options' : 'Tùy chọn')}</span>
+              <span>{newOrigin === 'unplanned_goal' ? t('card.unplanned', 'Phát sinh') : t('card.options', 'Tùy chọn')}</span>
             </button>
 
             <button
               type="submit"
-              className="py-2.5 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+              className="py-2.5 px-4 rounded-2xl bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4 text-white" />
-              <span>{language === 'en' ? 'Add' : 'Thêm'}</span>
+              <span>{t('card.add', 'Thêm')}</span>
             </button>
           </div>
 
@@ -292,11 +292,11 @@ export const DailyCardView: React.FC = () => {
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 pl-2">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-              {language === 'en' ? `Today's Task List (${currentItems.length} tasks)` : `Danh sách việc trong ngày (${currentItems.length} việc)`}
+              {t('card.task_list_title', `Danh sách việc trong ngày (${currentItems.length} việc)`, { count: currentItems.length })}
             </h4>
           </div>
           <span className="text-xs text-slate-500 italic">
-            {language === 'en' ? 'Tap to strike through • Completed tasks stay to record achievements' : 'Chạm vào để gạch ngang • Việc đã xong vẫn giữ nguyên để ghi nhận thành quả'}
+            {t('card.task_list_hint', 'Chạm vào để gạch ngang • Việc đã xong vẫn giữ nguyên để ghi nhận thành quả')}
           </span>
         </div>
 

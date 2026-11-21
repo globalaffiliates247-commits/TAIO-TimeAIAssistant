@@ -176,7 +176,7 @@ export function computeBlockStatus(
   return 'unconfirmed';
 }
 
-export function getBlockStatusDisplay(status: BlockStatus, language: 'vi' | 'en' = 'vi'): {
+export function getBlockStatusDisplay(status: BlockStatus, language: 'vi' | 'en' | string = 'vi'): {
   label: string;
   badgeClass: string;
   dotColor: string;

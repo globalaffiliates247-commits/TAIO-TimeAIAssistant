@@ -6,8 +6,7 @@ import {
   DEFAULT_MOTIVATION_SETTINGS,
   QuoteContext,
 } from './types';
-import viQuotesRaw from './defaultQuotes.vi.json';
-import enQuotesRaw from './defaultQuotes.en.json';
+import { BUILTIN_QUOTES } from './quotesIndex';
 import { pickQuote } from './pickQuote';
 import { quoteRegistry } from './quoteRegistry';
 import { getDeviceCalendarDate } from '@/core/clock';
@@ -20,10 +19,7 @@ const STORAGE_KEY_SERVER_CACHE = 'taio_motivation_server_cache';
 const LEGACY_STORAGE_KEY_FAV = 'taio_quote_favorites';
 const LEGACY_STORAGE_KEY_CUSTOM = 'taio_quote_custom';
 
-export const BUILTIN_QUOTES: MotivationQuote[] = [
-  ...(viQuotesRaw as MotivationQuote[]),
-  ...(enQuotesRaw as MotivationQuote[]),
-];
+export { BUILTIN_QUOTES };
 
 function getTodayString(): string {
   const now = new Date();
@@ -194,7 +190,7 @@ export function getRecent7DaysQuoteIds(recent: { quoteId: string; date: string }
 export function getOrPickDailyQuote(options: {
   slotKey: string;
   context: QuoteContext;
-  lang: 'vi' | 'en';
+  lang: 'vi' | 'en' | 'zh' | 'th' | string;
   quotes: MotivationQuote[];
   userState: UserMotivationState;
   activeGoalName?: string;
@@ -240,6 +236,7 @@ export function getOrPickDailyQuote(options: {
     lang,
     favorites: state.favorites,
     pinnedQuoteId: state.pinnedQuoteId,
+    pinnedGoalQuotes: state.pinnedGoalQuotes,
     activeGoalName,
     activeGoalId,
     recentQuoteIds: recentIds,
@@ -263,4 +260,33 @@ export function getOrPickDailyQuote(options: {
   }
 
   return { quote: picked, isHiddenToday, updatedState: state };
+}
+
+/**
+ * Toggle pin a quote specifically for a goal (PRD v0.3.48 Part B3).
+ * Returns true if pinned, false if unpinned.
+ */
+export function togglePinGoalQuote(goalId: string, quoteId: string): boolean {
+  if (!goalId || !quoteId) return false;
+  const state = loadUserMotivationState();
+  const currentMap = { ...(state.pinnedGoalQuotes || {}) };
+  let isPinned = false;
+
+  if (currentMap[goalId] === quoteId) {
+    delete currentMap[goalId];
+    isPinned = false;
+  } else {
+    currentMap[goalId] = quoteId;
+    isPinned = true;
+  }
+
+  state.pinnedGoalQuotes = currentMap;
+  saveUserMotivationState(state);
+  return isPinned;
+}
+
+export function isGoalQuotePinned(goalId: string, quoteId: string): boolean {
+  if (!goalId || !quoteId) return false;
+  const state = loadUserMotivationState();
+  return state.pinnedGoalQuotes?.[goalId] === quoteId;
 }

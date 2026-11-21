@@ -21,6 +21,7 @@ import { AppearanceModal } from '../components/AppearanceModal';
 import { AmbientProgressEdge } from '../components/AmbientProgressEdge';
 import { InboxModal } from '../components/InboxModal';
 import { StickyBoard } from '../features/sticky';
+import { StandaloneDaySheetWindow } from '../features/sticky/ui/StandaloneDaySheetWindow';
 import { MethodLibraryModal } from '../components/MethodLibraryModal';
 import { CoachCardOverlay } from '../components/CoachCardOverlay';
 import { ExportDataModal } from '../components/ExportDataModal';
@@ -54,6 +55,17 @@ const OrientationHint: React.FC = () => {
 };
 
 const MainAppContent: React.FC = () => {
+  const [isDaySheetMode, setIsDaySheetMode] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'day_sheet_window') {
+        setIsDaySheetMode(true);
+      }
+    }
+  }, []);
+
   useLockScreenClock();
   const {
     currentTab,
@@ -228,6 +240,10 @@ const MainAppContent: React.FC = () => {
       <ActiveCaptureModal />
     </>
   );
+
+  if (isDaySheetMode) {
+    return <StandaloneDaySheetWindow />;
+  }
 
   return (
     <AppShell

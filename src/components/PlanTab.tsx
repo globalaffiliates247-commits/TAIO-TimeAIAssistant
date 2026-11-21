@@ -35,6 +35,7 @@ import {
 import { updateScheduleEntry } from '@/features/tasks';
 import { TemplateScheduleModal } from '@/features/schedule-template';
 import { AddEventModal } from '@/features/events';
+import { useT } from '@/i18n/useT';
 
 const TYPE_CONFIG: Record<BlockType, { labelVi: string; labelEn: string; bg: string; text: string; border: string }> = {
   deep: { labelVi: 'Tập trung sâu', labelEn: 'Deep Work', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200/70' },
@@ -59,6 +60,7 @@ export const PlanTab: React.FC = () => {
     language,
     palette
   } = useApp();
+  const { t } = useT();
   const { nowMinutes, todayLabel } = useDeviceClock();
   const isCool = palette === 'cool';
 
@@ -157,23 +159,23 @@ export const PlanTab: React.FC = () => {
             onClick={() => setActiveView('card')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'card' 
-                ? 'bg-[var(--taio-brand)] text-white shadow-xs'
+                ? 'bg-[#E11D2E] bg-[var(--taio-brand)] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>{language === 'en' ? 'Daily Card' : 'Thẻ ngày'}</span>
+            <span>{t('terms.dailyCard', 'Thẻ ngày')}</span>
           </button>
           <button
             onClick={() => setActiveView('timeline')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'timeline' 
-                ? 'bg-[var(--taio-brand)] text-white shadow-xs'
+                ? 'bg-[#E11D2E] bg-[var(--taio-brand)] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span>{language === 'en' ? 'Timeline' : 'Thời gian biểu'}</span>
+            <span>{t('terms.timetable', 'Thời gian biểu')}</span>
           </button>
         </div>
 
@@ -182,27 +184,27 @@ export const PlanTab: React.FC = () => {
           <button
             onClick={() => setTemplateModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all"
-            title={language === 'en' ? 'Manage recurring template schedule' : 'Quản lý lịch ngày mẫu cố định'}
+            title={t('plan.templateTitle', 'Quản lý lịch ngày mẫu cố định')}
           >
             <RotateCw className="w-3.5 h-3.5 text-slate-500" />
-            <span className="hidden sm:inline">{language === 'en' ? 'Template' : 'Lịch mẫu'}</span>
+            <span className="hidden sm:inline">{t('terms.templateSchedule', 'Lịch mẫu')}</span>
           </button>
 
           <button
             onClick={() => setShowAddEventModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all"
-            title={language === 'en' ? 'Add event, birthday, holiday, anniversary...' : 'Thêm sự kiện, sinh nhật, ngày lễ, giỗ...'}
+            title={t('plan.addEventTitle', 'Thêm sự kiện, sinh nhật, ngày lễ, giỗ...')}
           >
             <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            <span>{language === 'en' ? 'Add Event' : 'Thêm sự kiện'}</span>
+            <span>{t('plan.addEvent', 'Thêm sự kiện')}</span>
           </button>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs transition-all bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)]"
           >
             <Plus className="w-4 h-4 text-white" />
-            <span>{language === 'en' ? 'Add Task' : 'Thêm việc'}</span>
+            <span>{t('plan.addTask', 'Thêm việc')}</span>
           </button>
         </div>
       </div>

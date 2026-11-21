@@ -43,7 +43,16 @@
     "goalFolder": "Ngăn mục tiêu",
     "wrapUpDay": "Khép ngày",
     "startTheDay": "Bắt đầu ngày",
-    "profile": "Cá nhân"
+    "profile": "Cá nhân",
+    "today": "Hôm nay",
+    "cancel": "Hủy"
+  },
+  "plan": {
+    "addEvent": "Thêm sự kiện",
+    "addEventTitle": "Thêm sự kiện, sinh nhật, ngày lễ, giỗ...",
+    "addTask": "Thêm việc",
+    "weeklyBudget": "Ngân sách tuần",
+    "templateTitle": "Quản lý lịch ngày mẫu cố định"
   },
   "quotes": {
     "title": "Cảm hứng & Động lực",

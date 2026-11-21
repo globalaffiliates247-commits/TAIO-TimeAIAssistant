@@ -19,7 +19,7 @@ import {
 } from '@/features/motivation';
 import type { TimeBlock } from '@/types';
 
-function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Date(), lang: 'vi' | 'en' = 'vi'): WidgetScheduleItemData[] {
+function buildWidgetSchedule(blocks: TimeBlock[], template: any[], now = new Date(), lang: 'vi' | 'en' | string = 'vi'): WidgetScheduleItemData[] {
   const year = now.getFullYear();
   const month = now.getMonth();
   const date = now.getDate();

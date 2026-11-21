@@ -104,16 +104,29 @@ final class TAIOAlarmService {
             if state == .notDetermined { state = (try? await manager.requestAuthorization()) ?? .denied }
             if state == .authorized {
                 var ids: [String: String] = [:]
+                let isEn = (UserDefaults.standard.string(forKey: "taio_language_preference") == "en")
+                let stopText = isEn ? "Dismiss" : "Đã biết"
+                let palette = UserDefaults.standard.string(forKey: "taio_palette_preference") ?? "warm"
+                let brandColor: Color
+                if palette == "cool" {
+                    brandColor = Color(red: 0.0, green: 104.0 / 255.0, blue: 1.0)
+                } else if palette == "calm" {
+                    brandColor = Color(red: 28.0 / 255.0, green: 120.0 / 255.0, blue: 192.0 / 255.0)
+                } else {
+                    // True TAIO Brand Red #E11D2E (PRD v0.3.47 / v0.3.48 Part C6)
+                    brandColor = Color(red: 225.0 / 255.0, green: 29.0 / 255.0, blue: 46.0 / 255.0)
+                }
+
                 for a in alarms {
                     let uuid = UUID()
                     let alert = AlarmPresentation.Alert(
                         title: LocalizedStringResource(stringLiteral: a.title),
-                        stopButton: AlarmButton(text: "Đã biết", textColor: .white, systemImageName: "checkmark")
+                        stopButton: AlarmButton(text: LocalizedStringResource(stringLiteral: stopText), textColor: .white, systemImageName: "checkmark")
                     )
                     let attributes = AlarmAttributes<TAIOAlarmMetadata>(
                         presentation: AlarmPresentation(alert: alert),
                         metadata: TAIOAlarmMetadata(),
-                        tintColor: Color(red: 0.88, green: 0.25, blue: 0.12)
+                        tintColor: brandColor
                     )
                     let config = AlarmManager.AlarmConfiguration<TAIOAlarmMetadata>(
                         schedule: .fixed(a.fireAt),

@@ -48,6 +48,7 @@ import {
   syncNativeBlockAlarms,
   NativeAlarmMode,
 } from '../features/alarm';
+import type { LanguageCode } from '@/i18n/languages';
 import {
   getDeviceCalendarDate,
   getDeviceTimeMinutes,
@@ -71,6 +72,8 @@ import {
   loadFreeTimers,
   saveFreeTimers,
   getFreeTimerElapsedSeconds,
+  getFreeTimerRemainingSeconds,
+  formatTimerSeconds,
   clockState,
 } from '../features/clock';
 import {
@@ -173,8 +176,8 @@ interface AppContextType {
   setIsOnboarded: (val: boolean) => void;
   currentTab: AppTab;
   setCurrentTab: (tab: AppTab) => void;
-  language: 'vi' | 'en';
-  setLanguage: (lang: 'vi' | 'en') => void;
+  language: LanguageCode;
+  setLanguage: (lang: LanguageCode) => void;
   toneLevel: ToneLevel;
   setToneLevel: (tl: ToneLevel) => void;
 
@@ -485,20 +488,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [profile, setProfile] = useState<UserProfile>(PROFILES.owner);
   const [isOnboarded, setIsOnboarded] = useState<boolean>(true);
   const [currentTab, setCurrentTab] = useState<AppTab>('now');
-  const [language, setLanguage] = useState<'vi' | 'en'>('vi');
+  const [language, setLanguage] = useState<LanguageCode>('vi');
 
-  const handleSetLanguage = (lang: 'vi' | 'en') => {
+  const handleSetLanguage = (lang: LanguageCode) => {
     setLanguage(lang);
     i18n.changeLanguage(lang);
     try {
       localStorage.setItem('taio_language', lang);
+      localStorage.setItem('taio_language_preference', lang);
     } catch (_) {}
   };
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('taio_language');
-      if (saved === 'vi' || saved === 'en') {
+      const saved = (localStorage.getItem('taio_language') || localStorage.getItem('taio_language_preference')) as LanguageCode;
+      if (saved) {
         setLanguage(saved);
         i18n.changeLanguage(saved);
       }
@@ -508,7 +512,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // v0.12 - v0.20: Appearance & Device Settings (B17)
   const [deviceLook, setDeviceLook] = useState<DeviceLook>('auto');
-  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
   const [palette, setPaletteState] = useState<ColorPalette>('red');
   const setPalette = (p: ColorPalette) => {
     const norm = normalizePalette(p);
@@ -3134,7 +3138,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const isDark = themeMode === 'dark' || (themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const currentHour = new Date().getHours();
+    const isDaytime = currentHour >= 6 && currentHour < 18;
+    const isDark = themeMode === 'dark' || (themeMode === 'system' && !isDaytime && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.classList.toggle('dark', isDark);
 
     if (typeof window !== 'undefined' && (window as any).taioAPI?.updateTimer) {
@@ -3147,11 +3153,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (themeMode === 'system') {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
       const listener = (e: MediaQueryListEvent) => {
-        document.documentElement.classList.toggle('dark', e.matches);
+        const hour = new Date().getHours();
+        const isDay = hour >= 6 && hour < 18;
+        const dark = !isDay && e.matches;
+        document.documentElement.classList.toggle('dark', dark);
         if (typeof window !== 'undefined' && (window as any).taioAPI?.updateTimer) {
           try {
             const norm = normalizePalette(palette);
-            (window as any).taioAPI.updateTimer({ palette: norm, theme: e.matches ? 'dark' : 'light' });
+            (window as any).taioAPI.updateTimer({ palette: norm, theme: dark ? 'dark' : 'light' });
           } catch {}
         }
       };
@@ -3343,7 +3352,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const bridge = (window as unknown as {
       taioAPI?: {
         onQuickNoteReceived?: (cb: (text: string) => void) => (() => void) | void;
-        onTimerAction?: (cb: (action: { type: string; minutes?: number }) => void) => (() => void) | void;
+        onTimerAction?: (cb: (action: { type: string; minutes?: number; timerId?: string }) => void) => (() => void) | void;
         onOpenTodayJournal?: (cb: (taskId?: string) => void) => (() => void) | void;
         onClockError?: (cb: (err: { message?: string; stack?: string }) => void) => (() => void) | void;
         updateTimer?: (payload: any) => void;
@@ -3361,7 +3370,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (bridge?.onTimerAction) {
-      const unsub = bridge.onTimerAction((action: { type: string; minutes?: number }) => {
+      const unsub = bridge.onTimerAction((action: { type: string; minutes?: number; timerId?: string }) => {
         const cur = currentBlockRef.current || scheduleBlocksRef.current.find(b => b.status === 'in_progress' || (b.extra as any)?.startedAt);
         if (action.type === 'done') {
           if (cur) {
@@ -3408,6 +3417,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           showToast?.(language === 'vi' ? `▶ Bắt đầu việc nhanh (${mins}p)` : `▶ Started quick task (${mins}m)`);
         } else if (action.type === 'open-journal') {
           setCurrentTab('plan');
+        } else if (action.type === 'free-timer-stop') {
+          if (action.timerId) {
+            setFreeTimers(prev => prev.map(t => t.id === action.timerId ? { ...t, status: 'paused', pausedAt: Date.now() } : t));
+          }
+        } else if (action.type === 'free-timer-done') {
+          if (action.timerId) {
+            setFreeTimers(prev => prev.map(t => t.id === action.timerId ? { ...t, status: 'done' } : t));
+          }
         }
       });
       if (typeof unsub === 'function') cleanups.push(unsub);
@@ -3466,6 +3483,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const goalHours = Math.floor(spentTotalMins / 60);
       const goalMins = spentTotalMins % 60;
 
+      // PRD v0.3.48 Part C4: Include all active free timers (up to 3)
+      const runningFreeTimers = (freeTimers || [])
+        .filter(ft => ft.status === 'running')
+        .slice(0, 3)
+        .map(ft => {
+          const sec = ft.mode === 'stopwatch'
+            ? getFreeTimerElapsedSeconds(ft, now.getTime())
+            : getFreeTimerRemainingSeconds(ft, now.getTime());
+          return {
+            id: ft.id,
+            title: ft.title,
+            timeStr: formatTimerSeconds(sec),
+            remainingSeconds: sec,
+            isCountDown: ft.mode !== 'stopwatch',
+          };
+        });
+
       bridge.updateTimer?.({
         taskId: st.block?.id || null,
         title: st.title,
@@ -3481,13 +3515,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         goalHours,
         goalMins,
         isCountDown: st.isCountDown,
+        freeTimers: runningFreeTimers,
       });
     };
 
     syncTimer();
     const ticker = setInterval(syncTimer, 2000);
     return () => clearInterval(ticker);
-  }, [scheduleBlocks, dayTemplate, language, goals]);
+  }, [scheduleBlocks, dayTemplate, language, goals, freeTimers]);
 
   return (
     <AppContext.Provider value={{

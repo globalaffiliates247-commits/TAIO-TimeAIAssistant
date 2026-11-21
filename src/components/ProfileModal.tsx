@@ -33,7 +33,8 @@ import {
   Calendar,
   Hourglass,
   Zap,
-  Droplets
+  Droplets,
+  Minimize2
 } from 'lucide-react';
 import { isIOSCalendarConnected, setIOSCalendarConnected, requestIOSCalendarAccess } from '@/features/events/service/calendarSync';
 import { isGoalSuggestionInlineChipEnabled, setGoalSuggestionInlineChipEnabled } from '@/features/goals';
@@ -166,6 +167,26 @@ export const ProfileModal: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'community'>('profile');
   const [inlineGoalSuggestionEnabled, setInlineGoalSuggestionEnabled] = useState(isGoalSuggestionInlineChipEnabled);
+  const [autoMinimizeOnClock, setAutoMinimizeOnClock] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      const saved = window.localStorage.getItem('taio_auto_minimize_clock');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleAutoMinimizeOnClock = () => {
+    const next = !autoMinimizeOnClock;
+    setAutoMinimizeOnClock(next);
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem('taio_auto_minimize_clock', String(next));
+        (window as any).taioAPI?.setAutoMinimizeClock(next);
+      } catch {}
+    }
+  };
 
   if (!isProfileModalOpen) return null;
 
@@ -626,6 +647,38 @@ export const ProfileModal: React.FC = () => {
                     <span
                       className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
                         lockScreenClockEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* PRD v0.3.48 Part C2: Tự thu nhỏ màn hình chính khi mở đồng hồ nổi */}
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <Minimize2 className="w-4 h-4 text-[var(--taio-brand)]" />
+                      <h4 className="text-xs font-bold text-slate-900">
+                        {language === 'en' ? 'Auto-minimize Main Window on Floating Clock' : 'Tự thu nhỏ màn hình chính khi mở đồng hồ nổi'}
+                      </h4>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      {language === 'en'
+                        ? 'Minimizes main window to Dock when opening floating clock; restores when opening journal'
+                        : 'Mở đồng hồ nổi thì màn hình chính tự thu nhỏ xuống Dock, bấm Mở nhật ký sẽ hiện lại'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={autoMinimizeOnClock}
+                    onClick={handleToggleAutoMinimizeOnClock}
+                    className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
+                      autoMinimizeOnClock ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+                        autoMinimizeOnClock ? 'translate-x-5' : 'translate-x-0'
                       }`}
                     />
                   </button>

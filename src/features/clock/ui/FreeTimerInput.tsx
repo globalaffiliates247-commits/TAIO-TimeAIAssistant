@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Play, Timer, Sparkles, Clock } from 'lucide-react';
+import { Play, Timer, Sparkles, Clock, AlertCircle } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 import { parseTimerInput } from '../model/parseTimerInput';
 import { 
   FreeTimer, 
   MAX_FREE_TIMERS, 
   loadRecentTimerPresets, 
-  saveRecentTimerPreset 
+  saveRecentTimerPreset,
+  formatTimerSeconds
 } from '../model/freeTimers';
 
 interface FreeTimerInputProps {
@@ -21,6 +23,7 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
   currentTaskTitle,
   onAddTimer,
 }) => {
+  const { showToast, language } = useApp();
   const [inputText, setInputText] = useState<string>('');
   const [recentPresets, setRecentPresets] = useState<string[]>([]);
 
@@ -32,7 +35,12 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
 
   const handleSubmit = (textToParse?: string) => {
     const raw = textToParse !== undefined ? textToParse : inputText;
-    if (isLimitReached) return;
+    if (isLimitReached) {
+      showToast?.(language === 'en' 
+        ? 'Maximum 3 free timers running simultaneously' 
+        : 'Đã đạt tối đa 3 đồng hồ đang chạy cùng lúc');
+      return;
+    }
 
     const parsed = parseTimerInput(raw);
     const now = Date.now();
@@ -65,21 +73,30 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
   };
 
   const handleQuickPreset = (preset: string) => {
-    if (isLimitReached) return;
+    if (isLimitReached) {
+      showToast?.(language === 'en' 
+        ? 'Maximum 3 free timers running simultaneously' 
+        : 'Đã đạt tối đa 3 đồng hồ đang chạy cùng lúc');
+      return;
+    }
     handleSubmit(preset);
   };
 
   return (
-    <div className="w-full p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+    <div className="w-full p-4 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <Timer className="w-4 h-4 text-orange-500" />
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-            Đồng hồ tự do (Bấm giờ riêng)
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
+            <Timer className="w-4 h-4" />
+          </div>
+          <span className="text-xs font-bold text-slate-900 tracking-wide">
+            {language === 'en' ? 'Free Timers (Multiple)' : 'Bấm giờ riêng (Nhiều đồng hồ)'}
           </span>
         </div>
-        <span className="text-[11px] font-medium text-slate-500">
-          Đang chạy: {activeCount}/{MAX_FREE_TIMERS}
+        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+          isLimitReached ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+        }`}>
+          {language === 'en' ? `Running: ${activeCount}/${MAX_FREE_TIMERS}` : `Đang chạy: ${activeCount}/${MAX_FREE_TIMERS}`}
         </span>
       </div>
 
@@ -88,7 +105,6 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
         <input
           type="text"
           value={inputText}
-          disabled={isLimitReached}
           onChange={e => setInputText(e.target.value)}
           onKeyDown={e => {
             if (e.key === 'Enter') {
@@ -98,63 +114,70 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
           }}
           placeholder={
             isLimitReached
-              ? 'Đã đạt tối đa 3 đồng hồ tự do cùng lúc'
-              : 'Gõ: "25p pha trà", "1g30", "15:30 gọi anh Minh", hoặc để trống...'
+              ? (language === 'en' ? 'Maximum 3 free timers running' : 'Đã đạt tối đa 3 đồng hồ tự do cùng lúc')
+              : (language === 'en' ? 'e.g. "25m tea", "1h30", "15:30 call Alice"...' : 'Gõ: "25p pha trà", "1g30", "15:30 gọi anh Minh", hoặc để trống...')
           }
-          className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="flex-1 px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[var(--taio-brand)] focus:bg-white transition-all"
         />
 
         <button
           type="button"
-          disabled={isLimitReached}
           onClick={() => handleSubmit()}
-          className="py-2.5 px-4 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] disabled:opacity-50 disabled:pointer-events-none text-white font-bold text-xs shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
+          className="py-2.5 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
-          <span>{inputText.trim() ? 'Chạy' : 'Bấm giờ'}</span>
+          <span>{inputText.trim() ? (language === 'en' ? 'Start' : 'Chạy') : (language === 'en' ? 'Stopwatch' : 'Bấm giờ')}</span>
         </button>
       </div>
 
-      {/* Quick Buttons & Recents */}
-      {!isLimitReached && (
-        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-          <span className="text-[11px] text-slate-500 mr-1">Nhanh:</span>
-          {['5p', '10p', '25p'].map(p => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => handleQuickPreset(p)}
-              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-colors cursor-pointer"
-            >
-              {p}
-            </button>
-          ))}
+      {/* Apple Clock Style: Recents List (PRD v0.3.48 Part C7) */}
+      {recentPresets.length > 0 && (
+        <div className="space-y-2 pt-1 border-t border-slate-100">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span>{language === 'en' ? 'Recent Timers' : 'Gần đây'}</span>
+            <span className="text-[11px] text-slate-400 font-normal">
+              {language === 'en' ? 'Tap Play to start immediately' : 'Chạm Play để chạy ngay 1 chạm'}
+            </span>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => handleQuickPreset('')}
-            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-colors cursor-pointer"
-          >
-            Bấm giờ
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {recentPresets.slice(0, 6).map((rp, i) => {
+              const parsed = parseTimerInput(rp);
+              const durationStr = parsed.durationSeconds
+                ? formatTimerSeconds(parsed.durationSeconds)
+                : parsed.targetTime || '00:00';
+              const label = parsed.title || rp;
 
-          {recentPresets.length > 0 && (
-            <>
-              <span className="text-slate-300 mx-1">|</span>
-              <span className="text-[11px] text-slate-400">Gần đây:</span>
-              {recentPresets.map((rp, i) => (
-                <button
+              return (
+                <div
                   key={`${rp}-${i}`}
-                  type="button"
-                  onClick={() => handleQuickPreset(rp)}
-                  className="px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 hover:bg-orange-100 text-[10px] font-medium border border-orange-200/50 truncate max-w-[120px] transition-colors cursor-pointer"
-                  title={rp}
+                  className="p-3 rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50 flex items-center justify-between gap-3 transition-colors"
                 >
-                  {rp}
-                </button>
-              ))}
-            </>
-          )}
+                  <div className="min-w-0">
+                    <div className="text-lg font-mono font-bold text-slate-900 tracking-tight">
+                      {durationStr}
+                    </div>
+                    <div className="text-[11.5px] text-slate-500 truncate max-w-[140px]">
+                      {label}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleQuickPreset(rp)}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                      isLimitReached
+                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'
+                        : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white shadow-xs hover:scale-105 active:scale-95 cursor-pointer'
+                    }`}
+                    title={isLimitReached ? (language === 'en' ? 'Max 3 active timers reached' : 'Đã đủ 3 đồng hồ đang chạy') : (language === 'en' ? 'Run now' : 'Chạy ngay')}
+                  >
+                    <Play className="w-4 h-4 fill-current ml-0.5" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

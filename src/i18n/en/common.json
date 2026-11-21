@@ -43,7 +43,16 @@
     "goalFolder": "Goal Folder",
     "wrapUpDay": "Wrap Up Day",
     "startTheDay": "Start the Day",
-    "profile": "Profile"
+    "profile": "Profile",
+    "today": "Today",
+    "cancel": "Cancel"
+  },
+  "plan": {
+    "addEvent": "Add Event",
+    "addEventTitle": "Add event, birthday, holiday, anniversary...",
+    "addTask": "Add Task",
+    "weeklyBudget": "Weekly Budget",
+    "templateTitle": "Manage recurring template schedule"
   },
   "quotes": {
     "title": "Inspiration & Motivation",

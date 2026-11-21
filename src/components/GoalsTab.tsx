@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 import { Goal, GoalProgressType } from '../types';
 import { GoalFolders, WorkAreaType } from '../features/goals/folders';
 import { OverviewScreen } from '../features/overview';
+import { QuoteCard } from '../features/goals/quotes/QuoteCard';
 import { Plus, Target, Sparkles, X } from 'lucide-react';
 import { useT } from '@/i18n/useT';
 
@@ -45,24 +46,18 @@ export const GoalsTab: React.FC = () => {
   const progressTypeOptions: { id: GoalProgressType; label: string; desc: string }[] = [
     {
       id: 'tasks',
-      label: language === 'en' ? 'Task Completion' : 'Hoàn thành các việc',
-      desc: language === 'en'
-        ? 'Tasks done divided by total goal tasks (1 unit per task)'
-        : 'Số việc đã xong chia cho tổng số việc của mục tiêu (mỗi việc tính là 1 đơn vị)',
+      label: t('goals.metric_tasks_label', 'Hoàn thành các việc'),
+      desc: t('goals.metric_tasks_desc', 'Số việc đã xong chia cho tổng số việc của mục tiêu (mỗi việc tính là 1 đơn vị)'),
     },
     {
       id: 'key_result',
-      label: language === 'en' ? 'Measurable Result' : 'Kết quả đo được',
-      desc: language === 'en'
-        ? 'Actual metric reached divided by target metric (one-tap update)'
-        : 'Con số thực tế đạt được chia cho con số mục tiêu (cập nhật 1 chạm)',
+      label: t('goals.metric_measured_label', 'Kết quả đo được'),
+      desc: t('goals.metric_measured_desc', 'Con số thực tế đạt được chia cho con số mục tiêu (cập nhật 1 chạm)'),
     },
     {
       id: 'time_commitment',
-      label: language === 'en' ? 'Time Commitment' : 'Có mặt đủ thời gian',
-      desc: language === 'en'
-        ? 'Hours spent divided by total committed hours (for practice, habits)'
-        : 'Số giờ đã dành ra chia cho tổng số giờ cam kết (dành cho rèn luyện, thói quen)',
+      label: t('goals.metric_presence_label', 'Có mặt đủ thời gian'),
+      desc: t('goals.metric_presence_desc', 'Số giờ đã dành ra chia cho tổng số giờ cam kết (dành cho rèn luyện, thói quen)'),
     },
   ];
 
@@ -131,30 +126,53 @@ export const GoalsTab: React.FC = () => {
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
-      {/* Header: Single Row per Part H1.6 */}
-      <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-[var(--taio-brand-soft)] text-[var(--taio-brand)]">
-            <Target className="w-4 h-4" />
+      {/* Header: Single Row with Desktop Quote Card per PRD v0.3.48 Part B1 */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-[var(--taio-brand-soft)] text-[var(--taio-brand)]">
+              <Target className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 leading-tight">
+                {t('navbar.goals', 'Mục tiêu')}
+              </h2>
+              <p className="text-xs text-slate-500">
+                {totalGoals} {t('goals.count_unit', 'mục tiêu')} · {dueSoonCount} {t('goals.due_soon', 'sắp tới hạn')}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 leading-tight">
-              {t('navbar.goals', 'Mục tiêu')}
-            </h2>
-            <p className="text-xs text-slate-500">
-              {totalGoals} {t('goals.count_unit', 'mục tiêu')} · {dueSoonCount} {t('goals.due_soon', 'sắp tới hạn')}
-            </p>
-          </div>
+
+          {/* Mobile Create Button */}
+          <button
+            type="button"
+            onClick={() => handleOpenCreateGoal(activeArea)}
+            className="flex lg:hidden items-center gap-1.5 px-3.5 py-1.5 rounded-2xl text-white font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shrink-0"
+          >
+            <Plus className="w-4 h-4 text-white" />
+            <span>{t('goals.add_goal', 'Mục tiêu')}</span>
+          </button>
         </div>
 
+        {/* Desktop QuoteCard (>=1024px) */}
+        <div className="hidden lg:flex flex-1 max-w-xl mx-4">
+          <QuoteCard className="w-full" />
+        </div>
+
+        {/* Desktop Create Button */}
         <button
           type="button"
           onClick={() => handleOpenCreateGoal(activeArea)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-white font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+          className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-2xl text-white font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shrink-0"
         >
           <Plus className="w-4 h-4 text-white" />
           <span>{t('goals.add_goal', 'Mục tiêu')}</span>
         </button>
+      </div>
+
+      {/* Mobile QuoteCard (<1024px): Full width below title and above Overview */}
+      <div className="block lg:hidden">
+        <QuoteCard className="w-full" />
       </div>
 
       {/* PRD v0.3.38 Part B3.3: Toàn cảnh là phần đầu của tab Mục tiêu */}
@@ -253,11 +271,11 @@ export const GoalsTab: React.FC = () => {
                     onChange={e => setHorizonDays(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
                   >
-                    <option value={30}>{language === 'en' ? '30 days (1 month)' : '30 ngày (1 tháng)'}</option>
-                    <option value={60}>{language === 'en' ? '60 days (2 months)' : '60 ngày (2 tháng)'}</option>
-                    <option value={90}>{language === 'en' ? '90 days (1 quarter)' : '90 ngày (1 quý)'}</option>
-                    <option value={180}>{language === 'en' ? '180 days (6 months)' : '180 ngày (6 tháng)'}</option>
-                    <option value={365}>{language === 'en' ? '365 days (1 year)' : '365 ngày (1 năm)'}</option>
+                    <option value={30}>{t('goals.horizon_30', '30 ngày (1 tháng)')}</option>
+                    <option value={60}>{t('goals.horizon_60', '60 ngày (2 tháng)')}</option>
+                    <option value={90}>{t('goals.horizon_90', '90 ngày (1 quý)')}</option>
+                    <option value={180}>{t('goals.horizon_180', '180 ngày (6 tháng)')}</option>
+                    <option value={365}>{t('goals.horizon_365', '365 ngày (1 năm)')}</option>
                   </select>
                 </div>
                 <div>
@@ -269,11 +287,11 @@ export const GoalsTab: React.FC = () => {
                     onChange={e => setDailyBudgetMins(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
                   >
-                    <option value={30}>{language === 'en' ? '30 mins / day' : '30 phút / ngày'}</option>
-                    <option value={45}>{language === 'en' ? '45 mins / day' : '45 phút / ngày'}</option>
-                    <option value={60}>{language === 'en' ? '60 mins / day' : '60 phút / ngày'}</option>
-                    <option value={90}>{language === 'en' ? '90 mins / day' : '90 phút / ngày'}</option>
-                    <option value={120}>{language === 'en' ? '120 mins / day' : '120 phút / ngày'}</option>
+                    <option value={30}>{t('goals.budget_30', '30 phút / ngày')}</option>
+                    <option value={45}>{t('goals.budget_45', '45 phút / ngày')}</option>
+                    <option value={60}>{t('goals.budget_60', '60 phút / ngày')}</option>
+                    <option value={90}>{t('goals.budget_90', '90 phút / ngày')}</option>
+                    <option value={120}>{t('goals.budget_120', '120 phút / ngày')}</option>
                   </select>
                 </div>
               </div>
@@ -288,7 +306,7 @@ export const GoalsTab: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-white font-bold shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+                  className="px-5 py-2 rounded-xl text-white font-bold shadow-xs transition-all bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)]"
                 >
                   {t('goals.create_submit', 'Tạo mục tiêu')}
                 </button>

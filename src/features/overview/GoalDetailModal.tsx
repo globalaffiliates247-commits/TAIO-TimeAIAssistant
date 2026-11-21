@@ -5,6 +5,7 @@ import React, { useMemo } from 'react';
 import { useT } from '@/i18n/useT';
 import type { Goal } from '@/types';
 import type { GoalLedgerEntry } from '@/domain/goalLedger';
+import { MotivationSticker } from '@/features/motivation';
 import { X, TrendingUp, Clock, Zap, Calendar, Target, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export interface GoalDetailModalProps {
@@ -62,7 +63,17 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({ goal, entry, o
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {/* PRD v0.3.48 Part B2 & B3: Goal Motivation Quote Line with Pin to Goal */}
+          <MotivationSticker
+            slotKey="goals_tab"
+            context="goal"
+            size="line"
+            activeGoalId={goal.id}
+            activeGoalName={goal.name}
+            className="w-full bg-slate-50 border-slate-200"
+          />
+
           {/* Missing Deadline / Size Prompt (B3.2) */}
           {(!goal.deadline || !goal.size) && (
             <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">

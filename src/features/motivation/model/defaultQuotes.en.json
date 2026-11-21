@@ -6,7 +6,11 @@
     "lang": "en",
     "originalLang": "en",
     "originalText": "Stay hungry, stay foolish.",
-    "contexts": ["start_day", "goal", "any"],
+    "contexts": [
+      "start_day",
+      "goal",
+      "any"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -17,7 +21,10 @@
     "text": "The key is not to prioritize what's on your schedule, but to schedule your priorities.",
     "author": "Stephen Covey",
     "lang": "en",
-    "contexts": ["start_day", "goal"],
+    "contexts": [
+      "start_day",
+      "goal"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -28,7 +35,10 @@
     "text": "Small daily improvements over time lead to stunning results.",
     "author": "Robin Sharma",
     "lang": "en",
-    "contexts": ["end_day", "goal"],
+    "contexts": [
+      "end_day",
+      "goal"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -39,7 +49,10 @@
     "text": "You don't have to be great to start, but you have to start to be great.",
     "author": "Zig Ziglar",
     "lang": "en",
-    "contexts": ["start_task", "goal"],
+    "contexts": [
+      "start_task",
+      "goal"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -50,7 +63,10 @@
     "text": "Focus on being productive instead of busy.",
     "author": "Tim Ferriss",
     "lang": "en",
-    "contexts": ["start_task", "break"],
+    "contexts": [
+      "start_task",
+      "break"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -61,7 +77,9 @@
     "text": "The secret of getting ahead is getting started.",
     "author": "Mark Twain",
     "lang": "en",
-    "contexts": ["start_task"],
+    "contexts": [
+      "start_task"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -72,7 +90,10 @@
     "text": "Time is what we want most, but what we use worst.",
     "author": "William Penn",
     "lang": "en",
-    "contexts": ["start_day", "break"],
+    "contexts": [
+      "start_day",
+      "break"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -83,7 +104,10 @@
     "text": "Done is better than perfect.",
     "author": "Sheryl Sandberg",
     "lang": "en",
-    "contexts": ["done", "goal"],
+    "contexts": [
+      "done",
+      "goal"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -94,7 +118,10 @@
     "text": "It's not about having time, it's about making time.",
     "author": "",
     "lang": "en",
-    "contexts": ["start_day", "start_task"],
+    "contexts": [
+      "start_day",
+      "start_task"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -105,7 +132,10 @@
     "text": "Progress, not perfection.",
     "author": "",
     "lang": "en",
-    "contexts": ["done", "break"],
+    "contexts": [
+      "done",
+      "break"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -116,7 +146,490 @@
     "text": "Your future is created by what you do today, not tomorrow.",
     "author": "Robert Kiyosaki",
     "lang": "en",
-    "contexts": ["start_day", "goal"],
+    "contexts": [
+      "start_day",
+      "goal"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-01",
+    "text": "A journey of a thousand miles begins with a single step.",
+    "author": "Lao Tzu",
+    "lang": "en",
+    "originalLang": "zh",
+    "originalText": "千里之行，始于足下。",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-02",
+    "text": "A goal without a plan is just a wish.",
+    "author": "Antoine de Saint-Exupéry",
+    "lang": "en",
+    "originalLang": "fr",
+    "originalText": "Un objectif sans plan n'est qu'un souhait.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-03",
+    "text": "Plans are only good intentions unless they immediately degenerate into hard work.",
+    "author": "Peter Drucker",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Plans are only good intentions unless they immediately degenerate into hard work.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-04",
+    "text": "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+    "author": "Aristotle",
+    "lang": "en",
+    "originalLang": "grc",
+    "originalText": "Excellence, then, is not an act, but a habit.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-05",
+    "text": "If a man knows not to which port he sails, no wind is favorable.",
+    "author": "Seneca",
+    "lang": "en",
+    "originalLang": "la",
+    "originalText": "Ignoranti quem portum petat nullus suus ventus est.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-06",
+    "text": "Strategy without tactics is the slowest route to victory.",
+    "author": "Sun Tzu",
+    "lang": "en",
+    "originalLang": "zh",
+    "originalText": "谋无术则事难成。",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-07",
+    "text": "Begin with the end in mind.",
+    "author": "Stephen Covey",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Begin with the end in mind.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-08",
+    "text": "Most people overestimate what they can do in one year and underestimate what they can do in ten years.",
+    "author": "Bill Gates",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Most people overestimate what they can do in one year and underestimate what they can do in ten years.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-09",
+    "text": "Focusing is about saying no to a hundred other good ideas.",
+    "author": "Steve Jobs",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Focusing is about saying no to a hundred other good ideas.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-10",
+    "text": "A goal is not always meant to be reached, it often serves simply as something to aim at.",
+    "author": "Bruce Lee",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "A goal is not always meant to be reached, it often serves simply as something to aim at.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-11",
+    "text": "Our goals can only be reached through a vehicle of a plan, in which we must fervently believe.",
+    "author": "Pablo Picasso",
+    "lang": "en",
+    "originalLang": "fr",
+    "originalText": "Our goals can only be reached through a vehicle of a plan, in which we must fervently believe.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-12",
+    "text": "First say to yourself what you would be; and then do what you have to do.",
+    "author": "Epictetus",
+    "lang": "en",
+    "originalLang": "grc",
+    "originalText": "First say to yourself what you would be; and then do what you have to do.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-13",
+    "text": "The will to win is important, but the will to prepare is vital.",
+    "author": "Vince Lombardi",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "The will to win is important, but the will to prepare is vital.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-14",
+    "text": "Nothing is particularly hard if you divide it into small jobs.",
+    "author": "Henry Ford",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Nothing is particularly hard if you divide it into small jobs.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-15",
+    "text": "When it is obvious that the goals cannot be reached, don't adjust the goals, adjust the action steps.",
+    "author": "Confucius",
+    "lang": "en",
+    "originalLang": "zh",
+    "originalText": "射有似乎君子，失诸正鹄，反求诸其身。",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-16",
+    "text": "To improve is to change; to be perfect is to change often.",
+    "author": "Winston Churchill",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "To improve is to change; to be perfect is to change often.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-17",
+    "text": "By failing to prepare, you are preparing to fail.",
+    "author": "Benjamin Franklin",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "By failing to prepare, you are preparing to fail.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-18",
+    "text": "Discipline is the bridge between goals and accomplishment.",
+    "author": "Jim Rohn",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Discipline is the bridge between goals and accomplishment.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-19",
+    "text": "You cannot hit a target you cannot see.",
+    "author": "Zig Ziglar",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "You cannot hit a target you cannot see.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-20",
+    "text": "The impediment to action advances action. What stands in the way becomes the way.",
+    "author": "Marcus Aurelius",
+    "lang": "en",
+    "originalLang": "grc",
+    "originalText": "The impediment to action advances action. What stands in the way becomes the way.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-21",
+    "text": "Vision without execution is hallucination.",
+    "author": "Thomas Edison",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Vision without execution is hallucination.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-22",
+    "text": "People with goals succeed because they know where they are going.",
+    "author": "Earl Nightingale",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "People with goals succeed because they know where they are going.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-23",
+    "text": "Concentrate all your thoughts upon the work in hand. The sun's rays do not burn until brought to a focus.",
+    "author": "Alexander Graham Bell",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Concentrate all your thoughts upon the work in hand. The sun's rays do not burn until brought to a focus.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-24",
+    "text": "You are never too old to set another goal or to dream a new dream.",
+    "author": "C.S. Lewis",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "You are never too old to set another goal or to dream a new dream.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-25",
+    "text": "Clear goals allow you to control the direction of change in your favor.",
+    "author": "Brian Tracy",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Clear goals allow you to control the direction of change in your favor.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-26",
+    "text": "Plans are nothing; planning is everything.",
+    "author": "Dwight D. Eisenhower",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Plans are nothing; planning is everything.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-27",
+    "text": "Shoot for the moon. Even if you miss, you'll land among the stars.",
+    "author": "Les Brown",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Shoot for the moon. Even if you miss, you'll land among the stars.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-28",
+    "text": "Knowing is not enough; we must apply. Willing is not enough; we must do.",
+    "author": "Johann Wolfgang von Goethe",
+    "lang": "en",
+    "originalLang": "de",
+    "originalText": "Es ist nicht genug, zu wissen, man muß auch anwenden; es ist nicht genug, zu wollen, man muß auch tun.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-29",
+    "text": "Start where you are. Use what you have. Do what you can.",
+    "author": "Arthur Ashe",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "Start where you are. Use what you have. Do what you can.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-goal-30",
+    "text": "To produce at your peak level you need to work for extended periods with full concentration on a single task.",
+    "author": "Cal Newport",
+    "lang": "en",
+    "originalLang": "en",
+    "originalText": "To produce at your peak level you need to work for extended periods with full concentration on a single task.",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",

@@ -47,7 +47,7 @@ export const QuoteAdmin: React.FC = () => {
   });
 
   const [search, setSearch] = useState('');
-  const [langFilter, setLangFilter] = useState<'all' | 'vi' | 'en'>('all');
+  const [langFilter, setLangFilter] = useState<string>('all');
   const [contextFilter, setContextFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [unverifiedOnly, setUnverifiedOnly] = useState(false);
@@ -63,7 +63,7 @@ export const QuoteAdmin: React.FC = () => {
   // Form fields
   const [formText, setFormText] = useState('');
   const [formAuthor, setFormAuthor] = useState('');
-  const [formLang, setFormLang] = useState<'vi' | 'en'>('vi');
+  const [formLang, setFormLang] = useState<string>('vi');
   const [formContexts, setFormContexts] = useState<QuoteContext[]>(['start_day']);
   const [formKeywords, setFormKeywords] = useState('');
   const [formWeight, setFormWeight] = useState<number>(1);

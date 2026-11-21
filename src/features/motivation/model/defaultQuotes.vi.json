@@ -6,7 +6,11 @@
     "lang": "vi",
     "originalLang": "en",
     "originalText": "Stay hungry, stay foolish.",
-    "contexts": ["start_day", "goal", "any"],
+    "contexts": [
+      "start_day",
+      "goal",
+      "any"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -17,7 +21,9 @@
     "text": "Hãy bắt đầu ngày của bạn bằng một nội dung truyền cảm hứng và năng lượng: một câu nói truyền động lực, một đoạn nhạc, và một hình ảnh truyền cảm hứng. Tất cả cần liên kết với mục tiêu của bạn.",
     "author": "TAIO-Lee",
     "lang": "vi",
-    "contexts": ["start_day"],
+    "contexts": [
+      "start_day"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -28,7 +34,10 @@
     "text": "Bạn không hơn gì người khác nếu bạn không làm việc nhiều hơn người khác.",
     "author": "",
     "lang": "vi",
-    "contexts": ["start_task", "goal"],
+    "contexts": [
+      "start_task",
+      "goal"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -39,7 +48,10 @@
     "text": "Nếu cuộc đời bạn không đủ thử thách, có lẽ bạn sẽ không đủ bản lĩnh.",
     "author": "",
     "lang": "vi",
-    "contexts": ["goal", "any"],
+    "contexts": [
+      "goal",
+      "any"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -50,7 +62,10 @@
     "text": "Cuộc sống cũng như chiếc xe đạp. Muốn giữ thăng bằng, bạn phải tiếp tục tiến về phía trước.",
     "author": "Albert Einstein",
     "lang": "vi",
-    "contexts": ["break", "any"],
+    "contexts": [
+      "break",
+      "any"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -61,8 +76,15 @@
     "text": "Sự học cũng như con thuyền trên dòng nước ngược, không tiến ắt phải lùi.",
     "author": "Ngạn ngữ Trung Hoa",
     "lang": "vi",
-    "contexts": ["goal", "start_day"],
-    "goalKeywords": ["học", "study", "learn"],
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "goalKeywords": [
+      "học",
+      "study",
+      "learn"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -73,7 +95,10 @@
     "text": "Hành trình vạn dặm bắt đầu từ một bước chân.",
     "author": "Lão Tử",
     "lang": "vi",
-    "contexts": ["start_task", "goal"],
+    "contexts": [
+      "start_task",
+      "goal"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -84,7 +109,10 @@
     "text": "Không có việc gì khó, chỉ sợ lòng không bền. Đào núi và lấp biển, quyết chí ắt làm nên.",
     "author": "Hồ Chí Minh",
     "lang": "vi",
-    "contexts": ["goal", "start_task"],
+    "contexts": [
+      "goal",
+      "start_task"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -95,7 +123,10 @@
     "text": "Có công mài sắt, có ngày nên kim.",
     "author": "Tục ngữ Việt Nam",
     "lang": "vi",
-    "contexts": ["done", "goal"],
+    "contexts": [
+      "done",
+      "goal"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -106,7 +137,9 @@
     "text": "Việc hôm nay chớ để ngày mai.",
     "author": "Tục ngữ Việt Nam",
     "lang": "vi",
-    "contexts": ["start_task"],
+    "contexts": [
+      "start_task"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -117,7 +150,10 @@
     "text": "Thiên tài là một phần trăm cảm hứng và chín mươi chín phần trăm mồ hôi.",
     "author": "Thomas Edison",
     "lang": "vi",
-    "contexts": ["start_task", "done"],
+    "contexts": [
+      "start_task",
+      "done"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -128,7 +164,10 @@
     "text": "Chúng ta là những gì ta lặp đi lặp lại. Vì thế, sự xuất sắc không phải một hành động mà là một thói quen.",
     "author": "Will Durant",
     "lang": "vi",
-    "contexts": ["end_day", "goal"],
+    "contexts": [
+      "end_day",
+      "goal"
+    ],
     "weight": 2,
     "active": true,
     "source": "taio",
@@ -139,7 +178,10 @@
     "text": "Không phải chúng ta có quá ít thời gian, mà là chúng ta lãng phí quá nhiều.",
     "author": "Seneca",
     "lang": "vi",
-    "contexts": ["start_day", "break"],
+    "contexts": [
+      "start_day",
+      "break"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -150,7 +192,10 @@
     "text": "Thời gian của bạn có hạn, đừng lãng phí nó để sống cuộc đời của người khác.",
     "author": "Steve Jobs",
     "lang": "vi",
-    "contexts": ["start_day", "goal"],
+    "contexts": [
+      "start_day",
+      "goal"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -161,7 +206,9 @@
     "text": "Thời điểm tốt nhất để trồng một cái cây là hai mươi năm trước. Thời điểm tốt thứ hai là ngay bây giờ.",
     "author": "Ngạn ngữ",
     "lang": "vi",
-    "contexts": ["start_task"],
+    "contexts": [
+      "start_task"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -172,7 +219,9 @@
     "text": "Dục tốc bất đạt.",
     "author": "Ngạn ngữ",
     "lang": "vi",
-    "contexts": ["break"],
+    "contexts": [
+      "break"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -183,7 +232,9 @@
     "text": "Đừng đếm ngày tháng, hãy làm cho ngày tháng trở nên đáng giá.",
     "author": "Muhammad Ali",
     "lang": "vi",
-    "contexts": ["start_day"],
+    "contexts": [
+      "start_day"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -194,7 +245,9 @@
     "text": "Viết ra một việc quan trọng nhất hôm nay trước khi mở tin nhắn.",
     "author": "",
     "lang": "vi",
-    "contexts": ["start_day"],
+    "contexts": [
+      "start_day"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -205,7 +258,9 @@
     "text": "Việc lớn quá thì chỉ cần làm 5 phút đầu tiên.",
     "author": "",
     "lang": "vi",
-    "contexts": ["start_task"],
+    "contexts": [
+      "start_task"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -216,7 +271,9 @@
     "text": "Nghỉ đúng lúc cũng là một phần của công việc.",
     "author": "",
     "lang": "vi",
-    "contexts": ["break"],
+    "contexts": [
+      "break"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -227,7 +284,10 @@
     "text": "Hôm nay bạn đã tiến thêm một bước. Ghi lại điều đó.",
     "author": "",
     "lang": "vi",
-    "contexts": ["done", "end_day"],
+    "contexts": [
+      "done",
+      "end_day"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -238,7 +298,10 @@
     "text": "Nhìn lại mục tiêu của bạn một phút trước khi bắt đầu.",
     "author": "",
     "lang": "vi",
-    "contexts": ["start_day", "goal"],
+    "contexts": [
+      "start_day",
+      "goal"
+    ],
     "weight": 1,
     "active": true,
     "source": "taio",
@@ -249,8 +312,520 @@
     "text": "Xong một việc nhỏ còn hơn nghĩ mãi về một việc lớn.",
     "author": "",
     "lang": "vi",
-    "contexts": ["start_task"],
+    "contexts": [
+      "start_task"
+    ],
     "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-01",
+    "text": "Hành trình vạn dặm bắt đầu từ một bước chân.",
+    "author": "Lão Tử",
+    "lang": "vi",
+    "originalLang": "zh",
+    "originalText": "千里之行，始于足下。",
+    "translationOf": "q-en-goal-01",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-02",
+    "text": "Một mục tiêu không có kế hoạch chỉ là một điều ước.",
+    "author": "Antoine de Saint-Exupéry",
+    "lang": "vi",
+    "originalLang": "fr",
+    "originalText": "Un objectif sans plan n'est qu'un souhait.",
+    "translationOf": "q-en-goal-02",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-03",
+    "text": "Kế hoạch chỉ là ý định tốt nếu không chuyển hóa ngay thành công việc thực tế.",
+    "author": "Peter Drucker",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Plans are only good intentions unless they immediately degenerate into hard work.",
+    "translationOf": "q-en-goal-03",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-04",
+    "text": "Chúng ta là những gì chúng ta lặp đi lặp lại. Sự xuất sắc là thói quen, không phải hành động nhất thời.",
+    "author": "Aristotle",
+    "lang": "vi",
+    "originalLang": "grc",
+    "originalText": "Excellence, then, is not an act, but a habit.",
+    "translationOf": "q-en-goal-04",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-05",
+    "text": "Không có ngọn gió nào thuận lợi cho con thuyền không biết mình định đi về đâu.",
+    "author": "Seneca",
+    "lang": "vi",
+    "originalLang": "la",
+    "originalText": "Ignoranti quem portum petat nullus suus ventus est.",
+    "translationOf": "q-en-goal-05",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-06",
+    "text": "Chiến lược mà không có chiến thuật là con đường chậm nhất đến chiến thắng.",
+    "author": "Tôn Tử",
+    "lang": "vi",
+    "originalLang": "zh",
+    "originalText": "谋无术则事难成。",
+    "translationOf": "q-en-goal-06",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-07",
+    "text": "Hãy bắt đầu với cái đích trong tâm trí.",
+    "author": "Stephen Covey",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Begin with the end in mind.",
+    "translationOf": "q-en-goal-07",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-08",
+    "text": "Hầu hết mọi người đánh giá quá cao điều làm được trong một năm, và đánh giá quá thấp điều làm được trong mười năm.",
+    "author": "Bill Gates",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Most people overestimate what they can do in one year and underestimate what they can do in ten years.",
+    "translationOf": "q-en-goal-08",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-09",
+    "text": "Tập trung có nghĩa là nói không với hàng trăm ý tưởng tốt khác.",
+    "author": "Steve Jobs",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Focusing is about saying no to a hundred other good ideas.",
+    "translationOf": "q-en-goal-09",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-10",
+    "text": "Mục tiêu không phải lúc nào cũng để đạt tới, đôi khi nó chỉ đóng vai trò là một điểm để ngắm bắn.",
+    "author": "Bruce Lee",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "A goal is not always meant to be reached, it often serves simply as something to aim at.",
+    "translationOf": "q-en-goal-10",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-11",
+    "text": "Mục tiêu chỉ có thể đạt được thông qua một kế hoạch mà chúng ta hết lòng tin tưởng.",
+    "author": "Pablo Picasso",
+    "lang": "vi",
+    "originalLang": "fr",
+    "originalText": "Our goals can only be reached through a vehicle of a plan, in which we must fervently believe.",
+    "translationOf": "q-en-goal-11",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-12",
+    "text": "Trước hết hãy tự nói với mình bạn muốn trở thành người thế nào; rồi làm những gì bạn phải làm.",
+    "author": "Epictetus",
+    "lang": "vi",
+    "originalLang": "grc",
+    "originalText": "First say to yourself what you would be; and then do what you have to do.",
+    "translationOf": "q-en-goal-12",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-13",
+    "text": "Khát khao chiến thắng là quan trọng, nhưng khát khao chuẩn bị để chiến thắng mới là tất cả.",
+    "author": "Vince Lombardi",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "The will to win is important, but the will to prepare is vital.",
+    "translationOf": "q-en-goal-13",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-14",
+    "text": "Không có việc gì quá khó nếu bạn chia nó thành từng phần nhỏ.",
+    "author": "Henry Ford",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Nothing is particularly hard if you divide it into small jobs.",
+    "translationOf": "q-en-goal-14",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-15",
+    "text": "Khi rõ ràng không thể đạt được mục tiêu, đừng điều chỉnh mục tiêu, hãy điều chỉnh hành động.",
+    "author": "Khổng Tử",
+    "lang": "vi",
+    "originalLang": "zh",
+    "originalText": "射有似乎君子，失诸正鹄，反求诸其身。",
+    "translationOf": "q-en-goal-15",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-16",
+    "text": "Cải tiến là thay đổi; để trở nên hoàn hảo cần phải thay đổi thường xuyên.",
+    "author": "Winston Churchill",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "To improve is to change; to be perfect is to change often.",
+    "translationOf": "q-en-goal-16",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-17",
+    "text": "Thất bại trong việc chuẩn bị là chuẩn bị cho sự thất bại.",
+    "author": "Benjamin Franklin",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "By failing to prepare, you are preparing to fail.",
+    "translationOf": "q-en-goal-17",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-18",
+    "text": "Kỷ luật là cầu nối giữa mục tiêu và thành tựu.",
+    "author": "Jim Rohn",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Discipline is the bridge between goals and accomplishment.",
+    "translationOf": "q-en-goal-18",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-19",
+    "text": "Bạn không thể bắn trúng một cái đích mà bạn không thể nhìn thấy.",
+    "author": "Zig Ziglar",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "You cannot hit a target you cannot see.",
+    "translationOf": "q-en-goal-19",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-20",
+    "text": "Trở ngại trên đường đi trở thành con đường. Thứ cản trở hành động thúc đẩy hành động.",
+    "author": "Marcus Aurelius",
+    "lang": "vi",
+    "originalLang": "grc",
+    "originalText": "The impediment to action advances action. What stands in the way becomes the way.",
+    "translationOf": "q-en-goal-20",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-21",
+    "text": "Tầm nhìn mà không có thực thi chỉ là ảo tưởng.",
+    "author": "Thomas Edison",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Vision without execution is hallucination.",
+    "translationOf": "q-en-goal-21",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-22",
+    "text": "Người có mục tiêu thành công vì họ biết mình đang đi đâu.",
+    "author": "Earl Nightingale",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "People with goals succeed because they know where they are going.",
+    "translationOf": "q-en-goal-22",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-23",
+    "text": "Tập trung tất cả suy nghĩ vào công việc trước mắt. Tia nắng không đốt cháy được gì cho đến khi được hội tụ.",
+    "author": "Alexander Graham Bell",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Concentrate all your thoughts upon the work in hand. The sun's rays do not burn until brought to a focus.",
+    "translationOf": "q-en-goal-23",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-24",
+    "text": "Bạn không bao giờ quá già để đặt một mục tiêu mới hay mơ một giấc mơ mới.",
+    "author": "C.S. Lewis",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "You are never too old to set another goal or to dream a new dream.",
+    "translationOf": "q-en-goal-24",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-25",
+    "text": "Mục tiêu rõ ràng cho phép bạn kiểm soát hướng đi của sự thay đổi thay vì bị nó chi phối.",
+    "author": "Brian Tracy",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Clear goals allow you to control the direction of change in your favor.",
+    "translationOf": "q-en-goal-25",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-26",
+    "text": "Kế hoạch không là gì cả; lập kế hoạch là tất cả.",
+    "author": "Dwight D. Eisenhower",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Plans are nothing; planning is everything.",
+    "translationOf": "q-en-goal-26",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-27",
+    "text": "Hãy nhắm tới mặt trăng. Dù trượt, bạn vẫn đứng giữa những vì sao.",
+    "author": "Les Brown",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Shoot for the moon. Even if you miss, you'll land among the stars.",
+    "translationOf": "q-en-goal-27",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-28",
+    "text": "Biết thôi chưa đủ, phải áp dụng. Muốn thôi chưa đủ, phải hành động.",
+    "author": "Johann Wolfgang von Goethe",
+    "lang": "vi",
+    "originalLang": "de",
+    "originalText": "Es ist nicht genug, zu wissen, man muß auch anwenden; es ist nicht genug, zu wollen, man muß auch tun.",
+    "translationOf": "q-en-goal-28",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-29",
+    "text": "Bắt đầu từ nơi bạn đứng. Sử dụng những gì bạn có. Làm những gì bạn có thể.",
+    "author": "Arthur Ashe",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "Start where you are. Use what you have. Do what you can.",
+    "translationOf": "q-en-goal-29",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-vi-goal-30",
+    "text": "Để tạo ra giá trị khác biệt, hãy tập trung không gián đoạn vào một mục tiêu quan trọng duy nhất.",
+    "author": "Cal Newport",
+    "lang": "vi",
+    "originalLang": "en",
+    "originalText": "To produce at your peak level you need to work for extended periods with full concentration on a single task.",
+    "translationOf": "q-en-goal-30",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
     "active": true,
     "source": "taio",
     "verified": true

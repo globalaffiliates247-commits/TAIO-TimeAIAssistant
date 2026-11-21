@@ -1,0 +1,50 @@
+[
+  {
+    "id": "q-zh-goal-01",
+    "text": "千里之行，始于足下。",
+    "author": "老子",
+    "lang": "zh",
+    "originalLang": "zh",
+    "originalText": "千里之行，始于足下。",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-zh-goal-06",
+    "text": "谋无术则事难成。",
+    "author": "孙子",
+    "lang": "zh",
+    "originalLang": "zh",
+    "originalText": "谋无术则事难成。",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-zh-goal-15",
+    "text": "射有似乎君子，失诸正鹄，反求诸其身。",
+    "author": "孔子",
+    "lang": "zh",
+    "originalLang": "zh",
+    "originalText": "射有似乎君子，失诸正鹄，反求诸其身。",
+    "contexts": [
+      "goal",
+      "start_day"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  }
+]

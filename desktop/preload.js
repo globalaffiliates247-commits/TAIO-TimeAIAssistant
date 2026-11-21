@@ -36,4 +36,16 @@ contextBridge.exposeInMainWorld('taioAPI', {
     ipcRenderer.on('taio-sync-timer', listener);
     return () => ipcRenderer.removeListener('taio-sync-timer', listener);
   },
+  openDaySheetWindow: () => ipcRenderer.send('taio-open-day-sheet-window'),
+  setAutoMinimizeClock: (val) => ipcRenderer.send('taio-set-auto-minimize-clock', val),
+  onDaySheetOpened: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on('taio-day-sheet-opened', listener);
+    return () => ipcRenderer.removeListener('taio-day-sheet-opened', listener);
+  },
+  onDaySheetClosed: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on('taio-day-sheet-closed', listener);
+    return () => ipcRenderer.removeListener('taio-day-sheet-closed', listener);
+  },
 });

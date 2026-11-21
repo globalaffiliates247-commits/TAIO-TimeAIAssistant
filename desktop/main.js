@@ -18,8 +18,11 @@ protocol.registerSchemesAsPrivileged([
 let mainWindow = null;
 let quickNoteWindow = null;
 let clockWindow = null;
+let daySheetWindow = null;
 let tray = null;
 let timerLabel = 'TAIO Time';
+let isQuitting = false;
+let autoMinimizeOnClock = true;
 
 // Remembered clock state
 let currentTimerData = {
@@ -32,6 +35,7 @@ let currentTimerData = {
 };
 let clockWindowBounds = null;
 let quickNoteWindowBounds = null;
+let daySheetWindowBounds = null;
 let clockIsPinned = true;
 let clockReadyWatchdog = null;
 
@@ -119,6 +123,20 @@ function persistQuickNoteBounds(bounds) {
   }, 500);
 }
 
+let saveDaySheetBoundsTimeout = null;
+function persistDaySheetBounds(bounds) {
+  daySheetWindowBounds = bounds;
+  if (saveDaySheetBoundsTimeout) clearTimeout(saveDaySheetBoundsTimeout);
+  saveDaySheetBoundsTimeout = setTimeout(() => {
+    try {
+      const filePath = path.join(app.getPath('userData'), 'day-sheet-window.json');
+      fs.writeFileSync(filePath, JSON.stringify(bounds, null, 2), 'utf8');
+    } catch (e) {
+      console.warn('[main] Failed to write day-sheet-window.json:', e);
+    }
+  }, 500);
+}
+
 function resolveFile(urlPath) {
   let rel = decodeURIComponent(urlPath.split('?')[0]);
   if (rel.endsWith('/')) rel += 'index.html';
@@ -143,6 +161,13 @@ function createWindow() {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (!url.startsWith(`${SCHEME}://`)) shell.openExternal(url);
     return { action: 'deny' };
+  });
+  // PRD v0.3.48 Part C1: Red button hides window on macOS, doesn't quit app
+  mainWindow.on('close', (e) => {
+    if (process.platform === 'darwin' && !isQuitting) {
+      e.preventDefault();
+      mainWindow.hide();
+    }
   });
   mainWindow.on('closed', () => { mainWindow = null; });
   mainWindow.webContents.on('did-finish-load', () => {
@@ -239,8 +264,71 @@ function createQuickNoteWindow() {
   quickNoteWindow.on('closed', () => { quickNoteWindow = null; });
 }
 
+// PRD v0.3.48 Part C3: Floating Day Sheet Window (⌥⌘A)
+function createDaySheetWindow() {
+  if (daySheetWindow && !daySheetWindow.isDestroyed()) {
+    if (daySheetWindow.isMinimized()) daySheetWindow.restore();
+    daySheetWindow.show();
+    daySheetWindow.focus();
+    return;
+  }
+
+  const bounds = daySheetWindowBounds || getPersistedBounds('day-sheet-window.json', 480, 680);
+
+  daySheetWindow = new BrowserWindow({
+    width: bounds.width,
+    height: bounds.height,
+    x: bounds.x,
+    y: bounds.y,
+    minWidth: 360,
+    minHeight: 400,
+    frame: false,
+    alwaysOnTop: true,
+    resizable: true,
+    movable: true,
+    skipTaskbar: false,
+    show: false,
+    backgroundColor: '#ffffff',
+    titleBarStyle: 'hidden',
+    webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'preload.js') },
+  });
+
+  daySheetWindow.on('resize', () => {
+    if (daySheetWindow && !daySheetWindow.isDestroyed()) {
+      persistDaySheetBounds(daySheetWindow.getBounds());
+    }
+  });
+  daySheetWindow.on('move', () => {
+    if (daySheetWindow && !daySheetWindow.isDestroyed()) {
+      persistDaySheetBounds(daySheetWindow.getBounds());
+    }
+  });
+
+  daySheetWindow.loadURL(`${SCHEME}://${HOST}/index.html?mode=day_sheet_window`);
+  daySheetWindow.once('ready-to-show', () => {
+    daySheetWindow.show();
+    daySheetWindow.focus();
+  });
+
+  daySheetWindow.on('closed', () => {
+    daySheetWindow = null;
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('taio-day-sheet-closed');
+    }
+  });
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('taio-day-sheet-opened');
+  }
+}
+
 // PRD FIX v0.3.33 Part I: Frameless Dual-View Floating Clock (⌥⌘T)
 function createClockWindow() {
+  // PRD v0.3.48 Part C2: Auto-minimize main window on opening floating clock
+  if (autoMinimizeOnClock && mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() && !mainWindow.isMinimized()) {
+    mainWindow.minimize();
+  }
+
   if (clockWindow && !clockWindow.isDestroyed()) {
     clockWindow.show();
     clockWindow.focus();
@@ -408,11 +496,20 @@ function updateTrayMenu() {
   const contextMenu = Menu.buildFromTemplate([
     { label: timerLabel, enabled: false },
     { type: 'separator' },
+    { label: isEn ? "Today's Journal (⌥⌘A)" : "Nhật ký hôm nay (⌥⌘A)", click: createDaySheetWindow },
     { label: isEn ? 'Quick Note (⌥⌘N)' : 'Ghi nhanh (⌥⌘N)', click: createQuickNoteWindow },
     { label: isEn ? 'Floating Clock (⌥⌘T)' : 'Đồng hồ rời (⌥⌘T)', click: createClockWindow },
-    { label: isEn ? 'Open TAIO Time' : 'Mở TAIO Time', click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
+    { label: isEn ? 'Open TAIO Time' : 'Mở TAIO Time', click: () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.show();
+        mainWindow.focus();
+      } else {
+        createWindow();
+      }
+    }},
     { type: 'separator' },
-    { label: isEn ? 'Quit' : 'Thoát', click: () => app.quit() },
+    { label: isEn ? 'Quit' : 'Thoát', click: () => { isQuitting = true; app.quit(); } },
   ]);
   tray.setContextMenu(contextMenu);
 }
@@ -479,6 +576,19 @@ ipcMain.on('taio-quick-note', (_event, noteText) => {
   }
 });
 
+// PRD v0.3.48 Part C2 & C3 IPC
+ipcMain.on('taio-open-day-sheet-window', () => {
+  createDaySheetWindow();
+});
+
+ipcMain.on('taio-set-auto-minimize-clock', (_event, enabled) => {
+  autoMinimizeOnClock = Boolean(enabled);
+});
+
+app.on('before-quit', () => {
+  isQuitting = true;
+});
+
 app.whenReady().then(() => {
   protocol.handle(SCHEME, (req) => {
     const { pathname } = new URL(req.url);
@@ -488,11 +598,20 @@ app.whenReady().then(() => {
   createWindow();
   createTray();
 
-  // Register global shortcuts: ⌥⌘N for Quick Note, ⌥⌘T for Clock
+  // Register global shortcuts: ⌥⌘A for Day Sheet, ⌥⌘N for Quick Note, ⌥⌘T for Clock (PRD v0.3.48 Part C3)
+  globalShortcut.register('Alt+CommandOrControl+A', createDaySheetWindow);
   globalShortcut.register('Alt+CommandOrControl+N', createQuickNoteWindow);
   globalShortcut.register('Alt+CommandOrControl+T', createClockWindow);
 
-  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  app.on('activate', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    } else {
+      createWindow();
+    }
+  });
 });
 
 app.on('window-all-closed', () => {

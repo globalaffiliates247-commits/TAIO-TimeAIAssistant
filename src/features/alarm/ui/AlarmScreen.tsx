@@ -44,7 +44,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark);
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && (typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false));
   const isCool = palette === 'cool';
 
   // Local state for snooze minutes & sound index
@@ -266,7 +266,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
               ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25'
               : isDark
                 ? 'bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-500/25'
-                : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white shadow-red-500/25'
+                : 'bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)] text-white shadow-red-500/25'
           }`}
         >
           <BellOff className="w-5 h-5" />

@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import { STICKY_COLORS, StickyColor, StickyNote } from '../model/stickyTypes';
 import { closeSticky, newFreeSticky, setActiveSticky, updateSticky, trashSticky, toggleStickyListPanel } from '../model/stickyStore';
 import { IconClose, IconCollapse, IconPin, IconPlus, IconShirt } from './StickyIcons';
-import { Lightbulb, Trash2, EyeOff, Layers, Calendar, FileText } from 'lucide-react';
+import { Lightbulb, Trash2, EyeOff, Layers, Calendar, FileText, ExternalLink } from 'lucide-react';
 import { DaySheetBody } from './DaySheetBody';
 import { FreeSheetBody } from './FreeSheetBody';
 import { useStickyResize } from './useStickyResize';
@@ -13,7 +13,7 @@ import { useApp } from '@/context/AppContext';
 import { toLunar } from '@/domain/lunar';
 import { AddEventModal } from '@/features/events';
 
-const dayTitle = (date: string, lang: 'vi' | 'en' = 'vi') => {
+const dayTitle = (date: string, lang: 'vi' | 'en' | string = 'vi') => {
   const [y, m, d] = date.split('-').map(Number);
   const dateObj = new Date(y, (m || 1) - 1, d || 1);
   const today = getDeviceCalendarDate();
@@ -213,6 +213,19 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
         >
           <IconCollapse color={c.muted} size={16} />
         </button>
+        {note.kind === 'day' && typeof window !== 'undefined' && Boolean((window as any).taioAPI?.openDaySheetWindow) && (
+          <button
+            className={btn}
+            aria-label={language === 'vi' ? 'Tách cửa sổ riêng' : 'Detach to separate window'}
+            title={language === 'vi' ? 'Tách cửa sổ riêng (⌥⌘A)' : 'Detach to separate window (⌥⌘A)'}
+            onClick={() => {
+              (window as any).taioAPI.openDaySheetWindow();
+              closeSticky(note.id);
+            }}
+          >
+            <ExternalLink size={14} color={c.muted} />
+          </button>
+        )}
         {note.kind === 'free' && (
           <button
             className={btn}

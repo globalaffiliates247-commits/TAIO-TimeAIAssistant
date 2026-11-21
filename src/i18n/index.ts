@@ -20,6 +20,9 @@ import enDayclose from './en/dayclose.json';
 import enAccount from './en/account.json';
 import enSettings from './en/settings.json';
 
+import zhCommon from './zh/common.json';
+import thCommon from './th/common.json';
+
 const viMerged = {
   ...viCommon,
   ...viNow,
@@ -62,6 +65,12 @@ const resources = {
     dayclose: enDayclose,
     account: enAccount,
     settings: enSettings,
+  },
+  zh: {
+    common: zhCommon,
+  },
+  th: {
+    common: thCommon,
   },
 };
 

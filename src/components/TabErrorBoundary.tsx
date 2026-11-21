@@ -8,7 +8,7 @@ import { AlertTriangle, Copy, RotateCw, Check } from 'lucide-react';
 interface Props {
   tabName: string;
   children: ReactNode;
-  language?: 'vi' | 'en';
+  language?: 'vi' | 'en' | string;
 }
 
 interface State {

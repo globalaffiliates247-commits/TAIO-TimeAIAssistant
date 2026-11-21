@@ -67,5 +67,20 @@
     "day_sheet": "Daily note",
     "lines_count": "{{count}} lines",
     "pinned": " · pinned"
+  },
+  "card": {
+    "daily_card_subtitle": "Quickly log tasks for today • Strike through when done • Move tasks with intent",
+    "prev_day": "Previous day",
+    "next_day": "Next day",
+    "active_question_default": "What are the 3 most important tasks you need to do today?",
+    "active_capture_title": "Active Capture & Backfill",
+    "backfill": "Backfill",
+    "productivity_rhythm": "Productivity Rhythm:",
+    "quick_input_placeholder": "Quickly log 1 task (enter task name then press Enter)...",
+    "options": "Options",
+    "unplanned": "Unplanned",
+    "add": "Add",
+    "task_list_title": "Today's Task List ({{count}} tasks)",
+    "task_list_hint": "Tap to strike through • Completed tasks stay to record achievements"
   }
 }

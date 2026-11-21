@@ -221,16 +221,16 @@ body {
   animation: pulse-slow 3s ease-in-out infinite;
 }
 
-/* Bulletproof Brand color variable classes */
-.bg-\\[var\\(--taio-brand\\)\\] { background-color: var(--taio-brand) !important; }
-.hover\\:bg-\\[var\\(--taio-brand-hover\\)\\]:hover { background-color: var(--taio-brand-hover) !important; }
-.bg-\\[var\\(--taio-brand-soft\\)\\] { background-color: var(--taio-brand-soft) !important; }
-.text-\\[var\\(--taio-brand\\)\\] { color: var(--taio-brand) !important; }
-.border-\\[var\\(--taio-brand\\)\\] { border-color: var(--taio-brand) !important; }
-.focus\\:border-\\[var\\(--taio-brand\\)\\]:focus { border-color: var(--taio-brand) !important; }
-.ring-\\[var\\(--taio-brand\\)\\] { --tw-ring-color: var(--taio-brand) !important; }
-.focus\\:ring-\\[var\\(--taio-brand\\)\\]:focus { --tw-ring-color: var(--taio-brand) !important; }
-.shadow-\\[var\\(--taio-brand\\)\\]\\/20 { --tw-shadow-color: var(--taio-brand) !important; }
+/* Bulletproof Brand color variable classes with solid hex fallback */
+.bg-\\[var\\(--taio-brand\\)\\] { background-color: #E11D2E !important; background-color: var(--taio-brand, #E11D2E) !important; }
+.hover\\:bg-\\[var\\(--taio-brand-hover\\)\\]:hover { background-color: #C4182A !important; background-color: var(--taio-brand-hover, #C4182A) !important; }
+.bg-\\[var\\(--taio-brand-soft\\)\\] { background-color: #FDE8EA !important; background-color: var(--taio-brand-soft, #FDE8EA) !important; }
+.text-\\[var\\(--taio-brand\\)\\] { color: #E11D2E !important; color: var(--taio-brand, #E11D2E) !important; }
+.border-\\[var\\(--taio-brand\\)\\] { border-color: #E11D2E !important; border-color: var(--taio-brand, #E11D2E) !important; }
+.focus\\:border-\\[var\\(--taio-brand\\)\\]:focus { border-color: #E11D2E !important; border-color: var(--taio-brand, #E11D2E) !important; }
+.ring-\\[var\\(--taio-brand\\)\\] { --tw-ring-color: #E11D2E !important; --tw-ring-color: var(--taio-brand, #E11D2E) !important; }
+.focus\\:ring-\\[var\\(--taio-brand\\)\\]:focus { --tw-ring-color: #E11D2E !important; --tw-ring-color: var(--taio-brand, #E11D2E) !important; }
+.shadow-\\[var\\(--taio-brand\\)\\]\\/20 { --tw-shadow-color: rgba(225, 29, 46, 0.2) !important; --tw-shadow-color: var(--taio-brand, rgba(225, 29, 46, 0.2)) !important; }
 `;
 
   const finalCss = generatedCss + "\n" + customCss;

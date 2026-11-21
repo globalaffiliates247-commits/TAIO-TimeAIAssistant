@@ -57,6 +57,7 @@
   const barIdleBottomBar = document.getElementById('barIdleBottomBar');
   const ringIdleBottomBar = document.getElementById('ringIdleBottomBar');
   const barProgressTrack = document.getElementById('barProgressTrack');
+  const barFreeTimersList = document.getElementById('barFreeTimersList');
   const barFreeTimerRow = document.getElementById('barFreeTimerRow');
   const barFreeTimerTitle = document.getElementById('barFreeTimerTitle');
   const barFreeTimerDigits = document.getElementById('barFreeTimerDigits');
@@ -301,6 +302,20 @@
     }
   });
 
+  // Free timer action handler (PRD v0.3.48 Part C4)
+  window.handleFreeTimerAction = function(actionType, timerId) {
+    try {
+      if (window.taioAPI && window.taioAPI.sendTimerAction) {
+        window.taioAPI.sendTimerAction({
+          type: actionType === 'stop' ? 'free-timer-stop' : 'free-timer-done',
+          timerId: timerId,
+        });
+      }
+    } catch (err) {
+      reportError(err, 'handleFreeTimerAction');
+    }
+  };
+
   // UI Update called from main.js syncClockWindowData (v0.3.46: guaranteed to be defined unconditionally)
   window.updateUI = function(data) {
     try {
@@ -326,8 +341,29 @@
         if (quoteText) quoteText.innerText = currentQuote.text;
       }
 
-      // Free timer row
-      if (data.freeTimer && barFreeTimerRow) {
+      // Free timers list (up to 3 independent timers, PRD v0.3.48 Part C4)
+      const freeTimers = Array.isArray(data.freeTimers)
+        ? data.freeTimers.slice(0, 3)
+        : (data.freeTimer ? [data.freeTimer] : []);
+
+      if (barFreeTimersList) {
+        if (freeTimers.length > 0) {
+          barFreeTimersList.style.display = 'flex';
+          barFreeTimersList.innerHTML = freeTimers.map(ft => `
+            <div class="free-timer-item">
+              <span class="free-timer-title" title="${ft.title || ''}">${ft.title || 'Timer'}</span>
+              <span class="free-timer-digits">${ft.timeStr || '--:--'}</span>
+              <div class="free-timer-actions">
+                <button class="ft-btn" onclick="handleFreeTimerAction('stop', '${ft.id}')" title="Dừng">Dừng</button>
+                <button class="ft-btn ft-done" onclick="handleFreeTimerAction('done', '${ft.id}')" title="Xong">✓</button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          barFreeTimersList.style.display = 'none';
+          barFreeTimersList.innerHTML = '';
+        }
+      } else if (data.freeTimer && barFreeTimerRow) {
         barFreeTimerRow.style.display = 'flex';
         if (barFreeTimerTitle) barFreeTimerTitle.innerText = data.freeTimer.title;
         if (barFreeTimerDigits) barFreeTimerDigits.innerText = data.freeTimer.timeStr;
@@ -410,14 +446,17 @@
       }
 
       if (currentMode === 'gap') {
+        const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
+        const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
+        const e = totalSec > 0 ? Math.max(0, Math.min(1, secElapsed / totalSec)) : 0;
+
         if (endsAt > now && endsAt > 0) {
           const secRemaining = Math.max(0, Math.floor((endsAt - now) / 1000));
           const m = Math.floor(secRemaining / 60);
           const s = secRemaining % 60;
           digitsStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
           sublineStr = currentLang === 'vi' ? 'tới việc kế tiếp' : 'until next task';
-          const totalSec = Math.max(60, Math.floor((endsAt - (startedAt || (now - 1000))) / 1000));
-          fraction = Math.max(0, Math.min(1, secRemaining / totalSec));
+          fraction = 1 - e;
         } else {
           const nowD = new Date();
           const curH = String(nowD.getHours()).padStart(2, '0');
@@ -428,25 +467,44 @@
         }
 
         if (threeViewMode === 'elapsed') {
-          const secElapsed = Math.max(0, Math.floor((now - (startedAt || now)) / 1000));
           const em = Math.floor(secElapsed / 60);
           const es = secElapsed % 60;
           digitsStr = `${String(em).padStart(2, '0')}:${String(es).padStart(2, '0')}`;
           sublineStr = currentLang === 'vi' ? 'thời gian trống' : 'gap time';
+          fraction = e;
         } else if (threeViewMode === 'goal') {
           const gh = (lastData && typeof lastData.goalHours === 'number') ? lastData.goalHours : 0;
           const gm = (lastData && typeof lastData.goalMins === 'number') ? lastData.goalMins : 0;
           digitsStr = `${gh}g${gm > 0 ? (gm < 10 ? '0' : '') + gm : '00'}`;
           sublineStr = lastData?.goalTitle ? `${lastData.goalTitle}` : (currentLang === 'vi' ? 'Tiến độ mục tiêu' : 'Goal progress');
+          fraction = 0;
         }
 
         if (barDigits) barDigits.innerText = digitsStr;
         if (ringDigits) ringDigits.innerText = digitsStr;
         if (ringSubText) ringSubText.innerText = sublineStr;
-        if (barProgress) barProgress.style.width = `${Math.round(fraction * 100)}%`;
+
+        // Bar progress (v0.3.47 Part C & v0.3.48 Part A)
+        if (barProgress) {
+          if (threeViewMode === 'remaining') {
+            barProgress.style.left = `${Math.round(e * 100)}%`;
+            barProgress.style.width = `${Math.round((1 - e) * 100)}%`;
+          } else {
+            barProgress.style.left = '0%';
+            barProgress.style.width = `${Math.round(e * 100)}%`;
+          }
+        }
+
+        // Ring progress circle (v0.3.47 Part C & v0.3.48 Part A)
         if (ringCircle) {
-          const offset = ringCircumference - fraction * ringCircumference;
-          ringCircle.style.strokeDashoffset = offset;
+          if (threeViewMode === 'remaining') {
+            const rem = 1 - e;
+            ringCircle.style.strokeDasharray = `${rem * ringCircumference} ${ringCircumference}`;
+            ringCircle.style.strokeDashoffset = `${-e * ringCircumference}`;
+          } else {
+            ringCircle.style.strokeDasharray = `${e * ringCircumference} ${ringCircumference}`;
+            ringCircle.style.strokeDashoffset = '0';
+          }
         }
         return;
       }

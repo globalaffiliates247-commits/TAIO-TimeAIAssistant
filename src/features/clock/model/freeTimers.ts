@@ -46,7 +46,7 @@ export function loadRecentTimerPresets(): string[] {
     const raw = window.localStorage.getItem(RECENT_FREE_TIMERS_KEY);
     if (!raw) return ['5p', '10p', '25p'];
     const list = JSON.parse(raw);
-    return Array.isArray(list) && list.length > 0 ? list.slice(0, 3) : ['5p', '10p', '25p'];
+    return Array.isArray(list) && list.length > 0 ? list.slice(0, 6) : ['5p', '10p', '25p'];
   } catch {
     return ['5p', '10p', '25p'];
   }
@@ -56,7 +56,7 @@ export function saveRecentTimerPreset(preset: string): void {
   if (typeof window === 'undefined' || !preset.trim()) return;
   try {
     const recents = loadRecentTimerPresets().filter(p => p !== preset);
-    const updated = [preset.trim(), ...recents].slice(0, 3);
+    const updated = [preset.trim(), ...recents].slice(0, 6);
     window.localStorage.setItem(RECENT_FREE_TIMERS_KEY, JSON.stringify(updated));
   } catch {}
 }

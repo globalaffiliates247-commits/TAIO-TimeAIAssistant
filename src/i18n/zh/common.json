@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "now": "现在",
+    "plan": "计划",
+    "efficiency": "效率",
+    "results": "效率",
+    "goals": "目标"
+  },
+  "terms": {
+    "today": "今天",
+    "cancel": "取消",
+    "profile": "个人",
+    "dailyCard": "每日卡片",
+    "timetable": "时间表",
+    "templateSchedule": "模板日程",
+    "quickNote": "便签"
+  },
+  "plan": {
+    "addEvent": "添加事件",
+    "addEventTitle": "添加事件、生日、节日、纪念日...",
+    "addTask": "添加任务",
+    "weeklyBudget": "每周时间预算",
+    "templateTitle": "管理固定模板日程"
+  },
+  "card": {
+    "daily_card_subtitle": "快速记录今日任务 • 完成后划线 • 有计划地推迟",
+    "prev_day": "前一天",
+    "next_day": "后一天",
+    "active_question_default": "今天你最需要完成的 3 件重要事是什么？",
+    "active_capture_title": "主动收集 & 补记",
+    "backfill": "补记",
+    "productivity_rhythm": "生产力节律：",
+    "quick_input_placeholder": "快速记录 1 项任务（输入后按回车）...",
+    "options": "选项",
+    "unplanned": "突发",
+    "add": "添加",
+    "task_list_title": "今日任务清单（{{count}} 项）",
+    "task_list_hint": "轻触以划除 • 已完成任务仍予保留以记录成果"
+  },
+  "goals": {
+    "modal_title": "添加新目标",
+    "input_name": "主要目标名称",
+    "input_measurable": "可衡量结果",
+    "input_progress_type": "进度计算方式",
+    "input_horizon": "截止期限",
+    "input_budget": "每日时间预算",
+    "create_submit": "创建目标",
+    "created_toast": "目标已添加到文件夹！",
+    "metric_tasks_label": "完成任务数",
+    "metric_tasks_desc": "已完成任务除以目标总任务数（每个任务计1单位）",
+    "metric_measured_label": "可衡量结果",
+    "metric_measured_desc": "实际达成数字除以目标数字（一键更新）",
+    "metric_presence_label": "投入时间",
+    "metric_presence_desc": "实际投入小时除以总承诺小时（适用于习惯养成与训练）",
+    "horizon_30": "30 天（1 个月）",
+    "horizon_60": "60 天（2 个月）",
+    "horizon_90": "90 天（1 个季度）",
+    "horizon_180": "180 天（6 个月）",
+    "horizon_365": "365 天（1 年）",
+    "budget_30": "30 分钟 / 天",
+    "budget_45": "45 分钟 / 天",
+    "budget_60": "60 分钟 / 天",
+    "budget_90": "90 分钟 / 天",
+    "budget_120": "120 分钟 / 天"
+  }
+}

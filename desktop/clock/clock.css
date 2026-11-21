@@ -217,19 +217,26 @@ body {
 }
 
 /* Free Timer Row */
-.free-timer-row {
+.free-timers-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0;
+  -webkit-app-region: no-drag;
+}
+
+.free-timer-item {
   width: 100%;
   font-size: 10.5px;
   color: #b45309;
   background: #fffbeb;
   padding: 2px 6px;
   border-radius: 6px;
-  margin: 1px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: 1px solid #fef3c7;
-  -webkit-app-region: no-drag;
 }
 
 .free-timer-title {
@@ -237,12 +244,42 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
-  max-width: 70%;
+  max-width: 48%;
 }
 
 .free-timer-digits {
   font-family: monospace;
   font-weight: 700;
+}
+
+.free-timer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ft-btn {
+  border: none;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(0,0,0,0.06);
+  color: #78350f;
+  transition: all 0.15s;
+}
+
+.ft-btn:hover {
+  background: rgba(0,0,0,0.12);
+}
+
+.ft-done {
+  background: #10b981;
+  color: #fff;
+}
+.ft-done:hover {
+  background: #059669;
 }
 
 /* Ring Display (PRD v0.3.38 Part E: responsive ring geometry without clipping) */

@@ -67,5 +67,20 @@
     "day_sheet": "Tờ theo ngày",
     "lines_count": "{{count}} dòng",
     "pinned": " · đã ghim"
+  },
+  "card": {
+    "daily_card_subtitle": "Ghi nhanh các việc trong ngày • Gạch ngang khi xong • Dời việc có chủ đích",
+    "prev_day": "Ngày trước",
+    "next_day": "Ngày sau",
+    "active_question_default": "3 việc quan trọng nhất bạn cần làm hôm nay là gì?",
+    "active_capture_title": "Thu thập chủ động & Ghi bù",
+    "backfill": "Ghi bù",
+    "productivity_rhythm": "Nhịp năng suất:",
+    "quick_input_placeholder": "Ghi nhanh 1 việc (nhập tên việc rồi nhấn Enter)...",
+    "options": "Tùy chọn",
+    "unplanned": "Phát sinh",
+    "add": "Thêm",
+    "task_list_title": "Danh sách việc trong ngày ({{count}} việc)",
+    "task_list_hint": "Chạm vào để gạch ngang • Việc đã xong vẫn giữ nguyên để ghi nhận thành quả"
   }
 }

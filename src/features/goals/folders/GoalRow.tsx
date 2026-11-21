@@ -4,6 +4,7 @@
 import React from 'react';
 import { Goal, TimeBlock } from '@/types';
 import { GoalRowDetail } from './GoalRowDetail';
+import { MotivationSticker } from '@/features/motivation';
 import { ChevronRight, ChevronDown, Clock, Calendar } from 'lucide-react';
 import { useT } from '@/i18n/useT';
 import { useApp } from '@/context/AppContext';
@@ -90,11 +91,22 @@ export const GoalRow: React.FC<GoalRowProps> = ({
 
       {/* Expanded in-place drawer */}
       {isExpanded && (
-        <GoalRowDetail
-          goal={goal}
-          todayBlocks={todayBlocks}
-          onOpenDedicatedPage={onOpenDedicatedPage}
-        />
+        <div className="space-y-2">
+          {/* PRD v0.3.48 Part B2 & B3: Quote for active expanded goal */}
+          <MotivationSticker
+            slotKey="goals_tab"
+            context="goal"
+            size="line"
+            activeGoalId={goal.id}
+            activeGoalName={goal.name}
+            className="w-full bg-white/70 border-black/10 shadow-2xs"
+          />
+          <GoalRowDetail
+            goal={goal}
+            todayBlocks={todayBlocks}
+            onOpenDedicatedPage={onOpenDedicatedPage}
+          />
+        </div>
       )}
     </div>
   );
