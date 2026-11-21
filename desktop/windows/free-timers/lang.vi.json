@@ -1,0 +1,14 @@
+{
+  "title": "Bấm giờ riêng",
+  "trayTitle": "Bấm giờ riêng (⌥⌘G)",
+  "empty": "Chưa có đồng hồ nào đang chạy.",
+  "emptyHint": "Nhập tên và phút để chạy ngay:",
+  "placeholder": "Đọc sách, tập thể dục...",
+  "minutes": "phút",
+  "start": "Chạy",
+  "stop": "Dừng",
+  "done": "Xong",
+  "maxLimit": "Tối đa 3 đồng hồ cùng lúc",
+  "pinTitle": "Ghim luôn nổi trên cùng",
+  "closeTitle": "Đóng"
+}

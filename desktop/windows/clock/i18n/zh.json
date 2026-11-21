@@ -1,0 +1,12 @@
+{
+  "defaultQuote": {
+    "text": "千里之行，始于足下",
+    "author": "老子"
+  },
+  "gap": "空闲",
+  "stop": "停止",
+  "done": "完成",
+  "extend5m": "+5分",
+  "extend15m": "+15分",
+  "nextTask": "接下来"
+}

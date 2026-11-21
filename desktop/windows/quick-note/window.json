@@ -1,0 +1,18 @@
+{
+  "id": "quick-note",
+  "titleKey": "title",
+  "type": "standalone",
+  "entry": "index.html",
+  "defaultWidth": 420,
+  "defaultHeight": 180,
+  "minWidth": 300,
+  "minHeight": 120,
+  "frame": false,
+  "alwaysOnTop": true,
+  "resizable": true,
+  "movable": true,
+  "skipTaskbar": true,
+  "trayMenu": true,
+  "defaultShortcut": "Alt+CommandOrControl+N",
+  "dataCollections": []
+}

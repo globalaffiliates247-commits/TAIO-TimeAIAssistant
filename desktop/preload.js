@@ -1,7 +1,40 @@
-// TAIO Time — Electron preload (PRD v0.3.33 Part I)
+// TAIO Time — Unified Electron Preload Bridge (PRD v0.3.51 Part B)
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('taioAPI', {
+  // Generic Window Management API (Part B1)
+  window: {
+    open: (id) => ipcRenderer.send('taio-window-open', id),
+    close: (id) => ipcRenderer.send('taio-window-close', id),
+    toggle: (id) => ipcRenderer.send('taio-window-toggle', id),
+    pin: (id, isPinned) => ipcRenderer.send('taio-window-pin', { id, isPinned }),
+  },
+
+  // Generic Data Bridge (Part B1 & B2)
+  data: {
+    get: (collection, query) => ipcRenderer.invoke('taio-data-get', collection, query),
+    subscribe: (collection, callback) => {
+      const channel = `taio-data-sync:${collection}`;
+      const listener = (_event, data) => callback(data);
+      ipcRenderer.on(channel, listener);
+      return () => ipcRenderer.removeListener(channel, listener);
+    },
+    act: (collection, action, payload) => ipcRenderer.send('taio-data-act', { collection, action, payload }),
+  },
+
+  // Language Bridge (Part B1 & F)
+  lang: {
+    get: () => ipcRenderer.invoke('taio-lang-get'),
+    subscribe: (callback) => {
+      const listener = (_event, lang) => callback(lang);
+      ipcRenderer.on('taio-lang-update', listener);
+      return () => ipcRenderer.removeListener('taio-lang-update', listener);
+    },
+  },
+
+  // --- Legacy Compatibility Layer (PRD v0.3.51 Part B4) ---
+  // Note: These methods are maintained for backward-compatibility with older components
+  // and will be deprecated in future versions in favor of taioAPI.window / taioAPI.data.
   sendQuickNote: (text) => ipcRenderer.send('taio-quick-note', text),
   updateTimer: (data) => ipcRenderer.send('taio-timer-update', data),
   openClockWindow: () => ipcRenderer.send('taio-open-clock'),

@@ -1,0 +1,14 @@
+{
+  "title": "Đồng hồ rời",
+  "trayTitle": "Đồng hồ rời (⌥⌘T)",
+  "defaultQuote": {
+    "text": "Vạn dặm khởi đầu từ một bước chân",
+    "author": "Lão Tử"
+  },
+  "gap": "Trống",
+  "stop": "Dừng",
+  "done": "Xong",
+  "extend5m": "+5p",
+  "extend15m": "+15p",
+  "nextTask": "Kế tiếp"
+}

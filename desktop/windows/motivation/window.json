@@ -1,0 +1,18 @@
+{
+  "id": "motivation",
+  "titleKey": "title",
+  "type": "standalone",
+  "entry": "index.html",
+  "defaultWidth": 320,
+  "defaultHeight": 180,
+  "minWidth": 260,
+  "minHeight": 120,
+  "frame": false,
+  "alwaysOnTop": true,
+  "resizable": true,
+  "movable": true,
+  "skipTaskbar": true,
+  "trayMenu": true,
+  "defaultShortcut": "Alt+CommandOrControl+E",
+  "dataCollections": ["motivationQuote"]
+}

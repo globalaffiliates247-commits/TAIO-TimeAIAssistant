@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TAIO Free Timers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header">
+    <div class="title" id="lblTitle">Bấm giờ riêng</div>
+    <div class="actions">
+      <button class="icon-btn active" id="btnPin" title="Ghim">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btnClose" title="Đóng">&times;</button>
+    </div>
+  </div>
+
+  <div class="timers-container" id="timersList">
+    <div class="empty-state" id="emptyState">
+      <span id="emptyMsg">Chưa có đồng hồ nào đang chạy.</span>
+      <span id="emptyHintMsg">Nhập tên và phút để chạy ngay:</span>
+    </div>
+  </div>
+
+  <form class="quick-add" id="formAdd">
+    <input type="text" id="inputTitle" placeholder="Đọc sách..." required />
+    <select id="selectMins">
+      <option value="5">5p</option>
+      <option value="15" selected>15p</option>
+      <option value="25">25p</option>
+      <option value="45">45p</option>
+      <option value="60">60p</option>
+    </select>
+    <button type="submit" class="btn-start" id="btnStart">Chạy</button>
+  </form>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+:root {
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --brand: #E11D2E;
+  --brand-hover: #C4182A;
+  --brand-soft: #FDE8EA;
+  --timer-bg: #fffbeb;
+  --timer-border: #fef3c7;
+  --timer-text: #b45309;
+}
+
+html.dark, html[data-theme="dark"] {
+  --bg-main: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --brand: #EF3042;
+  --brand-hover: #E11D2E;
+  --brand-soft: rgba(225, 29, 46, 0.22);
+  --timer-bg: rgba(245, 158, 11, 0.12);
+  --timer-border: rgba(245, 158, 11, 0.25);
+  --timer-text: #fbbf24;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
+  padding: 8px 10px;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  -webkit-app-region: drag;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.15s;
+}
+
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
+}
+
+.icon-btn.active {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.timers-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px 0;
+  -webkit-app-region: no-drag;
+}
+
+.timer-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: var(--timer-bg);
+  border: 1px solid var(--timer-border);
+  border-radius: 8px;
+  gap: 6px;
+}
+
+.timer-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.timer-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timer-digits {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', monospace;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--timer-text);
+  margin-top: 1px;
+}
+
+.timer-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-stop {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-muted);
+}
+
+.btn-stop:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: var(--text-main);
+}
+
+.btn-done {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.btn-done:hover {
+  background: #059669;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  padding: 8px;
+}
+
+.quick-add {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+
+.quick-add input[type="text"] {
+  flex: 1;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 11px;
+  outline: none;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+.quick-add select {
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 4px;
+  font-size: 11px;
+  outline: none;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+.btn-start {
+  height: 26px;
+  padding: 0 10px;
+  background: var(--brand);
+  color: #ffffff;
+  border-radius: 6px;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-start:hover {
+  background: var(--brand-hover);
+}
+
+.btn-start:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

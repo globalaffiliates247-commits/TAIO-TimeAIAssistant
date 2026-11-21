@@ -1,0 +1,18 @@
+{
+  "id": "free-timers",
+  "titleKey": "title",
+  "type": "standalone",
+  "entry": "index.html",
+  "defaultWidth": 280,
+  "defaultHeight": 200,
+  "minWidth": 240,
+  "minHeight": 140,
+  "frame": false,
+  "alwaysOnTop": true,
+  "resizable": true,
+  "movable": true,
+  "skipTaskbar": true,
+  "trayMenu": true,
+  "defaultShortcut": "Alt+CommandOrControl+G",
+  "dataCollections": ["freeTimers"]
+}

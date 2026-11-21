@@ -1,0 +1,14 @@
+{
+  "title": "Free Timers",
+  "trayTitle": "Free Timers (⌥⌘G)",
+  "empty": "No active timers running.",
+  "emptyHint": "Enter title and minutes to start:",
+  "placeholder": "Reading, exercise...",
+  "minutes": "mins",
+  "start": "Start",
+  "stop": "Stop",
+  "done": "Done",
+  "maxLimit": "Maximum 3 timers concurrent",
+  "pinTitle": "Pin on top",
+  "closeTitle": "Close"
+}

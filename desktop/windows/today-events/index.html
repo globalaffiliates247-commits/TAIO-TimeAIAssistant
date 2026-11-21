@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>TAIO Events</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <div class="app-icon">📅</div>
+      <span class="window-title" id="lblTitle">Sự kiện hôm nay</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btnPin" title="Ghim lên trên" aria-label="Pin">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="17" x2="12" y2="22"></line>
+          <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btnClose" title="Đóng" aria-label="Close">&times;</button>
+    </div>
+  </header>
+
+  <div class="date-section">
+    <div>
+      <span class="solar-date" id="lblSolarDate">--/--</span>
+      <span class="day-of-week" id="lblDayOfWeek">---</span>
+    </div>
+    <div class="lunar-badge" id="lblLunarDate">Âm lịch: --/--</div>
+  </div>
+
+  <div class="events-list" id="eventsList"></div>
+
+  <div class="empty-state" id="emptyState" style="display: none;">
+    <p id="lblEmpty">Hôm nay chưa có sự kiện nào</p>
+    <button class="empty-cta-btn" id="btnEmptyCta">+ Thêm sự kiện mới</button>
+  </div>
+
+  <form class="add-form" id="formAdd">
+    <input type="text" class="add-input" id="inputEvent" placeholder="14:00 Họp dự án..." autocomplete="off">
+    <button type="submit" class="add-btn" id="btnAdd">Thêm</button>
+  </form>
+
+  <script src="script.js"></script>
+</body>
+</html>

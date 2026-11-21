@@ -1,0 +1,15 @@
+{
+  "title": "Today's Events",
+  "trayTitle": "Today's Events (⌥⌘K)",
+  "empty": "No events scheduled for today",
+  "emptyCta": "+ Add new event",
+  "addPlaceholder": "14:00 Project meeting...",
+  "addBtn": "Add",
+  "alarmOn": "Alarm on",
+  "alarmOff": "Alarm off",
+  "lunarLabel": "Lunar",
+  "openInApp": "Open in app",
+  "pin": "Pin on top",
+  "unpin": "Unpin",
+  "close": "Close"
+}

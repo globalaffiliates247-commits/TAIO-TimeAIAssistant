@@ -94,11 +94,56 @@ for (const file of viFiles) {
   checkViInEn(en);
 }
 
+// PRD v0.3.51 Part F: Validate desktop/windows translation files
+const WINDOWS_DIR = path.join(__dirname, '../desktop/windows');
+let windowKeyCount = 0;
+if (fs.existsSync(WINDOWS_DIR)) {
+  const windowDirs = fs.readdirSync(WINDOWS_DIR).filter(d => {
+    return fs.statSync(path.join(WINDOWS_DIR, d)).isDirectory();
+  });
+
+  for (const winDir of windowDirs) {
+    const viWinPath = path.join(WINDOWS_DIR, winDir, 'lang.vi.json');
+    const enWinPath = path.join(WINDOWS_DIR, winDir, 'lang.en.json');
+
+    if (!fs.existsSync(viWinPath)) {
+      errors.push(`[desktop/windows/${winDir}] Missing lang.vi.json`);
+      continue;
+    }
+    if (!fs.existsSync(enWinPath)) {
+      errors.push(`[desktop/windows/${winDir}] Missing lang.en.json`);
+      continue;
+    }
+
+    try {
+      const viData = JSON.parse(fs.readFileSync(viWinPath, 'utf8'));
+      const enData = JSON.parse(fs.readFileSync(enWinPath, 'utf8'));
+
+      const viKeys = new Set(getKeys(viData));
+      const enKeys = new Set(getKeys(enData));
+      windowKeyCount += viKeys.size;
+
+      for (const k of viKeys) {
+        if (!enKeys.has(k)) {
+          errors.push(`[desktop/windows/${winDir}] Missing key in lang.en.json: ${k}`);
+        }
+      }
+      for (const k of enKeys) {
+        if (!viKeys.has(k)) {
+          errors.push(`[desktop/windows/${winDir}] Missing key in lang.vi.json: ${k}`);
+        }
+      }
+    } catch (err) {
+      errors.push(`[desktop/windows/${winDir}] JSON parse error: ${err.message}`);
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(`\x1b[31m[check-i18n] FAILED with ${errors.length} error(s):\x1b[0m`);
   errors.forEach(e => console.error(`  - ${e}`));
   process.exit(1);
 } else {
-  console.log(`\x1b[32m[check-i18n] PASSED: All ${totalKeys} keys across ${viFiles.length} domain files match 100% with clean translations.\x1b[0m`);
+  console.log(`\x1b[32m[check-i18n] PASSED: All ${totalKeys + windowKeyCount} keys across domain and mini app windows match 100% with clean translations.\x1b[0m`);
   process.exit(0);
 }

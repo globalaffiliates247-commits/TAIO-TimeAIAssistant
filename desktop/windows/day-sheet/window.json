@@ -1,0 +1,17 @@
+{
+  "id": "day-sheet",
+  "titleKey": "title",
+  "type": "app-route",
+  "route": "index.html?mode=day_sheet_window",
+  "defaultWidth": 480,
+  "defaultHeight": 680,
+  "minWidth": 360,
+  "minHeight": 400,
+  "frame": false,
+  "alwaysOnTop": true,
+  "resizable": true,
+  "movable": true,
+  "skipTaskbar": false,
+  "trayMenu": true,
+  "defaultShortcut": "Alt+CommandOrControl+A"
+}

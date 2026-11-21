@@ -1,0 +1,15 @@
+{
+  "title": "Sự kiện hôm nay",
+  "trayTitle": "Lịch hôm nay (⌥⌘K)",
+  "empty": "Hôm nay chưa có sự kiện nào",
+  "emptyCta": "+ Thêm sự kiện mới",
+  "addPlaceholder": "14:00 Họp dự án...",
+  "addBtn": "Thêm",
+  "alarmOn": "Có chuông",
+  "alarmOff": "Tắt chuông",
+  "lunarLabel": "Âm lịch",
+  "openInApp": "Mở trong app",
+  "pin": "Ghim lên trên",
+  "unpin": "Bỏ ghim",
+  "close": "Đóng"
+}

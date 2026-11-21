@@ -1,0 +1,588 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+:root,
+html,
+html[data-theme="light"] {
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-main: #e2e8f0;
+}
+
+:root,
+html,
+html[data-palette="red"] {
+  --taio-brand: #E11D2E;
+  --taio-brand-hover: #C4182A;
+  --taio-brand-soft: #FDE8EA;
+  --taio-brand-accent: #E11D2E;
+  --taio-on-brand: #FFFFFF;
+}
+
+html[data-palette="gold"] {
+  --taio-brand: #F7C531;
+  --taio-brand-hover: #E5B21E;
+  --taio-brand-soft: #FEF6DC;
+  --taio-brand-accent: #F7C531;
+  --taio-on-brand: #14161A;
+}
+
+html[data-palette="bright-blue"] {
+  --taio-brand: #0068FF;
+  --taio-brand-hover: #0055D4;
+  --taio-brand-soft: #E6F0FF;
+  --taio-brand-accent: #0068FF;
+  --taio-on-brand: #FFFFFF;
+}
+
+html[data-palette="calm-blue"] {
+  --taio-brand: #1C78C0;
+  --taio-brand-hover: #17669F;
+  --taio-brand-soft: #E8F4FC;
+  --taio-brand-accent: #2AABEE;
+  --taio-on-brand: #FFFFFF;
+}
+
+html[data-palette="neutral"] {
+  --taio-brand: #334155;
+  --taio-brand-hover: #1E293B;
+  --taio-brand-soft: #F1F5F9;
+  --taio-brand-accent: #334155;
+  --taio-on-brand: #FFFFFF;
+}
+
+/* Dark mode */
+html.dark,
+html[data-theme="dark"],
+html.dark[data-palette],
+html[data-theme="dark"][data-palette] {
+  --bg-main: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-main: #334155;
+}
+html.dark[data-palette="red"],
+html[data-theme="dark"][data-palette="red"] {
+  --taio-brand: #EF3042;
+  --taio-brand-hover: #E11D2E;
+  --taio-brand-soft: rgba(225, 29, 46, 0.22);
+  --taio-on-brand: #FFFFFF;
+}
+html.dark[data-palette="gold"],
+html[data-theme="dark"][data-palette="gold"] {
+  --taio-brand: #F7C531;
+  --taio-brand-hover: #E5B21E;
+  --taio-brand-soft: rgba(247, 197, 49, 0.18);
+  --taio-on-brand: #14161A;
+}
+html.dark[data-palette="bright-blue"],
+html[data-theme="dark"][data-palette="bright-blue"] {
+  --taio-brand: #2B7FFF;
+  --taio-brand-hover: #0068FF;
+  --taio-brand-soft: rgba(0, 104, 255, 0.22);
+  --taio-on-brand: #FFFFFF;
+}
+html.dark[data-palette="calm-blue"],
+html[data-theme="dark"][data-palette="calm-blue"] {
+  --taio-brand: #2AABEE;
+  --taio-brand-hover: #1C78C0;
+  --taio-brand-soft: rgba(28, 120, 192, 0.22);
+  --taio-on-brand: #FFFFFF;
+}
+html.dark[data-palette="neutral"],
+html[data-theme="dark"][data-palette="neutral"] {
+  --taio-brand: #64748B;
+  --taio-brand-hover: #475569;
+  --taio-brand-soft: rgba(100, 116, 139, 0.22);
+  --taio-on-brand: #FFFFFF;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px 6px 12px;
+  border: 1px solid var(--border-main);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  -webkit-app-region: drag; /* PRD v0.3.47 Part B1: Entire window body is draggable */
+}
+
+/* Header */
+.clock-header {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.drag-region {
+  flex: 1;
+  height: 100%;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: #64748b;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.icon-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.icon-btn.active {
+  background: var(--taio-brand-soft);
+  color: var(--taio-brand);
+  font-weight: 700;
+}
+
+/* Views */
+.view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+  width: 100%;
+}
+
+.task-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 92%;
+  cursor: pointer;
+  transition: color 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.task-title:hover {
+  color: var(--taio-brand);
+}
+
+.subtitle-line {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Bar Display */
+.timer-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-digits {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', monospace;
+  font-size: clamp(22px, 6vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+}
+
+.progress-track {
+  width: 100%;
+  height: 4px;
+  background: var(--taio-brand-soft);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 2px 0 4px;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--taio-brand);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease-out, left 0.8s ease-out;
+}
+
+/* Free Timer Row */
+.free-timers-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0;
+  -webkit-app-region: no-drag;
+}
+
+.free-timer-item {
+  width: 100%;
+  font-size: 10.5px;
+  color: #b45309;
+  background: #fffbeb;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #fef3c7;
+}
+
+.free-timer-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  max-width: 48%;
+}
+
+.free-timer-digits {
+  font-family: monospace;
+  font-weight: 700;
+}
+
+.free-timer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ft-btn {
+  border: none;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(0,0,0,0.06);
+  color: #78350f;
+  transition: all 0.15s;
+}
+
+.ft-btn:hover {
+  background: rgba(0,0,0,0.12);
+}
+
+.ft-done {
+  background: #10b981;
+  color: #fff;
+}
+.ft-done:hover {
+  background: #059669;
+}
+
+/* Ring Display (PRD v0.3.38 Part E: responsive ring geometry without clipping) */
+.ring-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0 auto;
+}
+
+.ring-svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ring-track {
+  stroke: var(--taio-brand-soft);
+}
+
+.ring-progress {
+  stroke: var(--taio-brand);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s ease-out, stroke-dasharray 0.8s ease-out;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2px;
+  pointer-events: none;
+}
+
+.ring-digits {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', monospace;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.ring-sub {
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.1;
+  max-width: 85%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bottom Actions */
+.bottom-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.btn {
+  flex: 1;
+  height: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--border-main);
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+html.dark .btn,
+html[data-theme="dark"] .btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+html.dark .btn:hover,
+html[data-theme="dark"] .btn:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+.btn.primary {
+  background: var(--taio-brand);
+  color: var(--taio-on-brand, #ffffff);
+  border: none;
+}
+
+.btn.primary:hover {
+  background: var(--taio-brand-hover);
+}
+
+html.dark .free-timer-item,
+html[data-theme="dark"] .free-timer-item {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+html.dark .icon-btn,
+html[data-theme="dark"] .icon-btn {
+  color: #94a3b8;
+}
+
+html.dark .icon-btn:hover,
+html[data-theme="dark"] .icon-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+html.dark .icon-btn.active,
+html[data-theme="dark"] .icon-btn.active {
+  background: var(--taio-brand-soft);
+  color: var(--taio-brand);
+}
+
+html.dark .quote-modal,
+html[data-theme="dark"] .quote-modal {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark .quote-content,
+html[data-theme="dark"] .quote-content {
+  color: #f8fafc;
+}
+
+html.dark .quote-author,
+html[data-theme="dark"] .quote-author {
+  color: #94a3b8;
+}
+
+html.dark .quote-actions,
+html[data-theme="dark"] .quote-actions {
+  border-top-color: #334155;
+}
+
+html.dark .quote-action-btn,
+html[data-theme="dark"] .quote-action-btn {
+  color: #94a3b8;
+}
+
+html.dark .quote-action-btn:hover,
+html[data-theme="dark"] .quote-action-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+/* Motivation Line at Bottom (PRD Part I4) */
+.motivation-line {
+  height: 18px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9.5px;
+  font-style: italic;
+  color: #94a3b8;
+  cursor: pointer;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  transition: color 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.motivation-line:hover {
+  color: #475569;
+}
+
+/* Hide motivation line on windows shorter than 150px (I4.4) */
+@media (max-height: 149px) {
+  .motivation-line {
+    display: none !important;
+  }
+}
+
+/* Quote modal popup */
+.quote-modal {
+  position: absolute;
+  inset: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 50;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  -webkit-app-region: no-drag;
+}
+
+.quote-modal button {
+  -webkit-app-region: no-drag;
+}
+
+.quote-content {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+  font-style: italic;
+  overflow-y: auto;
+}
+
+.quote-author {
+  font-size: 9.5px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.quote-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.quote-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #64748b;
+  padding: 2px 6px;
+  border-radius: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.quote-action-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}

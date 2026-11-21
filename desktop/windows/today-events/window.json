@@ -1,0 +1,18 @@
+{
+  "id": "today-events",
+  "titleKey": "title",
+  "type": "standalone",
+  "entry": "index.html",
+  "defaultWidth": 340,
+  "defaultHeight": 480,
+  "minWidth": 300,
+  "minHeight": 320,
+  "frame": false,
+  "alwaysOnTop": false,
+  "resizable": true,
+  "movable": true,
+  "skipTaskbar": true,
+  "trayMenu": true,
+  "defaultShortcut": "Alt+CommandOrControl+K",
+  "dataCollections": ["scheduledEvents", "lunarToday"]
+}

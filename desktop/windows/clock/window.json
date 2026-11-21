@@ -1,0 +1,21 @@
+{
+  "id": "clock",
+  "titleKey": "title",
+  "type": "standalone",
+  "entry": "clock.html",
+  "defaultWidth": 260,
+  "defaultHeight": 140,
+  "minWidth": 180,
+  "minHeight": 110,
+  "maxWidth": 420,
+  "maxHeight": 420,
+  "frame": false,
+  "alwaysOnTop": true,
+  "resizable": true,
+  "movable": true,
+  "skipTaskbar": true,
+  "trayMenu": true,
+  "defaultShortcut": "Alt+CommandOrControl+T",
+  "autoMinimizeMain": true,
+  "dataCollections": ["timer", "freeTimers"]
+}
