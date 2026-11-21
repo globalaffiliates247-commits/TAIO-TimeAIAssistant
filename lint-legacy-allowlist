@@ -6,6 +6,7 @@ src/components/PriorityMatrix.tsx
 src/components/ProfileModal.tsx
 src/context/AppContext.tsx
 src/core/storage/durableStorage.ts
+src/core/storage/windowBus.ts
 src/features/alarm/model/alarmScheduler.ts
 src/features/alarm/ui/AlarmSettingsSection.tsx
 src/features/clock/model/freeTimers.ts

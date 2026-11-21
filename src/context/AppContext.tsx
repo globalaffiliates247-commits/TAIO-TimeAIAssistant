@@ -8,6 +8,12 @@ import {
   mergeCollectionsByUpdatedAt
 } from '../core/storage/durableStorage';
 import {
+  broadcastWindowBus,
+  subscribeWindowBus,
+  getActiveEditingId
+} from '../core/storage/windowBus';
+import { syncPreferencesToNative } from '../features/settings/service/nativePreferenceSync.ts';
+import {
   detectRuntimeCapabilities,
   TAIONative,
   scheduleNativeNotification
@@ -164,6 +170,7 @@ export type AppTab = 'now' | 'plan' | 'efficiency' | 'achievements' | 'goals' | 
 
 // B17: Appearance & Color Palettes (PRD v0.3.47 Part A)
 export function normalizePalette(p?: string | null): ColorPalette {
+  if (p === 'gold') return 'gold';
   if (p === 'cool' || p === 'bright-blue') return 'bright-blue';
   if (p === 'calm-blue') return 'calm-blue';
   return 'red';
@@ -3062,35 +3069,100 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [scheduleBlocks, dailyCardItems]);
 
   // E5: Persist every state change immediately to durable storage (SQLite + IndexedDB)
+  // PRD v0.3.50 Part A: Broadcast change to other windows
   useEffect(() => {
     if (!isHydratedRef.current) return;
     saveDurableState('blocks', blocks, Date.now());
+    broadcastWindowBus('blocks');
   }, [blocks]);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;
     saveDurableState('dailyCardItems', dailyCardItems, Date.now());
+    broadcastWindowBus('dailyCardItems');
   }, [dailyCardItems]);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;
     saveDurableState('inbox', inbox, Date.now());
+    broadcastWindowBus('inbox');
   }, [inbox]);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;
     saveDurableState('goals', goals, Date.now());
+    broadcastWindowBus('goals');
   }, [goals]);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;
     saveDurableState('lists', lists, Date.now());
+    broadcastWindowBus('lists');
   }, [lists]);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;
     saveDurableState('listItems', listItems, Date.now());
+    broadcastWindowBus('listItems');
   }, [listItems]);
+
+  // PRD v0.3.50 Part A: Cross-window data synchronization listener
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    const unsubscribe = subscribeWindowBus(async (msg) => {
+      try {
+        if (msg.dataset === 'dailyCardItems') {
+          const saved = await loadDurableState<DailyCardItem[]>('dailyCardItems');
+          if (saved?.value && Array.isArray(saved.value)) {
+            const activeId = getActiveEditingId('dailyCardItems');
+            setDailyCardItems(prev => {
+              let local = prev;
+              if (activeId) {
+                local = local.map(item =>
+                  item.id === activeId ? { ...item, updatedAt: Math.max(Number(item.updatedAt) || 0, Date.now()) } : item
+                );
+              }
+              return mergeCollectionsByUpdatedAt(local, saved.value);
+            });
+          }
+        } else if (msg.dataset === 'blocks') {
+          const saved = await loadDurableState<TimeBlock[]>('blocks');
+          if (saved?.value && Array.isArray(saved.value)) {
+            const activeId = getActiveEditingId('blocks');
+            setBlocks(prev => {
+              let local = prev;
+              if (activeId) {
+                local = local.map(b =>
+                  b.id === activeId ? { ...b, updatedAt: Math.max(Number(b.updatedAt) || 0, Date.now()) } : b
+                );
+              }
+              return mergeCollectionsByUpdatedAt(local, saved.value);
+            });
+          }
+        } else if (msg.dataset === 'goals') {
+          const saved = await loadDurableState<Goal[]>('goals');
+          if (saved?.value && Array.isArray(saved.value)) {
+            const activeId = getActiveEditingId('goals');
+            setGoals(prev => {
+              let local = prev;
+              if (activeId) {
+                local = local.map(g =>
+                  g.id === activeId ? { ...g, updatedAt: Math.max(Number(g.updatedAt) || 0, Date.now()) } : g
+                );
+              }
+              return mergeCollectionsByUpdatedAt(local, saved.value);
+            });
+          }
+        } else if (msg.dataset === 'closedDays') {
+          const saved = await loadDurableState<ClosedDaysMap>('closedDays');
+          if (saved?.value) {
+            setClosedDays(prev => ({ ...prev, ...saved.value }));
+          }
+        }
+      } catch {}
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;
@@ -3168,6 +3240,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return () => mq.removeEventListener('change', listener);
     }
   }, [themeMode, palette]);
+
+  // PRD v0.3.50 Part B2: Sync preferences to iOS UserDefaults & App Group
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    syncPreferencesToNative({
+      languagePreference: language,
+      palette,
+      themeMode,
+    });
+
+    const handleResume = () => {
+      if (document.visibilityState === 'visible') {
+        syncPreferencesToNative({
+          languagePreference: language,
+          palette,
+          themeMode,
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleResume);
+    return () => document.removeEventListener('visibilitychange', handleResume);
+  }, [language, palette, themeMode]);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {

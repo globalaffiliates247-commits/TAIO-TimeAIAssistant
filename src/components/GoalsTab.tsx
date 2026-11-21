@@ -147,9 +147,9 @@ export const GoalsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => handleOpenCreateGoal(activeArea)}
-            className="flex lg:hidden items-center gap-1.5 px-3.5 py-1.5 rounded-2xl text-white font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shrink-0"
+            className="flex lg:hidden items-center gap-1.5 px-3.5 py-1.5 rounded-2xl text-[var(--taio-on-brand)] font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shrink-0 taio-btn-primary"
           >
-            <Plus className="w-4 h-4 text-white" />
+            <Plus className="w-4 h-4 text-[var(--taio-on-brand)]" />
             <span>{t('goals.add_goal', 'Mục tiêu')}</span>
           </button>
         </div>
@@ -163,9 +163,9 @@ export const GoalsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => handleOpenCreateGoal(activeArea)}
-          className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-2xl text-white font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shrink-0"
+          className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-2xl text-[var(--taio-on-brand)] font-bold text-xs shadow-sm transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shrink-0 taio-btn-primary"
         >
-          <Plus className="w-4 h-4 text-white" />
+          <Plus className="w-4 h-4 text-[var(--taio-on-brand)]" />
           <span>{t('goals.add_goal', 'Mục tiêu')}</span>
         </button>
       </div>
@@ -306,7 +306,7 @@ export const GoalsTab: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-white font-bold shadow-xs transition-all bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)]"
+                  className="px-5 py-2 rounded-xl text-[var(--taio-on-brand)] font-bold shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] taio-btn-primary"
                 >
                   {t('goals.create_submit', 'Tạo mục tiêu')}
                 </button>

@@ -49,6 +49,7 @@ export interface TAIONativePluginInterface {
     targetTimestamp?: number;
   }): Promise<{ ok: boolean; started?: boolean; activityId?: string; error?: string; message?: string }>;
   updateLiveActivity(options: {
+    blockId?: string;
     taskTitle: string;
     goalName: string;
     isCountDown: boolean;
@@ -58,7 +59,12 @@ export interface TAIONativePluginInterface {
     startTimestamp?: number;
     targetTimestamp?: number;
   }): Promise<{ ok: boolean; updated?: boolean; error?: string; message?: string }>;
-  stopLiveActivity(): Promise<{ ok: boolean }>;
+  stopLiveActivity(options?: { blockId?: string }): Promise<{ ok: boolean }>;
+  syncPreferences(options: {
+    language: string;
+    palette: string;
+    themeMode: string;
+  }): Promise<{ success: boolean; language: string; palette: string; themeMode: string }>;
   openAppSettings(): Promise<{ ok?: boolean; opened: boolean }>;
   // v0.3.24: names now match the Swift plugin (TAIONativePlugin.swift)
   scheduleNotification(options: {
@@ -186,6 +192,7 @@ export async function startNativeLiveActivity(params: {
 }
 
 export async function updateNativeLiveActivity(params: {
+  blockId?: string;
   taskTitle: string;
   goalName: string;
   isCountDown: boolean;
@@ -209,10 +216,10 @@ export async function updateNativeLiveActivity(params: {
   }
 }
 
-export async function stopNativeLiveActivity(): Promise<boolean> {
+export async function stopNativeLiveActivity(params?: { blockId?: string }): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
-    const res = await TAIONative.stopLiveActivity();
+    const res = await TAIONative.stopLiveActivity(params);
     return !!res?.ok;
   } catch {
     return false;

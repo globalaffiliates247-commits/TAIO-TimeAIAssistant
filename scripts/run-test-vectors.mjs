@@ -15,6 +15,7 @@ import { defaultLunarProvider } from '../src/domain/lunar/index.ts';
 import { newFreeSticky, updateSticky, closeSticky, getStickyNotesForExport } from '../src/features/sticky/model/stickyStore.ts';
 import { computeRingArc } from '../src/domain/clockRing.ts';
 import { clockState } from '../src/features/clock/model/clockState.ts';
+import { mergeCollectionsByUpdatedAt } from '../src/core/storage/durableStorage.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -592,6 +593,68 @@ for (const rt of ringTests) {
       mode1=${state1.mode}, mode2=${state2.mode},
       startedAt1=${state1.startedAt}, startedAt2=${state2.startedAt}, expectedStartMs=${expectedStartMs},
       elapsedSec1=${elapsedSec1} (expected 60), elapsedSec2=${elapsedSec2} (expected 62)`);
+    failed++;
+  }
+}
+
+// PRD v0.3.50 Part A: Test vectors for mergeCollectionsByUpdatedAt with tombstones
+{
+  const localItems = [
+    { id: 'item-1', title: 'Gọi anh Minh', updatedAt: 1000 },
+    { id: 'item-2', title: 'Soạn báo cáo (bản cũ)', updatedAt: 1200 },
+    { id: 'item-3', title: 'Chỉ có ở cửa sổ A', updatedAt: 1500 },
+  ];
+
+  const remoteItems = [
+    { id: 'item-1', title: 'Gọi anh Minh (vẫn thế)', updatedAt: 900 },
+    { id: 'item-2', title: 'Soạn báo cáo (đã sửa ở cửa sổ B)', updatedAt: 1800 },
+    { id: 'item-4', title: 'Mua vé (mới ở cửa sổ B)', updatedAt: 1600 },
+    { id: 'item-5', title: 'Mục đã bị xoá nhưng còn sót', updatedAt: 2000 },
+  ];
+
+  const deletedIds = ['item-5']; // Tombstone
+
+  const merged = mergeCollectionsByUpdatedAt(localItems, remoteItems, deletedIds);
+
+  const item1 = merged.find(i => i.id === 'item-1');
+  const item2 = merged.find(i => i.id === 'item-2');
+  const item3 = merged.find(i => i.id === 'item-3');
+  const item4 = merged.find(i => i.id === 'item-4');
+  const item5 = merged.find(i => i.id === 'item-5');
+
+  if (
+    item1?.title === 'Gọi anh Minh' &&
+    item2?.title === 'Soạn báo cáo (đã sửa ở cửa sổ B)' &&
+    item3?.title === 'Chỉ có ở cửa sổ A' &&
+    item4?.title === 'Mua vé (mới ở cửa sổ B)' &&
+    item5 === undefined &&
+    merged.length === 4
+  ) {
+    passed++;
+  } else {
+    console.error(`[FAIL] mergeCollectionsByUpdatedAt test failed: ${JSON.stringify(merged)}`);
+    failed++;
+  }
+}
+
+// PRD v0.3.50 Part F3: Quote parity test between Vietnamese and English
+{
+  const viQuotes = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../src/features/motivation/model/defaultQuotes.vi.json'), 'utf8'));
+  const enQuotes = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../src/features/motivation/model/defaultQuotes.en.json'), 'utf8'));
+
+  const enQuoteKeys = new Set(enQuotes.map(q => q.quoteKey).filter(Boolean));
+  const missingKeys = [];
+
+  for (const q of viQuotes) {
+    if (q.quoteKey && !enQuoteKeys.has(q.quoteKey)) {
+      missingKeys.push(q.quoteKey);
+    }
+  }
+
+  if (missingKeys.length === 0 && viQuotes.length === enQuotes.length) {
+    passed++;
+  } else {
+    console.error(`[FAIL] Part F3 Quote parity test: missing in EN: ${missingKeys.join(', ')} (VI: ${viQuotes.length}, EN: ${enQuotes.length})`);
     failed++;
   }
 }

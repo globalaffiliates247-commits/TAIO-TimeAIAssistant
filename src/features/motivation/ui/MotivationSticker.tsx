@@ -27,6 +27,7 @@ import { togglePinGoalQuote } from '../model/motivationStore';
 
 export interface MotivationStickerProps {
   slotKey: keyof MotivationSettings['slots'];
+  instanceKey?: string;
   context: QuoteContext;
   size?: StickerSize;
   activeGoalName?: string;
@@ -40,6 +41,7 @@ export interface MotivationStickerProps {
 
 export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   slotKey,
+  instanceKey,
   context,
   size = 'note',
   activeGoalName,
@@ -50,6 +52,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
+  const effectiveKey = instanceKey || slotKey;
   const { language, palette } = useApp();
   const { t } = useT();
   const isCool = palette === 'cool';
@@ -71,6 +74,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   const resolveQuote = useCallback((forceRefresh = false) => {
     const res = getOrPickDailyQuote({
       slotKey,
+      instanceKey: effectiveKey,
       context,
       lang: language,
       quotes: allQuotes,
@@ -84,22 +88,22 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
     setIsHiddenToday(res.isHiddenToday);
     setUserState(res.updatedState);
     if (res.quote && !res.isHiddenToday) {
-      quoteRegistry.register(slotKey, res.quote.id);
+      quoteRegistry.register(effectiveKey, res.quote.id);
     } else {
-      quoteRegistry.unregister(slotKey);
+      quoteRegistry.unregister(effectiveKey);
     }
-  }, [slotKey, context, language, allQuotes, userState, activeGoalName, activeGoalId]);
+  }, [slotKey, effectiveKey, context, language, allQuotes, userState, activeGoalName, activeGoalId]);
 
   useEffect(() => {
     resolveQuote(false);
-  }, [slotKey, context, language]);
+  }, [slotKey, effectiveKey, context, language]);
 
   // Clean up active quote registration on unmount
   useEffect(() => {
     return () => {
-      quoteRegistry.unregister(slotKey);
+      quoteRegistry.unregister(effectiveKey);
     };
-  }, [slotKey]);
+  }, [effectiveKey]);
 
   // Action: ↻ Đổi câu khác
   const handleRefresh = (e: React.MouseEvent) => {
@@ -153,15 +157,20 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   }
 
   const isFavorited = userState.favorites.includes(currentQuote.id);
-  const isGoalPinned = Boolean(activeGoalId && currentQuote && userState.pinnedGoalQuotes?.[activeGoalId] === currentQuote.id);
+  const targetKey = currentQuote.quoteKey || currentQuote.id;
+  const isGoalPinned = Boolean(
+    activeGoalId && currentQuote &&
+    (userState.pinnedGoalQuotes?.[activeGoalId] === targetKey ||
+     userState.pinnedGoalQuotes?.[activeGoalId] === currentQuote.id)
+  );
 
   const handleTogglePinGoal = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!activeGoalId || !currentQuote) return;
-    const nextPinned = togglePinGoalQuote(activeGoalId, currentQuote.id);
+    const nextPinned = togglePinGoalQuote(activeGoalId, targetKey);
     const updatedMap = { ...(userState.pinnedGoalQuotes || {}) };
     if (nextPinned) {
-      updatedMap[activeGoalId] = currentQuote.id;
+      updatedMap[activeGoalId] = targetKey;
     } else {
       delete updatedMap[activeGoalId];
     }
@@ -242,20 +251,20 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
         {/* Expanded popup if clicked on line */}
         {isExpanded && (
           <div
-            className="absolute left-0 top-full mt-1 z-30 w-full max-w-md p-2.5 rounded-lg bg-white dark:bg-neutral-800 shadow-lg border border-black/10 dark:border-white/10 text-xs text-neutral-800 dark:text-neutral-200"
+            className="absolute left-0 top-full mt-1 z-30 w-full max-w-md p-3 rounded-xl bg-[var(--surface-card,#FFFFFF)] text-[var(--text-primary,#0F172A)] shadow-xl border border-[var(--border-subtle,#E2E8F0)] dark:bg-neutral-800 dark:text-neutral-200 text-xs"
             onClick={e => e.stopPropagation()}
           >
             <div className="font-normal italic leading-relaxed" style={highlightStyle}>
               "{currentQuote.text}"
             </div>
             {currentQuote.author && (
-              <div className="mt-1 text-right text-[11px] text-neutral-500 dark:text-neutral-400 not-italic">
+              <div className="mt-1 text-right text-[11px] opacity-70 not-italic">
                 — {currentQuote.author}
               </div>
             )}
             <button
               onClick={() => setIsExpanded(false)}
-              className="mt-1 text-[10px] text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 underline"
+              className="mt-1 text-[10px] opacity-60 hover:opacity-100 underline cursor-pointer"
             >
               {t('common.close', 'Đóng')}
             </button>

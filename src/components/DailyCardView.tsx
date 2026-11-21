@@ -217,9 +217,9 @@ export const DailyCardView: React.FC = () => {
 
             <button
               type="submit"
-              className="py-2.5 px-4 rounded-2xl bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+              className="py-2.5 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-xs shadow-sm flex items-center gap-1.5 taio-btn-primary"
             >
-              <Plus className="w-4 h-4 text-white" />
+              <Plus className="w-4 h-4 text-[var(--taio-on-brand)]" />
               <span>{t('card.add', 'Thêm')}</span>
             </button>
           </div>

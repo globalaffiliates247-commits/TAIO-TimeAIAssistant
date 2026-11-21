@@ -14,7 +14,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "jobs"
   },
   {
     "id": "q-en-01",
@@ -28,7 +29,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "01"
   },
   {
     "id": "q-en-02",
@@ -42,7 +44,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "02"
   },
   {
     "id": "q-en-03",
@@ -56,7 +59,8 @@
     "weight": 1,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "03"
   },
   {
     "id": "q-en-04",
@@ -70,7 +74,8 @@
     "weight": 1,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "04"
   },
   {
     "id": "q-en-05",
@@ -83,7 +88,8 @@
     "weight": 1,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "05"
   },
   {
     "id": "q-en-06",
@@ -97,7 +103,8 @@
     "weight": 1,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "06"
   },
   {
     "id": "q-en-07",
@@ -111,7 +118,8 @@
     "weight": 1,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "07"
   },
   {
     "id": "q-en-08",
@@ -125,7 +133,8 @@
     "weight": 1,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "08"
   },
   {
     "id": "q-en-09",
@@ -139,7 +148,8 @@
     "weight": 1,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "09"
   },
   {
     "id": "q-en-10",
@@ -153,7 +163,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "10"
   },
   {
     "id": "q-en-goal-01",
@@ -169,7 +180,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-01"
   },
   {
     "id": "q-en-goal-02",
@@ -185,7 +197,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-02"
   },
   {
     "id": "q-en-goal-03",
@@ -201,7 +214,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-03"
   },
   {
     "id": "q-en-goal-04",
@@ -217,7 +231,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-04"
   },
   {
     "id": "q-en-goal-05",
@@ -233,7 +248,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-05"
   },
   {
     "id": "q-en-goal-06",
@@ -249,7 +265,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-06"
   },
   {
     "id": "q-en-goal-07",
@@ -265,7 +282,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-07"
   },
   {
     "id": "q-en-goal-08",
@@ -281,7 +299,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-08"
   },
   {
     "id": "q-en-goal-09",
@@ -297,7 +316,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-09"
   },
   {
     "id": "q-en-goal-10",
@@ -313,7 +333,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-10"
   },
   {
     "id": "q-en-goal-11",
@@ -329,7 +350,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-11"
   },
   {
     "id": "q-en-goal-12",
@@ -345,7 +367,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-12"
   },
   {
     "id": "q-en-goal-13",
@@ -361,7 +384,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-13"
   },
   {
     "id": "q-en-goal-14",
@@ -377,7 +401,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-14"
   },
   {
     "id": "q-en-goal-15",
@@ -393,7 +418,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-15"
   },
   {
     "id": "q-en-goal-16",
@@ -409,7 +435,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-16"
   },
   {
     "id": "q-en-goal-17",
@@ -425,7 +452,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-17"
   },
   {
     "id": "q-en-goal-18",
@@ -441,7 +469,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-18"
   },
   {
     "id": "q-en-goal-19",
@@ -457,7 +486,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-19"
   },
   {
     "id": "q-en-goal-20",
@@ -473,7 +503,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-20"
   },
   {
     "id": "q-en-goal-21",
@@ -489,7 +520,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-21"
   },
   {
     "id": "q-en-goal-22",
@@ -505,7 +537,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-22"
   },
   {
     "id": "q-en-goal-23",
@@ -521,7 +554,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-23"
   },
   {
     "id": "q-en-goal-24",
@@ -537,7 +571,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-24"
   },
   {
     "id": "q-en-goal-25",
@@ -553,7 +588,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-25"
   },
   {
     "id": "q-en-goal-26",
@@ -569,7 +605,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-26"
   },
   {
     "id": "q-en-goal-27",
@@ -585,7 +622,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-27"
   },
   {
     "id": "q-en-goal-28",
@@ -601,7 +639,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-28"
   },
   {
     "id": "q-en-goal-29",
@@ -617,7 +656,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-29"
   },
   {
     "id": "q-en-goal-30",
@@ -631,6 +671,188 @@
       "start_day"
     ],
     "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true,
+    "quoteKey": "goal-30"
+  },
+  {
+    "id": "q-en-11",
+    "quoteKey": "11",
+    "text": "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+    "author": "Will Durant",
+    "lang": "en",
+    "contexts": [
+      "end_day",
+      "goal"
+    ],
+    "weight": 2,
+    "active": true,
+    "source": "taio",
+    "verified": true,
+    "originalLang": "en",
+    "originalText": "We are what we repeatedly do. Excellence, then, is not an act, but a habit."
+  },
+  {
+    "id": "q-en-12",
+    "quoteKey": "12",
+    "text": "It is not that we have a short time to live, but that we waste a lot of it.",
+    "author": "Seneca",
+    "lang": "en",
+    "contexts": [
+      "start_day",
+      "break"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true,
+    "originalLang": "la",
+    "originalText": "Non exiguum temporis habemus, sed multum perdidimus."
+  },
+  {
+    "id": "q-en-13",
+    "quoteKey": "13",
+    "text": "Your time is limited, so don’t waste it living someone else’s life.",
+    "author": "Steve Jobs",
+    "lang": "en",
+    "contexts": [
+      "start_day",
+      "goal"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true,
+    "originalLang": "en",
+    "originalText": "Your time is limited, so don’t waste it living someone else’s life."
+  },
+  {
+    "id": "q-en-14",
+    "quoteKey": "14",
+    "text": "The best time to plant a tree was 20 years ago. The second best time is now.",
+    "author": "Proverb",
+    "lang": "en",
+    "contexts": [
+      "start_task"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-15",
+    "quoteKey": "15",
+    "text": "Haste makes waste.",
+    "author": "Proverb",
+    "lang": "en",
+    "contexts": [
+      "break"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-16",
+    "quoteKey": "16",
+    "text": "Don’t count the days, make the days count.",
+    "author": "Muhammad Ali",
+    "lang": "en",
+    "contexts": [
+      "start_day"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": false,
+    "originalLang": "en",
+    "originalText": "Don’t count the days, make the days count."
+  },
+  {
+    "id": "q-en-17",
+    "quoteKey": "17",
+    "text": "Write down the single most important task for today before opening messages.",
+    "author": "",
+    "lang": "en",
+    "contexts": [
+      "start_day"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-18",
+    "quoteKey": "18",
+    "text": "When a task feels overwhelming, just commit to the first 5 minutes.",
+    "author": "",
+    "lang": "en",
+    "contexts": [
+      "start_task"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-19",
+    "quoteKey": "19",
+    "text": "Resting at the right moment is also an essential part of the work.",
+    "author": "",
+    "lang": "en",
+    "contexts": [
+      "break"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-20",
+    "quoteKey": "20",
+    "text": "Today you took another step forward. Take note of it.",
+    "author": "",
+    "lang": "en",
+    "contexts": [
+      "done",
+      "end_day"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-21",
+    "quoteKey": "21",
+    "text": "Review your goal for one minute before starting a focus block.",
+    "author": "",
+    "lang": "en",
+    "contexts": [
+      "start_day",
+      "goal"
+    ],
+    "weight": 1,
+    "active": true,
+    "source": "taio",
+    "verified": true
+  },
+  {
+    "id": "q-en-22",
+    "quoteKey": "22",
+    "text": "Finishing one small task is far better than endlessly pondering a huge one.",
+    "author": "",
+    "lang": "en",
+    "contexts": [
+      "start_task"
+    ],
+    "weight": 1,
     "active": true,
     "source": "taio",
     "verified": true

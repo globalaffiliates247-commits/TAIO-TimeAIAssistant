@@ -45,7 +45,9 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
         // v0.3.45 Part D EventKit (iOS Calendar)
         CAPPluginMethod(name: "getCalendarPermissionStatus", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestCalendarPermission", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "fetchCalendarEvents", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "fetchCalendarEvents", returnType: CAPPluginReturnPromise),
+        // v0.3.50 Part B1 Preferences Sync
+        CAPPluginMethod(name: "syncPreferences", returnType: CAPPluginReturnPromise)
     ]
 
     private var db: OpaquePointer?
@@ -276,8 +278,11 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
             }
 
             Task {
+                // PRD v0.3.50 Part C1: Only end activity matching the same blockId
                 for activity in Activity<TAIOTimerAttributes>.activities {
-                    await activity.end(dismissalPolicy: .immediate)
+                    if activity.attributes.blockId == blockId {
+                        await activity.end(dismissalPolicy: .immediate)
+                    }
                 }
                 let attributes = TAIOTimerAttributes(blockId: blockId)
                 let state = TAIOTimerAttributes.ContentState(
@@ -330,6 +335,8 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
     }
 
     @objc func updateLiveActivity(_ call: CAPPluginCall) {
+        let rawBlockId = call.getString("blockId", "")
+        let blockId = rawBlockId.isEmpty ? nil : rawBlockId
         let taskTitle = call.getString("taskTitle", "Tập trung sâu")
         let goalName = call.getString("goalName", "Mục tiêu chính")
         let isCountDown = call.getBool("isCountDown", true)
@@ -359,7 +366,15 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
                     isPaused: isPaused
                 )
                 for activity in Activity<TAIOTimerAttributes>.activities {
-                    await activity.update(using: state)
+                    if let targetId = blockId, !targetId.isEmpty {
+                        if activity.attributes.blockId == targetId {
+                            await activity.update(using: state)
+                        }
+                    } else {
+                        if !activity.attributes.blockId.hasPrefix("timer:") {
+                            await activity.update(using: state)
+                        }
+                    }
                 }
                 call.resolve(["ok": true, "updated": true, "native": true])
             }
@@ -370,11 +385,19 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
     }
 
     @objc func stopLiveActivity(_ call: CAPPluginCall) {
+        let rawBlockId = call.getString("blockId", "")
+        let blockId = rawBlockId.isEmpty ? nil : rawBlockId
         if #available(iOS 16.1, *) {
             #if canImport(ActivityKit)
             Task {
                 for activity in Activity<TAIOTimerAttributes>.activities {
-                    await activity.end(dismissalPolicy: .immediate)
+                    if let targetId = blockId, !targetId.isEmpty {
+                        if activity.attributes.blockId == targetId {
+                            await activity.end(dismissalPolicy: .immediate)
+                        }
+                    } else {
+                        await activity.end(dismissalPolicy: .immediate)
+                    }
                 }
                 call.resolve(["ok": true, "native": true])
             }
@@ -382,6 +405,30 @@ public class TAIONativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDel
             #endif
         }
         call.resolve(["ok": true, "native": true])
+    }
+
+    // PRD v0.3.50 Part B1: Synchronize app preferences to iOS UserDefaults
+    @objc func syncPreferences(_ call: CAPPluginCall) {
+        let language = call.getString("language", "vi")
+        let palette = call.getString("palette", "red")
+        let themeMode = call.getString("themeMode", "light")
+
+        UserDefaults.standard.set(language, forKey: "taio_language_preference")
+        UserDefaults.standard.set(palette, forKey: "taio_palette_preference")
+        UserDefaults.standard.set(themeMode, forKey: "taio_theme_mode_preference")
+
+        if let sharedDefaults = UserDefaults(suiteName: "group.club.taio.timeapp") {
+            sharedDefaults.set(language, forKey: "taio_language_preference")
+            sharedDefaults.set(palette, forKey: "taio_palette_preference")
+            sharedDefaults.set(themeMode, forKey: "taio_theme_mode_preference")
+        }
+
+        call.resolve([
+            "success": true,
+            "language": language,
+            "palette": palette,
+            "themeMode": themeMode
+        ])
     }
 
     @objc func openAppSettings(_ call: CAPPluginCall) {

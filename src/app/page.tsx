@@ -30,7 +30,7 @@ import { ProfileModal } from '../components/ProfileModal';
 import { SwipeReviewModal } from '../components/SwipeReviewModal';
 import { ReminderQuestionsModal } from '../components/ReminderQuestionsModal';
 import { ActiveCaptureModal } from '../components/ActiveCaptureModal';
-import { useLockScreenClock } from '../features/quick-entry';
+import { useLockScreenClock, useFreeTimerLiveActivities } from '../features/quick-entry';
 import { Sparkles, X, Smartphone, AlertCircle } from 'lucide-react';
 import { TabErrorBoundary } from '../components/TabErrorBoundary';
 import { initGlobalErrorListeners, setActiveTabForLogging } from '../core/errorLogger';
@@ -78,11 +78,15 @@ const MainAppContent: React.FC = () => {
     toastUndoAction,
     toastActionLabel,
     dismissToast,
+    showToast,
     isOnboarded,
     hasServerBackupToRestore,
     resolveServerBackupChoice,
-    language
+    language,
+    freeTimers,
   } = useApp();
+
+  useFreeTimerLiveActivities(freeTimers, language, (msg) => showToast(msg));
 
   React.useEffect(() => {
     initGlobalErrorListeners();

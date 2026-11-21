@@ -388,7 +388,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl text-white text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+              className="px-5 py-2 rounded-xl text-[var(--taio-on-brand)] text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] taio-btn-primary"
             >
               {language === 'vi' ? 'Lưu sự kiện' : 'Save Event'}
             </button>

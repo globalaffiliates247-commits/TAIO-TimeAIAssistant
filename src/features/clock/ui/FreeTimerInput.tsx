@@ -123,7 +123,7 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
         <button
           type="button"
           onClick={() => handleSubmit()}
-          className="py-2.5 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-xs shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
+          className="py-2.5 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-xs shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer taio-btn-primary"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
           <span>{inputText.trim() ? (language === 'en' ? 'Start' : 'Chạy') : (language === 'en' ? 'Stopwatch' : 'Bấm giờ')}</span>

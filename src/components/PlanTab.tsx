@@ -159,7 +159,7 @@ export const PlanTab: React.FC = () => {
             onClick={() => setActiveView('card')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'card' 
-                ? 'bg-[#E11D2E] bg-[var(--taio-brand)] text-white shadow-xs'
+                ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-xs taio-btn-primary'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
@@ -170,7 +170,7 @@ export const PlanTab: React.FC = () => {
             onClick={() => setActiveView('timeline')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'timeline' 
-                ? 'bg-[#E11D2E] bg-[var(--taio-brand)] text-white shadow-xs'
+                ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-xs taio-btn-primary'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
@@ -201,9 +201,9 @@ export const PlanTab: React.FC = () => {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs transition-all bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)]"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[var(--taio-on-brand)] text-xs font-bold shadow-xs transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] taio-btn-primary"
           >
-            <Plus className="w-4 h-4 text-white" />
+            <Plus className="w-4 h-4 text-[var(--taio-on-brand)]" />
             <span>{t('plan.addTask', 'Thêm việc')}</span>
           </button>
         </div>
@@ -634,7 +634,7 @@ export const PlanTab: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleAcceptBacklogItem(item)}
-                    className="px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow-sm transition-all shrink-0 bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+                    className="px-3.5 py-1.5 rounded-xl text-[var(--taio-on-brand)] text-xs font-bold shadow-sm transition-all shrink-0 bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] taio-btn-primary"
                   >
                     {language === 'en' ? 'Do this week' : 'Làm tuần này'}
                   </button>
@@ -753,7 +753,7 @@ export const PlanTab: React.FC = () => {
                 <button
                   type="submit"
                   disabled={timeToMinutes(newStartTime) >= timeToMinutes(newEndTime)}
-                  className="px-5 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]"
+                  className="px-5 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-[var(--taio-on-brand)] text-xs font-bold shadow-md transition-all bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] taio-btn-primary"
                 >
                   {language === 'en' ? 'Add to schedule' : 'Thêm vào lịch'}
                 </button>

@@ -12,6 +12,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ className, activeGoalId, a
   return (
     <MotivationSticker
       slotKey="goals_tab"
+      instanceKey="goals_tab"
       context="goal"
       size="card"
       className={className}

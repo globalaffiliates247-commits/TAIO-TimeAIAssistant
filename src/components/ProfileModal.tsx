@@ -494,73 +494,109 @@ export const ProfileModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Palette (PRD v0.3.47 Part A1 & A4) */}
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPalette('red')}
-                    className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                      (palette === 'red' || palette === 'warm')
-                        ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
-                        : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-[#E11D2E] text-white flex items-center justify-center shadow-xs">
-                      <Hourglass className="w-4 h-4 stroke-[1.75]" />
-                    </div>
-                    <span className="text-[11px] leading-tight">
-                      {language === 'en' ? 'TAIO Red' : 'Đỏ TAIO'}
+                {/* Palette (PRD v0.3.47 Part A1 & v0.3.49 Part B1) */}
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {language === 'en' ? 'Warm Tones' : 'Gam nóng'}
                     </span>
-                    {(palette === 'red' || palette === 'warm') && (
-                      <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
-                        ✓
-                      </span>
-                    )}
-                  </button>
+                    <div className="grid grid-cols-2 gap-2 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => setPalette('red')}
+                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
+                          (palette === 'red' || palette === 'warm')
+                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
+                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-[#E11D2E] text-white flex items-center justify-center shadow-xs">
+                          <Hourglass className="w-4 h-4 stroke-[1.75]" />
+                        </div>
+                        <span className="text-[11px] leading-tight">
+                          {language === 'en' ? 'TAIO Red' : 'Đỏ TAIO'}
+                        </span>
+                        {(palette === 'red' || palette === 'warm') && (
+                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                            ✓
+                          </span>
+                        )}
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setPalette('bright-blue')}
-                    className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                      (palette === 'bright-blue' || palette === 'cool')
-                        ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
-                        : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-[#0068FF] text-white flex items-center justify-center shadow-xs">
-                      <Zap className="w-4 h-4 stroke-[1.75]" />
+                      <button
+                        type="button"
+                        onClick={() => setPalette('gold')}
+                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
+                          palette === 'gold'
+                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
+                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-[#F7C531] text-[#14161A] flex items-center justify-center shadow-xs font-black">
+                          <Sparkles className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <span className="text-[11px] leading-tight">
+                          {language === 'en' ? 'TAIO Gold' : 'Vàng TAIO'}
+                        </span>
+                        {palette === 'gold' && (
+                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#14161A] text-white flex items-center justify-center text-[9px]">
+                            ✓
+                          </span>
+                        )}
+                      </button>
                     </div>
-                    <span className="text-[11px] leading-tight">
-                      {language === 'en' ? 'Bright Blue' : 'Xanh sáng'}
-                    </span>
-                    {(palette === 'bright-blue' || palette === 'cool') && (
-                      <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
-                        ✓
-                      </span>
-                    )}
-                  </button>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setPalette('calm-blue')}
-                    className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                      palette === 'calm-blue'
-                        ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
-                        : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-[#1C78C0] text-white flex items-center justify-center shadow-xs">
-                      <Droplets className="w-4 h-4 stroke-[1.75]" />
-                    </div>
-                    <span className="text-[11px] leading-tight">
-                      {language === 'en' ? 'Calm Blue' : 'Xanh dịu'}
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {language === 'en' ? 'Cool Tones' : 'Gam mát'}
                     </span>
-                    {palette === 'calm-blue' && (
-                      <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
-                        ✓
-                      </span>
-                    )}
-                  </button>
+                    <div className="grid grid-cols-2 gap-2 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => setPalette('bright-blue')}
+                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
+                          (palette === 'bright-blue' || palette === 'cool')
+                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
+                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-[#0068FF] text-white flex items-center justify-center shadow-xs">
+                          <Zap className="w-4 h-4 stroke-[1.75]" />
+                        </div>
+                        <span className="text-[11px] leading-tight">
+                          {language === 'en' ? 'Bright Blue' : 'Xanh sáng'}
+                        </span>
+                        {(palette === 'bright-blue' || palette === 'cool') && (
+                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                            ✓
+                          </span>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setPalette('calm-blue')}
+                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center relative ${
+                          palette === 'calm-blue'
+                            ? 'border-[var(--taio-brand)] bg-[var(--taio-brand-soft)] shadow-xs font-bold text-slate-900'
+                            : 'border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-[#1C78C0] text-white flex items-center justify-center shadow-xs">
+                          <Droplets className="w-4 h-4 stroke-[1.75]" />
+                        </div>
+                        <span className="text-[11px] leading-tight">
+                          {language === 'en' ? 'Calm Blue' : 'Xanh dịu'}
+                        </span>
+                        {palette === 'calm-blue' && (
+                          <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--taio-brand)] text-white flex items-center justify-center text-[9px]">
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Language Switcher (Part C1.5) */}

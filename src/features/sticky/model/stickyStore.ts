@@ -2,6 +2,8 @@
 // 30-day trash retention, temporary hide/restore, and cross-device sync.
 import { useSyncExternalStore } from 'react';
 import type { StickyColor, StickyNote } from './stickyTypes';
+import { broadcastWindowBus, subscribeWindowBus, getActiveEditingId } from '../../../core/storage/windowBus.ts';
+import { mergeCollectionsByUpdatedAt } from '../../../core/storage/durableStorage.ts';
 
 const KEY = 'taio_sticky_v1';
 const COUNT_KEY = 'taio_sticky_last_count_v1';
@@ -97,7 +99,7 @@ function load() {
   }
 }
 
-function commit(next: State) {
+function commit(next: State, broadcast = true) {
   state = next;
   try {
     const validNotes = purgeExpired(state.notes);
@@ -108,6 +110,45 @@ function commit(next: State) {
     /* quota */
   }
   listeners.forEach(l => l());
+  if (broadcast) {
+    broadcastWindowBus('sticky');
+  }
+}
+
+// PRD v0.3.50 Part A: Cross-window sticky synchronization
+function syncFromRemoteWindow() {
+  if (typeof window === 'undefined') return;
+  try {
+    load();
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    const diskNotes: StickyNote[] = Array.isArray(parsed.notes) ? parsed.notes : [];
+    const tombstones = loadStickyTombstones();
+    const deletedIds = tombstones.map(t => t.id);
+
+    const activeEditingId = getActiveEditingId('sticky');
+    let localNotes = state.notes;
+
+    // A4: If user is actively typing in a note, protect local in-memory version
+    if (activeEditingId) {
+      localNotes = localNotes.map(n =>
+        n.id === activeEditingId ? { ...n, updatedAt: Math.max(Number(n.updatedAt) || 0, Date.now()) } : n
+      );
+    }
+
+    const merged = mergeCollectionsByUpdatedAt(localNotes, diskNotes, deletedIds);
+    state = { ...state, notes: purgeExpired(merged), cacheWipedWarning: false };
+    listeners.forEach(l => l());
+  } catch {}
+}
+
+if (typeof window !== 'undefined') {
+  subscribeWindowBus(msg => {
+    if (msg.dataset === 'sticky') {
+      syncFromRemoteWindow();
+    }
+  });
 }
 
 const uid = () => `st-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;

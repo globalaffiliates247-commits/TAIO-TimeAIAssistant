@@ -1,5 +1,6 @@
 // TAIO Time App — Motivation pickQuote pure function (PRD FEATURE v0.3.31 Part A.4)
-import { MotivationQuote, QuoteContext } from './types';
+import { MotivationQuote, QuoteContext } from './types.ts';
+import { normalizeToQuoteKey } from './migratePinnedQuotes.ts';
 
 export interface PickQuoteOptions {
   quotes: MotivationQuote[];
@@ -43,10 +44,26 @@ export function pickQuote(options: PickQuoteOptions): MotivationQuote | null {
   const activeQuotes = quotes.filter(q => q.active);
   if (activeQuotes.length === 0) return null;
 
-  // 1. Goal-specific pinned quote takes absolute priority for this goal (PRD v0.3.48 Part B3)
+  // 1. Goal-specific pinned quote takes absolute priority for this goal (PRD v0.3.48 Part B3 & v0.3.50 Part E)
   if (activeGoalId && pinnedGoalQuotes && pinnedGoalQuotes[activeGoalId]) {
-    const goalPinnedId = pinnedGoalQuotes[activeGoalId];
-    const goalPinned = activeQuotes.find(q => q.id === goalPinnedId);
+    const rawVal = pinnedGoalQuotes[activeGoalId];
+    const targetKey = normalizeToQuoteKey(rawVal);
+    // Find matching quote in current language by quoteKey or id
+    let goalPinned = activeQuotes.find(q => (q.quoteKey === targetKey || q.id === rawVal) && q.lang === lang);
+    if (!goalPinned && lang === 'zh') {
+      const zhOrig = activeQuotes.find(q => (q.quoteKey === targetKey || q.id === rawVal) && q.originalLang === 'zh');
+      if (zhOrig) {
+        goalPinned = { ...zhOrig, text: zhOrig.originalText || zhOrig.text };
+      }
+    }
+    // E4 Fallback: if not found in current language, look in English
+    if (!goalPinned) {
+      goalPinned = activeQuotes.find(q => (q.quoteKey === targetKey || q.id === rawVal) && q.lang === 'en');
+    }
+    // E4 Fallback: if not found in English, look in Vietnamese
+    if (!goalPinned) {
+      goalPinned = activeQuotes.find(q => (q.quoteKey === targetKey || q.id === rawVal) && q.lang === 'vi');
+    }
     if (goalPinned) return goalPinned;
   }
 

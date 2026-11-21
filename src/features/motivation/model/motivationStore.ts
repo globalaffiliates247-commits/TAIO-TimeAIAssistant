@@ -10,6 +10,7 @@ import { BUILTIN_QUOTES } from './quotesIndex';
 import { pickQuote } from './pickQuote';
 import { quoteRegistry } from './quoteRegistry';
 import { getDeviceCalendarDate } from '@/core/clock';
+import { migratePinnedGoalQuotes, normalizeToQuoteKey } from './migratePinnedQuotes.ts';
 
 const STORAGE_KEY_USER_MOTIVATION = 'taio_motivation_user_state';
 const STORAGE_KEY_SETTINGS = 'taio_motivation_settings';
@@ -52,6 +53,7 @@ export function loadUserMotivationState(): UserMotivationState {
     const raw = localStorage.getItem(STORAGE_KEY_USER_MOTIVATION);
     if (raw) {
       state = { ...state, ...JSON.parse(raw) };
+      state.pinnedGoalQuotes = migratePinnedGoalQuotes(state.pinnedGoalQuotes);
     }
   } catch (err) {
     console.warn('[motivationStore] Failed to parse user motivation state', err);
@@ -189,6 +191,7 @@ export function getRecent7DaysQuoteIds(recent: { quoteId: string; date: string }
  */
 export function getOrPickDailyQuote(options: {
   slotKey: string;
+  instanceKey?: string;
   context: QuoteContext;
   lang: 'vi' | 'en' | 'zh' | 'th' | string;
   quotes: MotivationQuote[];
@@ -199,6 +202,7 @@ export function getOrPickDailyQuote(options: {
 }): { quote: MotivationQuote | null; isHiddenToday: boolean; updatedState: UserMotivationState } {
   const {
     slotKey,
+    instanceKey,
     context,
     lang,
     quotes,
@@ -208,22 +212,23 @@ export function getOrPickDailyQuote(options: {
     forceRefresh = false,
   } = options;
 
+  const effectiveKey = instanceKey || slotKey;
   const today = getTodayString();
   let state = { ...userState };
 
-  // Check if hidden today
+  // Check if hidden today (by group slotKey)
   const isHiddenToday = state.hiddenTodaySlots[slotKey] === today;
 
-  // Active quotes currently showing on other slots or windows (v0.3.35 A3.2)
-  const activeExcludes = quoteRegistry.getActiveQuoteIds(slotKey);
+  // Active quotes currently showing on other slots, instances, or windows (PRD v0.3.50 Part D)
+  const activeExcludes = quoteRegistry.getActiveQuoteIds(effectiveKey);
 
   // Check if we already have a quote for this slot today and not forceRefresh,
-  // making sure it is not currently active in another slot
-  const slotEntry = state.historySlots[slotKey];
+  // making sure it is not currently active in another slot/instance
+  const slotEntry = state.historySlots[effectiveKey];
   if (!forceRefresh && slotEntry && slotEntry.date === today && !activeExcludes.includes(slotEntry.quoteId)) {
     const existing = quotes.find(q => q.id === slotEntry.quoteId && q.active);
     if (existing) {
-      quoteRegistry.register(slotKey, existing.id);
+      quoteRegistry.register(effectiveKey, existing.id);
       return { quote: existing, isHiddenToday, updatedState: state };
     }
   }
@@ -245,10 +250,10 @@ export function getOrPickDailyQuote(options: {
   });
 
   if (picked) {
-    quoteRegistry.register(slotKey, picked.id);
+    quoteRegistry.register(effectiveKey, picked.id);
     state.historySlots = {
       ...state.historySlots,
-      [slotKey]: { quoteId: picked.id, date: today },
+      [effectiveKey]: { quoteId: picked.id, date: today },
     };
 
     // Append to recent history
@@ -257,26 +262,31 @@ export function getOrPickDailyQuote(options: {
     state.recentQuoteIds = filteredRecent;
 
     saveUserMotivationState(state);
+  } else {
+    quoteRegistry.unregister(effectiveKey);
   }
 
   return { quote: picked, isHiddenToday, updatedState: state };
 }
 
 /**
- * Toggle pin a quote specifically for a goal (PRD v0.3.48 Part B3).
+ * Toggle pin a quote specifically for a goal (PRD v0.3.48 Part B3 & v0.3.50 Part E).
+ * Stores language-agnostic quoteKey so pins persist across languages.
  * Returns true if pinned, false if unpinned.
  */
-export function togglePinGoalQuote(goalId: string, quoteId: string): boolean {
-  if (!goalId || !quoteId) return false;
+export function togglePinGoalQuote(goalId: string, quoteIdOrKey: string): boolean {
+  if (!goalId || !quoteIdOrKey) return false;
   const state = loadUserMotivationState();
   const currentMap = { ...(state.pinnedGoalQuotes || {}) };
+  const targetKey = normalizeToQuoteKey(quoteIdOrKey);
   let isPinned = false;
 
-  if (currentMap[goalId] === quoteId) {
+  const existing = currentMap[goalId];
+  if (existing && (existing === targetKey || normalizeToQuoteKey(existing) === targetKey)) {
     delete currentMap[goalId];
     isPinned = false;
   } else {
-    currentMap[goalId] = quoteId;
+    currentMap[goalId] = targetKey;
     isPinned = true;
   }
 
@@ -285,8 +295,11 @@ export function togglePinGoalQuote(goalId: string, quoteId: string): boolean {
   return isPinned;
 }
 
-export function isGoalQuotePinned(goalId: string, quoteId: string): boolean {
-  if (!goalId || !quoteId) return false;
+export function isGoalQuotePinned(goalId: string, quoteIdOrKey: string): boolean {
+  if (!goalId || !quoteIdOrKey) return false;
   const state = loadUserMotivationState();
-  return state.pinnedGoalQuotes?.[goalId] === quoteId;
+  const currentMap = state.pinnedGoalQuotes || {};
+  const targetKey = normalizeToQuoteKey(quoteIdOrKey);
+  const existing = currentMap[goalId];
+  return Boolean(existing && (existing === targetKey || normalizeToQuoteKey(existing) === targetKey));
 }

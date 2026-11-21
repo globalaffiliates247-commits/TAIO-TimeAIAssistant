@@ -104,18 +104,12 @@ final class TAIOAlarmService {
             if state == .notDetermined { state = (try? await manager.requestAuthorization()) ?? .denied }
             if state == .authorized {
                 var ids: [String: String] = [:]
-                let isEn = (UserDefaults.standard.string(forKey: "taio_language_preference") == "en")
-                let stopText = isEn ? "Dismiss" : "Đã biết"
-                let palette = UserDefaults.standard.string(forKey: "taio_palette_preference") ?? "warm"
-                let brandColor: Color
-                if palette == "cool" {
-                    brandColor = Color(red: 0.0, green: 104.0 / 255.0, blue: 1.0)
-                } else if palette == "calm" {
-                    brandColor = Color(red: 28.0 / 255.0, green: 120.0 / 255.0, blue: 192.0 / 255.0)
-                } else {
-                    // True TAIO Brand Red #E11D2E (PRD v0.3.47 / v0.3.48 Part C6)
-                    brandColor = Color(red: 225.0 / 255.0, green: 29.0 / 255.0, blue: 46.0 / 255.0)
-                }
+                let sharedDefaults = UserDefaults(suiteName: "group.club.taio.timeapp") ?? UserDefaults.standard
+                let lang = sharedDefaults.string(forKey: "taio_language_preference") ?? UserDefaults.standard.string(forKey: "taio_language_preference") ?? "vi"
+                let isEn = (lang == "en")
+                let stopText = isEn ? "Start Task Now" : "Vào việc ngay"
+                let palette = sharedDefaults.string(forKey: "taio_palette_preference") ?? UserDefaults.standard.string(forKey: "taio_palette_preference") ?? "red"
+                let brandColor = TAIOPaletteColors.color(for: palette)
 
                 for a in alarms {
                     let uuid = UUID()

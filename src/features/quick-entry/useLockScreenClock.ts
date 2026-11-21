@@ -125,11 +125,8 @@ export function useLockScreenClock() {
 
       const blockId = state.block?.id || `anchor-${state.mode}`;
       const taskTitle = state.title;
-      // PRD FIX v0.3.30 Part E2.4: Secondary free timer line on lock screen banner
-      const activeFreeTimers = (freeTimers || []).filter(t => t.status === 'running');
-      const goalName = activeFreeTimers.length > 0
-        ? `${state.subtitle} • ⏱️ ${activeFreeTimers[0].title}`
-        : state.subtitle;
+      // PRD v0.3.50 Part C2: Main block clock keeps clean subtitle; free timers have dedicated Live Activities
+      const goalName = state.subtitle;
       const startTimestamp = Math.floor(state.startedAt / 1000);
       const targetTimestamp = Math.floor(state.endsAt / 1000);
       const totalMinutes = Math.max(5, Math.round((state.endsAt - state.startedAt) / 60000));

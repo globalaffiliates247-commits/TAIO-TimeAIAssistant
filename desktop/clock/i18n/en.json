@@ -1,0 +1,12 @@
+{
+  "defaultQuote": {
+    "text": "A journey of a thousand miles begins with a single step",
+    "author": "Lao Tzu"
+  },
+  "gap": "Free",
+  "stop": "Stop",
+  "done": "Done",
+  "extend5m": "+5m",
+  "extend15m": "+15m",
+  "nextTask": "Next"
+}

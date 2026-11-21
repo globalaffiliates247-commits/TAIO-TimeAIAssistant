@@ -131,7 +131,7 @@ export const CheckInModal: React.FC = () => {
                   setCheckInModalOpen(false);
                   setCloseDayModalOpen(true);
                 }}
-                className="flex-1 py-3 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                className="flex-1 py-3 px-4 rounded-2xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-colors taio-btn-primary"
               >
                 <span>{language === 'vi' ? 'Khép ngày bây giờ' : 'Wrap up now'}</span>
                 <ArrowRight className="w-4 h-4" />

@@ -656,6 +656,15 @@ export const PALETTES: Record<ColorPalette, PaletteColors> = {
     personal: '#5E8C31',
     planning: '#FCD34D',
   },
+  gold: {
+    name: 'gold',
+    brandAccent: '#F7C531',
+    deepWork: '#F7C531',
+    interruption: '#F59E0B',
+    meeting: '#8A6248',
+    personal: '#5E8C31',
+    planning: '#FCD34D',
+  },
   'bright-blue': {
     name: 'bright-blue',
     brandAccent: 'var(--taio-brand)',

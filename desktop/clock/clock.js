@@ -1,13 +1,104 @@
 // TAIO Clock Window Controller (PRD v0.3.33 Part I & v0.3.46 Part A)
 (() => {
   // State variables (v0.3.46 Part A1: ALL declared at top before any functions or calls)
+  const CLOCK_I18N = {
+    vi: {
+      defaultQuote: { text: 'Vạn dặm khởi đầu từ một bước chân', author: 'Lão Tử' },
+      gap: 'Trống',
+      noActiveTask: 'Chưa có việc đang làm',
+      inProgress: 'Đang làm',
+      todayDone: 'Hết việc có giờ hôm nay',
+      milestone: 'mốc kế tiếp',
+      currentTime: 'giờ hiện tại',
+      untilNextTask: 'tới việc kế tiếp',
+      freeTime: 'thời gian trống',
+      gapTime: 'thời gian trống',
+      goalProgress: 'Tiến độ mục tiêu',
+      noGoal: 'Chưa gắn mục tiêu',
+      over: 'quá',
+      overrun: 'đã quá hạn',
+      remaining: 'còn lại',
+      elapsed: 'đã dùng',
+      switchToBar: 'Đổi sang kiểu Thanh (V)',
+      switchToRing: 'Đổi sang kiểu Vòng tròn (V)',
+      stop: 'Dừng',
+      done: 'Xong'
+    },
+    en: {
+      defaultQuote: { text: 'A journey of a thousand miles begins with a single step', author: 'Lao Tzu' },
+      gap: 'Free',
+      noActiveTask: 'No active task',
+      inProgress: 'In progress',
+      todayDone: 'Today Scheduled Done',
+      milestone: 'milestone',
+      currentTime: 'current time',
+      untilNextTask: 'until next task',
+      freeTime: 'free time',
+      gapTime: 'gap time',
+      goalProgress: 'Goal progress',
+      noGoal: 'No goal',
+      over: 'over',
+      overrun: 'overrun',
+      remaining: 'remaining',
+      elapsed: 'elapsed',
+      switchToBar: 'Switch to Bar view (V)',
+      switchToRing: 'Switch to Ring view (V)',
+      stop: 'Stop',
+      done: 'Done'
+    },
+    zh: {
+      defaultQuote: { text: '千里之行，始于足下', author: '老子' },
+      gap: '空闲',
+      noActiveTask: '暂无进行中任务',
+      inProgress: '进行中',
+      todayDone: '今日已完成所有计划',
+      milestone: '下一个里程碑',
+      currentTime: '当前时间',
+      untilNextTask: '距离下个任务',
+      freeTime: '空闲时间',
+      gapTime: '间隙时间',
+      goalProgress: '目标进度',
+      noGoal: '未关联目标',
+      over: '超时',
+      overrun: '已超时',
+      remaining: '剩余',
+      elapsed: '已用',
+      switchToBar: '切换至条形视图 (V)',
+      switchToRing: '切换至环形视图 (V)',
+      stop: '停止',
+      done: '完成'
+    },
+    th: {
+      defaultQuote: { text: 'การเดินทางนับพันลี้เริ่มต้นที่ก้าวแรก', author: 'เล่าจื๊อ' },
+      gap: 'ว่าง',
+      noActiveTask: 'ไม่มีงานที่กำลังทำ',
+      inProgress: 'กำลังทำ',
+      todayDone: 'งานตามกำหนดวันนี้เสร็จสิ้น',
+      milestone: 'เป้าหมายถัดไป',
+      currentTime: 'เวลาปัจจุบัน',
+      untilNextTask: 'จนถึงงานถัดไป',
+      freeTime: 'เวลาว่าง',
+      gapTime: 'ช่วงเวลาว่าง',
+      goalProgress: 'ความคืบหน้าเป้าหมาย',
+      noGoal: 'ไม่ได้ผูกเป้าหมาย',
+      over: 'เกิน',
+      overrun: 'เกินเวลา',
+      remaining: 'คงเหลือ',
+      elapsed: 'ใช้ไปแล้ว',
+      switchToBar: 'สลับเป็นแถบ (V)',
+      switchToRing: 'สลับเป็นวงกลม (V)',
+      stop: 'หยุด',
+      done: 'เสร็จ'
+    }
+  };
+
   let endsAt = 0;
   let startedAt = 0;
   let isCountDown = true;
   let isPinned = true;
   let currentMode = 'gap';
   let currentTaskId = null;
-  let currentQuote = { text: 'Vạn dặm khởi đầu từ một bước chân', author: 'Lão Tử' };
+  let currentQuote = CLOCK_I18N.vi.defaultQuote;
   let currentLang = 'vi';
   let viewMode = 'bar';
   let threeViewMode = 'remaining';
@@ -302,7 +393,18 @@
     }
   });
 
-  // Free timer action handler (PRD v0.3.48 Part C4)
+  // PRD v0.3.50 Part G1: Robust HTML escaping for user strings
+  function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Free timer action handler (PRD v0.3.48 Part C4 & v0.3.50 Part G2)
   window.handleFreeTimerAction = function(actionType, timerId) {
     try {
       if (window.taioAPI && window.taioAPI.sendTimerAction) {
@@ -315,6 +417,20 @@
       reportError(err, 'handleFreeTimerAction');
     }
   };
+
+  // PRD v0.3.50 Part G2: Delegated event listener for free timer buttons
+  if (barFreeTimersList) {
+    barFreeTimersList.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (btn) {
+        const actionType = btn.getAttribute('data-action');
+        const timerId = btn.getAttribute('data-timer-id');
+        if (actionType && timerId) {
+          window.handleFreeTimerAction(actionType, timerId);
+        }
+      }
+    });
+  }
 
   // UI Update called from main.js syncClockWindowData (v0.3.46: guaranteed to be defined unconditionally)
   window.updateUI = function(data) {
@@ -338,8 +454,10 @@
 
       if (data.quote) {
         currentQuote = typeof data.quote === 'string' ? { text: data.quote, author: '' } : data.quote;
-        if (quoteText) quoteText.innerText = currentQuote.text;
+      } else {
+        currentQuote = (CLOCK_I18N[currentLang] || CLOCK_I18N.en).defaultQuote;
       }
+      if (quoteText) quoteText.innerText = currentQuote.text;
 
       // Free timers list (up to 3 independent timers, PRD v0.3.48 Part C4)
       const freeTimers = Array.isArray(data.freeTimers)
@@ -349,16 +467,24 @@
       if (barFreeTimersList) {
         if (freeTimers.length > 0) {
           barFreeTimersList.style.display = 'flex';
-          barFreeTimersList.innerHTML = freeTimers.map(ft => `
-            <div class="free-timer-item">
-              <span class="free-timer-title" title="${ft.title || ''}">${ft.title || 'Timer'}</span>
-              <span class="free-timer-digits">${ft.timeStr || '--:--'}</span>
-              <div class="free-timer-actions">
-                <button class="ft-btn" onclick="handleFreeTimerAction('stop', '${ft.id}')" title="Dừng">Dừng</button>
-                <button class="ft-btn ft-done" onclick="handleFreeTimerAction('done', '${ft.id}')" title="Xong">✓</button>
+          const dict = CLOCK_I18N[currentLang] || CLOCK_I18N.vi;
+          barFreeTimersList.innerHTML = freeTimers.map(ft => {
+            const safeTitle = escapeHtml(ft.title || 'Timer');
+            const safeDigits = escapeHtml(ft.timeStr || '--:--');
+            const safeId = escapeHtml(ft.id);
+            const stopLabel = escapeHtml(dict.stop || 'Dừng');
+            const doneLabel = escapeHtml(dict.done || 'Xong');
+            return `
+              <div class="free-timer-item">
+                <span class="free-timer-title" title="${safeTitle}">${safeTitle}</span>
+                <span class="free-timer-digits">${safeDigits}</span>
+                <div class="free-timer-actions">
+                  <button class="ft-btn" data-action="stop" data-timer-id="${safeId}" title="${stopLabel}">${stopLabel}</button>
+                  <button class="ft-btn ft-done" data-action="done" data-timer-id="${safeId}" title="${doneLabel}">✓</button>
+                </div>
               </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         } else {
           barFreeTimersList.style.display = 'none';
           barFreeTimersList.innerHTML = '';

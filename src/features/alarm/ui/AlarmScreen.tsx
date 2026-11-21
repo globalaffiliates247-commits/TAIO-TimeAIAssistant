@@ -265,8 +265,8 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({
             isCool
               ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25'
               : isDark
-                ? 'bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-500/25'
-                : 'bg-[#E11D2E] bg-[var(--taio-brand)] hover:bg-[#C4182A] hover:bg-[var(--taio-brand-hover)] text-white shadow-red-500/25'
+                ? 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-lg taio-btn-primary'
+                : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-sm taio-btn-primary'
           }`}
         >
           <BellOff className="w-5 h-5" />

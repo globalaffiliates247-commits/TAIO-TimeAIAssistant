@@ -4,6 +4,8 @@ export type QuoteContext = 'start_day' | 'start_task' | 'break' | 'done' | 'end_
 
 export interface MotivationQuote {
   id: string;
+  quoteKey?: string; // v0.3.50 Part E1: Shared cross-language identifier
+  authorId?: string;
   text: string;
   author?: string;
   lang: 'vi' | 'en' | 'zh' | 'th' | string;

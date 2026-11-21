@@ -42,7 +42,7 @@ async function build() {
 
   console.log(`Found ${candidateSet.size} candidate tokens across ${files.length} source files.`);
 
-  const compiler = await tw.compile('@import "tailwindcss"; @theme { --color-brand: var(--taio-brand); --color-brand-hover: var(--taio-brand-hover); --color-brand-soft: var(--taio-brand-soft); }', {
+  const compiler = await tw.compile('@import "tailwindcss"; @custom-variant dark (&:where(.dark, [data-theme="dark"], .dark *)); @theme { --color-brand: var(--taio-brand); --color-brand-hover: var(--taio-brand-hover); --color-brand-soft: var(--taio-brand-soft); }', {
     base: path.resolve(__dirname, '..'),
     loadStylesheet: async (id, base) => {
       let resolvedPath;
@@ -69,6 +69,25 @@ html[data-palette="red"] {
   --taio-brand-hover: #C4182A;
   --taio-brand-soft: #FDE8EA;
   --taio-brand-accent: #E11D2E;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #E11D2E;
+  
+  /* Fixed Gold Accent (PRD v0.3.49 Part B1) */
+  --taio-accent: #F7C531;
+  --taio-accent-text: #8A6100;
+  --taio-accent-soft: #FEF6DC;
+  --taio-warning: #D97706;
+
+  /* Card and Surface tokens (Light Mode) */
+  --surface-page: #F8FAFC;
+  --surface-card: #FFFFFF;
+  --surface-elevated: #F1F5F9;
+  --border-subtle: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --success: #059669;
+  --danger: #E11D2E;
+
   --background: #ffffff;
   --foreground: #0f172a;
   --native-sat: 0px;
@@ -79,11 +98,22 @@ html[data-palette="red"] {
   --sar: env(safe-area-inset-right, 0px);
 }
 
+html[data-palette="gold"] {
+  --taio-brand: #F7C531;
+  --taio-brand-hover: #E5B21E;
+  --taio-brand-soft: #FEF6DC;
+  --taio-brand-accent: #F7C531;
+  --taio-on-brand: #14161A;
+  --taio-brand-text: #8A6100;
+}
+
 html[data-palette="bright-blue"] {
   --taio-brand: #0068FF;
   --taio-brand-hover: #0055D4;
   --taio-brand-soft: #E6F0FF;
   --taio-brand-accent: #0068FF;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #0068FF;
 }
 
 html[data-palette="calm-blue"] {
@@ -91,29 +121,85 @@ html[data-palette="calm-blue"] {
   --taio-brand-hover: #17669F;
   --taio-brand-soft: #E8F4FC;
   --taio-brand-accent: #2AABEE;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #1C78C0;
 }
 
-/* Dark mode adjustments */
+html[data-palette="neutral"] {
+  --taio-brand: #334155;
+  --taio-brand-hover: #1E293B;
+  --taio-brand-soft: #F1F5F9;
+  --taio-brand-accent: #334155;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #334155;
+}
+
+/* Dark mode adjustments (PRD v0.3.49 Part B2) */
+html.dark,
+html[data-theme="dark"] {
+  --taio-accent: #F7C531;
+  --taio-accent-text: #F7C531;
+  --taio-accent-soft: rgba(247, 197, 49, 0.14);
+  --taio-warning: #F59E0B;
+
+  --surface-page: #12151A;
+  --surface-card: #1C2027;
+  --surface-elevated: #262B33;
+  --border-subtle: #2E343D;
+  --text-primary: #EAECEF;
+  --text-secondary: #8B93A1;
+  --success: #2EBD85;
+  --danger: #F6465D;
+}
+
 html.dark[data-palette="red"],
 html[data-theme="dark"][data-palette="red"] {
   --taio-brand: #EF3042;
   --taio-brand-hover: #E11D2E;
   --taio-brand-soft: rgba(225, 29, 46, 0.22);
   --taio-brand-accent: #EF3042;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #F6465D;
 }
+
+html.dark[data-palette="gold"],
+html[data-theme="dark"][data-palette="gold"] {
+  --taio-brand: #F7C531;
+  --taio-brand-hover: #E5B21E;
+  --taio-brand-soft: rgba(247, 197, 49, 0.18);
+  --taio-brand-accent: #F7C531;
+  --taio-on-brand: #14161A;
+  --taio-brand-text: #F7C531;
+}
+
 html.dark[data-palette="bright-blue"],
 html[data-theme="dark"][data-palette="bright-blue"] {
   --taio-brand: #2B7FFF;
   --taio-brand-hover: #0068FF;
   --taio-brand-soft: rgba(0, 104, 255, 0.22);
   --taio-brand-accent: #2B7FFF;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #2B7FFF;
 }
+
 html.dark[data-palette="calm-blue"],
 html[data-theme="dark"][data-palette="calm-blue"] {
   --taio-brand: #2AABEE;
   --taio-brand-hover: #1C78C0;
   --taio-brand-soft: rgba(28, 120, 192, 0.22);
   --taio-brand-accent: #2AABEE;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #2AABEE;
+}
+
+html.dark[data-palette="neutral"],
+html[data-theme="dark"][data-palette="neutral"] {
+  --taio-brand: #64748B;
+  --taio-brand-hover: #475569;
+  --taio-brand-soft: rgba(100, 116, 139, 0.22);
+  --taio-brand-accent: #64748B;
+  --taio-on-brand: #FFFFFF;
+  --taio-brand-text: #94A3B8;
 }
 
 /* Platform Corner Radii (PRD v0.3.47 Part D3) */
@@ -184,7 +270,7 @@ html.is-native-ios {
 html, body {
   background-color: #ffffff;
   color: #0f172a;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Be Vietnam Pro", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Thonburi", "Leelawadee UI", sans-serif;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
 }
@@ -231,6 +317,32 @@ body {
 .ring-\\[var\\(--taio-brand\\)\\] { --tw-ring-color: #E11D2E !important; --tw-ring-color: var(--taio-brand, #E11D2E) !important; }
 .focus\\:ring-\\[var\\(--taio-brand\\)\\]:focus { --tw-ring-color: #E11D2E !important; --tw-ring-color: var(--taio-brand, #E11D2E) !important; }
 .shadow-\\[var\\(--taio-brand\\)\\]\\/20 { --tw-shadow-color: rgba(225, 29, 46, 0.2) !important; --tw-shadow-color: var(--taio-brand, rgba(225, 29, 46, 0.2)) !important; }
+
+/* PRD v0.3.49 Part B: Brand tokens on surfaces & fixed Gold accent */
+.text-\\[var\\(--taio-on-brand\\)\\] { color: var(--taio-on-brand, #FFFFFF) !important; }
+.text-\\[var\\(--taio-brand-text\\)\\] { color: var(--taio-brand-text, #E11D2E) !important; }
+.btn-taio-brand,
+.taio-btn-primary {
+  background-color: #E11D2E !important;
+  background-color: var(--taio-brand, #E11D2E) !important;
+  color: #FFFFFF !important;
+  color: var(--taio-on-brand, #FFFFFF) !important;
+}
+.btn-taio-brand:hover,
+.taio-btn-primary:hover {
+  background-color: #C4182A !important;
+  background-color: var(--taio-brand-hover, #C4182A) !important;
+}
+.bg-\\[var\\(--taio-accent\\)\\] { background-color: var(--taio-accent, #F7C531) !important; }
+.text-\\[var\\(--taio-accent\\)\\] { color: var(--taio-accent, #F7C531) !important; }
+.text-\\[var\\(--taio-accent-text\\)\\] { color: var(--taio-accent-text, #8A6100) !important; }
+.bg-\\[var\\(--taio-accent-soft\\)\\] { background-color: var(--taio-accent-soft, #FEF6DC) !important; }
+.border-\\[var\\(--taio-accent\\)\\] { border-color: var(--taio-accent, #F7C531) !important; }
+.bg-\\[var\\(--surface-card\\)\\] { background-color: var(--surface-card, #FFFFFF) !important; }
+.bg-\\[var\\(--surface-page\\)\\] { background-color: var(--surface-page, #F8FAFC) !important; }
+.bg-\\[var\\(--surface-elevated\\)\\] { background-color: var(--surface-elevated, #F1F5F9) !important; }
+.text-\\[var\\(--text-primary\\)\\] { color: var(--text-primary, #0F172A) !important; }
+.text-\\[var\\(--text-secondary\\)\\] { color: var(--text-secondary, #64748B) !important; }
 `;
 
   const finalCss = generatedCss + "\n" + customCss;

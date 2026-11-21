@@ -13,7 +13,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-01"
   },
   {
     "id": "q-zh-goal-06",
@@ -29,7 +30,8 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-06"
   },
   {
     "id": "q-zh-goal-15",
@@ -45,6 +47,7 @@
     "weight": 2,
     "active": true,
     "source": "taio",
-    "verified": true
+    "verified": true,
+    "quoteKey": "goal-15"
   }
 ]

@@ -92,9 +92,10 @@ export const GoalRow: React.FC<GoalRowProps> = ({
       {/* Expanded in-place drawer */}
       {isExpanded && (
         <div className="space-y-2">
-          {/* PRD v0.3.48 Part B2 & B3: Quote for active expanded goal */}
+          {/* PRD v0.3.48 Part B2 & B3 & v0.3.50 Part D: Unique instanceKey for expanded goal quote */}
           <MotivationSticker
             slotKey="goals_tab"
+            instanceKey={`goals_tab#goal:${goal.id}`}
             context="goal"
             size="line"
             activeGoalId={goal.id}

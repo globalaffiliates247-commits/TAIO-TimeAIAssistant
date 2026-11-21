@@ -1,7 +1,7 @@
 'use client';
 
 import { Capacitor } from '@capacitor/core';
-import { TAIONative } from '../../features/native';
+import { TAIONative } from '../../features/native/index.ts';
 
 const IDB_NAME = 'taio_durable_db';
 const IDB_VERSION = 1;

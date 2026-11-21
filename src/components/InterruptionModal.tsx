@@ -350,7 +350,7 @@ export const InterruptionModal: React.FC = () => {
           <button
             type="button"
             onClick={handleSave}
-            className="w-full py-3 rounded-2xl text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 mt-3 bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-[var(--taio-brand)]/20"
+            className="w-full py-3 rounded-2xl text-[var(--taio-on-brand)] text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 mt-3 bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-[var(--taio-brand)]/20 taio-btn-primary"
           >
             <Check className="w-4 h-4" />
             <span>Xác nhận & Áp dụng</span>
