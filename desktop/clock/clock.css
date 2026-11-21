@@ -7,16 +7,21 @@
 
 :root,
 html,
+html[data-theme="light"] {
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-main: #e2e8f0;
+}
+
+:root,
+html,
 html[data-palette="red"] {
   --taio-brand: #E11D2E;
   --taio-brand-hover: #C4182A;
   --taio-brand-soft: #FDE8EA;
   --taio-brand-accent: #E11D2E;
   --taio-on-brand: #FFFFFF;
-  --bg-main: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-main: #e2e8f0;
 }
 
 html[data-palette="gold"] {
@@ -25,10 +30,6 @@ html[data-palette="gold"] {
   --taio-brand-soft: #FEF6DC;
   --taio-brand-accent: #F7C531;
   --taio-on-brand: #14161A;
-  --bg-main: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-main: #e2e8f0;
 }
 
 html[data-palette="bright-blue"] {
@@ -37,10 +38,6 @@ html[data-palette="bright-blue"] {
   --taio-brand-soft: #E6F0FF;
   --taio-brand-accent: #0068FF;
   --taio-on-brand: #FFFFFF;
-  --bg-main: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-main: #e2e8f0;
 }
 
 html[data-palette="calm-blue"] {
@@ -49,10 +46,6 @@ html[data-palette="calm-blue"] {
   --taio-brand-soft: #E8F4FC;
   --taio-brand-accent: #2AABEE;
   --taio-on-brand: #FFFFFF;
-  --bg-main: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-main: #e2e8f0;
 }
 
 html[data-palette="neutral"] {
@@ -61,15 +54,13 @@ html[data-palette="neutral"] {
   --taio-brand-soft: #F1F5F9;
   --taio-brand-accent: #334155;
   --taio-on-brand: #FFFFFF;
-  --bg-main: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-main: #e2e8f0;
 }
 
 /* Dark mode */
 html.dark,
-html[data-theme="dark"] {
+html[data-theme="dark"],
+html.dark[data-palette],
+html[data-theme="dark"][data-palette] {
   --bg-main: #0f172a;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;

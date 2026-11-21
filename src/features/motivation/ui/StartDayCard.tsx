@@ -253,8 +253,10 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
         </button>
         <button
           onClick={handleStart}
-          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white shadow-xs transition-transform active:scale-95 ${
-            isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-transform active:scale-95 ${
+            isCool
+              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
           }`}
         >
           <span>{t('motivation.startDayBtn', 'Bắt đầu')}</span>

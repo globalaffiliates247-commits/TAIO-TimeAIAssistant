@@ -85,8 +85,10 @@ export const ActionNudgeBanner: React.FC = () => {
         <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0">
           <button
             onClick={acceptActionNudge}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-white font-bold text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer ${
-              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer ${
+              isCool
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
             }`}
           >
             <span>{actionNudge.ctaText}</span>

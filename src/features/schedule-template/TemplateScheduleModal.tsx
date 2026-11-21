@@ -347,8 +347,10 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
                 </button>
                 <button
                   type="submit"
-                  className={`px-4 py-1.5 rounded-xl text-white font-bold text-xs ${
-                    isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                  className={`px-4 py-1.5 rounded-xl font-bold text-xs ${
+                    isCool
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                   }`}
                 >
                   {language === 'vi' ? 'Thêm' : 'Add'}

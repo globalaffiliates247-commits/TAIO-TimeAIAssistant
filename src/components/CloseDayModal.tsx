@@ -404,10 +404,10 @@ export const CloseDayModal: React.FC = () => {
               </button>
               <button
                 onClick={onConfirmClose}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer ${
                   isCool
-                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
-                    : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-red-500/20'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                    : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-red-500/20 taio-btn-primary'
                 }`}
               >
                 <span>

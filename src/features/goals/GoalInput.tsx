@@ -119,8 +119,10 @@ export const GoalInput: React.FC = () => {
           type="button"
           onClick={handleCreate}
           disabled={!parsed}
-          className={`px-4 py-2 rounded-xl text-xs font-bold text-white shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-            isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+          className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+            isCool
+              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
           }`}
         >
           {t('goals.createBtn')}

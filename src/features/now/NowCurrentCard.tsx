@@ -1155,8 +1155,10 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             <button
               type="button"
               onClick={handleFinish}
-              className={`flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs shadow-xs transition-all cursor-pointer ${
-                isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+              className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer ${
+                isCool
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
               }`}
             >
               {language === 'en' ? 'Finish' : 'Kết thúc'}
@@ -1183,8 +1185,10 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
                   handleExtend(customExtendMins);
                   setShowCustomExtend(false);
                 }}
-                className={`px-3 py-1 rounded-lg text-white font-bold text-xs shadow-2xs cursor-pointer ${
-                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                className={`px-3 py-1 rounded-lg font-bold text-xs shadow-2xs cursor-pointer ${
+                  isCool
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                 }`}
               >
                 {language === 'vi' ? 'Gia hạn' : 'Add'}

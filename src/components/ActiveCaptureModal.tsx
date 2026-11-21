@@ -292,10 +292,10 @@ export const ActiveCaptureModal: React.FC = () => {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className={`w-full py-3 rounded-xl text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
+                  className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
                     isCool 
-                      ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20' 
-                      : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] shadow-red-500/20'
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20' 
+                      : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-red-500/20 taio-btn-primary'
                   }`}
                 >
                   Xác nhận Ghi bù vào Sổ cái & Thẻ ngày
@@ -390,8 +390,10 @@ export const ActiveCaptureModal: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => acceptPassiveSuggestion(s.id, currentTitle)}
-                            className={`px-4 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
-                              isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                            className={`px-4 py-1.5 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+                              isCool
+                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                             }`}
                           >
                             <Check className="w-3.5 h-3.5" />

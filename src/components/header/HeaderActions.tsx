@@ -145,8 +145,10 @@ export const HeaderActions: React.FC = () => {
                           triggerNotificationAction(notif);
                           setBellOpen(false);
                         }}
-                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white shrink-0 shadow-xs transition-colors ${
-                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold shrink-0 shadow-xs transition-colors ${
+                          isCool
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                            : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                         }`}
                       >
                         {notif.ctaLabel}
@@ -164,12 +166,14 @@ export const HeaderActions: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsProfileModalOpen(true)}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-white font-semibold text-xs transition-all shadow-xs ${
-          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-semibold text-xs transition-all shadow-xs ${
+          isCool
+            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+            : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
         }`}
         title={t('terms.profile', 'Cá nhân')}
       >
-        <div className="w-4 h-4 rounded-full bg-white/25 text-white flex items-center justify-center text-[9px] font-black">
+        <div className="w-4 h-4 rounded-full bg-black/15 text-current flex items-center justify-center text-[9px] font-black">
           {userProfileDetail.displayName.charAt(0) || 'U'}
         </div>
         <span className="hidden sm:inline">{t('terms.profile', 'Cá nhân')}</span>

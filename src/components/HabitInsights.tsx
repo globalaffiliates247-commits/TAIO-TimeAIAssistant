@@ -373,8 +373,10 @@ export const HabitInsights: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleHabitAction(card.id, 'try')}
-                        className={`px-3 py-1 text-xs font-semibold rounded-lg text-white shadow-xs flex items-center gap-1 transition-colors ${
-                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                        className={`px-3 py-1 text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1 transition-colors ${
+                          isCool
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                            : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                         }`}
                       >
                         Thử tuần này <ChevronRight className="w-3.5 h-3.5" />

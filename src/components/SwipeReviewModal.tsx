@@ -637,8 +637,10 @@ export const SwipeReviewModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={submitPlan}
-                        className={`px-4 py-2 text-xs font-bold text-white rounded-xl shadow-sm ${
-                          isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                        className={`px-4 py-2 text-xs font-bold rounded-xl shadow-sm ${
+                          isCool
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                            : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                         }`}
                       >
                         Xếp vào lịch
@@ -670,8 +672,10 @@ export const SwipeReviewModal: React.FC = () => {
 
                   <button
                     onClick={() => handleAction('plan')}
-                    className={`flex-1 py-3 px-4 rounded-2xl text-white flex items-center justify-center gap-2 transition-all font-bold text-xs shadow-sm ${
-                      isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                    className={`flex-1 py-3 px-4 rounded-2xl flex items-center justify-center gap-2 transition-all font-bold text-xs shadow-sm ${
+                      isCool
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                     }`}
                   >
                     <span>{t('swipe.scheduleNow')}</span>
@@ -727,8 +731,10 @@ export const SwipeReviewModal: React.FC = () => {
 
               <button
                 onClick={() => setIsSwipeModalOpen(false)}
-                className={`w-full py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
-                  isCool ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)]'
+                className={`w-full py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
+                  isCool
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                 }`}
               >
                 Quay lại làm việc
