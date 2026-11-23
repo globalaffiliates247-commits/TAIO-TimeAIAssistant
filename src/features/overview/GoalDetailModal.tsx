@@ -3,6 +3,7 @@
 // TAIO Time App — Goal Detail Modal with SVG Burn-up Chart & EVM Metrics (PRD v0.3.38 Part B3.2 & B5.3)
 import React, { useMemo } from 'react';
 import { useT } from '@/i18n/useT';
+import { useApp } from '@/context/AppContext';
 import type { Goal } from '@/types';
 import type { GoalLedgerEntry } from '@/domain/goalLedger';
 import { MotivationSticker } from '@/features/motivation';
@@ -16,6 +17,7 @@ export interface GoalDetailModalProps {
 
 export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({ goal, entry, onClose }) => {
   const { t } = useT();
+  const { toggleMilestoneDone } = useApp();
 
   // Burn-up chart SVG coordinates
   // Plan curve (dashed) from 0 to plannedHours
@@ -212,19 +214,29 @@ export const GoalDetailModal: React.FC<GoalDetailModalProps> = ({ goal, entry, o
               </p>
             ) : (
               <div className="divide-y divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden bg-white">
-                {goal.milestones.map(m => (
-                  <div key={m.id} className="p-3 flex items-center justify-between text-xs hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className={`w-3.5 h-3.5 ${m.status === 'completed' ? 'text-emerald-600' : 'text-slate-300'}`} />
-                      <span className={`font-semibold ${m.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>
-                        {m.name}
+                {goal.milestones.map(m => {
+                  const isDone = m.status === 'completed' || m.status === 'done';
+                  return (
+                    <div key={m.id} className="p-3 flex items-center justify-between text-xs hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => toggleMilestoneDone(goal.id, m.id)}
+                          className="w-5 h-5 flex items-center justify-center shrink-0 cursor-pointer"
+                          title={isDone ? 'Đánh dấu chưa xong' : 'Đánh dấu hoàn thành'}
+                        >
+                          <CheckCircle2 className={`w-4 h-4 transition-colors ${isDone ? 'text-emerald-600 fill-emerald-100' : 'text-slate-300 hover:text-slate-500'}`} />
+                        </button>
+                        <span className={`font-semibold truncate ${isDone ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                          {m.name}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 shrink-0">
+                        {m.dueDate}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-400">
-                      {m.dueDate}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

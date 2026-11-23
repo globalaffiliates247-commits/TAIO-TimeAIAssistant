@@ -4,10 +4,9 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getDeviceCalendarDate, getDeviceTimeMinutes, computeBlockStatus } from '@/core/clock';
-import { commitQuickLine } from '@/features/tasks';
 import { openStickyBoard } from '@/features/sticky';
 import { Plus, ArrowUpRight, Clock, CheckCircle2, Mic, MicOff, Square } from 'lucide-react';
-import { getSpeechEngine, normalizeSpokenVi, normalizeSpokenEn, normalizeGoalVoice } from '@/features/intake';
+import { getSpeechEngine, intakeTask } from '@/features/intake';
 
 export const QuickLineInput: React.FC = () => {
   const {
@@ -21,6 +20,7 @@ export const QuickLineInput: React.FC = () => {
   const [inputVal, setInputVal] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [wasVoice, setWasVoice] = useState(false);
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const isVi = language === 'vi';
   const today = getDeviceCalendarDate();
@@ -38,11 +38,13 @@ export const QuickLineInput: React.FC = () => {
     const started = await engine.start({
       onPartial: (text) => {
         setInputVal(text);
+        setWasVoice(true);
       },
       onFinal: (text) => {
-        const spokenNorm = isVi ? normalizeSpokenVi(text) : normalizeSpokenEn(text);
-        const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
-        setInputVal(withGoal);
+        // PRD v0.3.54 Part B: Put RAW text into input for user to see & edit.
+        // Normalization happens strictly once on commit inside intakeTask.
+        setInputVal(text);
+        setWasVoice(true);
         setIsListening(false);
       },
       onError: (err) => {
@@ -59,14 +61,26 @@ export const QuickLineInput: React.FC = () => {
     }
   };
 
+  const handleCommit = () => {
+    const trimmed = inputVal.trim();
+    if (!trimmed) return;
+    intakeTask({
+      source: wasVoice ? 'voice' : 'manual',
+      rawText: trimmed,
+      date: today,
+      goals: goals || [],
+      lang: isVi ? 'vi' : 'en',
+      deps: { addDailyCardItem, goals },
+    });
+    setInputVal('');
+    setWasVoice(false);
+    setSpeechError(null);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && inputVal.trim()) {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      const spokenNorm = isVi ? normalizeSpokenVi(inputVal.trim()) : normalizeSpokenEn(inputVal.trim());
-      const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
-      commitQuickLine(withGoal, today, { addDailyCardItem, goals });
-      setInputVal('');
-      setSpeechError(null);
+      handleCommit();
     }
   };
 
@@ -107,15 +121,7 @@ export const QuickLineInput: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => {
-                if (inputVal.trim()) {
-                  const spokenNorm = isVi ? normalizeSpokenVi(inputVal.trim()) : normalizeSpokenEn(inputVal.trim());
-                  const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
-                  commitQuickLine(withGoal, today, { addDailyCardItem, goals });
-                  setInputVal('');
-                  setSpeechError(null);
-                }
-              }}
+              onClick={handleCommit}
               disabled={!inputVal.trim()}
               className={`h-8 px-2.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all ${
                 inputVal.trim()

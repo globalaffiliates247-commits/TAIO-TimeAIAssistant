@@ -8,6 +8,7 @@ export interface MotivationQuote {
   authorId?: string;
   text: string;
   author?: string;
+  authorAvatar?: string;
   lang: 'vi' | 'en' | 'zh' | 'th' | string;
   contexts: QuoteContext[];
   goalKeywords?: string[];

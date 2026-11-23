@@ -20,8 +20,11 @@ import { quoteRegistry } from '../model/quoteRegistry';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { getPreviousDay, isDayClosed } from '@/features/dayclose';
 import { Lightbulb, ArrowRight, X, Clock, Plus } from 'lucide-react';
+import { AuthorAvatar } from './AuthorAvatar';
+import { getStorageItemSync, setStorageItemSync } from '@/core/storage/durableStorage';
 
 const STORAGE_KEY_START_DAY_SEEN = 'taio_start_day_card_seen';
+const STORAGE_KEY_START_DAY_SNOOZED = 'taio_start_day_card_snoozed_until';
 
 export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOpenTodaySheet }) => {
   const { 
@@ -73,12 +76,19 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
     const settings: MotivationSettings = loadMotivationSettings();
     if (!settings.enabled) return;
 
-    // Check if seen today (only dismiss quote if seen, but keep yesterday unfinished reminder visible if any)
-    const seenDate = localStorage.getItem(STORAGE_KEY_START_DAY_SEEN);
+    // Check if seen or snoozed today (PRD v0.3.54 Part G)
+    const seenDate = getStorageItemSync<string>(STORAGE_KEY_START_DAY_SEEN, '');
+    const snoozedUntil = getStorageItemSync<number>(STORAGE_KEY_START_DAY_SNOOZED, 0);
     const hasUnfinishedPrompt = !yesterdayClosed && unfinishedYesterday.length > 0;
     const shouldAskMorningTask = !hasTodayTasks;
 
-    if (seenDate === today && !hasUnfinishedPrompt && !shouldAskMorningTask) {
+    // Permanently dismissed for the day if user clicked "Bắt đầu"
+    if (seenDate === today) {
+      return;
+    }
+
+    // Snoozed for 2 hours if user clicked "Để sau"
+    if (Date.now() < snoozedUntil && !hasUnfinishedPrompt && !shouldAskMorningTask) {
       return;
     }
 
@@ -121,14 +131,19 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
     };
   }, []);
 
+  // PRD v0.3.54 Part G: "Để sau" snoozes for 2 hours, does NOT mark full day seen
   const handleDismiss = () => {
-    localStorage.setItem(STORAGE_KEY_START_DAY_SEEN, today);
+    const snoozeUntil = Date.now() + 2 * 60 * 60 * 1000;
+    setStorageItemSync(STORAGE_KEY_START_DAY_SNOOZED, snoozeUntil);
     quoteRegistry.unregister('start_day_card');
     setVisible(false);
   };
 
+  // PRD v0.3.54 Part G: "Bắt đầu" marks day seen permanently and opens today sheet
   const handleStart = () => {
-    handleDismiss();
+    setStorageItemSync(STORAGE_KEY_START_DAY_SEEN, today);
+    quoteRegistry.unregister('start_day_card');
+    setVisible(false);
     if (onOpenTodaySheet) {
       onOpenTodaySheet();
     }
@@ -207,8 +222,9 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
           </div>
 
           {quote.author && (
-            <div className="mt-1.5 text-right text-xs text-slate-500 not-italic font-medium">
-              — {quote.author}
+            <div className="mt-2 flex items-center justify-end gap-1.5 text-xs text-slate-600 not-italic font-medium">
+              <AuthorAvatar author={quote.author} avatarUrl={quote.authorAvatar} size={20} />
+              <span>— {quote.author}</span>
             </div>
           )}
         </>

@@ -5,6 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { useT } from '@/i18n/useT';
 import { getDeviceCalendarDate, getTodayLabelWithWeekday } from '@/core/clock';
 import { StartDayCard } from '@/features/motivation';
+import { openStickyBoard } from '@/features/sticky';
 import { MotionPermissionCard, isMotionPermissionCardDismissed } from '@/features/motion';
 import { 
   getMotionCapability, 
@@ -71,8 +72,8 @@ export const NowTab: React.FC = () => {
       </div>
 
       {/* 2. Thẻ chỉ hiện khi cần */}
-      {/* Thẻ Bắt đầu ngày */}
-      <StartDayCard />
+      {/* Thẻ Bắt đầu ngày (PRD v0.3.54 Part G) */}
+      <StartDayCard onOpenTodaySheet={() => openStickyBoard(getDeviceCalendarDate())} />
 
       {/* Thẻ mời quyền chuyển động */}
       {!isMotionPermissionCardDismissed() && <MotionPermissionCard />}

@@ -1,0 +1,165 @@
+{
+  "format": "taio-time-export",
+  "formatVersion": 1,
+  "specVersion": "v0.3.54",
+  "exportedAt": "2026-11-23T00:00:00.000Z",
+  "profile": {
+    "id": "manager",
+    "title": "Quản lý",
+    "seeded": true
+  },
+  "goals": [
+    {
+      "id": "g-mgr-1",
+      "name": "Hoàn thiện kế hoạch quý & Tối ưu vận hành team",
+      "measurableResult": "100% OKR được gán, hoàn thành review hiệu suất",
+      "horizonDays": 45,
+      "dailyBudgetMins": 120,
+      "deadline": "DATE_PLUS_45",
+      "workArea": "Operations",
+      "progressPercent": 40,
+      "seeded": true,
+      "milestones": [
+        {
+          "id": "m-mgr-1",
+          "goalId": "g-mgr-1",
+          "name": "Giai đoạn 1: Thu thập đề xuất từ các lead",
+          "dueDate": "DATE_PLUS_15",
+          "status": "done",
+          "seeded": true
+        },
+        {
+          "id": "m-mgr-2",
+          "goalId": "g-mgr-2",
+          "name": "Giai đoạn 2: Họp phản biện & Thống nhất ngân sách",
+          "dueDate": "DATE_PLUS_30",
+          "status": "pending",
+          "seeded": true
+        },
+        {
+          "id": "m-mgr-3",
+          "goalId": "g-mgr-3",
+          "name": "Giai đoạn 3: Ban hành tài liệu OKR chính thức",
+          "dueDate": "DATE_PLUS_45",
+          "status": "pending",
+          "seeded": true
+        }
+      ]
+    }
+  ],
+  "dailyCardItems": [
+    {
+      "id": "t-m-y1",
+      "text": "Họp 1-on-1 với Lead Backend",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-m-y2",
+      "text": "Duyệt ngân sách tuyển dụng quý tới",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-m-t1",
+      "text": "Họp giao ban tuần các bộ phận",
+      "status": "done",
+      "goalId": "g-mgr-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-m-t2",
+      "text": "Đánh giá tiến độ dự án Alpha",
+      "status": "in_progress",
+      "goalId": "g-mgr-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-m-t3",
+      "text": "Phản hồi email đối tác chiến lược",
+      "status": "todo",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-m-tm1",
+      "text": "Họp 1-on-1 với Product Manager",
+      "status": "todo",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    },
+    {
+      "id": "t-m-tm2",
+      "text": "Soạn slide báo cáo Ban Điều Hành",
+      "status": "todo",
+      "goalId": "g-mgr-1",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    }
+  ],
+  "blocks": [
+    {
+      "id": "b-mgr-1",
+      "title": "Họp giao ban tuần",
+      "startTime": "09:00",
+      "endTime": "10:30",
+      "type": "meeting",
+      "status": "completed",
+      "goalId": "g-mgr-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-mgr-2",
+      "title": "Review báo cáo tiến độ Alpha",
+      "startTime": "11:00",
+      "endTime": "12:00",
+      "type": "focus",
+      "status": "completed",
+      "goalId": "g-mgr-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-mgr-3",
+      "title": "Xử lý việc tồn & Email",
+      "startTime": "14:00",
+      "endTime": "15:30",
+      "type": "admin",
+      "status": "pending",
+      "date": "DATE_TODAY",
+      "seeded": true
+    }
+  ],
+  "days": [
+    {
+      "id": "DATE_YESTERDAY",
+      "date": "DATE_YESTERDAY",
+      "seeded": true,
+      "blockResults": [
+        {
+          "id": "br-y-0",
+          "title": "Họp 1-on-1 với Lead Backend",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        },
+        {
+          "id": "br-y-1",
+          "title": "Duyệt ngân sách tuyển dụng quý tới",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        }
+      ],
+      "interruptions": [],
+      "dayClosedAt": "2026-11-22T21:30:00.000Z"
+    }
+  ]
+}

@@ -15,9 +15,6 @@ cp desktop/main.js "$STAGE/app/"
 if [ -f desktop/preload.js ]; then
   cp desktop/preload.js "$STAGE/app/"
 fi
-if [ -d desktop/clock ]; then
-  cp -R desktop/clock "$STAGE/app/"
-fi
 if [ -d desktop/windows ]; then
   cp -R desktop/windows "$STAGE/app/"
 fi

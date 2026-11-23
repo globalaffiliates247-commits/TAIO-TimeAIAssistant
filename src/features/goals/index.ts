@@ -3,3 +3,5 @@ export * from './ui/GoalPicker';
 export * from './goalMetrics';
 export * from './model/goalSizes';
 export * from './GoalInput';
+export * from './ui/MethodExplainer';
+export * from './model/milestoneTemplates';

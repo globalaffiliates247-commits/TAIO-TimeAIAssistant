@@ -108,6 +108,7 @@ export interface TimeBlock {
   snoozeHistory?: Array<{ from: string; to: string; at: number }>; // Lịch sử dời giờ
   statusDate?: string; // YYYY-MM-DD: ngày cập nhật trạng thái (PRD v0.3.36 Part E)
   loudAlarm?: boolean; // PRD v0.3.37 Part A: Ưu tiên báo thức toàn màn hình (Nhắc to)
+  seeded?: boolean;
   dailyStatus?: Record<string, { status: BlockStatus; outcome?: string; updatedAt?: number }>;
   dailyOverrides?: Record<string, { startTime?: string; endTime?: string; status?: BlockStatus; outcome?: string; snoozes?: Array<{ from: string; to: string; at: number }> }>;
   // B16 Priority Matrix
@@ -154,7 +155,8 @@ export interface Milestone {
   goalId: string;
   name: string;
   dueDate: string;
-  status: 'pending' | 'completed';
+  status: 'pending' | 'completed' | 'done';
+  seeded?: boolean;
 }
 
 export type GoalProgressType = 'key_result' | 'tasks' | 'time_commitment';
@@ -186,6 +188,7 @@ export interface Goal {
     days: number;
     start: string;
   };
+  seeded?: boolean;
   extra?: Record<string, unknown>;
 }
 
@@ -466,6 +469,7 @@ export interface DailyCardItem {
   snoozeHistory?: Array<{ from: string; to: string; at: number }>; // Lịch sử dời giờ
   statusDate?: string; // YYYY-MM-DD: ngày cập nhật trạng thái (PRD v0.3.36 Part E)
   loudAlarm?: boolean; // PRD v0.3.37 Part A: Ưu tiên báo thức toàn màn hình (Nhắc to)
+  seeded?: boolean;
   dailyStatus?: Record<string, { status: BlockStatus; outcome?: string; updatedAt?: number }>;
   dailyOverrides?: Record<string, { startTime?: string; endTime?: string; status?: BlockStatus; outcome?: string; snoozes?: Array<{ from: string; to: string; at: number }> }>;
   updatedAt?: string | number;
@@ -541,9 +545,11 @@ export interface ListItem {
 export interface UserProfileDetail {
   displayName: string;
   salutation: string; // "Anh", "Chị", "Bạn"
-  avatarType: 'initials' | 'image' | 'preset';
+  avatarType: 'initials' | 'image' | 'preset' | 'photo' | 'mascot';
   avatarPreset?: string;
   avatarUrl?: string;
+  avatarMascot?: string;
+  customPhotoUrl?: string;
   defaultHomeScreen: 'inbox' | 'daycard' | 'now' | 'plan' | 'lists';
   quietHoursStart: string; // "22:00"
   quietHoursEnd: string;   // "07:00"
@@ -607,6 +613,7 @@ export interface BacklogCard {
   whyThisCard: string; // "Tồn đọng 7 ngày", "Thuộc mục tiêu chậm tiến độ", "Khám phá ngẫu nhiên (1/5)"
   estimatedMinutes?: number;
   deadline?: string;
+  seeded?: boolean;
   updatedAt?: string | number;
 }
 

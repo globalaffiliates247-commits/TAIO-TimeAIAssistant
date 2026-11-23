@@ -267,8 +267,12 @@ export const AppearanceModal: React.FC = () => {
               </label>
               <button
                 type="button"
-                onClick={() => setTemplateModalOpen(true)}
-                className="text-xs text-[var(--taio-brand)] font-bold hover:underline flex items-center gap-1"
+                onClick={() => {
+                  setSettingsModalOpen(false);
+                  window.dispatchEvent(new CustomEvent('taio:open-events-list', { detail: { filter: 'routine' } }));
+                  window.dispatchEvent(new CustomEvent('taio:switch-tab', { detail: 'plan' }));
+                }}
+                className="text-xs text-[var(--taio-brand)] font-bold hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <span>{language === 'vi' ? 'Quản lý lịch mẫu ↗' : 'Manage Templates ↗'}</span>
               </button>

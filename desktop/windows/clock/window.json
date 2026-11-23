@@ -2,7 +2,7 @@
   "id": "clock",
   "titleKey": "title",
   "type": "standalone",
-  "entry": "clock.html",
+  "entry": "index.html",
   "defaultWidth": 260,
   "defaultHeight": 140,
   "minWidth": 180,

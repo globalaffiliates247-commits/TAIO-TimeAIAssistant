@@ -1,0 +1,165 @@
+{
+  "format": "taio-time-export",
+  "formatVersion": 1,
+  "specVersion": "v0.3.54",
+  "exportedAt": "2026-11-23T00:00:00.000Z",
+  "profile": {
+    "id": "freelancer",
+    "title": "Làm việc tự do",
+    "seeded": true
+  },
+  "goals": [
+    {
+      "id": "g-fl-1",
+      "name": "Bàn giao trọn gói 2 dự án Brand Identity & Website",
+      "measurableResult": "100% feedback 5 sao, thanh toán đầy đủ 2 hợp đồng",
+      "horizonDays": 30,
+      "dailyBudgetMins": 150,
+      "deadline": "DATE_PLUS_30",
+      "workArea": "Product",
+      "progressPercent": 60,
+      "seeded": true,
+      "milestones": [
+        {
+          "id": "m-fl-1",
+          "goalId": "g-fl-1",
+          "name": "Giai đoạn 1: Moodboard & Wireframe thiết kế",
+          "dueDate": "DATE_PLUS_10",
+          "status": "done",
+          "seeded": true
+        },
+        {
+          "id": "m-fl-2",
+          "goalId": "g-fl-2",
+          "name": "Giai đoạn 2: Thiết kế giao diện UI & Prototype Figma",
+          "dueDate": "DATE_PLUS_20",
+          "status": "done",
+          "seeded": true
+        },
+        {
+          "id": "m-fl-3",
+          "goalId": "g-fl-3",
+          "name": "Giai đoạn 3: Bàn giao file gốc và tài liệu Style Guide",
+          "dueDate": "DATE_PLUS_30",
+          "status": "pending",
+          "seeded": true
+        }
+      ]
+    }
+  ],
+  "dailyCardItems": [
+    {
+      "id": "t-fl-y1",
+      "text": "Hoàn thiện 5 screens UI trang chủ",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-fl-y2",
+      "text": "Gửi hoá đơn đợt 2 cho khách hàng nước ngoài",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-fl-t1",
+      "text": "Thiết kế component hệ thống Typography & Colors",
+      "status": "in_progress",
+      "goalId": "g-fl-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-fl-t2",
+      "text": "Sync online 30 phút nghe phản hồi từ client",
+      "status": "todo",
+      "goalId": "g-fl-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-fl-t3",
+      "text": "Chạy bộ thể dục chiều 45 phút",
+      "status": "todo",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-fl-tm1",
+      "text": "Làm hiệu ứng tương tác micro-animations",
+      "status": "todo",
+      "goalId": "g-fl-1",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    },
+    {
+      "id": "t-fl-tm2",
+      "text": "Nghiên cứu thêm layout phong cách bento grid",
+      "status": "todo",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    }
+  ],
+  "blocks": [
+    {
+      "id": "b-fl-1",
+      "title": "Creative Focus: UI Design Style Guide",
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "type": "focus",
+      "status": "completed",
+      "goalId": "g-fl-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-fl-2",
+      "title": "Sync phản hồi Client",
+      "startTime": "14:30",
+      "endTime": "15:00",
+      "type": "meeting",
+      "status": "completed",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-fl-3",
+      "title": "Hoàn thiện Prototype Figma",
+      "startTime": "15:30",
+      "endTime": "17:30",
+      "type": "focus",
+      "status": "pending",
+      "goalId": "g-fl-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    }
+  ],
+  "days": [
+    {
+      "id": "DATE_YESTERDAY",
+      "date": "DATE_YESTERDAY",
+      "seeded": true,
+      "blockResults": [
+        {
+          "id": "br-y-0",
+          "title": "Hoàn thiện 5 screens UI trang chủ",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        },
+        {
+          "id": "br-y-1",
+          "title": "Gửi hoá đơn đợt 2 cho khách hàng nước ngoài",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        }
+      ],
+      "interruptions": [],
+      "dayClosedAt": "2026-11-22T21:30:00.000Z"
+    }
+  ]
+}

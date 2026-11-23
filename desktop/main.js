@@ -3,6 +3,7 @@ const { app, BrowserWindow, protocol, shell, net, globalShortcut, Tray, Menu, ip
 const path = require('path');
 const { pathToFileURL } = require('url');
 const fs = require('fs');
+const { spawn } = require('child_process');
 
 const SCHEME = 'app';
 const HOST = 'taio';
@@ -40,6 +41,93 @@ let currentTimerData = {
   startedAt: 0,
   lang: 'vi',
 };
+
+// --- Mac Frontmost App & Multi-Window Focus Telemetry (PRD v0.3.54 Part C) ---
+let latestFrontApp = { appName: '', bundleId: '' };
+let frontAppProcess = null;
+let focusDebounceTimer = null;
+let taioIsFocused = true;
+let taioLeaveTimestamp = null;
+
+function initFrontAppObserver() {
+  if (process.platform !== 'darwin') return;
+  const binCandidates = [
+    path.join(__dirname, 'native/frontApp/frontApp'),
+    path.resolve(__dirname, 'native/frontApp/frontApp'),
+    path.join(process.resourcesPath || '', 'app/native/frontApp/frontApp'),
+  ];
+  const binPath = binCandidates.find(p => fs.existsSync(p));
+  if (!binPath) {
+    console.warn('[main] FrontApp observer binary not found in candidates');
+    return;
+  }
+
+  try {
+    frontAppProcess = spawn(binPath, [], { stdio: ['ignore', 'pipe', 'ignore'] });
+    let buffer = '';
+    frontAppProcess.stdout.on('data', (chunk) => {
+      buffer += chunk.toString();
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const parsed = JSON.parse(line.trim());
+          if (parsed && typeof parsed.appName === 'string') {
+            latestFrontApp = {
+              appName: parsed.appName || '',
+              bundleId: parsed.bundleId || '',
+            };
+            broadcastDataSync('frontApp', latestFrontApp);
+          }
+        } catch (_) {}
+      }
+    });
+
+    frontAppProcess.on('exit', () => {
+      frontAppProcess = null;
+    });
+  } catch (err) {
+    console.error('[main] Failed to spawn frontApp observer:', err);
+  }
+}
+
+function evaluateTaioFocus() {
+  const focusedWin = BrowserWindow.getFocusedWindow();
+  const hasFocus = Boolean(focusedWin);
+
+  if (!hasFocus && taioIsFocused) {
+    taioIsFocused = false;
+    taioLeaveTimestamp = Date.now();
+    broadcastDataSync('appFocus', {
+      isFocused: false,
+      leaveTime: taioLeaveTimestamp,
+      frontApp: latestFrontApp,
+    });
+  } else if (hasFocus && !taioIsFocused) {
+    taioIsFocused = true;
+    const returnTime = Date.now();
+    const durationSec = taioLeaveTimestamp ? Math.round((returnTime - taioLeaveTimestamp) / 1000) : 0;
+    broadcastDataSync('appFocus', {
+      isFocused: true,
+      leaveTime: taioLeaveTimestamp,
+      returnTime,
+      durationSec,
+      frontApp: latestFrontApp,
+    });
+    taioLeaveTimestamp = null;
+  }
+}
+
+app.on('browser-window-blur', () => {
+  if (focusDebounceTimer) clearTimeout(focusDebounceTimer);
+  focusDebounceTimer = setTimeout(evaluateTaioFocus, 150);
+});
+
+app.on('browser-window-focus', () => {
+  if (focusDebounceTimer) clearTimeout(focusDebounceTimer);
+  focusDebounceTimer = setTimeout(evaluateTaioFocus, 60);
+});
 
 // Part A3: Bounds Persistence with Migration
 function getWindowsDataDir() {
@@ -225,6 +313,7 @@ function openWindow(id) {
     if (existing.isMinimized()) existing.restore();
     existing.show();
     existing.focus();
+    // Clock window requires real-time timer sync when restored/focused
     if (id === 'clock') syncClockWindowData();
     return existing;
   }
@@ -279,23 +368,26 @@ function openWindow(id) {
     const entryFile = path.join(config._folder, config.entry || 'index.html');
     if (fs.existsSync(entryFile)) {
       win.loadFile(entryFile);
-    } else if (id === 'clock' && fs.existsSync(path.join(__dirname, 'clock/clock.html'))) {
-      win.loadFile(path.join(__dirname, 'clock/clock.html'));
+    } else {
+      console.error(`[main] Entry file not found for window ${id}: ${entryFile}`);
     }
   }
 
   win.once('ready-to-show', () => {
     win.show();
+    // Clock window receives initial timer and task states upon ready
     if (id === 'clock') syncClockWindowData();
   });
 
   win.on('closed', () => {
     activeWindows.delete(id);
+    // Notify main window so day sheet button state remains synchronized
     if (id === 'day-sheet' && mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('taio-day-sheet-closed');
     }
   });
 
+  // Notify main window that day sheet is currently open
   if (id === 'day-sheet' && mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('taio-day-sheet-opened');
   }
@@ -324,6 +416,18 @@ function pinWindow(id, isPinned) {
   const win = activeWindows.get(id);
   if (win && !win.isDestroyed()) {
     win.setAlwaysOnTop(isPinned);
+  }
+}
+
+function setWindowHeight(id, height) {
+  const win = activeWindows.get(id);
+  if (win && !win.isDestroyed()) {
+    const config = windowRegistry.get(id) || {};
+    const minW = config.minWidth || 180;
+    const minH = height <= 50 ? height : (config.minHeight || 40);
+    win.setMinimumSize(minW, minH);
+    const [w] = win.getSize();
+    win.setSize(w, height);
   }
 }
 
@@ -444,6 +548,12 @@ ipcMain.handle('taio-data-get', async (_event, collection, query) => {
   if (collection === 'failedShortcuts') {
     return failedShortcuts;
   }
+  if (collection === 'frontApp') {
+    return latestFrontApp;
+  }
+  if (collection === 'appFocus') {
+    return { isFocused: taioIsFocused, leaveTime: taioLeaveTimestamp, frontApp: latestFrontApp };
+  }
   return null;
 });
 
@@ -474,6 +584,7 @@ ipcMain.on('taio-window-open', (_e, id) => openWindow(id));
 ipcMain.on('taio-window-close', (_e, id) => closeWindow(id));
 ipcMain.on('taio-window-toggle', (_e, id) => toggleWindow(id));
 ipcMain.on('taio-window-pin', (_e, { id, isPinned }) => pinWindow(id, isPinned));
+ipcMain.on('taio-window-set-height', (_e, { id, height }) => setWindowHeight(id, height));
 
 // --- Legacy Compatibility IPC Listeners (Part B4) ---
 ipcMain.on('taio-quick-note', (_event, noteText) => {
@@ -548,6 +659,7 @@ app.whenReady().then(() => {
 
   migrateLegacyBounds();
   loadWindowRegistry();
+  initFrontAppObserver();
   createWindow();
   createTray();
   registerGlobalShortcuts();
@@ -562,5 +674,8 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
+  if (frontAppProcess) {
+    try { frontAppProcess.kill(); } catch (_) {}
+  }
   globalShortcut.unregisterAll();
 });

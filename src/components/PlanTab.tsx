@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { updateScheduleEntry } from '@/features/tasks';
 import { TemplateScheduleModal } from '@/features/schedule-template';
-import { AddEventModal } from '@/features/events';
+import { AddEventModal, EventsListView, type EventFilterType } from '@/features/events';
 import { PlanVsRealityView } from '@/features/plan-reality';
 import { useT } from '@/i18n/useT';
 
@@ -66,10 +66,22 @@ export const PlanTab: React.FC = () => {
   const { nowMinutes, todayLabel } = useDeviceClock();
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
-  const [activeView, setActiveView] = useState<'card' | 'timeline' | 'reality' | 'matrix'>('card');
+  const [activeView, setActiveView] = useState<'card' | 'timeline' | 'reality' | 'matrix' | 'events'>('card');
+  const [eventsFilter, setEventsFilter] = useState<EventFilterType>('all');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showAddEventModal, setShowAddEventModal] = useState<boolean>(false);
   const [templateModalOpen, setTemplateModalOpen] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    const handleOpenEvents = (e: any) => {
+      setActiveView('events');
+      if (e?.detail?.filter) {
+        setEventsFilter(e.detail.filter);
+      }
+    };
+    window.addEventListener('taio:open-events-list', handleOpenEvents);
+    return () => window.removeEventListener('taio:open-events-list', handleOpenEvents);
+  }, []);
 
   const [newTitle, setNewTitle] = useState<string>('');
   const [newType, setNewType] = useState<BlockType>('deep');
@@ -180,6 +192,17 @@ export const PlanTab: React.FC = () => {
             <span>{t('terms.timetable', 'Thời gian biểu')}</span>
           </button>
           <button
+            onClick={() => { setActiveView('events'); setEventsFilter('all'); }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeView === 'events' 
+                ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)] shadow-xs taio-btn-primary'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>{language === 'vi' ? 'Sự kiện' : 'Events'}</span>
+          </button>
+          <button
             onClick={() => setActiveView('reality')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeView === 'reality' 
@@ -195,7 +218,10 @@ export const PlanTab: React.FC = () => {
         {/* Action buttons */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setTemplateModalOpen(true)}
+            onClick={() => {
+              setActiveView('events');
+              setEventsFilter('routine');
+            }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all"
             title={t('plan.templateTitle', 'Quản lý lịch ngày mẫu cố định')}
           >
@@ -223,6 +249,7 @@ export const PlanTab: React.FC = () => {
       </div>
 
       {activeView === 'card' && <DailyCardView />}
+      {activeView === 'events' && <EventsListView initialFilter={eventsFilter} />}
       {activeView === 'reality' && <PlanVsRealityView />}
       {activeView === 'timeline' && (
         <>

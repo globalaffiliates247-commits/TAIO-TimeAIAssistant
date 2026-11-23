@@ -56,7 +56,20 @@
     "budget_45": "45 phút / ngày",
     "budget_60": "60 phút / ngày",
     "budget_90": "90 phút / ngày",
-    "budget_120": "120 phút / ngày"
+    "budget_120": "120 phút / ngày",
+    "addTaskToGoal": "Thêm việc vào mục tiêu",
+    "regenerateMilestones": "Dựng lại cột mốc gợi ý",
+    "deleteGoalAction": "Xoá mục tiêu",
+    "methodExplainerTitle": "Tìm hiểu phương pháp lập kế hoạch ngược",
+    "addMilestoneAction": "Thêm cột mốc mới",
+    "milestonePlaceholder": "Tên cột mốc...",
+    "saveMilestone": "Lưu",
+    "suggest3Milestones": "+ Gợi ý 3 cột mốc từ hạn chót",
+    "addTaskBtn": "Thêm việc",
+    "promptTaskTitle": "Nhập tên công việc mới gắn với mục tiêu này:",
+    "confirmDeleteGoal": "Bạn có chắc muốn xoá mục tiêu này?",
+    "confirmResetMilestones": "Dựng lại 3 cột mốc gợi ý theo hạn chót? Các cột mốc hiện tại sẽ được thay thế.",
+    "milestonesRegenerated": "Đã dựng lại 3 cột mốc theo gợi ý."
   },
   "overview": {
     "title": "Toàn cảnh mục tiêu · {{year}}",

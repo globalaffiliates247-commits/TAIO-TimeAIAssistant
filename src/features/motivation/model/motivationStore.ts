@@ -144,12 +144,14 @@ export function loadServerQuotesCache(): MotivationQuote[] {
   return [];
 }
 
-export function saveServerQuotesCache(quotes: MotivationQuote[]): void {
+export function saveLocalQuoteOverrides(quotes: MotivationQuote[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEY_SERVER_CACHE, JSON.stringify(quotes));
   } catch {}
 }
+
+export const saveServerQuotesCache = saveLocalQuoteOverrides;
 
 /**
  * Returns merged quotes pool: Server quotes -> Built-in default quotes -> User custom quotes

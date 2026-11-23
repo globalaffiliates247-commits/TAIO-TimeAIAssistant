@@ -139,11 +139,41 @@ if (fs.existsSync(WINDOWS_DIR)) {
   }
 }
 
+// PRD v0.3.54 Part I (A5): Guard against hardcoded language ternaries in .tsx
+const SRC_DIR = path.join(__dirname, '../src');
+const HARDCODED_TERNARY_BASELINE = 457; // Monitored baseline post-ProfileModal cleanup
+let hardcodedTernaryCount = 0;
+const ternaryRegex = /language\s*===\s*['"](?:vi|en)['"]\s*\?/g;
+
+function scanTsxFiles(dir) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      scanTsxFiles(full);
+    } else if (entry.isFile() && entry.name.endsWith('.tsx')) {
+      const content = fs.readFileSync(full, 'utf8');
+      const matches = content.match(ternaryRegex);
+      if (matches) {
+        hardcodedTernaryCount += matches.length;
+        if (entry.name === 'ProfileModal.tsx') {
+          errors.push(`[ProfileModal.tsx] Must have 0 hardcoded language ternaries, but found ${matches.length}`);
+        }
+      }
+    }
+  }
+}
+scanTsxFiles(SRC_DIR);
+
+if (hardcodedTernaryCount > HARDCODED_TERNARY_BASELINE) {
+  errors.push(`Hardcoded language ternaries count increased: found ${hardcodedTernaryCount}, baseline is ${HARDCODED_TERNARY_BASELINE}. Move new strings to src/i18n/*.json.`);
+}
+
 if (errors.length > 0) {
   console.error(`\x1b[31m[check-i18n] FAILED with ${errors.length} error(s):\x1b[0m`);
   errors.forEach(e => console.error(`  - ${e}`));
   process.exit(1);
 } else {
-  console.log(`\x1b[32m[check-i18n] PASSED: All ${totalKeys + windowKeyCount} keys across domain and mini app windows match 100% with clean translations.\x1b[0m`);
+  console.log(`\x1b[32m[check-i18n] PASSED: All ${totalKeys + windowKeyCount} keys across domain and mini app windows match 100% with clean translations (hardcoded ternaries: ${hardcodedTernaryCount}/${HARDCODED_TERNARY_BASELINE}).\x1b[0m`);
   process.exit(0);
 }

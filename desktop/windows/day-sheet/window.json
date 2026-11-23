@@ -6,7 +6,7 @@
   "defaultWidth": 480,
   "defaultHeight": 680,
   "minWidth": 360,
-  "minHeight": 400,
+  "minHeight": 40,
   "frame": false,
   "alwaysOnTop": true,
   "resizable": true,

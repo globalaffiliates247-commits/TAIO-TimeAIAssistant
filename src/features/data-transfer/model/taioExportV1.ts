@@ -82,6 +82,7 @@ export interface ExportedDayRecord {
   undeclaredLabel?: string;
   notes?: string;
   updatedAt?: string | number;
+  seeded?: boolean;
   extra?: Record<string, unknown>;
 }
 

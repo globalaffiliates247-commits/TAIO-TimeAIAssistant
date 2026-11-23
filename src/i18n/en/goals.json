@@ -56,7 +56,20 @@
     "budget_45": "45 mins / day",
     "budget_60": "60 mins / day",
     "budget_90": "90 mins / day",
-    "budget_120": "120 mins / day"
+    "budget_120": "120 mins / day",
+    "addTaskToGoal": "Add task attached to this goal",
+    "regenerateMilestones": "Regenerate 3 suggested milestones",
+    "deleteGoalAction": "Delete goal",
+    "methodExplainerTitle": "Learn about backward planning",
+    "addMilestoneAction": "Add new milestone",
+    "milestonePlaceholder": "Milestone title...",
+    "saveMilestone": "Save",
+    "suggest3Milestones": "+ Generate 3 milestones from deadline",
+    "addTaskBtn": "Add task",
+    "promptTaskTitle": "Enter task title attached to this goal:",
+    "confirmDeleteGoal": "Are you sure you want to delete this goal?",
+    "confirmResetMilestones": "Regenerate 3 suggested milestones from deadline? Current milestones will be replaced.",
+    "milestonesRegenerated": "Regenerated 3 milestone suggestions."
   },
   "overview": {
     "title": "Goal Overview · {{year}}",

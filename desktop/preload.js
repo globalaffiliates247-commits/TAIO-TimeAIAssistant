@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('taioAPI', {
     close: (id) => ipcRenderer.send('taio-window-close', id),
     toggle: (id) => ipcRenderer.send('taio-window-toggle', id),
     pin: (id, isPinned) => ipcRenderer.send('taio-window-pin', { id, isPinned }),
+    setHeight: (id, height) => ipcRenderer.send('taio-window-set-height', { id, height }),
   },
 
   // Generic Data Bridge (Part B1 & B2)

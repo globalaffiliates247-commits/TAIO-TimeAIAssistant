@@ -92,7 +92,12 @@ export const GoalRow: React.FC<GoalRowProps> = ({
       {/* Expanded in-place drawer */}
       {isExpanded && (
         <div className="space-y-2">
-          {/* PRD v0.3.48 Part B2 & B3 & v0.3.50 Part D: Unique instanceKey for expanded goal quote */}
+          <GoalRowDetail
+            goal={goal}
+            todayBlocks={todayBlocks}
+            onOpenDedicatedPage={onOpenDedicatedPage}
+          />
+          {/* PRD v0.3.54 Part M: Motivation quote moved to bottom of expanded drawer with high-contrast tokens */}
           <MotivationSticker
             slotKey="goals_tab"
             instanceKey={`goals_tab#goal:${goal.id}`}
@@ -100,12 +105,7 @@ export const GoalRow: React.FC<GoalRowProps> = ({
             size="line"
             activeGoalId={goal.id}
             activeGoalName={goal.name}
-            className="w-full bg-white/70 border-black/10 shadow-2xs"
-          />
-          <GoalRowDetail
-            goal={goal}
-            todayBlocks={todayBlocks}
-            onOpenDedicatedPage={onOpenDedicatedPage}
+            className="w-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 shadow-2xs"
           />
         </div>
       )}

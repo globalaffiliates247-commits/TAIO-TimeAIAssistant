@@ -59,7 +59,7 @@ export const ScreenTimeSettingsSection: React.FC<Props> = ({ language = 'vi' }) 
   };
 
   return (
-    <div className="bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-4 space-y-4">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-4 shadow-2xs">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
@@ -69,7 +69,7 @@ export const ScreenTimeSettingsSection: React.FC<Props> = ({ language = 'vi' }) 
             <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
               {isVi ? 'Cảnh báo ngưỡng dùng app (Screen Time)' : 'App Usage Threshold Warning (Screen Time)'}
             </h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
               {isVi 
                 ? 'Nhận tín hiệu khi vượt ngưỡng thời gian dùng ứng dụng trên iPhone (chỉ ngưỡng, không đọc số liệu chi tiết).'
                 : 'Get alerts when exceeding app usage thresholds on iPhone (threshold alert only, no detailed telemetry).'}

@@ -1,0 +1,146 @@
+{
+  "format": "taio-time-export",
+  "formatVersion": 1,
+  "specVersion": "v0.3.54",
+  "exportedAt": "2026-11-23T00:00:00.000Z",
+  "profile": {
+    "id": "owner",
+    "title": "Chủ doanh nghiệp",
+    "seeded": true
+  },
+  "goals": [
+    {
+      "id": "g-own-1",
+      "name": "Mở rộng kênh phân phối & Tăng trưởng doanh thu 30%",
+      "measurableResult": "Ký thêm 5 đại lý lớn, MRR đạt mốc mới",
+      "horizonDays": 90,
+      "dailyBudgetMins": 90,
+      "deadline": "DATE_PLUS_90",
+      "workArea": "Business",
+      "progressPercent": 25,
+      "seeded": true,
+      "milestones": [
+        {
+          "id": "m-own-1",
+          "goalId": "g-own-1",
+          "name": "Giai đoạn 1: Hoàn thiện chính sách chiết khấu đại lý",
+          "dueDate": "DATE_PLUS_30",
+          "status": "done",
+          "seeded": true
+        },
+        {
+          "id": "m-own-2",
+          "goalId": "g-own-2",
+          "name": "Giai đoạn 2: Tiếp cận 20 đối tác tiềm năng",
+          "dueDate": "DATE_PLUS_60",
+          "status": "pending",
+          "seeded": true
+        },
+        {
+          "id": "m-own-3",
+          "goalId": "g-own-3",
+          "name": "Giai đoạn 3: Ký kết hợp đồng phân phối chính thức",
+          "dueDate": "DATE_PLUS_90",
+          "status": "pending",
+          "seeded": true
+        }
+      ]
+    }
+  ],
+  "dailyCardItems": [
+    {
+      "id": "t-o-y1",
+      "text": "Gặp gỡ nhà đầu tư vòng Series A",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-o-y2",
+      "text": "Xem xét báo cáo tài chính tháng trước",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-o-t1",
+      "text": "Phỏng vấn ứng viên Giám đốc Kinh doanh",
+      "status": "done",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-o-t2",
+      "text": "Chiến lược phân phối kênh miền Trung",
+      "status": "in_progress",
+      "goalId": "g-own-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-o-tm1",
+      "text": "Làm việc với cố vấn pháp lý về hợp đồng đại lý",
+      "status": "todo",
+      "goalId": "g-own-1",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    },
+    {
+      "id": "t-o-tm2",
+      "text": "Họp định hướng cùng Co-founder",
+      "status": "todo",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    }
+  ],
+  "blocks": [
+    {
+      "id": "b-own-1",
+      "title": "Chiến lược mở rộng kênh bán lẻ",
+      "startTime": "09:30",
+      "endTime": "11:30",
+      "type": "focus",
+      "status": "completed",
+      "goalId": "g-own-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-own-2",
+      "title": "Phỏng vấn Key C-Level",
+      "startTime": "14:30",
+      "endTime": "16:00",
+      "type": "meeting",
+      "status": "completed",
+      "date": "DATE_TODAY",
+      "seeded": true
+    }
+  ],
+  "days": [
+    {
+      "id": "DATE_YESTERDAY",
+      "date": "DATE_YESTERDAY",
+      "seeded": true,
+      "blockResults": [
+        {
+          "id": "br-y-0",
+          "title": "Gặp gỡ nhà đầu tư vòng Series A",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        },
+        {
+          "id": "br-y-1",
+          "title": "Xem xét báo cáo tài chính tháng trước",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        }
+      ],
+      "interruptions": [],
+      "dayClosedAt": "2026-11-22T21:30:00.000Z"
+    }
+  ]
+}

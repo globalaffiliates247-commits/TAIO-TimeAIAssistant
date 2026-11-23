@@ -1,0 +1,162 @@
+{
+  "format": "taio-time-export",
+  "formatVersion": 1,
+  "specVersion": "v0.3.54",
+  "exportedAt": "2026-11-23T00:00:00.000Z",
+  "profile": {
+    "id": "admin",
+    "title": "Hành chính văn phòng",
+    "seeded": true
+  },
+  "goals": [
+    {
+      "id": "g-adm-1",
+      "name": "Số hóa tài liệu & Chuẩn hóa quy trình hành chính",
+      "measurableResult": "100% hợp đồng lưu trữ điện tử, giảm 50% thời gian xử lý thủ tục",
+      "horizonDays": 30,
+      "dailyBudgetMins": 60,
+      "deadline": "DATE_PLUS_30",
+      "workArea": "Operations",
+      "progressPercent": 50,
+      "seeded": true,
+      "milestones": [
+        {
+          "id": "m-adm-1",
+          "goalId": "g-adm-1",
+          "name": "Giai đoạn 1: Phân loại hồ sơ giấy và quét scan",
+          "dueDate": "DATE_PLUS_10",
+          "status": "done",
+          "seeded": true
+        },
+        {
+          "id": "m-adm-2",
+          "goalId": "g-adm-2",
+          "name": "Giai đoạn 2: Thiết lập cấu trúc thư mục bảo mật trên Cloud",
+          "dueDate": "DATE_PLUS_20",
+          "status": "pending",
+          "seeded": true
+        },
+        {
+          "id": "m-adm-3",
+          "goalId": "g-adm-3",
+          "name": "Giai đoạn 3: Hướng dẫn nội bộ quy trình mới",
+          "dueDate": "DATE_PLUS_30",
+          "status": "pending",
+          "seeded": true
+        }
+      ]
+    }
+  ],
+  "dailyCardItems": [
+    {
+      "id": "t-a-y1",
+      "text": "Kiểm kê văn phòng phẩm tháng",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-a-y2",
+      "text": "Gửi đối soát hóa đơn cho kế toán",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-a-t1",
+      "text": "Scan tài liệu hợp đồng kinh tế năm 2026",
+      "status": "in_progress",
+      "goalId": "g-adm-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-a-t2",
+      "text": "Đặt tiệc nhẹ liên hoan sinh nhật team tháng",
+      "status": "todo",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-a-t3",
+      "text": "Thanh toán hóa đơn điện thoại & internet công ty",
+      "status": "done",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-a-tm1",
+      "text": "Soạn thảo thông báo lịch nghỉ lễ",
+      "status": "todo",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    },
+    {
+      "id": "t-a-tm2",
+      "text": "Tiếp đón đối tác kiểm toán",
+      "status": "todo",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    }
+  ],
+  "blocks": [
+    {
+      "id": "b-adm-1",
+      "title": "Xử lý chứng từ & Hóa đơn",
+      "startTime": "08:30",
+      "endTime": "10:00",
+      "type": "admin",
+      "status": "completed",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-adm-2",
+      "title": "Số hóa tài liệu hợp đồng",
+      "startTime": "10:30",
+      "endTime": "12:00",
+      "type": "focus",
+      "status": "completed",
+      "goalId": "g-adm-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-adm-3",
+      "title": "Chuẩn bị hậu cần & Văn phòng phẩm",
+      "startTime": "14:00",
+      "endTime": "15:30",
+      "type": "admin",
+      "status": "pending",
+      "date": "DATE_TODAY",
+      "seeded": true
+    }
+  ],
+  "days": [
+    {
+      "id": "DATE_YESTERDAY",
+      "date": "DATE_YESTERDAY",
+      "seeded": true,
+      "blockResults": [
+        {
+          "id": "br-y-0",
+          "title": "Kiểm kê văn phòng phẩm tháng",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        },
+        {
+          "id": "br-y-1",
+          "title": "Gửi đối soát hóa đơn cho kế toán",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        }
+      ],
+      "interruptions": [],
+      "dayClosedAt": "2026-11-22T21:30:00.000Z"
+    }
+  ]
+}

@@ -5,7 +5,9 @@ import {
   saveDurableState,
   loadDurableState,
   clearAllDurableState,
-  mergeCollectionsByUpdatedAt
+  mergeCollectionsByUpdatedAt,
+  getStorageItemSync,
+  setStorageItemSync
 } from '../core/storage/durableStorage';
 import {
   broadcastWindowBus,
@@ -20,6 +22,8 @@ import {
 } from '../features/native';
 import { logAppError } from '../core/errorLogger';
 import { computeGoalMetrics } from '../features/goals/goalMetrics';
+import { generateSuggestedMilestones } from '../features/goals/model/milestoneTemplates';
+import { getSeedData, type ProfessionRole } from '../features/onboarding/seeds';
 import {
   parseAndValidateTaioExport,
   applyTaioImport,
@@ -284,6 +288,19 @@ interface AppContextType {
   importTaioData: (rawJson: string, mode: 'merge' | 'replace') => TaioImportSummary | null;
   dayTemplate: DayTemplateSlot[];
   importedDays: ExportedDayRecord[];
+
+  // PRD v0.3.54 Part K: Seeded Profession Onboarding
+  importProfessionSeed: (role: ProfessionRole) => void;
+  clearSeededSampleData: () => void;
+  hasSeededData: boolean;
+
+  // PRD v0.3.54 Part N: Editable Milestones
+  updateMilestone: (goalId: string, milestoneId: string, updates: Partial<Milestone>) => void;
+  addMilestone: (goalId: string, name: string, dueDate: string) => void;
+  deleteMilestone: (goalId: string, milestoneId: string) => void;
+  reorderMilestones: (goalId: string, milestones: Milestone[]) => void;
+  toggleMilestoneDone: (goalId: string, milestoneId: string) => void;
+  resetMilestonesToSuggestions: (goalId: string) => void;
 
   // v0.3.2 B26: Mini app Lists ("Danh sách")
   lists: AppList[];
@@ -3405,21 +3422,169 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addGoalWithBackplanning = (goalData: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => {
-    const weeks = Math.ceil(goalData.horizonDays / 7);
-    const generatedMilestones: Milestone[] = [
-      { id: `m-${Date.now()}-1`, goalId: '', name: `Giai đoạn 1: Chuẩn bị & Bản nháp (Tuần 1-${Math.ceil(weeks / 3)})`, dueDate: '30 ngày tới', status: 'pending' },
-      { id: `m-${Date.now()}-2`, goalId: '', name: `Giai đoạn 2: Triển khai lõi & Đánh giá (Tuần ${Math.ceil(weeks / 3) + 1}-${Math.ceil(weeks * 2 / 3)})`, dueDate: '60 ngày tới', status: 'pending' },
-      { id: `m-${Date.now()}-3`, goalId: '', name: `Giai đoạn 3: Hoàn thiện & Đạt kết quả đo lường`, dueDate: goalData.deadline, status: 'pending' },
-    ];
+    const goalId = `g-${Date.now()}`;
+    const generatedMilestones: Milestone[] = goalData.deadline
+      ? generateSuggestedMilestones(goalId, goalData.horizonDays, goalData.deadline)
+      : [];
 
     const newG: Goal = {
       ...goalData,
-      id: `g-${Date.now()}`,
+      id: goalId,
       progressPercent: 0,
       milestones: generatedMilestones,
     };
-    setGoals(prev => [...prev, newG]);
+    setGoals(prev => {
+      const next = [...prev, newG];
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+
+    // PRD v0.3.54 Part O: Trigger Method Explainer once on first goal with milestones
+    if (typeof window !== 'undefined' && generatedMilestones.length > 0) {
+      const seen = getStorageItemSync('taio_method_explainer_seen', false);
+      if (!seen) {
+        setStorageItemSync('taio_method_explainer_seen', true);
+        window.dispatchEvent(new CustomEvent('taio:open-method-explainer'));
+      }
+    }
   };
+
+  // PRD v0.3.54 Part N: Milestone CRUD & Backplanning updates
+  const updateMilestone = (goalId: string, milestoneId: string, updates: Partial<Milestone>) => {
+    setGoals(prev => {
+      const next = prev.map(g => {
+        if (g.id !== goalId) return g;
+        const nextMilestones = (g.milestones || []).map(m => {
+          if (m.id !== milestoneId) return m;
+          return { ...m, ...updates, seeded: false };
+        });
+        return { ...g, milestones: nextMilestones, updatedAt: Date.now() };
+      });
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+  };
+
+  const addMilestone = (goalId: string, name: string, dueDate: string) => {
+    setGoals(prev => {
+      const next = prev.map(g => {
+        if (g.id !== goalId) return g;
+        const newM: Milestone = {
+          id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          goalId,
+          name,
+          dueDate,
+          status: 'pending',
+          seeded: false,
+        };
+        const nextMilestones = [...(g.milestones || []), newM];
+        return { ...g, milestones: nextMilestones, updatedAt: Date.now() };
+      });
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+  };
+
+  const deleteMilestone = (goalId: string, milestoneId: string) => {
+    setGoals(prev => {
+      const next = prev.map(g => {
+        if (g.id !== goalId) return g;
+        const nextMilestones = (g.milestones || []).filter(m => m.id !== milestoneId);
+        const total = nextMilestones.length;
+        const completed = nextMilestones.filter(m => m.status === 'completed' || m.status === 'done').length;
+        const progressPercent = total > 0 ? Math.round((completed / total) * 100) : g.progressPercent;
+        return { ...g, milestones: nextMilestones, progressPercent, updatedAt: Date.now() };
+      });
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+  };
+
+  const reorderMilestones = (goalId: string, milestones: Milestone[]) => {
+    setGoals(prev => {
+      const next = prev.map(g => {
+        if (g.id !== goalId) return g;
+        return { ...g, milestones, updatedAt: Date.now() };
+      });
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+  };
+
+  const toggleMilestoneDone = (goalId: string, milestoneId: string) => {
+    setGoals(prev => {
+      const next = prev.map(g => {
+        if (g.id !== goalId) return g;
+        const nextMilestones = (g.milestones || []).map(m => {
+          if (m.id !== milestoneId) return m;
+          const isDone = m.status === 'completed' || m.status === 'done';
+          const newStatus: 'pending' | 'completed' = isDone ? 'pending' : 'completed';
+          return { ...m, status: newStatus, seeded: false };
+        });
+        const total = nextMilestones.length;
+        const completed = nextMilestones.filter(m => m.status === 'completed' || m.status === 'done').length;
+        const progressPercent = total > 0 ? Math.round((completed / total) * 100) : g.progressPercent;
+        return { ...g, milestones: nextMilestones, progressPercent, updatedAt: Date.now() };
+      });
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+  };
+
+  const resetMilestonesToSuggestions = (goalId: string) => {
+    setGoals(prev => {
+      const next = prev.map(g => {
+        if (g.id !== goalId) return g;
+        const regenerated = generateSuggestedMilestones(goalId, g.horizonDays || 30, g.deadline);
+        return { ...g, milestones: regenerated, updatedAt: Date.now() };
+      });
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+    showToast(i18n.t('goals.milestonesRegenerated', 'Đã dựng lại 3 cột mốc theo gợi ý.'));
+  };
+
+  // PRD v0.3.54 Part K: Seeded Profession Onboarding
+  const importProfessionSeed = (role: ProfessionRole) => {
+    const seedPayload = getSeedData(role);
+    applyImportPayload(seedPayload, 'merge', false);
+  };
+
+  const clearSeededSampleData = () => {
+    const nowTs = Date.now();
+    setGoals(prev => {
+      const next = prev.filter(g => !g.seeded);
+      saveDurableState('goals', next, nowTs);
+      return next;
+    });
+    setBlocks(prev => {
+      const next = prev.filter(b => !b.seeded);
+      saveDurableState('blocks', next, nowTs);
+      return next;
+    });
+    setDailyCardItems(prev => {
+      const next = prev.filter(d => !d.seeded);
+      saveDurableState('dailyCardItems', next, nowTs);
+      return next;
+    });
+    setBacklogCards(prev => {
+      const next = prev.filter(c => !c.seeded);
+      saveDurableState('backlogCards', next, nowTs);
+      return next;
+    });
+    setImportedDays(prev => {
+      const next = prev.filter(day => !day.seeded);
+      saveDurableState('importedDays', next, nowTs);
+      return next;
+    });
+    showToast(i18n.t('settings.seededDataCleared', 'Đã xoá toàn bộ dữ liệu mẫu.'));
+  };
+
+  const hasSeededData = useMemo(() => {
+    return goals.some(g => g.seeded) ||
+      blocks.some(b => b.seeded) ||
+      dailyCardItems.some(d => d.seeded);
+  }, [goals, blocks, dailyCardItems]);
 
   const deleteGoal = (goalId: string) => {
     setGoals(prev => {
@@ -3758,6 +3923,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       importTaioData,
       dayTemplate,
       importedDays,
+      importProfessionSeed,
+      clearSeededSampleData,
+      hasSeededData,
+      updateMilestone,
+      addMilestone,
+      deleteMilestone,
+      reorderMilestones,
+      toggleMilestoneDone,
+      resetMilestonesToSuggestions,
       lists,
       listItems,
       activeListId,

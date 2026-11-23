@@ -238,9 +238,17 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
           </button>
         )}
         <span
-          className="flex-1 text-center text-xs font-bold truncate px-1 cursor-default"
+          className={`flex-1 text-center text-xs font-bold truncate px-1 ${
+            note.kind === 'day' ? 'cursor-pointer hover:underline transition-all' : 'cursor-default'
+          }`}
           style={{ color: c.muted }}
-          title={note.kind === 'day' ? dayTitle(note.date!, language) : note.title}
+          title={note.kind === 'day' ? (language === 'vi' ? 'Mở Lịch sự kiện' : 'Open Events') : note.title}
+          onClick={() => {
+            if (note.kind === 'day') {
+              window.dispatchEvent(new CustomEvent('taio:open-events-list', { detail: { filter: 'all' } }));
+              window.dispatchEvent(new CustomEvent('taio:switch-tab', { detail: 'plan' }));
+            }
+          }}
         >
           {note.kind === 'day' ? dayTitle(note.date!, language) : note.title}
         </span>

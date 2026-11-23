@@ -29,10 +29,11 @@ const PROFILE_ICONS: Record<UserProfileType, any> = {
 };
 
 export const OnboardingModal: React.FC = () => {
-  const { isOnboarded, setIsOnboarded, setProfile, profile, setCurrentTab, addNewBlock } = useApp();
+  const { isOnboarded, setIsOnboarded, setProfile, profile, setCurrentTab, addNewBlock, importProfessionSeed } = useApp();
   const [selectedType, setSelectedType] = useState<UserProfileType>(profile.type);
   const [step, setStep] = useState<1 | 2>(1);
   const [weeklyTopFocus, setWeeklyTopFocus] = useState<string>('Hoàn thành bản nháp MVP cho TAIO Time App');
+  const [seedSampleData, setSeedSampleData] = useState<boolean>(true);
 
   if (isOnboarded) return null;
 
@@ -41,6 +42,9 @@ export const OnboardingModal: React.FC = () => {
 
   const handleFinishOnboarding = () => {
     setProfile(currentSelectedProfile);
+    if (seedSampleData && importProfessionSeed) {
+      importProfessionSeed(selectedType as any);
+    }
     if (weeklyTopFocus.trim()) {
       addNewBlock({
         title: weeklyTopFocus,
@@ -234,6 +238,22 @@ export const OnboardingModal: React.FC = () => {
                 Bản dùng thử lưu dữ liệu trên máy này. Khi chưa xác thực tài khoản, người khác có thể đăng nhập trên máy khác nếu trùng thông tin. Bạn có thể xác thực trong Cá nhân → Tài khoản bất kỳ lúc nào.
               </span>
             </div>
+
+            {/* PRD v0.3.54 Part K: Seed Sample Data Checkbox */}
+            <label className="flex items-start gap-2.5 p-3 rounded-xl bg-indigo-50/50 border border-indigo-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={seedSampleData}
+                onChange={(e) => setSeedSampleData(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-0 cursor-pointer"
+              />
+              <div className="text-[11px]">
+                <span className="font-bold text-slate-900">Khởi tạo dữ liệu mẫu thực tế theo nghề nghiệp (3 ngày)</span>
+                <p className="text-slate-600 mt-0.5">
+                  Tải sẵn công việc, khối tập trung và lịch biểu mẫu cho {currentSelectedProfile.title}. Bạn có thể xóa data mẫu bất kỳ lúc nào trong phần Cài đặt.
+                </p>
+              </div>
+            </label>
 
             {/* Actions */}
             <div className="pt-2 flex items-center justify-between">

@@ -9,7 +9,7 @@ import {
 import {
   BUILTIN_QUOTES,
   loadServerQuotesCache,
-  saveServerQuotesCache,
+  saveLocalQuoteOverrides,
 } from '../model/motivationStore';
 import {
   Search,
@@ -70,10 +70,10 @@ export const QuoteAdmin: React.FC = () => {
   const [formActive, setFormActive] = useState(true);
   const [formVerified, setFormVerified] = useState(false);
 
-  // Sync to local cache
+  // Sync to local override storage
   const persistQuotes = (updated: MotivationQuote[]) => {
     setQuotes(updated);
-    saveServerQuotesCache(updated);
+    saveLocalQuoteOverrides(updated);
   };
 
   const openAddForm = () => {

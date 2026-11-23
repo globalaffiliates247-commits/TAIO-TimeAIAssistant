@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { SwipeEntryCard } from '@/features/swipe';
 import { useT } from '@/i18n/useT';
-import { getSpeechEngine, normalizeSpokenVi, normalizeSpokenEn, normalizeGoalVoice } from '@/features/intake';
+import { getSpeechEngine, intakeTask } from '@/features/intake';
 
 export const DailyCardView: React.FC = () => {
   const { t } = useT();
@@ -54,6 +54,7 @@ export const DailyCardView: React.FC = () => {
   const [displacedBlockId, setDisplacedBlockId] = useState<string>('');
   const [showUnplannedOptions, setShowUnplannedOptions] = useState<boolean>(false);
   const [isVoiceListening, setIsVoiceListening] = useState<boolean>(false);
+  const [wasVoice, setWasVoice] = useState<boolean>(false);
 
   const handleToggleVoice = async () => {
     const engine = getSpeechEngine();
@@ -67,11 +68,12 @@ export const DailyCardView: React.FC = () => {
     await engine.start({
       onPartial: (text) => {
         setNewText(text);
+        setWasVoice(true);
       },
       onFinal: (text) => {
-        const spokenNorm = isVi ? normalizeSpokenVi(text) : normalizeSpokenEn(text);
-        const withGoal = normalizeGoalVoice(spokenNorm, goals || []);
-        setNewText(withGoal);
+        // PRD v0.3.54 Part B: Raw text into input field. Normalization occurs inside intakeTask on add.
+        setNewText(text);
+        setWasVoice(true);
         setIsVoiceListening(false);
       },
       onError: () => {
@@ -97,10 +99,20 @@ export const DailyCardView: React.FC = () => {
     e.preventDefault();
     if (!newText.trim()) return;
 
+    const result = intakeTask({
+      source: wasVoice ? 'voice' : 'manual',
+      rawText: newText.trim(),
+      date: selectedCardDate,
+      goals: goals || [],
+      lang: language === 'vi' ? 'vi' : 'en',
+    });
+    setWasVoice(false);
+    const itemText = result.normalizedText || newText.trim();
+
     const displacedBlock = blocks.find(b => b.id === displacedBlockId);
 
     addDailyCardItem({
-      text: newText.trim(),
+      text: itemText,
       goalId: selectedGoalId || undefined,
       origin: newOrigin,
       displacedItemId: displacedBlockId || undefined,

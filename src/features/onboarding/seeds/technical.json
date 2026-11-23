@@ -1,0 +1,157 @@
+{
+  "format": "taio-time-export",
+  "formatVersion": 1,
+  "specVersion": "v0.3.54",
+  "exportedAt": "2026-11-23T00:00:00.000Z",
+  "profile": {
+    "id": "technical",
+    "title": "Kỹ thuật",
+    "seeded": true
+  },
+  "goals": [
+    {
+      "id": "g-tech-1",
+      "name": "Nâng cấp hệ thống Core API & Database",
+      "measurableResult": "P99 latency < 150ms, 99.9% uptime",
+      "horizonDays": 60,
+      "dailyBudgetMins": 180,
+      "deadline": "DATE_PLUS_60",
+      "workArea": "Product",
+      "progressPercent": 35,
+      "seeded": true,
+      "milestones": [
+        {
+          "id": "m-tech-1",
+          "goalId": "g-tech-1",
+          "name": "Giai đoạn 1: Đo benchmark & Profiling",
+          "dueDate": "DATE_PLUS_20",
+          "status": "done",
+          "seeded": true
+        },
+        {
+          "id": "m-tech-2",
+          "goalId": "g-tech-1",
+          "name": "Giai đoạn 2: Tái cấu trúc Indexing & Cache Redis",
+          "dueDate": "DATE_PLUS_40",
+          "status": "pending",
+          "seeded": true
+        },
+        {
+          "id": "m-tech-3",
+          "goalId": "g-tech-1",
+          "name": "Giai đoạn 3: Load test & Triển khai Production",
+          "dueDate": "DATE_PLUS_60",
+          "status": "pending",
+          "seeded": true
+        }
+      ]
+    }
+  ],
+  "dailyCardItems": [
+    {
+      "id": "t-t-y1",
+      "text": "Setup môi trường test staging",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-t-y2",
+      "text": "Viết migration script cho bảng users",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-t-t1",
+      "text": "Tối ưu hóa các query chậm bảng orders",
+      "status": "in_progress",
+      "goalId": "g-tech-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-t-t2",
+      "text": "Review Pull Request module Auth",
+      "status": "todo",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-t-tm1",
+      "text": "Cài đặt Redis cluster replica",
+      "status": "todo",
+      "goalId": "g-tech-1",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    },
+    {
+      "id": "t-t-tm2",
+      "text": "Viết integration test endpoint thanh toán",
+      "status": "todo",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    }
+  ],
+  "blocks": [
+    {
+      "id": "b-tech-1",
+      "title": "Deep Work: Tối ưu query DB",
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "type": "focus",
+      "status": "completed",
+      "goalId": "g-tech-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-tech-2",
+      "title": "Code Review & Sync kỹ thuật",
+      "startTime": "14:00",
+      "endTime": "15:00",
+      "type": "meeting",
+      "status": "completed",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-tech-3",
+      "title": "Deep Work: Redis caching",
+      "startTime": "15:30",
+      "endTime": "17:30",
+      "type": "focus",
+      "status": "pending",
+      "goalId": "g-tech-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    }
+  ],
+  "days": [
+    {
+      "id": "DATE_YESTERDAY",
+      "date": "DATE_YESTERDAY",
+      "seeded": true,
+      "blockResults": [
+        {
+          "id": "br-y-0",
+          "title": "Setup môi trường test staging",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        },
+        {
+          "id": "br-y-1",
+          "title": "Viết migration script cho bảng users",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        }
+      ],
+      "interruptions": [],
+      "dayClosedAt": "2026-11-22T21:30:00.000Z"
+    }
+  ]
+}

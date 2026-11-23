@@ -1,0 +1,166 @@
+{
+  "format": "taio-time-export",
+  "formatVersion": 1,
+  "specVersion": "v0.3.54",
+  "exportedAt": "2026-11-23T00:00:00.000Z",
+  "profile": {
+    "id": "trade",
+    "title": "Kinh doanh",
+    "seeded": true
+  },
+  "goals": [
+    {
+      "id": "g-trd-1",
+      "name": "Chinh phục chỉ tiêu doanh số quý 1 tỷ đồng",
+      "measurableResult": "Chốt 15 hợp đồng mới, tỷ lệ tái ký > 80%",
+      "horizonDays": 60,
+      "dailyBudgetMins": 120,
+      "deadline": "DATE_PLUS_60",
+      "workArea": "Business",
+      "progressPercent": 45,
+      "seeded": true,
+      "milestones": [
+        {
+          "id": "m-trd-1",
+          "goalId": "g-trd-1",
+          "name": "Giai đoạn 1: Tiếp cận danh sách 50 lead ấm",
+          "dueDate": "DATE_PLUS_20",
+          "status": "done",
+          "seeded": true
+        },
+        {
+          "id": "m-trd-2",
+          "goalId": "g-trd-2",
+          "name": "Giai đoạn 2: Demo giải pháp & Đàm phán hợp đồng",
+          "dueDate": "DATE_PLUS_40",
+          "status": "pending",
+          "seeded": true
+        },
+        {
+          "id": "m-trd-3",
+          "goalId": "g-trd-3",
+          "name": "Giai đoạn 3: Chốt hợp đồng & Nhận cọc đợt 1",
+          "dueDate": "DATE_PLUS_60",
+          "status": "pending",
+          "seeded": true
+        }
+      ]
+    }
+  ],
+  "dailyCardItems": [
+    {
+      "id": "t-tr-y1",
+      "text": "Gặp khách hàng công ty An Thịnh trao đổi hợp đồng",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-tr-y2",
+      "text": "Gọi 10 cuộc follow-up báo giá",
+      "status": "done",
+      "date": "DATE_YESTERDAY",
+      "seeded": true
+    },
+    {
+      "id": "t-tr-t1",
+      "text": "Demo giải pháp phần mềm cho khách hàng Vinatex",
+      "status": "done",
+      "goalId": "g-trd-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-tr-t2",
+      "text": "Gửi bảng báo giá điều chỉnh cho Anh Nam",
+      "status": "in_progress",
+      "goalId": "g-trd-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-tr-t3",
+      "text": "Cập nhật pipeline CRM cuối ngày",
+      "status": "todo",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "t-tr-tm1",
+      "text": "Ký kết nghiệm thu và hợp đồng đại lý Minh Phát",
+      "status": "todo",
+      "goalId": "g-trd-1",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    },
+    {
+      "id": "t-tr-tm2",
+      "text": "Khảo sát thực tế nhu cầu showroom mới",
+      "status": "todo",
+      "date": "DATE_TOMORROW",
+      "seeded": true
+    }
+  ],
+  "blocks": [
+    {
+      "id": "b-trd-1",
+      "title": "Gọi tư vấn & Telesales lead mới",
+      "startTime": "09:00",
+      "endTime": "10:30",
+      "type": "meeting",
+      "status": "completed",
+      "goalId": "g-trd-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-trd-2",
+      "title": "Demo sản phẩm trực tiếp Vinatex",
+      "startTime": "14:00",
+      "endTime": "15:30",
+      "type": "meeting",
+      "status": "completed",
+      "goalId": "g-trd-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    },
+    {
+      "id": "b-trd-3",
+      "title": "Soạn thảo báo giá & Hợp đồng",
+      "startTime": "16:00",
+      "endTime": "17:30",
+      "type": "focus",
+      "status": "pending",
+      "goalId": "g-trd-1",
+      "date": "DATE_TODAY",
+      "seeded": true
+    }
+  ],
+  "days": [
+    {
+      "id": "DATE_YESTERDAY",
+      "date": "DATE_YESTERDAY",
+      "seeded": true,
+      "blockResults": [
+        {
+          "id": "br-y-0",
+          "title": "Gặp khách hàng công ty An Thịnh trao đổi hợp đồng",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        },
+        {
+          "id": "br-y-1",
+          "title": "Gọi 10 cuộc follow-up báo giá",
+          "result": "done",
+          "blockStart": "09:00",
+          "blockEnd": "11:00",
+          "seeded": true
+        }
+      ],
+      "interruptions": [],
+      "dayClosedAt": "2026-11-22T21:30:00.000Z"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { QuoteAdmin } from '@/features/motivation';
 import { PROFILES } from '../data/mockData';
+import { getStorageItemSync, setStorageItemSync, removeStorageItemSync } from '@/core/storage/durableStorage';
 import { 
   Users, 
   BarChart3, 
@@ -57,6 +58,71 @@ export const AdminPortal: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [profileFilter, setProfileFilter] = useState<string>('all');
   const [usersList, setUsersList] = useState<MockUser[]>(MOCK_USERS);
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(getStorageItemSync('taio_admin_unlocked', false));
+  });
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState(false);
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinInput.trim() === 'taio2026' || pinInput.trim().toLowerCase() === 'admin') {
+      setStorageItemSync('taio_admin_unlocked', true);
+      setIsUnlocked(true);
+      setPinError(false);
+    } else {
+      setPinError(true);
+    }
+  };
+
+  const handleLock = () => {
+    removeStorageItemSync('taio_admin_unlocked');
+    setIsUnlocked(false);
+    setPinInput('');
+  };
+
+  if (!isUnlocked) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-6 rounded-2xl bg-white border border-slate-200 shadow-xl space-y-4 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
+          <ShieldAlert className="w-6 h-6" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-900">Khu vực Quản trị TAIO</h3>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Khu vực này dành riêng cho quản trị viên cấu hình câu trích dẫn và giám sát thử nghiệm. Vui lòng nhập mã bảo vệ để tiếp tục.
+        </p>
+        <form onSubmit={handleUnlock} className="space-y-3 pt-2">
+          <input
+            type="password"
+            value={pinInput}
+            onChange={(e) => { setPinInput(e.target.value); setPinError(false); }}
+            placeholder="Nhập mã quản trị..."
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--taio-brand)]"
+            autoFocus
+          />
+          {pinError && (
+            <p className="text-xs font-semibold text-rose-600">Mã quản trị chưa chính xác.</p>
+          )}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentTab('now')}
+              className="flex-1 py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700"
+            >
+              Quay lại
+            </button>
+            <button
+              type="submit"
+              className="flex-1 py-2 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] text-xs font-bold shadow-xs taio-btn-primary"
+            >
+              Mở khóa
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   const toggleStatus = (userId: string) => {
     setUsersList(prev => prev.map(u => {
@@ -143,6 +209,14 @@ export const AdminPortal: React.FC = () => {
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Kho câu động lực</span>
+          </button>
+          <button
+            onClick={handleLock}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-all border-l border-slate-200 ml-1"
+            title="Khóa màn hình quản trị"
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>Khóa</span>
           </button>
         </div>
       </div>

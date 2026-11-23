@@ -421,8 +421,8 @@ if (fs.existsSync(goalLedgerPath)) {
   }
 }
 
-// 6. Clock Window Controller test vectors (PRD v0.3.46 Part A6)
-const clockJsPath = path.resolve(__dirname, '../desktop/clock/clock.js');
+// 6. Clock Window Controller test vectors (PRD v0.3.46 Part A6 & v0.3.54 Part A)
+const clockJsPath = path.resolve(__dirname, '../desktop/windows/clock/script.js');
 if (fs.existsSync(clockJsPath)) {
   const clockCode = fs.readFileSync(clockJsPath, 'utf8');
   const modesToTest = [undefined, 'remaining', 'elapsed', 'goal', 'corrupted_state_!#$'];

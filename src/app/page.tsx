@@ -33,6 +33,7 @@ import { ActiveCaptureModal } from '../components/ActiveCaptureModal';
 import { useLockScreenClock, useFreeTimerLiveActivities } from '../features/quick-entry';
 import { Sparkles, X, Smartphone, AlertCircle } from 'lucide-react';
 import { TabErrorBoundary } from '../components/TabErrorBoundary';
+import { MethodExplainer } from '../features/goals';
 import { initAppUsageTracker } from '@/features/app-usage';
 import { initGlobalErrorListeners, setActiveTabForLogging } from '../core/errorLogger';
 
@@ -71,6 +72,7 @@ const MainAppContent: React.FC = () => {
   useLockScreenClock();
   const {
     currentTab,
+    setCurrentTab,
     celebrationMsg,
     setCelebrationMsg,
     deviceLook,
@@ -97,6 +99,22 @@ const MainAppContent: React.FC = () => {
   React.useEffect(() => {
     setActiveTabForLogging(currentTab);
   }, [currentTab]);
+
+  const [isExplainerOpen, setIsExplainerOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleOpenExplainer = () => setIsExplainerOpen(true);
+    window.addEventListener('taio:open-method-explainer', handleOpenExplainer);
+    return () => window.removeEventListener('taio:open-method-explainer', handleOpenExplainer);
+  }, []);
+
+  React.useEffect(() => {
+    const handleSwitchTab = (e: any) => {
+      if (e?.detail) setCurrentTab(e.detail);
+    };
+    window.addEventListener('taio:switch-tab', handleSwitchTab);
+    return () => window.removeEventListener('taio:switch-tab', handleSwitchTab);
+  }, [setCurrentTab]);
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const touchStartYRef = React.useRef<number | null>(null);
 
@@ -293,6 +311,7 @@ const MainAppContent: React.FC = () => {
           <AdminPortal />
         </TabErrorBoundary>
       )}
+      <MethodExplainer isOpen={isExplainerOpen} onClose={() => setIsExplainerOpen(false)} />
     </AppShell>
   );
 };

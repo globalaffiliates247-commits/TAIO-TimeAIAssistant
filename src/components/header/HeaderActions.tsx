@@ -17,6 +17,7 @@ import {
   AlertCircle,
   X as CloseIcon 
 } from 'lucide-react';
+import { MascotIcon } from '@/features/profile';
 
 export const HeaderActions: React.FC = () => {
   const { 
@@ -173,8 +174,14 @@ export const HeaderActions: React.FC = () => {
         }`}
         title={t('terms.profile', 'Cá nhân')}
       >
-        <div className="w-4 h-4 rounded-full bg-black/15 text-current flex items-center justify-center text-[9px] font-black">
-          {userProfileDetail.displayName.charAt(0) || 'U'}
+        <div className="w-4 h-4 rounded-full bg-black/15 text-current flex items-center justify-center text-[9px] font-black overflow-hidden shrink-0">
+          {userProfileDetail.customPhotoUrl ? (
+            <img src={userProfileDetail.customPhotoUrl} alt="" className="w-full h-full object-cover" />
+          ) : userProfileDetail.avatarMascot ? (
+            <MascotIcon id={userProfileDetail.avatarMascot} size={11} />
+          ) : (
+            userProfileDetail.displayName.charAt(0) || 'U'
+          )}
         </div>
         <span className="hidden sm:inline">{t('terms.profile', 'Cá nhân')}</span>
       </button>

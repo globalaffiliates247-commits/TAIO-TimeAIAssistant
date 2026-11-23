@@ -19,6 +19,8 @@ interface DataSettingsPanelProps {
   setIsProfileModalOpen: (open: boolean) => void;
   setExportModalOpen: (open: boolean) => void;
   language: string;
+  clearSeededSampleData?: () => void;
+  hasSeededData?: boolean;
 }
 
 export const DataSettingsPanel: React.FC<DataSettingsPanelProps> = ({
@@ -30,6 +32,8 @@ export const DataSettingsPanel: React.FC<DataSettingsPanelProps> = ({
   setIsProfileModalOpen,
   setExportModalOpen,
   language,
+  clearSeededSampleData,
+  hasSeededData,
 }) => {
   const { t } = useT();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -97,6 +101,28 @@ export const DataSettingsPanel: React.FC<DataSettingsPanelProps> = ({
 
       {/* 4. Recent Errors & Lag Log (PRD v0.3.39 Part A2.2 & A2.4) */}
       <RecentErrorLogSection language={language} />
+
+      {/* PRD v0.3.54 Part K: Clear seeded sample data */}
+      {hasSeededData && clearSeededSampleData && (
+        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
+          <div>
+            <p className="text-xs font-bold text-amber-900">
+              {t('settings.clearSeededData', 'Xoá toàn bộ dữ liệu mẫu')}
+            </p>
+            <p className="text-[11px] text-amber-800">
+              {t('settings.clearSeededDataDesc', 'Chỉ xoá các việc, mục tiêu và lịch mẫu chưa chỉnh sửa. Những gì bạn đã tạo hoặc sửa đổi vẫn được giữ nguyên.')}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={clearSeededSampleData}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-amber-100/80 text-amber-900 border border-amber-300 font-bold text-xs flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-amber-700" />
+            <span>{t('settings.clearSeededDataBtn', 'Xoá dữ liệu mẫu')}</span>
+          </button>
+        </div>
+      )}
 
       {/* 5. Reset & Data Wipe (Rule G1.2: luôn là mục cuối cùng) */}
       {!showDeleteConfirm ? (
