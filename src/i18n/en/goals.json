@@ -97,6 +97,21 @@
     "nowCardTitle": "Overview {{year}} · {{count}} goals",
     "detailTitle": "Goal Details",
     "targetDatePrompt": "This goal has no deadline. Set a deadline to track EVM pacing.",
-    "viewOverview": "View Overview"
+    "viewOverview": "View Overview",
+    "selectGoalGroup": "Select Goal Group",
+    "goalNamePlaceholder": "e.g. Launch version 1.0...",
+    "goalMeasurablePlaceholder": "e.g. Reach 100 paying customers",
+    "classificationGuide": "Classification guide",
+    "classificationQuestion": "Classification Question",
+    "classificationTip": "When undecided: choose based on who the final outcome primarily serves.",
+    "dragToMoveFolder": "Drag to move folder",
+    "goalDetailsUpdated": "Goal details updated!",
+    "changeCategory": "Move group",
+    "selectNewGroup": "Select new group",
+    "editGoal": "Edit goal",
+    "dueDateFormatPlaceholder": "Due date (e.g. 15/12)",
+    "uncategorizedBanner": "These goals do not have a category yet. Move them to a folder spine or choose Move group to organize them.",
+    "categoryLabel": "Category:",
+    "defaultDeadline30": "in 30 days"
   }
 }

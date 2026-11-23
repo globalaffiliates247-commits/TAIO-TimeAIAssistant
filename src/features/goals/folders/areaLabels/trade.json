@@ -1,0 +1,31 @@
+{
+  "role": "trade",
+  "labels": {
+    "vi": {
+      "Product": "Tiếp cận",
+      "Business": "Doanh số",
+      "Operations": "Hồ sơ",
+      "Personal": "Cá nhân"
+    },
+    "en": {
+      "Product": "Outreach",
+      "Business": "Sales",
+      "Operations": "Records",
+      "Personal": "Personal"
+    }
+  },
+  "questions": {
+    "vi": {
+      "Product": "Việc này có giúp mở rộng đầu phễu, tạo cơ hội tiếp cận khách hàng tiềm năng mới không?",
+      "Business": "Việc này có trực tiếp chốt đơn, tạo doanh thu hoặc đạt chỉ tiêu bán hàng không?",
+      "Operations": "Việc này có duy trì CRM, báo cáo bán hàng, hợp đồng và chăm sóc sau bán không?",
+      "Personal": "Việc này thuộc về tôi, không thuộc về công việc? Sức khoẻ, gia đình, học hành, sở thích"
+    },
+    "en": {
+      "Product": "Does this expand the top-of-funnel and generate prospective lead opportunities?",
+      "Business": "Does this directly close deals, generate revenue, or achieve sales targets?",
+      "Operations": "Does this maintain CRM pipelines, sales records, contracts, and after-sales care?",
+      "Personal": "Is this for me, outside of work? Health, family, learning, personal interests"
+    }
+  }
+}

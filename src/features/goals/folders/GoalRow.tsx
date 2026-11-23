@@ -1,11 +1,11 @@
-// TAIO Time App — Goal Row Component (PRD v0.3.33 Part H)
+// TAIO Time App — Goal Row Component (PRD v0.3.33 Part H & v0.3.54 Part P)
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Goal, TimeBlock } from '@/types';
 import { GoalRowDetail } from './GoalRowDetail';
 import { MotivationSticker } from '@/features/motivation';
-import { ChevronRight, ChevronDown, Clock, Calendar } from 'lucide-react';
+import { ChevronRight, ChevronDown, Clock, Calendar, GripVertical } from 'lucide-react';
 import { useT } from '@/i18n/useT';
 import { useApp } from '@/context/AppContext';
 import { formatDuration } from '@/i18n/format';
@@ -29,12 +29,21 @@ export const GoalRow: React.FC<GoalRowProps> = ({
 }) => {
   const { t } = useT();
   const { language } = useApp();
+  const [isDragging, setIsDragging] = useState(false);
   const pct = Math.max(0, Math.min(100, Math.round(goal.progressPercent || 0)));
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 transition-opacity ${isDragging ? 'opacity-40' : 'opacity-100'}`}>
       {/* Single Row Item */}
       <div
+        draggable={true}
+        onDragStart={(e) => {
+          setIsDragging(true);
+          e.dataTransfer.setData('text/plain', goal.id);
+          e.dataTransfer.setData('application/x-taio-goal', goal.id);
+          e.dataTransfer.effectAllowed = 'move';
+        }}
+        onDragEnd={() => setIsDragging(false)}
         onClick={onToggle}
         className={`group p-3.5 rounded-2xl bg-white/90 hover:bg-white border transition-all cursor-pointer select-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs ${
           isExpanded
@@ -42,8 +51,15 @@ export const GoalRow: React.FC<GoalRowProps> = ({
             : 'border-black/5 hover:border-black/15'
         }`}
       >
-        {/* Left: Expand icon + Name (not bold) */}
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        {/* Left: Drag handle + Expand icon + Name (not bold) */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div
+            className="text-slate-300 group-hover:text-slate-500 cursor-grab shrink-0 transition-colors"
+            title={t('goals.dragToMoveFolder', 'Kéo để chuyển thư mục')}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-3.5 h-3.5" />
+          </div>
           <div className="text-slate-400 group-hover:text-slate-700 transition-colors shrink-0">
             {isExpanded ? (
               <ChevronDown className="w-4 h-4" />

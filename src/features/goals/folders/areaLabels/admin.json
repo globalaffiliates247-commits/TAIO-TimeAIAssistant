@@ -1,0 +1,31 @@
+{
+  "role": "admin",
+  "labels": {
+    "vi": {
+      "Product": "Công việc",
+      "Business": "Phối hợp",
+      "Operations": "Quy trình",
+      "Personal": "Cá nhân"
+    },
+    "en": {
+      "Product": "Tasks & Work",
+      "Business": "Coordination",
+      "Operations": "Processes",
+      "Personal": "Personal"
+    }
+  },
+  "questions": {
+    "vi": {
+      "Product": "Đầu việc này có tạo ra sản phẩm bàn giao trực tiếp phục vụ các phòng ban khác không?",
+      "Business": "Việc này có kết nối liên phòng ban, hỗ trợ các mục tiêu chiến lược chung không?",
+      "Operations": "Việc này có hoàn thiện thủ tục, hồ sơ, văn bản và đảm bảo kỷ luật vận hành không?",
+      "Personal": "Việc này thuộc về tôi, không thuộc về công việc? Sức khoẻ, gia đình, học hành, sở thích"
+    },
+    "en": {
+      "Product": "Does this deliver tangible work outputs directly serving other departments?",
+      "Business": "Does this cross-functional coordination support overarching organizational goals?",
+      "Operations": "Does this optimize administrative procedures, documentation, and compliance?",
+      "Personal": "Is this for me, outside of work? Health, family, learning, personal interests"
+    }
+  }
+}

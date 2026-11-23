@@ -1,0 +1,31 @@
+{
+  "role": "manager",
+  "labels": {
+    "vi": {
+      "Product": "Dự án",
+      "Business": "Chỉ tiêu",
+      "Operations": "Đội ngũ",
+      "Personal": "Cá nhân"
+    },
+    "en": {
+      "Product": "Projects",
+      "Business": "Targets",
+      "Operations": "Team",
+      "Personal": "Personal"
+    }
+  },
+  "questions": {
+    "vi": {
+      "Product": "Dự án này có tạo ra kết quả bàn giao cho các bên liên quan hay khách hàng không?",
+      "Business": "Việc này có đóng góp trực tiếp vào KPI, OKR hay chỉ tiêu cốt lõi không?",
+      "Operations": "Việc này có duy trì, nâng cao năng lực đội ngũ và tối ưu quy trình phối hợp không?",
+      "Personal": "Việc này thuộc về tôi, không thuộc về công việc? Sức khoẻ, gia đình, học hành, sở thích"
+    },
+    "en": {
+      "Product": "Does this project deliver outcomes to stakeholders or customers?",
+      "Business": "Does this directly contribute to core KPIs, OKRs, or targets?",
+      "Operations": "Does this maintain team capacity and streamline team workflow?",
+      "Personal": "Is this for me, outside of work? Health, family, learning, personal interests"
+    }
+  }
+}

@@ -18,7 +18,7 @@ export interface WorkNode {
   progressPercent: number;
   progressType?: GoalProgressType;
   status: 'active' | 'completed' | 'paused' | 'archived';
-  workArea?: 'Business' | 'Product' | 'Operations' | 'Personal' | 'Other';
+  workArea?: 'Business' | 'Product' | 'Operations' | 'Personal' | 'Other' | 'uncategorized' | string;
   priority?: 1 | 2 | 3 | 4;
   keyResultCurrent?: number;
   keyResultTarget?: number;

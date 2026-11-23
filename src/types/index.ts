@@ -169,7 +169,7 @@ export interface Goal {
   dailyBudgetMins: number;
   deadline: string;
   milestones: Milestone[];
-  workArea: 'Business' | 'Product' | 'Operations' | 'Personal';
+  workArea?: 'Business' | 'Product' | 'Operations' | 'Personal' | 'uncategorized' | string;
   progressPercent: number;
   progressType?: GoalProgressType; // B7 v0.3.18/v0.3.19: default 'tasks'
   size?: 'XS' | 'S' | 'M' | 'L' | 'XL'; // v0.3.34 Part E5: T-Shirt Goal Sizing

@@ -42,7 +42,7 @@ import {
 import { useT } from '@/i18n/useT';
 import { MASCOTS, MascotIcon } from '@/features/profile';
 import { isIOSCalendarConnected, setIOSCalendarConnected, requestIOSCalendarAccess } from '@/features/events/service/calendarSync';
-import { isGoalSuggestionInlineChipEnabled, setGoalSuggestionInlineChipEnabled } from '@/features/goals';
+import { isGoalSuggestionInlineChipEnabled, setGoalSuggestionInlineChipEnabled, getAreaDefinitionForRole } from '@/features/goals';
 import { startNativeLiveActivity, stopNativeLiveActivity, openNativeAppSettings } from '../features/native';
 import { isMotionTrackingEnabled, setMotionTrackingEnabled, getMotionCapability } from '@/features/motion';
 import { PROFILES } from '../data/mockData';
@@ -88,6 +88,9 @@ export const ProfileModal: React.FC = () => {
     deleteGoal,
     clearSeededSampleData,
     hasSeededData,
+    customAreaNames,
+    updateCustomAreaNames,
+    resetCustomAreaNames,
   } = useApp();
 
   const { t } = useT('settings');
@@ -986,6 +989,66 @@ export const ProfileModal: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {/* PRD Part P4.4: Custom Area Folder Renaming */}
+              <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                      {t('settings.areaFoldersTitle', 'Tên 4 thư mục mục tiêu')}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {t('settings.areaFoldersDesc', 'Tự đặt tên cho 4 nhóm. Tên tự đặt sẽ được giữ nguyên khi đổi nghề.')}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetCustomAreaNames();
+                      showToast(t('settings.areaFoldersResetToast', 'Đã khôi phục tên nhóm mặc định theo nghề!'));
+                    }}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold cursor-pointer shrink-0"
+                  >
+                    {t('settings.areaFoldersResetBtn', 'Khôi phục mặc định')}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {(['Product', 'Business', 'Operations', 'Personal'] as const).map(areaKey => {
+                    const defaultDef = getAreaDefinitionForRole(profile?.type);
+                    const langKey = (language as 'en' | 'vi') || 'vi';
+                    const roleDefault = defaultDef.labels[langKey]?.[areaKey] || defaultDef.labels.vi?.[areaKey] || areaKey;
+                    const customVal = customAreaNames[areaKey] || '';
+                    const isCustomized = Boolean(customAreaNames[areaKey]?.trim());
+
+                    return (
+                      <div key={areaKey} className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 space-y-1">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-mono text-slate-400">{areaKey}</span>
+                          {isCustomized ? (
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                              {t('settings.areaCustomBadge', 'Tự đặt')}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-slate-400">
+                              {t('settings.areaDefaultBadge', 'Mặc định nghề')}
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={customVal}
+                          placeholder={roleDefault}
+                          onChange={e => {
+                            updateCustomAreaNames({ [areaKey]: e.target.value });
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
@@ -1014,19 +1077,21 @@ export const ProfileModal: React.FC = () => {
                       href={communityConfig.advisor.zaloUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      style={{ color: 'var(--taio-on-brand)' }}
                       className="flex-1 py-2 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-sm font-bold text-xs flex items-center justify-center gap-1.5 transition-all taio-btn-primary"
                     >
-                      <span>Nhắn qua Zalo</span>
-                      <ExternalLink className="w-3 h-3 opacity-80" />
+                      <span style={{ color: 'var(--taio-on-brand)' }}>Nhắn qua Zalo</span>
+                      <ExternalLink className="w-3 h-3 opacity-80" style={{ color: 'var(--taio-on-brand)' }} />
                     </a>
                     <a
                       href={communityConfig.advisor.telegramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      style={{ color: 'var(--taio-on-brand)' }}
                       className="flex-1 py-2 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] shadow-sm font-bold text-xs flex items-center justify-center gap-1.5 transition-all taio-btn-primary"
                     >
-                      <span>Nhắn qua Telegram</span>
-                      <ExternalLink className="w-3 h-3 opacity-80" />
+                      <span style={{ color: 'var(--taio-on-brand)' }}>Nhắn qua Telegram</span>
+                      <ExternalLink className="w-3 h-3 opacity-80" style={{ color: 'var(--taio-on-brand)' }} />
                     </a>
                   </div>
                 </div>

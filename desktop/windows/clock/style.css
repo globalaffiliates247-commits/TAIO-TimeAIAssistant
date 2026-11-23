@@ -57,14 +57,40 @@ html[data-palette="neutral"] {
 }
 
 /* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]),
+  html:not([data-theme="light"]) {
+    --bg-main: #0f172a;
+    --text-main: #f8fafc;
+    --text-muted: #cbd5e1;
+    --border-main: #334155;
+  }
+}
+
 html.dark,
 html[data-theme="dark"],
 html.dark[data-palette],
 html[data-theme="dark"][data-palette] {
   --bg-main: #0f172a;
   --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-muted: #cbd5e1;
   --border-main: #334155;
+}
+
+html.dark .task-title,
+html[data-theme="dark"] .task-title,
+html.dark .time-digits,
+html[data-theme="dark"] .time-digits,
+html.dark .ring-digits,
+html[data-theme="dark"] .ring-digits {
+  color: #f8fafc !important;
+}
+
+html.dark .subtitle-line,
+html[data-theme="dark"] .subtitle-line,
+html.dark .ring-sub,
+html[data-theme="dark"] .ring-sub {
+  color: #cbd5e1 !important;
 }
 html.dark[data-palette="red"],
 html[data-theme="dark"][data-palette="red"] {

@@ -1,10 +1,10 @@
-// TAIO Time App — Folder Spine Component (PRD v0.3.33 Part H)
+// TAIO Time App — Folder Spine Component (PRD v0.3.33 Part H & v0.3.54 Part P)
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { STICKY_COLORS, StickyColor } from '@/features/sticky/model/stickyTypes';
 
-export type WorkAreaType = 'Product' | 'Business' | 'Operations' | 'Personal';
+export type WorkAreaType = 'Product' | 'Business' | 'Operations' | 'Personal' | 'uncategorized';
 
 export interface FolderSpineProps {
   area: WorkAreaType;
@@ -14,31 +14,60 @@ export interface FolderSpineProps {
   isActive: boolean;
   orientation: 'vertical' | 'horizontal';
   onClick: () => void;
+  onDropGoal?: (goalId: string, targetArea: WorkAreaType) => void;
 }
 
 export const FolderSpine: React.FC<FolderSpineProps> = ({
-  area: _area,
+  area,
   label,
   color,
   count,
   isActive,
   orientation,
   onClick,
+  onDropGoal,
 }) => {
-  const palette = STICKY_COLORS[color];
+  const palette = STICKY_COLORS[color] || STICKY_COLORS.blue;
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (!isDragOver) setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const goalId = e.dataTransfer.getData('application/x-taio-goal') || e.dataTransfer.getData('text/plain');
+    if (goalId && onDropGoal) {
+      onDropGoal(goalId, area);
+    }
+  };
 
   if (orientation === 'vertical') {
     return (
       <button
         type="button"
         onClick={onClick}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         style={{
-          backgroundColor: isActive ? palette.paper : palette.bar,
+          backgroundColor: isDragOver ? palette.paper : isActive ? palette.paper : palette.bar,
           color: palette.ink,
           borderRight: isActive ? `2px solid ${palette.paper}` : 'none',
         }}
         className={`w-12 sm:w-14 py-6 px-1 flex flex-col items-center justify-between rounded-l-2xl transition-all cursor-pointer select-none relative -mr-[1px] z-10 ${
-          isActive
+          isDragOver
+            ? 'ring-2 ring-blue-500 scale-105 z-20 shadow-md font-bold'
+            : isActive
             ? 'shadow-xs font-bold ring-1 ring-black/5'
             : 'opacity-75 hover:opacity-95 hover:brightness-102'
         }`}
@@ -76,12 +105,18 @@ export const FolderSpine: React.FC<FolderSpineProps> = ({
     <button
       type="button"
       onClick={onClick}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       style={{
-        backgroundColor: isActive ? palette.paper : palette.bar,
+        backgroundColor: isDragOver ? palette.paper : isActive ? palette.paper : palette.bar,
         color: palette.ink,
       }}
       className={`px-4 py-2.5 rounded-2xl flex items-center gap-2 transition-all cursor-pointer select-none shrink-0 border ${
-        isActive
+        isDragOver
+          ? 'ring-2 ring-blue-500 scale-105 border-blue-500 shadow-md font-bold'
+          : isActive
           ? 'shadow-xs font-bold border-black/10 ring-1 ring-black/5'
           : 'border-transparent opacity-75 hover:opacity-100'
       }`}

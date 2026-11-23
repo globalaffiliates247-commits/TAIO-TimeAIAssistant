@@ -1,0 +1,31 @@
+{
+  "role": "technical",
+  "labels": {
+    "vi": {
+      "Product": "Sản phẩm",
+      "Business": "Yêu cầu",
+      "Operations": "Hệ thống",
+      "Personal": "Cá nhân"
+    },
+    "en": {
+      "Product": "Product",
+      "Business": "Requirements",
+      "Operations": "Systems",
+      "Personal": "Personal"
+    }
+  },
+  "questions": {
+    "vi": {
+      "Product": "Việc này có trực tiếp xây dựng hay cải tiến tính năng, sản phẩm người dùng sử dụng không?",
+      "Business": "Việc này có đáp ứng yêu cầu nghiệp vụ, mang lại giá trị thiết thực cho tổ chức không?",
+      "Operations": "Việc này có củng cố kiến trúc kỹ thuật, hạ tầng, giảm nợ kỹ thuật và tăng độ ổn định không?",
+      "Personal": "Việc này thuộc về tôi, không thuộc về công việc? Sức khoẻ, gia đình, học hành, sở thích"
+    },
+    "en": {
+      "Product": "Does this directly build or enhance features that end users use?",
+      "Business": "Does this fulfill business requirements and deliver practical value?",
+      "Operations": "Does this strengthen infrastructure, reduce tech debt, and improve stability?",
+      "Personal": "Is this for me, outside of work? Health, family, learning, personal interests"
+    }
+  }
+}

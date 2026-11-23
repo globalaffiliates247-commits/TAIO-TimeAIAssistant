@@ -461,7 +461,11 @@ interface AppContextType {
   handleCloseDay: (tomorrowTask: string, targetDate?: string) => void;
   addNewBlock: (block: Omit<TimeBlock, 'id'>) => void;
   addGoalWithBackplanning: (goal: Omit<Goal, 'id' | 'milestones' | 'progressPercent'>) => void;
+  updateGoal: (goalId: string, patch: Partial<Goal>) => void;
   deleteGoal: (goalId: string) => void;
+  customAreaNames: Record<string, string>;
+  updateCustomAreaNames: (names: Record<string, string>) => void;
+  resetCustomAreaNames: () => void;
   remainingSampleGoals: Goal[];
   dayCloseConfig: { enabled: boolean; time: string; activeDays: number[]; durationMins?: number };
   setDayCloseConfig: (cfg: { enabled: boolean; time: string; activeDays: number[]; durationMins?: number }) => void;
@@ -3586,6 +3590,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       dailyCardItems.some(d => d.seeded);
   }, [goals, blocks, dailyCardItems]);
 
+  // PRD v0.3.54 Part P: Goal update & custom area names
+  const updateGoal = (goalId: string, patch: Partial<Goal>) => {
+    setGoals(prev => {
+      const next = prev.map(g => {
+        if (g.id !== goalId) return g;
+        return { ...g, ...patch, updatedAt: Date.now() };
+      });
+      saveDurableState('goals', next, Date.now());
+      return next;
+    });
+  };
+
+  const [customAreaNames, setCustomAreaNames] = useState<Record<string, string>>(() => {
+    if (typeof window === 'undefined') return {};
+    const saved = getStorageItemSync<Record<string, string> | null>('taio_custom_area_names', null);
+    if (saved && typeof saved === 'object') return saved;
+    // Check if existing user (has profile or goals saved before this version)
+    const isExistingUser = getStorageItemSync<boolean>('taio_area_names_initialized', false);
+    const hasGoalsOrProfile = !!getStorageItemSync('taio_profile', null) || !!getStorageItemSync('taio_durable_goals', null);
+    if (!isExistingUser && hasGoalsOrProfile) {
+      // Preserve existing names for legacy user as if custom-defined (Acceptance P13)
+      const legacy: Record<string, string> = {
+        Product: 'Sản phẩm',
+        Business: 'Kinh doanh',
+        Operations: 'Vận hành',
+        Personal: 'Cá nhân',
+      };
+      setStorageItemSync('taio_custom_area_names', legacy);
+      setStorageItemSync('taio_area_names_initialized', true);
+      return legacy;
+    }
+    setStorageItemSync('taio_area_names_initialized', true);
+    return {};
+  });
+
+  const updateCustomAreaNames = (patch: Record<string, string>) => {
+    setCustomAreaNames(prev => {
+      const next = { ...prev, ...patch };
+      Object.keys(next).forEach(k => {
+        if (!next[k] || !next[k].trim()) {
+          delete next[k];
+        }
+      });
+      setStorageItemSync('taio_custom_area_names', next);
+      return next;
+    });
+  };
+
+  const resetCustomAreaNames = () => {
+    setCustomAreaNames({});
+    setStorageItemSync('taio_custom_area_names', {});
+  };
+
   const deleteGoal = (goalId: string) => {
     setGoals(prev => {
       const next = prev.filter(g => g.id !== goalId);
@@ -3835,7 +3892,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       handleCloseDay,
       addNewBlock,
       addGoalWithBackplanning,
+      updateGoal,
       deleteGoal,
+      customAreaNames,
+      updateCustomAreaNames,
+      resetCustomAreaNames,
       remainingSampleGoals,
       dayCloseConfig,
       setDayCloseConfig,

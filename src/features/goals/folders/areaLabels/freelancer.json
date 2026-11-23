@@ -1,0 +1,31 @@
+{
+  "role": "freelancer",
+  "labels": {
+    "vi": {
+      "Product": "Dự án",
+      "Business": "Khách hàng",
+      "Operations": "Giấy tờ",
+      "Personal": "Cá nhân"
+    },
+    "en": {
+      "Product": "Projects",
+      "Business": "Clients",
+      "Operations": "Paperwork",
+      "Personal": "Personal"
+    }
+  },
+  "questions": {
+    "vi": {
+      "Product": "Dự án này có tạo ra sản phẩm hoàn thiện để bàn giao cho khách hàng không?",
+      "Business": "Việc này có mang lại khách hàng mới, thanh toán hay hợp đồng mới không?",
+      "Operations": "Việc này có giữ tài chính, kế toán, thuế, hợp đồng và quản lý vận hành cá nhân trơn tru không?",
+      "Personal": "Việc này thuộc về tôi, không thuộc về công việc? Sức khoẻ, gia đình, học hành, sở thích"
+    },
+    "en": {
+      "Product": "Does this project produce deliverable work to hand over to clients?",
+      "Business": "Does this bring in new clients, contract signings, or invoice payments?",
+      "Operations": "Does this keep independent invoicing, taxes, contracts, and admin running smoothly?",
+      "Personal": "Is this for me, outside of work? Health, family, learning, personal interests"
+    }
+  }
+}

@@ -81,6 +81,12 @@
     "clearSeededData": "Xoá toàn bộ dữ liệu mẫu",
     "clearSeededDataDesc": "Chỉ xoá các việc, mục tiêu và lịch mẫu chưa chỉnh sửa. Những gì bạn đã tạo hoặc sửa đổi vẫn được giữ nguyên.",
     "clearSeededDataBtn": "Xoá dữ liệu mẫu",
-    "seededDataCleared": "Đã xoá toàn bộ dữ liệu mẫu."
+    "seededDataCleared": "Đã xoá toàn bộ dữ liệu mẫu.",
+    "areaFoldersTitle": "Tên 4 thư mục mục tiêu",
+    "areaFoldersDesc": "Tự đặt tên cho 4 nhóm. Tên tự đặt sẽ được giữ nguyên khi đổi nghề.",
+    "areaFoldersResetBtn": "Khôi phục mặc định",
+    "areaFoldersResetToast": "Đã khôi phục tên nhóm mặc định theo nghề!",
+    "areaCustomBadge": "Tự đặt",
+    "areaDefaultBadge": "Mặc định nghề"
   }
 }

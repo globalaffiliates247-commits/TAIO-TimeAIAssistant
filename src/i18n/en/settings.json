@@ -81,6 +81,12 @@
     "clearSeededData": "Clear Seeded Sample Data",
     "clearSeededDataDesc": "Clears only untouched seeded sample records. Customized items remain intact.",
     "clearSeededDataBtn": "Clear Sample Data",
-    "seededDataCleared": "Cleared all seeded sample data."
+    "seededDataCleared": "Cleared all seeded sample data.",
+    "areaFoldersTitle": "Goal Folder Names",
+    "areaFoldersDesc": "Customize the 4 group labels. Custom names will be preserved when changing professions.",
+    "areaFoldersResetBtn": "Reset to default",
+    "areaFoldersResetToast": "Reset folder names to profession defaults!",
+    "areaCustomBadge": "Custom",
+    "areaDefaultBadge": "Default"
   }
 }

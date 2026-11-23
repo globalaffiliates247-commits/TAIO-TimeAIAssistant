@@ -1,4 +1,4 @@
-// TAIO Time App — Goal Row Inline Expandable Detail (PRD v0.3.33 Part H & v0.3.54 Part M/N/O)
+// TAIO Time App — Goal Row Inline Expandable Detail (PRD v0.3.33 Part H & v0.3.54 Part M/N/O/P)
 'use client';
 
 import React, { useState } from 'react';
@@ -17,11 +17,14 @@ import {
   RotateCcw, 
   HelpCircle, 
   ChevronUp, 
-  ChevronDown 
+  ChevronDown,
+  FolderSync,
+  Save
 } from 'lucide-react';
 import { useT } from '@/i18n/useT';
 import { useApp } from '@/context/AppContext';
 import { MethodExplainer } from '../ui/MethodExplainer';
+import { getAreaLabel, getAreaQuestion } from './areaLabels';
 
 export interface GoalRowDetailProps {
   goal: Goal;
@@ -43,6 +46,10 @@ export const GoalRowDetail: React.FC<GoalRowDetailProps> = ({
     reorderMilestones, 
     resetMilestonesToSuggestions,
     deleteGoal,
+    updateGoal,
+    customAreaNames,
+    profile,
+    showToast,
     addDailyCardItem,
     selectedCardDate,
     language 
@@ -56,7 +63,17 @@ export const GoalRowDetail: React.FC<GoalRowDetailProps> = ({
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
 
+  // PRD Part P: Inline Goal Editing
+  const [isEditingGoal, setIsEditingGoal] = useState(false);
+  const [goalName, setGoalName] = useState(goal.name);
+  const [measurableResult, setMeasurableResult] = useState(goal.measurableResult || '');
+  const [deadline, setDeadline] = useState(goal.deadline || '');
+
+  // PRD Part P: Move Group Menu
+  const [showMoveMenu, setShowMoveMenu] = useState(false);
+
   const milestones = goal.milestones || [];
+  const standardAreas = ['Product', 'Business', 'Operations', 'Personal'] as const;
 
   const handleStartEdit = (m: Milestone) => {
     setEditingMilestoneId(m.id);
@@ -91,9 +108,7 @@ export const GoalRowDetail: React.FC<GoalRowDetailProps> = ({
   };
 
   const handleAddTaskToGoal = () => {
-    const title = window.prompt(
-      t('goals.promptTaskTitle')
-    );
+    const title = window.prompt(t('goals.promptTaskTitle'));
     if (title && title.trim()) {
       addDailyCardItem({
         text: title.trim(),
@@ -117,21 +132,175 @@ export const GoalRowDetail: React.FC<GoalRowDetailProps> = ({
     }
   };
 
+  const handleSaveGoalInfo = () => {
+    if (goalName.trim()) {
+      updateGoal(goal.id, {
+        name: goalName.trim(),
+        measurableResult: measurableResult.trim() || goalName.trim(),
+        deadline: deadline.trim(),
+      });
+      setIsEditingGoal(false);
+      showToast(t('goals.goalDetailsUpdated', 'Đã lưu thông tin mục tiêu!'));
+    }
+  };
+
+  const handleSelectArea = (targetArea: string) => {
+    updateGoal(goal.id, { workArea: targetArea });
+    setShowMoveMenu(false);
+    const targetLabel = getAreaLabel(targetArea, profile?.type, customAreaNames, language);
+    showToast(
+      language === 'vi'
+        ? `Đã chuyển sang nhóm ${targetLabel}!`
+        : `Moved to ${targetLabel}!`
+    );
+  };
+
+  const currentAreaLabel = getAreaLabel(goal.workArea || 'uncategorized', profile?.type, customAreaNames, language);
+
   return (
     <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4 animate-in fade-in slide-in-from-top-1 duration-150">
-      {/* Top row: Measurable result + 4 Action Buttons (Part M3: touch target >= 24x24, gap >= 4px) */}
+      {/* Top row: Measurable result + Action Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-3">
-        <div className="space-y-0.5">
-          <span className="text-[10.5px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
-            {t('goals.target_result', 'Kết quả then chốt')}
-          </span>
-          <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">
-            {goal.measurableResult || goal.name}
-          </p>
-        </div>
+        {isEditingGoal ? (
+          <div className="flex-1 space-y-2 pr-2">
+            <div>
+              <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
+                {t('goals.input_name', 'Tên mục tiêu')}
+              </label>
+              <input
+                type="text"
+                value={goalName}
+                onChange={e => setGoalName(e.target.value)}
+                className="w-full text-xs font-semibold px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
+                  {t('goals.target_result', 'Kết quả then chốt')}
+                </label>
+                <input
+                  type="text"
+                  value={measurableResult}
+                  onChange={e => setMeasurableResult(e.target.value)}
+                  className="w-full text-xs px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
+                  {t('goals.deadline', 'Hạn chót')}
+                </label>
+                <input
+                  type="text"
+                  value={deadline}
+                  onChange={e => setDeadline(e.target.value)}
+                  className="w-full text-xs px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleSaveGoalInfo}
+                className="px-2.5 py-1 rounded-lg bg-[var(--taio-brand)] text-white text-xs font-semibold flex items-center gap-1 shadow-2xs"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>{t('common.save', 'Lưu')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setGoalName(goal.name);
+                  setMeasurableResult(goal.measurableResult || '');
+                  setDeadline(goal.deadline || '');
+                  setIsEditingGoal(false);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold"
+              >
+                {t('common.cancel', 'Hủy')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[10.5px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
+                {t('goals.target_result', 'Kết quả then chốt')}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                {currentAreaLabel}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+              {goal.measurableResult || goal.name}
+            </p>
+          </div>
+        )}
 
-        {/* 4 Action Buttons */}
-        <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0 relative">
+          {/* PRD Part P: Move Group Button with Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowMoveMenu(!showMoveMenu)}
+              className="h-8 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center gap-1 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+              title={t('goals.changeCategory', 'Chuyển nhóm')}
+            >
+              <FolderSync className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('goals.changeCategory', 'Chuyển nhóm')}</span>
+            </button>
+
+            {showMoveMenu && (
+              <div
+                className="absolute right-0 top-full mt-1.5 z-40 w-64 p-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl space-y-1"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="px-2 py-1 text-[10.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/60 mb-1">
+                  {t('goals.selectNewGroup', 'Chọn nhóm mới')}
+                </div>
+                {standardAreas.map(areaKey => {
+                  const label = getAreaLabel(areaKey, profile?.type, customAreaNames, language);
+                  const question = getAreaQuestion(areaKey, profile?.type, language);
+                  const isCurrent = (goal.workArea || 'uncategorized') === areaKey;
+
+                  return (
+                    <button
+                      key={areaKey}
+                      type="button"
+                      onClick={() => handleSelectArea(areaKey)}
+                      className={`w-full text-left p-2 rounded-xl text-xs transition-colors flex flex-col gap-0.5 cursor-pointer ${
+                        isCurrent
+                          ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{label}</span>
+                        {isCurrent && <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
+                      </div>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight font-normal">
+                        {question}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Edit Goal Button */}
+          {!isEditingGoal && (
+            <button
+              type="button"
+              onClick={() => setIsEditingGoal(true)}
+              className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+              title={t('goals.editGoal', 'Sửa mục tiêu')}
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleAddTaskToGoal}
@@ -184,53 +353,56 @@ export const GoalRowDetail: React.FC<GoalRowDetailProps> = ({
               <button
                 type="button"
                 onClick={() => setIsExplainerOpen(true)}
-                className="w-6 h-6 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center justify-center transition-colors cursor-pointer"
-                title={t('goals.methodExplainerTitle')}
+                className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                title={t('goals.methodExplainerTitle', 'Giải thích phương pháp')}
               >
                 <HelpCircle className="w-3.5 h-3.5" />
               </button>
+
               <button
                 type="button"
                 onClick={() => setIsAddingMilestone(true)}
-                className="w-6 h-6 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors cursor-pointer"
-                title={t('goals.addMilestoneAction')}
+                className="text-[11px] text-[var(--taio-brand)] hover:underline font-semibold"
               >
-                <Plus className="w-3.5 h-3.5" />
+                + {t('goals.addMilestone', 'Thêm mốc')}
               </button>
             </div>
           </div>
 
-          {/* New Milestone Form */}
+          {/* Inline Add Milestone Form */}
           {isAddingMilestone && (
-            <form onSubmit={handleAddSubmit} className="p-2.5 rounded-lg bg-white dark:bg-slate-750 border border-[var(--taio-brand)]/40 space-y-2 shadow-2xs">
+            <form onSubmit={handleAddSubmit} className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 space-y-2 shadow-2xs">
               <input
                 type="text"
+                autoFocus
+                placeholder={t('goals.milestoneNamePlaceholder', 'Tên cột mốc mới...')}
                 value={newName}
                 onChange={e => setNewName(e.target.value)}
-                placeholder={t('goals.milestonePlaceholder')}
-                className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none"
-                autoFocus
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
               />
               <div className="flex items-center justify-between gap-2">
                 <input
-                  type="date"
+                  type="text"
+                  placeholder={t('goals.dueDateFormatPlaceholder', 'Hạn chót (VD: 15/12)')}
                   value={newDate}
                   onChange={e => setNewDate(e.target.value)}
-                  className="px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none"
+                  className="w-32 px-2 py-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none"
                 />
                 <div className="flex items-center gap-1">
                   <button
-                    type="button"
-                    onClick={() => setIsAddingMilestone(false)}
-                    className="p-1 rounded text-slate-400 hover:text-slate-700"
+                    type="submit"
+                    className="p-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                    title={t('common.save', 'Lưu')}
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <Check className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    type="submit"
-                    className="px-2.5 py-1 rounded bg-[var(--taio-brand)] text-[var(--taio-on-brand)] font-bold text-xs"
+                    type="button"
+                    onClick={() => setIsAddingMilestone(false)}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 cursor-pointer"
+                    title={t('common.cancel', 'Hủy')}
                   >
-                    {t('goals.saveMilestone')}
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -238,52 +410,59 @@ export const GoalRowDetail: React.FC<GoalRowDetailProps> = ({
           )}
 
           {milestones.length === 0 ? (
-            <div className="text-[11px] text-slate-500 dark:text-slate-400 italic py-2 space-y-1">
-              <p>{t('goals.no_milestones', 'Chưa có cột mốc nào.')}</p>
+            <div className="text-center py-4 space-y-1">
+              <p className="text-[11px] text-slate-400 italic">
+                {t('goals.noMilestones')}
+              </p>
               <button
                 type="button"
-                onClick={handleResetMilestones}
-                className="text-[var(--taio-brand)] hover:underline font-medium not-italic"
+                onClick={() => setIsExplainerOpen(true)}
+                className="text-[11px] text-blue-600 hover:underline font-semibold"
               >
-                {t('goals.suggest3Milestones')}
+                {t('goals.learnBackplanning', 'Tìm hiểu cách lập kế hoạch ngược')}
               </button>
             </div>
           ) : (
-            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
               {milestones.map((m, idx) => {
                 const isCompleted = m.status === 'completed' || m.status === 'done';
                 const isEditing = editingMilestoneId === m.id;
 
                 if (isEditing) {
                   return (
-                    <div key={m.id} className="p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 space-y-1.5 shadow-2xs">
+                    <div
+                      key={m.id}
+                      className="p-2 rounded-lg bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 space-y-1.5"
+                    >
                       <input
                         type="text"
                         value={editName}
                         onChange={e => setEditName(e.target.value)}
-                        className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none"
+                        autoFocus
                       />
                       <div className="flex items-center justify-between gap-2">
                         <input
-                          type="date"
+                          type="text"
                           value={editDate}
                           onChange={e => setEditDate(e.target.value)}
-                          className="px-2 py-0.5 text-xs rounded border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                          placeholder="Hạn chót"
+                          className="w-28 px-2 py-0.5 text-[11px] rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none"
                         />
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
-                            onClick={() => setEditingMilestoneId(null)}
-                            className="p-1 rounded text-slate-400 hover:text-slate-600"
+                            onClick={() => handleSaveEdit(m.id)}
+                            className="p-1 rounded bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
                           >
-                            <X className="w-3.5 h-3.5" />
+                            <Check className="w-3 h-3" />
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleSaveEdit(m.id)}
-                            className="p-1 rounded text-emerald-600 hover:bg-emerald-50 font-bold"
+                            onClick={() => setEditingMilestoneId(null)}
+                            className="p-1 rounded text-slate-400 hover:text-slate-600 cursor-pointer"
                           >
-                            <Check className="w-3.5 h-3.5" />
+                            <X className="w-3 h-3" />
                           </button>
                         </div>
                       </div>

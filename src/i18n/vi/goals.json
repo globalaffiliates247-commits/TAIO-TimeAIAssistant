@@ -97,6 +97,21 @@
     "nowCardTitle": "Toàn cảnh {{year}} · {{count}} mục tiêu",
     "detailTitle": "Chi tiết mục tiêu",
     "targetDatePrompt": "Mục tiêu này chưa có hạn chót. Đặt hạn chót để theo dõi nhịp độ chuẩn EVM.",
-    "viewOverview": "Xem Toàn cảnh"
+    "viewOverview": "Xem Toàn cảnh",
+    "selectGoalGroup": "Chọn nhóm mục tiêu",
+    "goalNamePlaceholder": "Ví dụ: Ra mắt phiên bản 1.0...",
+    "goalMeasurablePlaceholder": "Ví dụ: Đạt 100 khách hàng trả phí đầu tiên",
+    "classificationGuide": "Tiêu chí phân nhóm",
+    "classificationQuestion": "Câu hỏi phân nhóm",
+    "classificationTip": "Khi phân vân giữa hai nhóm: chọn theo kết quả cuối cùng phục vụ ai.",
+    "dragToMoveFolder": "Kéo để chuyển thư mục",
+    "goalDetailsUpdated": "Đã lưu thông tin mục tiêu!",
+    "changeCategory": "Chuyển nhóm",
+    "selectNewGroup": "Chọn nhóm mới",
+    "editGoal": "Sửa mục tiêu",
+    "dueDateFormatPlaceholder": "Hạn chót (VD: 15/12)",
+    "uncategorizedBanner": "Các mục tiêu này chưa được xếp nhóm. Kéo sang gáy thư mục hoặc chọn Chuyển nhóm để phân loại.",
+    "categoryLabel": "Nhóm:",
+    "defaultDeadline30": "30 ngày tới"
   }
 }

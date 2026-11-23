@@ -8,16 +8,19 @@ import { parseViGoal, ParsedGoal } from './parsers/vi';
 import { parseEnGoal } from './parsers/en';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { Target, Lightbulb, Calendar, Hash, Clock } from 'lucide-react';
+import { getAreaLabel } from './folders/areaLabels';
 
 export const GoalInput: React.FC = () => {
-  const { addGoalWithBackplanning, showToast, language, palette } = useApp();
+  const { addGoalWithBackplanning, showToast, language, palette, profile, customAreaNames } = useApp();
   const { t } = useT();
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const [text, setText] = useState('');
+  const [selectedArea, setSelectedArea] = useState<string>('Personal');
 
   const parsed: ParsedGoal | null = useMemo(() => {
     if (text.trim().length < 3) return null;
-    return language === 'en' ? parseEnGoal(text) : parseViGoal(text);
+    const isEn = language === 'en';
+    return isEn ? parseEnGoal(text) : parseViGoal(text);
   }, [text, language]);
 
   const handleCreate = () => {
@@ -40,8 +43,8 @@ export const GoalInput: React.FC = () => {
           : parsed.title,
       horizonDays,
       dailyBudgetMins: parsed.duration || 60,
-      deadline: parsed.deadlineRaw || (language === 'vi' ? '30 ngày tới' : 'in 30 days'),
-      workArea: 'Personal',
+      deadline: parsed.deadlineRaw || t('goals.defaultDeadline30', '30 ngày tới'),
+      workArea: selectedArea as any,
       progressType,
       keyResultTarget: parsed.target,
       keyResultUnit: parsed.unit,
@@ -51,7 +54,12 @@ export const GoalInput: React.FC = () => {
         : undefined,
     });
 
-    showToast(t('goals.toastCreated'));
+    const areaLabel = getAreaLabel(selectedArea, profile?.type, customAreaNames, language);
+    showToast(
+      language === 'vi'
+        ? `Đã thêm mục tiêu vào nhóm ${areaLabel}!`
+        : `Goal added to ${areaLabel}!`
+    );
     setText('');
   };
 
@@ -112,6 +120,31 @@ export const GoalInput: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* PRD Part P & Acceptance 6: Category chips */}
+      <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+        <span className="text-[11px] text-slate-400 font-medium">
+          {t('goals.categoryLabel', 'Nhóm:')}
+        </span>
+        {(['Product', 'Business', 'Operations', 'Personal'] as const).map(areaKey => {
+          const label = getAreaLabel(areaKey, profile?.type, customAreaNames, language);
+          const isSel = selectedArea === areaKey;
+          return (
+            <button
+              key={areaKey}
+              type="button"
+              onClick={() => setSelectedArea(areaKey)}
+              className={`px-2 py-0.5 rounded-lg text-[10.5px] font-semibold transition-all cursor-pointer ${
+                isSel
+                  ? 'bg-blue-600 text-white shadow-2xs font-bold'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
 
       <div className="flex items-center justify-between">
         <p className="text-[11px] text-slate-400">{t('goals.quickAddHint')}</p>

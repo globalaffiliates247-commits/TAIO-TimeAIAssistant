@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Goal, GoalProgressType } from '../types';
 import { GoalFolders, WorkAreaType } from '../features/goals/folders';
+import { getAreaLabel, getAreaQuestion } from '../features/goals';
 import { OverviewScreen } from '../features/overview';
 import { QuoteCard } from '../features/goals/quotes/QuoteCard';
 import { Plus, Target, Sparkles, X } from 'lucide-react';
@@ -38,6 +39,8 @@ export const GoalsTab: React.FC = () => {
     showToast,
     palette,
     language,
+    profile,
+    customAreaNames,
   } = useApp();
   const { t } = useT();
 
@@ -62,6 +65,7 @@ export const GoalsTab: React.FC = () => {
   ];
 
   const [activeArea, setActiveArea] = useState<WorkAreaType>('Product');
+  const [selectedWorkArea, setSelectedWorkArea] = useState<WorkAreaType>('Product');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
   // Form states for new goal
@@ -83,7 +87,7 @@ export const GoalsTab: React.FC = () => {
   const dueSoonCount = goals.filter(g => (g.horizonDays && g.horizonDays <= 14) || (g.deadline && g.deadline.includes('7'))).length;
 
   const handleOpenCreateGoal = (area: WorkAreaType) => {
-    setActiveArea(area);
+    setSelectedWorkArea(area === 'uncategorized' ? 'Product' : area);
     setShowAddModal(true);
   };
 
@@ -110,7 +114,7 @@ export const GoalsTab: React.FC = () => {
       horizonDays: Number(horizonDays),
       dailyBudgetMins: Number(dailyBudgetMins),
       deadline: deadlineStr,
-      workArea: activeArea,
+      workArea: selectedWorkArea,
       progressType,
       keyResultCurrent: 0,
       keyResultTarget: Number(keyResultTarget) || 50,
@@ -118,10 +122,16 @@ export const GoalsTab: React.FC = () => {
       committedHours: Number(committedHours) || 30,
     });
 
+    setActiveArea(selectedWorkArea);
     setNewGoalName('');
     setMeasurableResult('');
     setShowAddModal(false);
-    showToast(t('goals.created_toast', `Đã thêm mục tiêu vào ngăn ${activeArea}!`));
+    const areaName = getAreaLabel(selectedWorkArea, profile?.type, customAreaNames, language);
+    showToast(
+      language === 'vi'
+        ? `Đã thêm mục tiêu vào ngăn ${areaName}!`
+        : `Goal added to ${areaName}!`
+    );
   };
 
   return (
@@ -197,7 +207,7 @@ export const GoalsTab: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[var(--taio-brand)]" />
                 <h3 className="text-base font-bold text-slate-900">
-                  {t('goals.modal_title', 'Thêm mục tiêu mới')} ({activeArea})
+                  {t('goals.modal_title', 'Thêm mục tiêu mới')}
                 </h3>
               </div>
               <button
@@ -210,6 +220,37 @@ export const GoalsTab: React.FC = () => {
             </div>
 
             <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
+              {/* PRD Part P & Acceptance 5: Explicit category selection with question helpers */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1.5">
+                  {t('goals.selectGoalGroup', 'Chọn nhóm mục tiêu')}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['Product', 'Business', 'Operations', 'Personal'] as const).map(areaKey => {
+                    const label = getAreaLabel(areaKey, profile?.type, customAreaNames, language);
+                    const question = getAreaQuestion(areaKey, profile?.type, language);
+                    const isSel = selectedWorkArea === areaKey;
+                    return (
+                      <button
+                        key={areaKey}
+                        type="button"
+                        onClick={() => setSelectedWorkArea(areaKey)}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                          isSel
+                            ? 'border-blue-600 bg-blue-50/80 text-blue-900 font-bold ring-1 ring-blue-500 shadow-2xs'
+                            : 'border-slate-200 bg-slate-50/70 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="text-xs font-bold">{label}</div>
+                        <div className="text-[10px] text-slate-500 font-normal leading-tight mt-0.5 line-clamp-2">
+                          {question}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
                   {t('goals.input_name', 'Tên mục tiêu lớn')}
@@ -220,7 +261,7 @@ export const GoalsTab: React.FC = () => {
                   autoFocus
                   value={newGoalName}
                   onChange={e => setNewGoalName(e.target.value)}
-                  placeholder={language === 'en' ? 'e.g. Launch version 1.0...' : 'Ví dụ: Ra mắt phiên bản 1.0...'}
+                  placeholder={t('goals.goalNamePlaceholder', 'Ví dụ: Ra mắt phiên bản 1.0...')}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)] focus:ring-1 focus:ring-[var(--taio-brand)]"
                 />
               </div>
@@ -233,7 +274,7 @@ export const GoalsTab: React.FC = () => {
                   type="text"
                   value={measurableResult}
                   onChange={e => setMeasurableResult(e.target.value)}
-                  placeholder={language === 'en' ? 'e.g. Reach 100 paying customers' : 'Ví dụ: Đạt 100 khách hàng trả phí đầu tiên'}
+                  placeholder={t('goals.goalMeasurablePlaceholder', 'Ví dụ: Đạt 100 khách hàng trả phí đầu tiên')}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)] focus:ring-1 focus:ring-[var(--taio-brand)]"
                 />
               </div>

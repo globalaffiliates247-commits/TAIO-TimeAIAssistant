@@ -1,0 +1,31 @@
+{
+  "role": "owner",
+  "labels": {
+    "vi": {
+      "Product": "Sản phẩm",
+      "Business": "Kinh doanh",
+      "Operations": "Vận hành",
+      "Personal": "Cá nhân"
+    },
+    "en": {
+      "Product": "Product",
+      "Business": "Business",
+      "Operations": "Operations",
+      "Personal": "Personal"
+    }
+  },
+  "questions": {
+    "vi": {
+      "Product": "Việc này có tạo ra hoặc cải thiện thứ mà người dùng, khách hàng của tôi sẽ dùng không?",
+      "Business": "Việc này có mang tiền về, hoặc mang khách về không?",
+      "Operations": "Việc này có giữ cho bộ máy chạy trơn không? Giấy tờ, quy trình, nhân sự, công cụ",
+      "Personal": "Việc này thuộc về tôi, không thuộc về công việc? Sức khoẻ, gia đình, học hành, sở thích"
+    },
+    "en": {
+      "Product": "Does this create or improve something my users or customers will use?",
+      "Business": "Does this bring in revenue or bring in customers?",
+      "Operations": "Does this keep operations running smoothly? Paperwork, processes, HR, tools",
+      "Personal": "Is this for me, outside of work? Health, family, learning, personal interests"
+    }
+  }
+}
