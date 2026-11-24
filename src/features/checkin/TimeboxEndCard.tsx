@@ -13,7 +13,8 @@ import type { TimeBlock } from '@/types';
 import { useT } from '@/i18n/useT';
 import { MotivationSticker } from '@/features/motivation';
 import { SnoozePicker, type SnoozeOption } from '@/features/snooze';
-import { timeToMinutes, getDeviceTimeMinutes } from '@/core/clock';
+import { timeToMinutes, getDeviceTimeMinutes, getDeviceCalendarDate } from '@/core/clock';
+import { getPreviousDay } from '@/features/dayclose';
 
 export interface TimeboxEndCardProps {
   checkInBlock: TimeBlock;
@@ -43,6 +44,20 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
 
   const hasGoal = Boolean(checkInBlock.goalName && checkInBlock.goalName.trim() && checkInBlock.goalName !== 'Ngoài mục tiêu chính');
 
+  // PRD v0.3.56 Phần C: Thẻ hết giờ chỉ rõ ngày khi không phải hôm nay
+  const today = getDeviceCalendarDate();
+  const isOtherDay = Boolean(checkInBlock.date && checkInBlock.date !== today);
+  let datePrefix = '';
+  if (isOtherDay) {
+    if (checkInBlock.date === getPreviousDay(today)) {
+      datePrefix = `${t('checkin.yesterday', 'Hôm qua')} · `;
+    } else if (checkInBlock.date) {
+      const parts = checkInBlock.date.split('-');
+      const formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}` : checkInBlock.date;
+      datePrefix = `${formattedDate} · `;
+    }
+  }
+
   return (
     <div className="fixed app-bottom-sheet-safe z-[100] bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200">
       <div className="bg-white border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl p-6 text-slate-900 border-t border-orange-500/30 sm:border">
@@ -53,7 +68,7 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
               {t('checkin.kicker', 'Hết giờ rồi. Việc này xong chưa?')}
             </div>
             <div className="text-[11px] text-slate-400">
-              {checkInBlock.startTime} - {checkInBlock.endTime} · {waitingCount}
+              {datePrefix}{checkInBlock.startTime} - {checkInBlock.endTime} · {t('checkin.waitingTasks', { count: waitingCount, defaultValue: `${waitingCount} việc đang chờ` })}
             </div>
           </div>
           <button 

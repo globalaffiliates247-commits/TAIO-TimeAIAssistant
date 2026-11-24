@@ -17,7 +17,23 @@ export function buildTodaySchedule(
 ): TimeBlock[] {
   // 1. Existing template blocks and user blocks from blocks array (excluding old dc- blocks and purged mock b-ritual-close)
   const baseBlocks = (blocks || [])
-    .filter(b => !b.id.startsWith('dc-') && b.id !== 'b-ritual-close')
+    .filter(b => {
+      if (b.id.startsWith('dc-') || b.id === 'b-ritual-close') return false;
+      const isTemplateOrRitual = Boolean(
+        b.isTemplateBlock || 
+        b.blockKind === 'ritual' || 
+        b.taskSource === 'template_schedule' ||
+        b.id === 'b-user-dayclose' || 
+        b.id === 'b-10'
+      );
+      if (isTemplateOrRitual) return true;
+      // PRD v0.3.56 Phần A2: User-created blocks only enter schedule if date === today
+      if (b.date) {
+        return b.date === today;
+      }
+      // Legacy unmigrated blocks: only if statusDate === today
+      return b.statusDate === today;
+    })
     .map(b => {
       // Apply today's daily override if present for recurring template blocks
       if ((b.isTemplateBlock || b.blockKind === 'ritual') && b.dailyOverrides && b.dailyOverrides[today]) {

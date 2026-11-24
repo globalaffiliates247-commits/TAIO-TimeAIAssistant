@@ -5,10 +5,17 @@ import { timeToMinutes, minutesToTime, getDeviceTimeMinutes, getDeviceCalendarDa
 export interface ScheduleWriteContext {
   updateDailyCardItem: (id: string, patch: Partial<DailyCardItem>) => void;
   setBlocks: React.Dispatch<React.SetStateAction<TimeBlock[]>>;
+  blocks?: TimeBlock[];
   dailyCardItems?: DailyCardItem[];
   dayCloseConfig?: { enabled: boolean; time: string; activeDays: number[]; durationMins?: number };
   dayCloseOverrides?: Record<string, { time: string; endTime?: string; durationMins?: number; status?: import('@/types').BlockStatus; count?: number; history?: Array<{ from: string; to: string; at: number }> }>;
   setDayCloseOverrides?: React.Dispatch<React.SetStateAction<Record<string, { time: string; endTime?: string; durationMins?: number; status?: import('@/types').BlockStatus; count?: number; history?: Array<{ from: string; to: string; at: number }> }>>>;
+}
+
+export interface ScheduleWriteResult {
+  success: boolean;
+  target?: 'block' | 'card' | 'dayclose' | 'not_found';
+  error?: string;
 }
 
 /**
@@ -22,7 +29,7 @@ export function updateScheduleEntry(
   id: string,
   patch: Partial<TimeBlock>,
   ctx: ScheduleWriteContext
-): void {
+): ScheduleWriteResult {
   // Day-close ritual handler (PRD v0.3.36 Part E)
   if (id === 'b-user-dayclose' || id === 'b-ritual-close') {
     if (ctx.setDayCloseOverrides) {
@@ -45,11 +52,16 @@ export function updateScheduleEntry(
         };
       });
     }
-    return;
+    return { success: true, target: 'dayclose' };
   }
 
-  const isCardItem = id.startsWith('dc-') || ctx.dailyCardItems?.some(it => it.id === id);
+  const cardExists = ctx.dailyCardItems?.some(it => it.id === id);
+  const isCardItem = cardExists || id.startsWith('dc-');
   if (isCardItem) {
+    if (ctx.dailyCardItems && !cardExists) {
+      console.error(`[updateScheduleEntry] Item "${id}" not found in dailyCardItems.`);
+      return { success: false, target: 'not_found', error: `Item "${id}" not found in dailyCardItems` };
+    }
     const cardPatch: Partial<DailyCardItem> = {};
     if ((patch as any).date !== undefined) cardPatch.date = (patch as any).date;
     if (patch.title !== undefined) cardPatch.text = patch.title;
@@ -120,7 +132,13 @@ export function updateScheduleEntry(
     }
 
     ctx.updateDailyCardItem(id, cardPatch);
+    return { success: true, target: 'card' };
   } else {
+    if (ctx.blocks && !ctx.blocks.some(b => b.id === id)) {
+      console.error(`[updateScheduleEntry] Schedule entry "${id}" not found in blocks or dailyCardItems.`);
+      return { success: false, target: 'not_found', error: `Schedule entry "${id}" not found in blocks or dailyCardItems` };
+    }
+
     ctx.setBlocks(prev => prev.map(b => {
       if (b.id !== id) return b;
       const today = getDeviceCalendarDate();
@@ -177,5 +195,7 @@ export function updateScheduleEntry(
       }
       return updated;
     }));
+
+    return { success: true, target: 'block' };
   }
 }

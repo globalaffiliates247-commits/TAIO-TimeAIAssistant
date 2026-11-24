@@ -104,6 +104,7 @@ export function computeBlockStatus(
     timeboxEndOutcome?: string;
     isTemplateBlock?: boolean;
     blockKind?: string;
+    date?: string;
     statusDate?: string;
     dailyStatus?: Record<string, { status: BlockStatus; outcome?: string }>;
     dailyOverrides?: Record<string, { startTime?: string; endTime?: string; status?: BlockStatus; outcome?: string }>;
@@ -149,6 +150,11 @@ export function computeBlockStatus(
   }
   if (effectiveStatus === 'done' || effectiveStatus === 'partly_done' || effectiveStatus === 'dropped') {
     return effectiveStatus;
+  }
+
+  // PRD v0.3.56 Phần A4: If block belongs to another day, never return in_progress
+  if (block.date && block.date !== currentDate) {
+    return 'planned';
   }
 
   const start = timeToMinutes(block.startTime);

@@ -16,6 +16,7 @@ import { LiveClockStrip } from '@/features/quick-entry';
 import { MotivationSticker } from '@/features/motivation';
 import { GoalPicker, findHighConfidenceGoalSuggestion } from '@/features/goals';
 import { recordTombstone, removeTombstone } from '@/features/data-transfer/model/tombstones';
+import { useT } from '@/i18n/useT';
 import { useRowSelection } from './useRowSelection';
 import { updateScheduleEntry } from '@/features/tasks';
 import { getPreviousDay } from '@/features/dayclose';
@@ -27,6 +28,7 @@ import { defaultLunarProvider } from '@/domain/lunar';
 import { fetchIOSCalendarOccurrences, EventDetailModal } from '@/features/events';
 
 export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
+  const { t } = useT();
   const c = STICKY_COLORS[note.color];
   const { 
     dailyCardItems, 
@@ -723,16 +725,11 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   };
 
   const handleStopRunningItem = (it: DailyCardItem) => {
-    const matchingBlock = (scheduleBlocks || []).find(b => b.id === it.id) || {
-      id: it.id,
-      title: it.text,
-      startTime: it.start || toTime(nowMins),
-      endTime: it.end || toTime(nowMins + 30),
-      type: 'personal' as const,
-      status: 'in_progress' as const,
-      goalId: it.goalId,
-      goalName: it.goalName,
-    };
+    const matchingBlock = (scheduleBlocks || []).find(b => b.id === it.id);
+    if (!matchingBlock) {
+      showToast?.(t('checkin.itemNotFound', 'Không tìm thấy thông tin công việc.'));
+      return;
+    }
     setCheckInBlock(matchingBlock);
     setCheckInModalOpen(true);
   };

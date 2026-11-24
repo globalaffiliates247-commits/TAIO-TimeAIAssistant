@@ -106,6 +106,7 @@ export interface TimeBlock {
   extensions?: TaskExtension[]; // PRD v0.3.36 Part B: Lịch sử gia hạn (+5p, +10p, +15p)
   snoozeCount?: number; // PRD v0.3.36 Part D: Số lần dời trong ngày
   snoozeHistory?: Array<{ from: string; to: string; at: number }>; // Lịch sử dời giờ
+  date?: string; // YYYY-MM-DD: ngày của công việc (PRD v0.3.56 Phần A)
   statusDate?: string; // YYYY-MM-DD: ngày cập nhật trạng thái (PRD v0.3.36 Part E)
   loudAlarm?: boolean; // PRD v0.3.37 Part A: Ưu tiên báo thức toàn màn hình (Nhắc to)
   seeded?: boolean;

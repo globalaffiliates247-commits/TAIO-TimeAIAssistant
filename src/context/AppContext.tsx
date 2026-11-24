@@ -39,6 +39,7 @@ import i18n from '../i18n';
 import {
   buildTodaySchedule,
   updateScheduleEntry,
+  ScheduleWriteResult,
   commitQuickLine,
   extendTask,
   snoozeScheduleEntry,
@@ -2608,12 +2609,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!checkInBlock) return;
 
     try {
+      let writeResult: ScheduleWriteResult | undefined;
+
       if (answer === 'done') {
         const actualMins = checkInBlock.startTime && checkInBlock.endTime
           ? Math.max(5, (timeToMinutes(checkInBlock.endTime) - timeToMinutes(checkInBlock.startTime) + 1440) % 1440)
           : (checkInBlock.estimatedMinutes || 30);
 
-        updateScheduleEntry(
+        writeResult = updateScheduleEntry(
           checkInBlock.id,
           { 
             status: 'done', 
@@ -2622,8 +2625,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             cycleTimeMinutes: actualMins,
             flowEfficiency: 1.0,
           },
-          { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
+          { updateDailyCardItem, setBlocks, blocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
         );
+
+        if (!writeResult?.success) {
+          showToast(i18n.t('checkin.notRecordedRetry', { defaultValue: 'Chưa ghi nhận được việc này, thử lại?' }), undefined, 'error');
+          return;
+        }
+
         setIsTimerRunning(false);
         setCelebrationMsg(language === 'vi' ? '🎉 Hoàn thành! Tiến độ mục tiêu đã cập nhật.' : '🎉 Completed! Goal progress updated.');
         triggerCoachCard('first_dod_done');
@@ -2631,7 +2640,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Next block only becomes in_progress when its scheduled time window arrives or when started early.
       } else if (answer === 'continue_later' || answer === 'stop_here') {
         const stopTime = minutesToTime(getDeviceTimeMinutes());
-        updateScheduleEntry(
+        writeResult = updateScheduleEntry(
           checkInBlock.id,
           { 
             status: 'partly_done',
@@ -2640,8 +2649,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             nextStep: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
             returnPoint: nextStep || checkInBlock.nextStep || 'Làm tiếp bước kế tiếp',
           },
-          { updateDailyCardItem, setBlocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
+          { updateDailyCardItem, setBlocks, blocks, dailyCardItems, dayCloseConfig, dayCloseOverrides, setDayCloseOverrides }
         );
+
+        if (!writeResult?.success) {
+          showToast(i18n.t('checkin.notRecordedRetry', { defaultValue: 'Chưa ghi nhận được việc này, thử lại?' }), undefined, 'error');
+          return;
+        }
+
         setIsTimerRunning(false);
         // Auto add residual step to Inbox so mind is clear (Zeigarnik effect reduction)
         if (nextStep) {
@@ -2659,18 +2674,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           extraMins,
           { updateDailyCardItem, setBlocks, dailyCardItems, goals, setGoals }
         );
-        setTimerMinutesRemaining(prev => prev + extraMins);
-        setCelebrationMsg(
-          language === 'vi'
-            ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại (kết thúc lúc ${res?.newEndTime || 'mới'}).`
-            : `Added +${extraMins} minutes.`
-        );
+        if (res?.newEndTime) {
+          setTimerMinutesRemaining(prev => prev + extraMins);
+          setCelebrationMsg(
+            language === 'vi'
+              ? `Đã thêm +${extraMins} phút tập trung cho nhiệm vụ hiện tại (kết thúc lúc ${res.newEndTime}).`
+              : `Added +${extraMins} minutes.`
+          );
+        }
       } else if (answer === 'remind_10m') {
         snoozeBlock(checkInBlock.id, { type: 'minutes', minutes: extraMins || 10 });
       }
-    } finally {
+
       setCheckInModalOpen(false);
       setCheckInBlock(null);
+    } catch (err) {
+      console.error('[handleCheckInAnswer] Error:', err);
+      showToast(i18n.t('checkin.notRecordedRetry', { defaultValue: 'Chưa ghi nhận được việc này, thử lại?' }), undefined, 'error');
     }
   };
 
@@ -2910,6 +2930,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         const templateBlocks: TimeBlock[] = [];
         let didMigrate = false;
+        let migratedBlockCount = 0;
         const todayStr = getDeviceCalendarDate();
 
         for (const b of rawBlocks) {
@@ -2923,14 +2944,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 cleanB = { ...b, status: 'planned' as const };
               }
             }
+            if (!cleanB.isTemplateBlock && cleanB.blockKind !== 'ritual' && !cleanB.date) {
+              cleanB = { ...cleanB, date: cleanB.statusDate || todayStr };
+              migratedBlockCount++;
+            }
             templateBlocks.push(cleanB);
           } else {
             const alreadyExists = cards.some(c => c.text === b.title && c.start === b.startTime);
             if (!alreadyExists && !b.id.startsWith('dc-')) {
               didMigrate = true;
+              migratedBlockCount++;
               cards.push({
                 id: `dc-migrated-${b.id}`,
-                date: b.deadline?.slice(0, 10) || todayStr,
+                date: b.date || b.statusDate || b.deadline?.slice(0, 10) || todayStr,
                 text: b.title,
                 start: b.startTime,
                 end: b.endTime,
@@ -2952,6 +2978,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               });
             }
           }
+        }
+
+        if (migratedBlockCount > 0) {
+          console.warn(`[v0.3.56 migration] Migrated ${migratedBlockCount} legacy blocks with date field.`);
         }
 
         setBlocks(templateBlocks);
