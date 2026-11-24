@@ -245,8 +245,7 @@ export const StickySheet: React.FC<{ note: StickyNote; floating: boolean; z: num
           title={note.kind === 'day' ? (language === 'vi' ? 'Mở Lịch sự kiện' : 'Open Events') : note.title}
           onClick={() => {
             if (note.kind === 'day') {
-              window.dispatchEvent(new CustomEvent('taio:open-events-list', { detail: { filter: 'all' } }));
-              window.dispatchEvent(new CustomEvent('taio:switch-tab', { detail: 'plan' }));
+              window.dispatchEvent(new CustomEvent('taio:navigate', { detail: { tab: 'plan', view: 'events', filter: 'all' } }));
             }
           }}
         >

@@ -45,8 +45,12 @@ export const DailyCardView: React.FC = () => {
     setIsQuestionsModalOpen,
     setIsActiveCaptureOpen,
     activeQuestion,
-    language
+    language,
+    deviceLook,
+    isNativePlatform,
   } = useApp();
+
+  const isPhone = isNativePlatform || deviceLook === 'phone';
 
   const [newText, setNewText] = useState<string>('');
   const [selectedGoalId, setSelectedGoalId] = useState<string>('');
@@ -241,20 +245,22 @@ export const DailyCardView: React.FC = () => {
                 value={newText}
                 onChange={e => setNewText(e.target.value)}
                 placeholder={t('card.quick_input_placeholder', 'Ghi nhanh 1 việc (nhập tên việc rồi nhấn Enter)...')}
-                className="w-full bg-white border border-slate-300 rounded-2xl pl-4 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
+                className={`w-full bg-white border border-slate-300 rounded-2xl pl-4 ${isPhone ? 'pr-10' : 'pr-4'} py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs`}
               />
-              <button
-                type="button"
-                onClick={handleToggleVoice}
-                className={`absolute right-1.5 top-1.5 h-8 w-8 rounded-xl flex items-center justify-center transition-all ${
-                  isVoiceListening
-                    ? 'bg-rose-500 text-white animate-pulse shadow-xs ring-2 ring-rose-200'
-                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
-                }`}
-                title={isVoiceListening ? (language === 'vi' ? 'Đang nghe... bấm để dừng' : 'Listening... click to stop') : (language === 'vi' ? 'Nói để nhập việc' : 'Voice input')}
-              >
-                {isVoiceListening ? <SquareIcon className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
-              </button>
+              {isPhone && (
+                <button
+                  type="button"
+                  onClick={handleToggleVoice}
+                  className={`absolute right-1.5 top-1.5 h-8 w-8 rounded-xl flex items-center justify-center transition-all ${
+                    isVoiceListening
+                      ? 'bg-rose-500 text-white animate-pulse shadow-xs ring-2 ring-rose-200'
+                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                  }`}
+                  title={isVoiceListening ? (language === 'vi' ? 'Đang nghe... bấm để dừng' : 'Listening... click to stop') : (language === 'vi' ? 'Nói để nhập việc' : 'Voice input')}
+                >
+                  {isVoiceListening ? <SquareIcon className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
+                </button>
+              )}
             </div>
 
             <button

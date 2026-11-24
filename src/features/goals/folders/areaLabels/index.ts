@@ -71,11 +71,11 @@ export function getAreaLabel(
     return roleLabel;
   }
 
-  // 3. Fallback to default
+  // 3. Fallback to default (PRD v0.3.55 Part C)
   const defaultMap: Record<string, { vi: string; en: string }> = {
     Product: { vi: 'Sản phẩm', en: 'Product' },
-    Business: { vi: 'Kinh doanh', en: 'Business' },
-    Operations: { vi: 'Vận hành', en: 'Operations' },
+    Business: { vi: 'Dự án', en: 'Project' },
+    Operations: { vi: 'Gia đình', en: 'Family' },
     Personal: { vi: 'Cá nhân', en: 'Personal' },
     uncategorized: { vi: 'Chưa phân nhóm', en: 'Uncategorized' },
   };

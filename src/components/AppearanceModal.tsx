@@ -269,8 +269,7 @@ export const AppearanceModal: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setSettingsModalOpen(false);
-                  window.dispatchEvent(new CustomEvent('taio:open-events-list', { detail: { filter: 'routine' } }));
-                  window.dispatchEvent(new CustomEvent('taio:switch-tab', { detail: 'plan' }));
+                  window.dispatchEvent(new CustomEvent('taio:navigate', { detail: { tab: 'plan', view: 'events', filter: 'routine' } }));
                 }}
                 className="text-xs text-[var(--taio-brand)] font-bold hover:underline flex items-center gap-1 cursor-pointer"
               >

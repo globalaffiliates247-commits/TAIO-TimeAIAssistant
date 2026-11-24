@@ -47,7 +47,15 @@ const TYPE_CONFIG: Record<BlockType, { labelVi: string; labelEn: string; bg: str
   planning: { labelVi: 'Lập kế hoạch', labelEn: 'Planning', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200/70' },
 };
 
-export const PlanTab: React.FC = () => {
+export interface PlanTabProps {
+  initialView?: 'card' | 'timeline' | 'timetable' | 'reality' | 'matrix' | 'events';
+  initialFilter?: EventFilterType | string;
+}
+
+export const PlanTab: React.FC<PlanTabProps> = ({
+  initialView = 'card',
+  initialFilter = 'all',
+}) => {
   const { 
     blocks, 
     scheduleBlocks, 
@@ -66,11 +74,29 @@ export const PlanTab: React.FC = () => {
   const { nowMinutes, todayLabel } = useDeviceClock();
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
 
-  const [activeView, setActiveView] = useState<'card' | 'timeline' | 'reality' | 'matrix' | 'events'>('card');
-  const [eventsFilter, setEventsFilter] = useState<EventFilterType>('all');
+  const resolveView = (v?: string): 'card' | 'timeline' | 'reality' | 'matrix' | 'events' => {
+    if (v === 'timetable') return 'timeline';
+    if (v === 'events' || v === 'card' || v === 'timeline' || v === 'reality' || v === 'matrix') return v;
+    return 'card';
+  };
+
+  const [activeView, setActiveView] = useState<'card' | 'timeline' | 'reality' | 'matrix' | 'events'>(resolveView(initialView));
+  const [eventsFilter, setEventsFilter] = useState<EventFilterType>((initialFilter as EventFilterType) || 'all');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showAddEventModal, setShowAddEventModal] = useState<boolean>(false);
   const [templateModalOpen, setTemplateModalOpen] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (initialView) {
+      setActiveView(resolveView(initialView));
+    }
+  }, [initialView]);
+
+  React.useEffect(() => {
+    if (initialFilter) {
+      setEventsFilter(initialFilter as EventFilterType);
+    }
+  }, [initialFilter]);
 
   React.useEffect(() => {
     const handleOpenEvents = (e: any) => {

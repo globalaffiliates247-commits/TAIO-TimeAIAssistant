@@ -115,6 +115,49 @@ const MainAppContent: React.FC = () => {
     window.addEventListener('taio:switch-tab', handleSwitchTab);
     return () => window.removeEventListener('taio:switch-tab', handleSwitchTab);
   }, [setCurrentTab]);
+
+  // PRD v0.3.55 Part A: Unified in-app navigation and Electron IPC bridge listener
+  const [planNavigation, setPlanNavigation] = React.useState<{ view: 'card' | 'timeline' | 'timetable' | 'reality' | 'matrix' | 'events'; filter?: string } | null>(null);
+
+  React.useEffect(() => {
+    const handleNavigate = (e: any) => {
+      const detail = e?.detail;
+      if (!detail) return;
+      if (detail.tab) setCurrentTab(detail.tab);
+      if (detail.tab === 'plan' || !detail.tab) {
+        if (detail.view) {
+          setPlanNavigation({ view: detail.view, filter: detail.filter });
+        }
+      }
+    };
+
+    const handleOpenEventsList = (e: any) => {
+      setPlanNavigation({ view: 'events', filter: e?.detail?.filter || 'all' });
+      setCurrentTab('plan');
+    };
+
+    window.addEventListener('taio:navigate', handleNavigate);
+    window.addEventListener('taio:open-events-list', handleOpenEventsList);
+
+    let unsubscribeAct: (() => void) | undefined;
+    const win = typeof window !== 'undefined' ? (window as any) : null;
+    if (win?.taioAPI?.data?.onAct) {
+      unsubscribeAct = win.taioAPI.data.onAct((data: any) => {
+        if (data?.collection === 'scheduledEvents' && data?.action === 'openInApp') {
+          const payload = data.payload || {};
+          const filter = payload.filter || (payload.view === 'routine' ? 'routine' : 'all');
+          setPlanNavigation({ view: 'events', filter });
+          setCurrentTab('plan');
+        }
+      });
+    }
+
+    return () => {
+      window.removeEventListener('taio:navigate', handleNavigate);
+      window.removeEventListener('taio:open-events-list', handleOpenEventsList);
+      if (unsubscribeAct) unsubscribeAct();
+    };
+  }, [setCurrentTab]);
   const isCool = palette === 'cool' || palette === 'bright-blue' || palette === 'calm-blue';
   const touchStartYRef = React.useRef<number | null>(null);
 
@@ -293,7 +336,10 @@ const MainAppContent: React.FC = () => {
       )}
       {currentTab === 'plan' && (
         <TabErrorBoundary tabName="plan" language={language}>
-          <PlanTab />
+          <PlanTab
+            initialView={planNavigation?.view}
+            initialFilter={planNavigation?.filter}
+          />
         </TabErrorBoundary>
       )}
       {(currentTab === 'achievements' || (currentTab as any) === 'efficiency') && (

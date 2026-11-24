@@ -6,7 +6,7 @@ import { Goal, TimeBlock } from '@/types';
 import { STICKY_COLORS, StickyColor } from '@/features/sticky/model/stickyTypes';
 import { FolderSpine, WorkAreaType } from './FolderSpine';
 import { GoalRow } from './GoalRow';
-import { Plus, Target, HelpCircle, AlertCircle, X } from 'lucide-react';
+import { Plus, Target, HelpCircle, AlertCircle, X, Pencil } from 'lucide-react';
 import { useT } from '@/i18n/useT';
 import { useApp } from '@/context/AppContext';
 import { getAreaLabel, getAreaQuestion } from './areaLabels';
@@ -43,14 +43,35 @@ export const GoalFolders: React.FC<GoalFoldersProps> = ({
   onOpenDedicatedGoalPage,
 }) => {
   const { t } = useT();
-  const { profile, customAreaNames, updateGoal, language, showToast } = useApp();
+  const { profile, customAreaNames, updateGoal, updateCustomAreaNames, language, showToast } = useApp();
 
   const [internalActiveArea, setInternalActiveArea] = useState<WorkAreaType>('Product');
   const activeArea = controlledActiveArea || internalActiveArea;
 
   const setActiveArea = (area: WorkAreaType) => {
     setInternalActiveArea(area);
+    setEditingAreaName(null);
     onActiveAreaChange?.(area);
+  };
+
+  // Inline rename folder header (PRD v0.3.55 Part C)
+  const [editingAreaName, setEditingAreaName] = useState<string | null>(null);
+  const [editAreaValue, setEditAreaValue] = useState<string>('');
+
+  const handleStartEditingAreaName = (area: WorkAreaType, currentLabel: string) => {
+    setEditingAreaName(area);
+    setEditAreaValue(currentLabel);
+  };
+
+  const handleSaveAreaName = (area: WorkAreaType) => {
+    if (editAreaValue.trim() && editAreaValue.trim() !== activeLabel) {
+      updateCustomAreaNames({ [area]: editAreaValue.trim() });
+    }
+    setEditingAreaName(null);
+  };
+
+  const handleCancelAreaName = () => {
+    setEditingAreaName(null);
   };
 
   // Only one goal open at a time (PRD H1.4)
@@ -157,12 +178,46 @@ export const GoalFolders: React.FC<GoalFoldersProps> = ({
             {/* Folder Header */}
             <div className="flex items-center justify-between border-b border-black/5 pb-3 relative">
               <div className="flex items-center gap-2">
-                <h3
-                  className="text-base sm:text-lg font-bold tracking-tight"
-                  style={{ color: activePalette.ink }}
-                >
-                  {activeLabel}
-                </h3>
+                {editingAreaName === activeConfig.area ? (
+                  <input
+                    type="text"
+                    value={editAreaValue}
+                    onChange={e => setEditAreaValue(e.target.value)}
+                    maxLength={20}
+                    autoFocus
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSaveAreaName(activeConfig.area);
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        handleCancelAreaName();
+                      }
+                    }}
+                    onBlur={() => handleSaveAreaName(activeConfig.area)}
+                    className="px-2 py-0.5 text-base sm:text-lg font-bold tracking-tight rounded-lg border border-black/20 bg-white/90 outline-none focus:ring-2 focus:ring-blue-400"
+                    style={{ color: activePalette.ink }}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <h3
+                      className="text-base sm:text-lg font-bold tracking-tight"
+                      style={{ color: activePalette.ink }}
+                    >
+                      {activeLabel}
+                    </h3>
+                    {activeConfig.area !== 'uncategorized' && (
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditingAreaName(activeConfig.area, activeLabel)}
+                        className="p-1 rounded-full hover:bg-black/10 transition-colors cursor-pointer opacity-60 hover:opacity-100"
+                        title={t('goals.renameFolder', 'Đổi tên thư mục')}
+                      >
+                        <Pencil className="w-3.5 h-3.5" style={{ color: activePalette.ink }} />
+                      </button>
+                    )}
+                  </div>
+                )}
                 <span
                   style={{ backgroundColor: activePalette.bar, color: activePalette.ink }}
                   className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold"
@@ -300,12 +355,46 @@ export const GoalFolders: React.FC<GoalFoldersProps> = ({
             {/* Folder Header */}
             <div className="flex items-center justify-between border-b border-black/5 pb-3 relative">
               <div className="flex items-center gap-2">
-                <h3
-                  className="text-base font-bold tracking-tight"
-                  style={{ color: activePalette.ink }}
-                >
-                  {activeLabel}
-                </h3>
+                {editingAreaName === activeConfig.area ? (
+                  <input
+                    type="text"
+                    value={editAreaValue}
+                    onChange={e => setEditAreaValue(e.target.value)}
+                    maxLength={20}
+                    autoFocus
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSaveAreaName(activeConfig.area);
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        handleCancelAreaName();
+                      }
+                    }}
+                    onBlur={() => handleSaveAreaName(activeConfig.area)}
+                    className="px-2 py-0.5 text-base font-bold tracking-tight rounded-lg border border-black/20 bg-white/90 outline-none focus:ring-2 focus:ring-blue-400"
+                    style={{ color: activePalette.ink }}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <h3
+                      className="text-base font-bold tracking-tight"
+                      style={{ color: activePalette.ink }}
+                    >
+                      {activeLabel}
+                    </h3>
+                    {activeConfig.area !== 'uncategorized' && (
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditingAreaName(activeConfig.area, activeLabel)}
+                        className="p-1 rounded-full hover:bg-black/10 transition-colors cursor-pointer opacity-60 hover:opacity-100"
+                        title={t('goals.renameFolder', 'Đổi tên thư mục')}
+                      >
+                        <Pencil className="w-3.5 h-3.5" style={{ color: activePalette.ink }} />
+                      </button>
+                    )}
+                  </div>
+                )}
                 <span
                   style={{ backgroundColor: activePalette.bar, color: activePalette.ink }}
                   className="px-2 py-0.5 rounded-full text-xs font-mono font-bold"

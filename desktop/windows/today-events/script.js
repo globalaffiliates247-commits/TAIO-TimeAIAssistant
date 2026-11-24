@@ -275,9 +275,8 @@
 
     const card = target.closest('.event-card');
     if (card) {
-      const id = card.getAttribute('data-id');
       if (window.taioAPI && window.taioAPI.data && typeof window.taioAPI.data.act === 'function') {
-        window.taioAPI.data.act('scheduledEvents', 'openInApp', { id });
+        window.taioAPI.data.act('scheduledEvents', 'openInApp', { view: 'events-list', filter: 'all' });
       }
       if (window.taioAPI && window.taioAPI.window && typeof window.taioAPI.window.open === 'function') {
         window.taioAPI.window.open('main');

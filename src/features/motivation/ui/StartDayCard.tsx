@@ -24,7 +24,6 @@ import { AuthorAvatar } from './AuthorAvatar';
 import { getStorageItemSync, setStorageItemSync } from '@/core/storage/durableStorage';
 
 const STORAGE_KEY_START_DAY_SEEN = 'taio_start_day_card_seen';
-const STORAGE_KEY_START_DAY_SNOOZED = 'taio_start_day_card_snoozed_until';
 
 export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOpenTodaySheet }) => {
   const { 
@@ -76,19 +75,13 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
     const settings: MotivationSettings = loadMotivationSettings();
     if (!settings.enabled) return;
 
-    // Check if seen or snoozed today (PRD v0.3.54 Part G)
+    // Check if seen today (PRD v0.3.55 Part B: full day dismiss, no 2-hour snooze)
     const seenDate = getStorageItemSync<string>(STORAGE_KEY_START_DAY_SEEN, '');
-    const snoozedUntil = getStorageItemSync<number>(STORAGE_KEY_START_DAY_SNOOZED, 0);
     const hasUnfinishedPrompt = !yesterdayClosed && unfinishedYesterday.length > 0;
     const shouldAskMorningTask = !hasTodayTasks;
 
-    // Permanently dismissed for the day if user clicked "Bắt đầu"
+    // Permanently dismissed for the day if user clicked "Bắt đầu" or "Bỏ qua"
     if (seenDate === today) {
-      return;
-    }
-
-    // Snoozed for 2 hours if user clicked "Để sau"
-    if (Date.now() < snoozedUntil && !hasUnfinishedPrompt && !shouldAskMorningTask) {
       return;
     }
 
@@ -131,10 +124,9 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
     };
   }, []);
 
-  // PRD v0.3.54 Part G: "Để sau" snoozes for 2 hours, does NOT mark full day seen
+  // PRD v0.3.55 Part B: "Bỏ qua" / "Skip" marks full day seen immediately, no 2-hour snooze
   const handleDismiss = () => {
-    const snoozeUntil = Date.now() + 2 * 60 * 60 * 1000;
-    setStorageItemSync(STORAGE_KEY_START_DAY_SNOOZED, snoozeUntil);
+    setStorageItemSync(STORAGE_KEY_START_DAY_SEEN, today);
     quoteRegistry.unregister('start_day_card');
     setVisible(false);
   };
@@ -265,7 +257,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
           onClick={handleDismiss}
           className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
         >
-          {t('common.later', 'Để sau')}
+          {t('common.skip', 'Bỏ qua')}
         </button>
         <button
           onClick={handleStart}

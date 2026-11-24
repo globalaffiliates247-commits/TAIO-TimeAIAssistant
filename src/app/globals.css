@@ -3169,6 +3169,9 @@
   .pr-10 {
     padding-right: calc(var(--spacing) * 10);
   }
+  .pr-16 {
+    padding-right: calc(var(--spacing) * 16);
+  }
   .pr-20 {
     padding-right: calc(var(--spacing) * 20);
   }
@@ -4959,6 +4962,9 @@
   }
   .focus\:ring-blue-100:focus {
     --tw-ring-color: var(--color-blue-100);
+  }
+  .focus\:ring-blue-400:focus {
+    --tw-ring-color: var(--color-blue-400);
   }
   .focus\:ring-blue-500\/20:focus {
     --tw-ring-color: color-mix(in srgb, oklch(62.3% 0.214 259.815) 20%, transparent);

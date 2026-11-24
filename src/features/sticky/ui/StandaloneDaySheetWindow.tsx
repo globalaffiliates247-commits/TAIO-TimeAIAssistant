@@ -87,9 +87,13 @@ export const StandaloneDaySheetWindow: React.FC = () => {
   const handleOpenEventsList = () => {
     const win = window as any;
     if (win?.taioAPI?.data?.act) {
-      win.taioAPI.data.act('scheduledEvents', 'openInApp', { view: 'events-list' });
-    } else if (win?.taioAPI?.window?.open) {
+      win.taioAPI.data.act('scheduledEvents', 'openInApp', { view: 'events-list', filter: 'all' });
+    }
+    if (win?.taioAPI?.window?.open) {
       win.taioAPI.window.open('main');
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('taio:navigate', { detail: { tab: 'plan', view: 'events', filter: 'all' } }));
     }
   };
 

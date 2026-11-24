@@ -21,6 +21,11 @@ contextBridge.exposeInMainWorld('taioAPI', {
       return () => ipcRenderer.removeListener(channel, listener);
     },
     act: (collection, action, payload) => ipcRenderer.send('taio-data-act', { collection, action, payload }),
+    onAct: (callback) => {
+      const listener = (_event, data) => callback(data);
+      ipcRenderer.on('taio-data-act', listener);
+      return () => ipcRenderer.removeListener('taio-data-act', listener);
+    },
   },
 
   // Language Bridge (Part B1 & F)

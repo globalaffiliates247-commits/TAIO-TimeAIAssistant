@@ -15,7 +15,11 @@ export const QuickLineInput: React.FC = () => {
     scheduleBlocks,
     language,
     palette,
+    deviceLook,
+    isNativePlatform,
   } = useApp();
+
+  const isPhone = isNativePlatform || deviceLook === 'phone';
 
   const [inputVal, setInputVal] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -104,21 +108,23 @@ export const QuickLineInput: React.FC = () => {
                 ? 'Gõ việc nhanh (vd: 14:00 Họp dự án #congviec 45p) rồi nhấn Enter...'
                 : 'Quick add (e.g. 14:00 Team sync #work 45m) then press Enter...'
             }
-            className="w-full h-11 pl-4 pr-24 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all"
+            className={`w-full h-11 pl-4 ${isPhone ? 'pr-24' : 'pr-16'} rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all`}
           />
           <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
-            <button
-              type="button"
-              onClick={handleToggleVoice}
-              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all ${
-                isListening
-                  ? 'bg-rose-500 text-white animate-pulse shadow-xs ring-2 ring-rose-200'
-                  : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60'
-              }`}
-              title={isListening ? (isVi ? 'Đang nghe... bấm để dừng' : 'Listening... click to stop') : (isVi ? 'Nói để nhập việc' : 'Voice input')}
-            >
-              {isListening ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
-            </button>
+            {isPhone && (
+              <button
+                type="button"
+                onClick={handleToggleVoice}
+                className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all ${
+                  isListening
+                    ? 'bg-rose-500 text-white animate-pulse shadow-xs ring-2 ring-rose-200'
+                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60'
+                }`}
+                title={isListening ? (isVi ? 'Đang nghe... bấm để dừng' : 'Listening... click to stop') : (isVi ? 'Nói để nhập việc' : 'Voice input')}
+              >
+                {isListening ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleCommit}
