@@ -18,7 +18,12 @@
     "continue": "Tiếp tục",
     "add": "Thêm",
     "apply": "Áp dụng",
-    "finish": "Hoàn tất"
+    "finish": "Hoàn tất",
+    "expand": "Mở rộng",
+    "collapse": "Thu gọn"
+  },
+  "navbar": {
+    "goals": "Mục tiêu"
   },
   "nav": {
     "now": "Lúc này",
@@ -36,6 +41,9 @@
     "miniClock": "Đồng hồ mini",
     "pinnedClock": "Đồng hồ ghim",
     "stopwatches": "Bấm giờ riêng",
+    "freeTimer": "Bấm giờ riêng",
+    "next": "Tiếp theo",
+    "noMoreScheduledTasks": "Không còn việc nào sắp tới hôm nay",
     "timeLedger": "Sổ tay thời gian",
     "timetable": "Thời gian biểu",
     "templateSchedule": "Lịch ngày mẫu",
@@ -76,6 +84,12 @@
     "startDayTitle": "Bắt đầu ngày",
     "startDayBtn": "Bắt đầu",
     "masterTitle": "Câu truyền động lực",
+    "masterDesc": "Nhắc nhở và tiếp năng lượng vào đúng nơi bạn nhìn thấy mỗi ngày",
+    "slotsTitle": "Vị trí hiển thị",
+    "refresh": "Đổi câu khác",
+    "favorite": "Lưu vào kho của tôi",
+    "hideToday": "Ẩn hết hôm nay",
+    "original": "Nguyên văn",
     "enabledToast": "Đã bật câu truyền động lực",
     "disabledToast": "Đã tắt câu truyền động lực",
     "slot_clock_idle": "Trên đồng hồ",
@@ -94,5 +108,26 @@
     "slot_alarm_start_desc": "Hiện dòng nhắc nhở dưới tên việc khi chuông reo",
     "slot_widget": "Widget & Màn hình khóa iPhone",
     "slot_widget_desc": "Hiện câu khi không có việc đang đếm ngược"
+  },
+  "sync": {
+    "syncing": "Đang đồng bộ...",
+    "idle": "Đã đồng bộ",
+    "error": "Lỗi đồng bộ",
+    "off": "Đồng bộ thiết bị",
+    "desc": "Dùng cùng một mã đồng bộ trên iPhone và Mac. Dữ liệu được mã hóa trên máy trước khi gửi đi; không có mã thì không ai đọc được.",
+    "create_code": "Tạo mã mới trên máy này",
+    "enter_code": "Nhập mã từ máy khác",
+    "join_warning": "Lần đồng bộ đầu tiên sẽ thay dữ liệu trên máy này bằng dữ liệu của máy kia.",
+    "connect": "Kết nối",
+    "cancel": "Hủy",
+    "active_title": "Đồng bộ giữa các máy · đang bật",
+    "your_code_label": "Mã đồng bộ (nhập hoặc gửi mã này sang máy kia)",
+    "share_btn": "Gửi mã",
+    "security_note": "Mã này mở khóa dữ liệu của bạn; không chia sẻ cho người khác.",
+    "disconnect": "Ngắt đồng bộ trên máy này"
+  },
+  "profile": {
+    "sync_and_data": "Đồng bộ và dữ liệu",
+    "sync_and_data_desc": "Đồng bộ giữa các thiết bị, sao lưu/khôi phục file JSON, và quản trị dữ liệu."
   }
 }

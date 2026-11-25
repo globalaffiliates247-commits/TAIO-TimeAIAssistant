@@ -266,12 +266,14 @@ function createWindow() {
     return mainWindow;
   }
 
+  const appIconPath = path.join(__dirname, '../src/assets/icon/png/appicon-256.png');
   mainWindow = new BrowserWindow({
     width: 1180,
     height: 820,
     minWidth: 380,
     minHeight: 600,
     title: 'TAIO Time',
+    icon: fs.existsSync(appIconPath) ? appIconPath : undefined,
     backgroundColor: '#ffffff',
     webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'preload.js') },
   });
@@ -330,6 +332,7 @@ function openWindow(id) {
 
   const bounds = getPersistedBounds(id, config.defaultWidth || 300, config.defaultHeight || 200);
 
+  const miniIconPath = path.join(__dirname, '../src/assets/icon/png/icon-32.png');
   const win = new BrowserWindow({
     width: bounds.width,
     height: bounds.height,
@@ -339,6 +342,7 @@ function openWindow(id) {
     maxHeight: config.maxHeight || undefined,
     x: bounds.x,
     y: bounds.y,
+    icon: fs.existsSync(miniIconPath) ? miniIconPath : undefined,
     frame: Boolean(config.frame),
     alwaysOnTop: Boolean(config.alwaysOnTop),
     resizable: config.resizable !== false,
@@ -472,9 +476,12 @@ function getWindowTrayLabel(config, lang) {
 }
 
 function createTray() {
-  const icon = nativeImage.createFromDataURL(
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVQ4T2NkoBAwUqifYdQABhpEAyM2L4wiA8YQYMA3DEYDEUMSMBIMBAYaJCSqAQAL6QYRdpSxJAAAAABJRU5ErkJggg=='
-  );
+  const trayIconPath = path.join(__dirname, '../src/assets/icon/png/icon-16.png');
+  const icon = fs.existsSync(trayIconPath)
+    ? nativeImage.createFromPath(trayIconPath)
+    : nativeImage.createFromDataURL(
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVQ4T2NkoBAwUqifYdQABhpEAyM2L4wiA8YQYMA3DEYDEUMSMBIMBAYaJCSqAQAL6QYRdpSxJAAAAABJRU5ErkJggg=='
+      );
   tray = new Tray(icon);
   updateTrayMenu();
 }
@@ -637,8 +644,18 @@ ipcMain.on('taio-timer-action', (_event, action) => {
     pinWindow('clock', !!action.pinned);
     return;
   }
-  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents) {
-    mainWindow.webContents.send('taio-timer-action', action);
+  let win = mainWindow;
+  if (!win || win.isDestroyed()) {
+    win = openWindow('main');
+  }
+  if (win && win.webContents) {
+    if (win.webContents.isLoading()) {
+      win.webContents.once('did-finish-load', () => {
+        win.webContents.send('taio-timer-action', action);
+      });
+    } else {
+      win.webContents.send('taio-timer-action', action);
+    }
   }
 });
 ipcMain.on('taio-open-today-journal', (_event, taskId) => {

@@ -341,6 +341,7 @@ export const CloseDayModal: React.FC = () => {
 
             <input
               type="text"
+              enterKeyHint="done"
               value={tomorrowTask}
               onChange={e => setTomorrowTask(e.target.value)}
               placeholder={isPastDay
@@ -376,7 +377,12 @@ export const CloseDayModal: React.FC = () => {
           </div>
 
           {/* PRD FEATURE v0.3.31 B6: Motivation card for End of Day */}
-          <MotivationSticker slotKey="close_day" context="end_day" size="card" />
+          <MotivationSticker
+            slotKey="close_day"
+            context="end_day"
+            size="card"
+            palette={{ ink: '#0f172a', muted: '#64748b', line: '#e2e8f0', paper: '#ffffff' }}
+          />
 
           {/* Actions (Part A2 #9) */}
           <div className="pt-2 flex items-center justify-between gap-2">

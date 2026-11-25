@@ -9,9 +9,10 @@ import {
   setActiveSticky, 
   trashSticky,
   setStickyListPanelOpen,
-  openStickyBoard
+  openStickyBoard,
+  openStickyNote,
 } from '../model/stickyStore';
-import { STICKY_COLORS, StickyColor, StickyNote } from '../model/stickyTypes';
+import { STICKY_COLORS, StickyColor, StickyNote, getStickyNoteTitle } from '../model/stickyTypes';
 import { useApp } from '@/context/AppContext';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { 
@@ -94,20 +95,13 @@ export const StickyListPanel: React.FC<{ isPhone?: boolean }> = ({ isPhone = fal
   };
 
   const handleOpenNote = (n: StickyNote) => {
-    // If note is positioned behind or overlapping the list panel (x < 310 on desktop), shift it to the right of panel
-    const patch: Partial<StickyNote> = { open: true };
-    if (!isPhone && (typeof n.x !== 'number' || n.x < 310)) {
-      patch.x = 320;
-    }
-
     if (n.kind === 'day' && n.date) {
       openStickyBoard(n.date, n.id);
-      if (patch.x !== undefined) {
-        updateSticky(n.id, { x: patch.x });
+      if (!isPhone && (typeof n.x !== 'number' || n.x < 310)) {
+        updateSticky(n.id, { x: 320 });
       }
     } else {
-      updateSticky(n.id, patch);
-      setActiveSticky(n.id);
+      openStickyNote(n.id);
     }
     if (isPhone) {
       setStickyListPanelOpen(false);
@@ -323,9 +317,7 @@ export const StickyListPanel: React.FC<{ isPhone?: boolean }> = ({ isPhone = fal
               <div className="w-2.5 h-5 rounded-full shrink-0 bg-amber-300" />
               <div className="flex-1 min-w-0">
                 <span className="text-xs font-semibold text-slate-800">
-                  {isTodayNote
-                    ? (language === 'vi' ? 'Hôm nay' : 'Today')
-                    : `${n.date}`}
+                  {getStickyNoteTitle(n, today, language, false)}
                 </span>
               </div>
               {isTodayNote && (

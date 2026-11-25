@@ -231,8 +231,12 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
           <div className="flex items-center gap-2">
             <input
               type="text"
+              enterKeyHint="done"
               value={firstTaskText}
               onChange={e => setFirstTaskText(e.target.value)}
+              onBlur={() => {
+                if (firstTaskText.trim()) handleAddFirstTask();
+              }}
               onKeyDown={e => {
                 if (e.key === 'Enter') handleAddFirstTask();
               }}

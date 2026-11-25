@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import type { TimeBlock } from '@/types';
 import { useT } from '@/i18n/useT';
+import { useApp } from '@/context/AppContext';
 import { MotivationSticker } from '@/features/motivation';
 import { SnoozePicker, type SnoozeOption } from '@/features/snooze';
 import { timeToMinutes, getDeviceTimeMinutes, getDeviceCalendarDate } from '@/core/clock';
@@ -38,6 +39,7 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
   snoozeCount = 0,
 }) => {
   const { t } = useT();
+  const { scheduleBlocks, language } = useApp();
   const [showNextStepForm, setShowNextStepForm] = useState<boolean>(false);
   const [nextStepInput, setNextStepInput] = useState<string>('');
   const [showSnoozePicker, setShowSnoozePicker] = useState<boolean>(false);
@@ -83,6 +85,26 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
         <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
           {checkInBlock.title}
         </h3>
+
+        {/* PRD v0.3.57 Part E: Parallel running task indication */}
+        {(() => {
+          const otherRunning = (scheduleBlocks || []).find(
+            b => b.id !== checkInBlock.id && b.status === 'in_progress' && !b.isTemplateBlock && b.blockKind !== 'ritual' && (!b.date || b.date === today)
+          );
+          if (!otherRunning) return null;
+          return (
+            <div className="mt-2 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-800 font-medium flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
+              <span>
+                {t('checkin.otherTaskRunning', {
+                  title: otherRunning.title,
+                  endTime: otherRunning.endTime,
+                  defaultValue: `Còn "${otherRunning.title}" đang chạy tới ${otherRunning.endTime}`,
+                })}
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Goal context line - only when linked goal exists */}
         {hasGoal && (
@@ -189,8 +211,14 @@ export const TimeboxEndCard: React.FC<TimeboxEndCardProps> = ({
               <input
                 type="text"
                 autoFocus
+                enterKeyHint="done"
                 value={nextStepInput}
                 onChange={e => setNextStepInput(e.target.value)}
+                onBlur={() => {
+                  if (nextStepInput.trim()) {
+                    onAnswer('continue_later', 0, nextStepInput);
+                  }
+                }}
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     onAnswer('continue_later', 0, nextStepInput || t('checkin.unnamed_step', 'Làm tiếp việc dang dở'));

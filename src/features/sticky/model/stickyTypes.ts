@@ -33,9 +33,33 @@ export interface StickyNote {
   h?: number;
   lines: StickyLine[];    // kind 'free' only
   content?: string;       // v0.3.32 C2: continuous multi-line text
+  contentHtml?: string;   // v0.3.57 Part G: rich text formatted html
   scheduledMap?: Record<string, string>; // maps line token/idx to dailyCardItemId
   hasMotivationSticker?: boolean; // v0.3.31 B2: "Thêm nhãn động lực"
   updatedAt: number;
   deletedAt?: number;     // PRD v0.3.37 Part E: soft-deleted (30-day trash retention)
   lastOpen?: boolean;      // PRD v0.3.37 Part E: track open state before hiding/closing board
+}
+
+/** PRD v0.3.57 Part D: Unified sticky note title helper for tabs and list panel */
+export function getStickyNoteTitle(
+  note: StickyNote,
+  today: string,
+  language: string = 'vi',
+  isNarrow = false
+): string {
+  if (note.kind === 'day' && note.date) {
+    if (note.date === today) {
+      return language === 'vi' ? 'Hôm nay' : 'Today';
+    }
+    const parts = note.date.split('-');
+    if (parts.length === 3) {
+      const dd = parts[2];
+      const mm = parts[1];
+      const yyyy = parts[0];
+      return isNarrow ? `${dd}/${mm}` : `${dd}/${mm}/${yyyy}`;
+    }
+    return note.date;
+  }
+  return note.title || (language === 'vi' ? 'Ghi nhanh' : 'Quick note');
 }

@@ -64,7 +64,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
     onUpdateChildren(updated);
   };
 
-  const handleAddNew = () => {
+  const handleAddNew = (shouldRefocus = true) => {
     if (!newTitle.trim()) return;
     if (childrenItems.length >= MAX_SUBTASKS_PER_TASK) {
       showToast?.(isEn ? 'Maximum 10 subtasks reached' : 'Đã đủ tối đa 10 việc con');
@@ -94,15 +94,17 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
     }
     onUpdateChildren(children);
     setNewTitle('');
-    // Keep focus in new input for consecutive fast typing
-    setTimeout(() => {
-      newInputRef.current?.focus();
-    }, 0);
+    // Keep focus in new input for consecutive fast typing (only when Enter pressed, not on blur)
+    if (shouldRefocus) {
+      setTimeout(() => {
+        newInputRef.current?.focus();
+      }, 0);
+    }
   };
 
   const handleBlurNew = () => {
     if (newTitle.trim()) {
-      handleAddNew();
+      handleAddNew(false);
     } else {
       onCloseInput?.();
     }
@@ -158,6 +160,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
               {isEditing ? (
                 <input
                   type="text"
+                  enterKeyHint="done"
                   value={editingTitle}
                   onChange={e => setEditingTitle(e.target.value)}
                   onBlur={() => handleSaveEdit(st.id)}
@@ -210,6 +213,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
           <input
             ref={newInputRef}
             type="text"
+            enterKeyHint="done"
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
             onBlur={handleBlurNew}
@@ -217,7 +221,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
               if (e.key === 'Enter') {
                 e.preventDefault();
                 if (newTitle.trim()) {
-                  handleAddNew();
+                  handleAddNew(true);
                 } else {
                   // Rule F2.3: Empty + Enter closes subtask input and returns to parent line
                   onCloseInput?.();

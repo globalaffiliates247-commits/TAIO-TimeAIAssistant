@@ -97,9 +97,9 @@ export const SwipeReviewModal: React.FC = () => {
       const deck: SwipeDeckCard[] = buildSwipeDeck(dailyCardItems, inbox as any, backlogCards, today).map(item => ({
         ...item,
         whyThisCard: item.sourceType === 'flex' 
-          ? t('swipe.flexibleBadge') 
+          ? t('swipe.flexibleBadge', 'Linh động') 
           : item.sourceType === 'basket' 
-            ? t('swipe.basketBadge') 
+            ? t('swipe.basketBadge', 'Rổ việc') 
             : item.whyThisCard || '',
       })) as SwipeDeckCard[];
 
@@ -137,7 +137,7 @@ export const SwipeReviewModal: React.FC = () => {
             end: slot.endTime,
             status: 'open',
           });
-          showToast(t('swipe.toastScheduled'));
+          showToast(t('swipe.toastScheduled', 'Đã xếp lịch!'));
         } else {
           setIsPlanningStep(true);
           setPlanGoalId(currentCard.goalId || goals[0]?.id || '');
@@ -151,7 +151,7 @@ export const SwipeReviewModal: React.FC = () => {
         const today = getDeviceCalendarDate();
         addDailyCardItem({ text: currentCard.text, date: today, goalId: currentCard.goalId });
         processInboxItem(currentCard.sourceId, 'schedule', { quadrant: 2 });
-        showToast(t('swipe.toastScheduled'));
+        showToast(t('swipe.toastScheduled', 'Đã xếp lịch!'));
       } else {
         setIsPlanningStep(true);
         setPlanGoalId(currentCard.goalId || goals[0]?.id || '');
@@ -172,7 +172,7 @@ export const SwipeReviewModal: React.FC = () => {
         const d = new Date(); d.setDate(d.getDate() + 1);
         const tomorrowStr = getDeviceCalendarDate(d);
         updateDailyCardItem(currentCard.sourceId, { date: tomorrowStr, status: 'open' });
-        showToast(t('swipe.toastPostponed'));
+        showToast(t('swipe.toastPostponed', 'Đã dời sang ngày mai!'));
       } else if (currentCard.sourceType === 'basket') {
         // basket "Để mai" just skips for now
       } else {
@@ -344,9 +344,9 @@ export const SwipeReviewModal: React.FC = () => {
               <Layers className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">{t('swipe.title')}</h2>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">{t('swipe.title', 'Quẹt thẻ nhiệm vụ')}</h2>
               <p className="text-[11px] text-slate-500">
-                Vuốt trái: {t('swipe.postponeTomorrow')} • Vuốt phải: {t('swipe.scheduleNow')} • Chạm thẻ: {t('swipe.done')}
+                Vuốt trái: {t('swipe.postponeTomorrow', 'Để mai')} • Vuốt phải: {t('swipe.scheduleNow', 'Xếp')} • Chạm thẻ: {t('swipe.done', 'Xong')}
               </p>
             </div>
           </div>
@@ -388,12 +388,12 @@ export const SwipeReviewModal: React.FC = () => {
                   {/* Threshold Swipe Labels (> 30% width) */}
                   {showLeftLabel && (
                     <div className="absolute top-4 right-4 px-3 py-1 rounded-xl bg-amber-100 border-2 border-amber-500 text-amber-800 font-black text-xs uppercase tracking-wider shadow-sm">
-                      ← {t('swipe.postponeTomorrow')}
+                      ← {t('swipe.postponeTomorrow', 'Để mai')}
                     </div>
                   )}
                   {showRightLabel && (
                     <div className="absolute top-4 left-4 px-3 py-1 rounded-xl bg-emerald-100 border-2 border-emerald-500 text-emerald-800 font-black text-xs uppercase tracking-wider shadow-sm">
-                      {t('swipe.scheduleNow')} →
+                      {t('swipe.scheduleNow', 'Xếp')} →
                     </div>
                   )}
 
@@ -401,9 +401,9 @@ export const SwipeReviewModal: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
                         {currentCard.sourceType === 'flex'
-                          ? t('swipe.flexibleBadge')
+                          ? t('swipe.flexibleBadge', 'Linh động hôm nay')
                           : currentCard.sourceType === 'basket'
-                            ? t('swipe.basketBadge')
+                            ? t('swipe.basketBadge', 'Rổ công việc')
                             : currentCard.type === 'inbox' ? 'Rổ việc' : currentCard.type === 'idea' ? 'Ý tưởng' : 'Nhiệm vụ'}
                       </span>
                       {currentCard.goalName && (
@@ -658,16 +658,16 @@ export const SwipeReviewModal: React.FC = () => {
                     className="flex-1 py-3 px-4 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-800 flex items-center justify-center gap-2 transition-all font-bold text-xs"
                   >
                     <ArrowLeft className="w-4 h-4 text-amber-600" />
-                    <span>{t('swipe.postponeTomorrow')}</span>
+                    <span>{t('swipe.postponeTomorrow', 'Để mai')}</span>
                   </button>
 
                   <button
                     onClick={() => handleAction('drop')}
                     className="p-3 rounded-2xl bg-white border border-slate-200 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center gap-1 transition-all text-xs font-semibold"
-                    title={t('swipe.skip')}
+                    title={t('swipe.skip', 'Bỏ qua')}
                   >
                     <Trash2 className="w-4 h-4" />
-                    <span className="text-[11px]">{t('swipe.skip')}</span>
+                    <span className="text-[11px]">{t('swipe.skip', 'Bỏ qua')}</span>
                   </button>
 
                   <button
@@ -678,7 +678,7 @@ export const SwipeReviewModal: React.FC = () => {
                         : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                     }`}
                   >
-                    <span>{t('swipe.scheduleNow')}</span>
+                    <span>{t('swipe.scheduleNow', 'Xếp')}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -692,9 +692,9 @@ export const SwipeReviewModal: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{t('swipe.completedTitle')}</h3>
+                <h3 className="text-lg font-bold text-slate-900">{t('swipe.completedTitle', 'Hoàn thành phiên Quẹt thẻ!')}</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  {t('swipe.completedDesc')}
+                  {t('swipe.completedDesc', 'Bạn đã duyệt hết các việc Linh động hôm nay và việc trong Rổ.')}
                 </p>
               </div>
 

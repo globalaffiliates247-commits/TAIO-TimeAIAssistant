@@ -100,8 +100,12 @@ export const QuickLineInput: React.FC = () => {
         <div className="relative flex-1">
           <input
             type="text"
+            enterKeyHint="done"
             value={inputVal}
             onChange={e => setInputVal(e.target.value)}
+            onBlur={() => {
+              if (inputVal.trim()) handleCommit();
+            }}
             onKeyDown={handleKeyDown}
             placeholder={
               isVi

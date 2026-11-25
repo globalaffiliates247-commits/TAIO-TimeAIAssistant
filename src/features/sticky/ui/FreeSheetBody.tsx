@@ -10,17 +10,21 @@ import { parseTimedText, toMins, toTime } from '../model/timeline';
 import { commitQuickLine } from '@/features/tasks';
 import { getDeviceCalendarDate } from '@/core/clock';
 import { matchLinesWithStableIds } from '../model/lineMatcher';
+import { RichNoteEditor } from './RichNoteEditor';
 
 export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const c = STICKY_COLORS[note.color];
   const { addDailyCardItem, updateDailyCardItem, goals } = useApp();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Initialize content: from note.content or join legacy lines
   const initialText = note.content ?? note.lines.map(l => l.text).join('\n');
   const [text, setText] = useState(initialText);
   const textRef = useRef(text);
   textRef.current = text;
+
+  const [html, setHtml] = useState(note.contentHtml || '');
+  const htmlRef = useRef(html);
+  htmlRef.current = html;
 
   // PRD v0.3.39 Part E2.1-E2.2: Refs for stable persistNow identity across renders
   const noteRef = useRef(note);
@@ -33,6 +37,7 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   goalsRef.current = goals;
 
   const lastSavedTextRef = useRef(initialText);
+  const lastSavedHtmlRef = useRef(note.contentHtml || '');
 
   const [saved, setSaved] = useState(true);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,31 +49,26 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       setText(note.content);
       textRef.current = note.content;
       lastSavedTextRef.current = note.content;
+      if (note.contentHtml !== undefined) {
+        setHtml(note.contentHtml);
+        htmlRef.current = note.contentHtml;
+        lastSavedHtmlRef.current = note.contentHtml;
+      }
       setSaved(true);
     }
-  }, [note.content]);
-
-  // Auto-resize textarea to fit content without scrollbars
-  const autoResize = () => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.max(160, el.scrollHeight)}px`;
-  };
-
-  useLayoutEffect(() => {
-    autoResize();
-  }, [text]);
+  }, [note.content, note.contentHtml]);
 
   // Core persist function (PRD v0.3.39 Part E2.1 & E2.2: Stable identity, only save on change)
-  const persistNow = useCallback((contentToSave: string) => {
+  const persistNow = useCallback((contentToSave: string, htmlToSave?: string) => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
 
-    // PRD v0.3.39 Part E2.2: Chỉ ghi khi có thay đổi thực sự
-    if (contentToSave === lastSavedTextRef.current) {
+    const currentHtml = htmlToSave !== undefined ? htmlToSave : htmlRef.current;
+
+    // Chỉ ghi khi có thay đổi thực sự
+    if (contentToSave === lastSavedTextRef.current && currentHtml === lastSavedHtmlRef.current) {
       return;
     }
 
@@ -84,7 +84,6 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
       const parsed = parseTimedText(trimmed);
       if (parsed.time) {
-        // PRD v0.3.39 Part E2.6: Liên kết dòng ↔ việc bằng line.id thay vì line_${idx}
         const lineKey = line.id;
         const legacyKey = `line_${idx}`;
         const existingTaskId = updatedScheduledMap[lineKey] || updatedScheduledMap[legacyKey];
@@ -122,92 +121,41 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
     updateSticky(note.id, {
       content: contentToSave,
+      contentHtml: currentHtml,
       lines: matchedLines,
       title,
       scheduledMap: updatedScheduledMap,
     });
 
     lastSavedTextRef.current = contentToSave;
+    lastSavedHtmlRef.current = currentHtml;
     setSaved(true);
   }, [note.id]);
 
   // Handle typing with 2-second debounce (Rule E2.3)
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const nextVal = e.target.value;
-    setText(nextVal);
-    textRef.current = nextVal;
+  const handleChange = (plainText: string, sanitizedHtml: string) => {
+    setText(plainText);
+    textRef.current = plainText;
+    setHtml(sanitizedHtml);
+    htmlRef.current = sanitizedHtml;
     setSaved(false);
 
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
-      persistNow(nextVal);
+      persistNow(plainText, sanitizedHtml);
     }, 2000);
   };
 
   // Immediate save on blur (Rule E2.3)
   const handleBlur = () => {
-    persistNow(textRef.current);
-  };
-
-  // Immediate save on Enter key (Rule E2.3)
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const el = textareaRef.current;
-    if (!el) return;
-
-    if (e.key === 'Enter') {
-      // Save state immediately on line break
-      setTimeout(() => {
-        if (textareaRef.current) persistNow(textareaRef.current.value);
-      }, 0);
-    }
-
-    // Tab / Shift+Tab for Indentation (Part C2 #3)
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const lineStart = text.lastIndexOf('\n', start - 1) + 1;
-
-      if (e.shiftKey) {
-        // Shift+Tab: Unindent
-        if (text.slice(lineStart, lineStart + 2) === '  ') {
-          const next = text.slice(0, lineStart) + text.slice(lineStart + 2);
-          setText(next);
-          textRef.current = next;
-          setSaved(false);
-          setTimeout(() => {
-            el.selectionStart = Math.max(lineStart, start - 2);
-            el.selectionEnd = Math.max(lineStart, end - 2);
-          }, 0);
-        } else if (text[lineStart] === '\t') {
-          const next = text.slice(0, lineStart) + text.slice(lineStart + 1);
-          setText(next);
-          textRef.current = next;
-          setSaved(false);
-          setTimeout(() => {
-            el.selectionStart = Math.max(lineStart, start - 1);
-            el.selectionEnd = Math.max(lineStart, end - 1);
-          }, 0);
-        }
-      } else {
-        // Tab: Indent 2 spaces
-        const next = text.slice(0, lineStart) + '  ' + text.slice(lineStart);
-        setText(next);
-        textRef.current = next;
-        setSaved(false);
-        setTimeout(() => {
-          el.selectionStart = start + 2;
-          el.selectionEnd = end + 2;
-        }, 0);
-      }
-    }
+    persistNow(textRef.current, htmlRef.current);
   };
 
   // Immediate save on unmount, page hide, visibility change, beforeunload (PRD v0.3.39 Part E2.1 & E2.2)
   useEffect(() => {
     const handleImmediateFlush = () => {
-      if (textRef.current !== lastSavedTextRef.current) {
-        persistNow(textRef.current);
+      if (textRef.current !== lastSavedTextRef.current || htmlRef.current !== lastSavedHtmlRef.current) {
+        persistNow(textRef.current, htmlRef.current);
       }
     };
 
@@ -238,21 +186,18 @@ export const FreeSheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           context="any"
           size="note"
           className="mb-1"
+          palette={c}
           onHide={() => updateSticky(note.id, { hasMotivationSticker: false })}
         />
       )}
 
-      {/* Single continuous multi-line editor (PRD FIX v0.3.32 Part C2) */}
-      <textarea
-        ref={textareaRef}
-        value={text}
+      {/* Rich Note Editor with formatting shortcuts & iPhone toolbar (PRD v0.3.57 Part G) */}
+      <RichNoteEditor
+        color={note.color}
+        initialContent={initialText}
+        initialHtml={note.contentHtml}
         onChange={handleChange}
         onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        placeholder="Ghi ý nghĩ, công việc, danh sách… (gõ giờ '15:30 làm việc' để tự xếp lịch)"
-        rows={6}
-        className="w-full flex-1 bg-transparent outline-none resize-none overflow-hidden placeholder:opacity-50 text-[15px] leading-relaxed select-text font-normal"
-        style={{ color: c.ink }}
         autoFocus={!text}
       />
 

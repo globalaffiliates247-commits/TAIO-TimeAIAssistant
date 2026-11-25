@@ -33,6 +33,7 @@ import {
   TaioImportSummary,
   TaioExportV1,
   recordTombstone,
+  loadTombstones,
 } from '../features/data-transfer';
 import { useSyncLoop } from '../features/sync/useSyncLoop';
 import i18n from '../i18n';
@@ -558,8 +559,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
 
-  // v0.20: Inbox Mini App State
-  const [inbox, setInbox] = useState<InboxItem[]>(INITIAL_INBOX);
+  // v0.20: Inbox Mini App State (PRD v0.3.57 Part J5: default empty state, only seed for clean new accounts)
+  const [inbox, setInbox] = useState<InboxItem[]>([]);
   const [inboxModalOpen, setInboxModalOpen] = useState<boolean>(false);
 
   // v0.20: 24-Hour Time Ledger
@@ -2432,9 +2433,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         showToast('Sẽ nhắc bạn khi hết khung giờ hiện tại.');
       }
     } else if (decision === 'do_now') {
-      setTimerMinutesRemaining(minutes || 15);
+      const todayStr = getDeviceCalendarDate();
+      const currentNowMins = getDeviceTimeMinutes();
+      const startStr = getDeviceTimeString();
+      const dur = minutes || 15;
+      const endMins = (currentNowMins + dur) % 1440;
+      const endStr = minutesToTime(endMins);
+
+      // PRD v0.3.57 Part H1: Stop previous running task cleanly if one was in progress
+      if (currentBlock && !currentBlock.isTemplateBlock && currentBlock.blockKind !== 'ritual') {
+        updateScheduleEntry(
+          currentBlock.id,
+          {
+            endTime: startStr,
+            status: 'partly_done',
+            returnPoint: currentBlock.title,
+            timeboxEndOutcome: 'continue_later',
+            extra: {
+              ...((currentBlock.extra as Record<string, unknown>) || {}),
+              startedAt: undefined,
+            },
+          },
+          { updateDailyCardItem, setBlocks, dailyCardItems }
+        );
+      }
+
+      // Create interruption task
+      addDailyCardItem({
+        text: title,
+        origin: 'interruption',
+        date: todayStr,
+        start: startStr,
+        end: endStr,
+        status: 'in_progress',
+        goalId,
+        extra: {
+          actualMinutes: dur,
+          startedAt: Date.now(),
+          estimateMins: dur,
+          interruptionReturnPoint: currentBlock ? currentBlock.title : undefined,
+          interruptionPreviousId: currentBlock ? currentBlock.id : undefined,
+        },
+      });
+
+      setTimerMinutesRemaining(dur);
       setIsTimerRunning(true);
-      showToast(language === 'vi' ? 'Đang chạy đồng hồ việc phát sinh. Giảm trừ vào quỹ dự phòng hôm nay!' : 'Interruption timer active. Deducted from today\'s reserve.');
+      showToast(
+        language === 'vi'
+          ? `Đã dừng việc trước và bắt đầu "${title}" (${dur}p)!`
+          : `Paused previous task and started "${title}" (${dur}m)!`
+      );
     } else if (decision === 'parallel') {
       // PRD v0.3.33 Part F2.1: Dual-tasking (1 main task + 1 side task maximum)
       const todayStr = getDeviceCalendarDate();
@@ -2871,10 +2919,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const initialBlockMap = new Map(INITIAL_BLOCKS.map(b => [b.id, b]));
       const initialGoalMap = new Map(INITIAL_GOALS.map(g => [g.id, g]));
       const initialCardMap = new Map(INITIAL_DAILY_CARD_ITEMS.map(c => [c.id, c]));
+      const tombstoneIds = new Set(loadTombstones().map(t => t.id));
+      const initialInboxTitles = new Set(INITIAL_INBOX.map(i => i.title));
+      let purgedMockInboxCount = 0;
 
-      // FIX v0.3.34 Part A2.1 & v0.3.36 Part E: Purge mock cards dc-1..dc-9, unmodified INITIAL_DAILY_CARD_ITEMS,
-      // and migrated mock blocks (like b-10 and b-ritual-close)
+      // FIX v0.3.34 Part A2.1 & v0.3.36 Part E & v0.3.57 Part J: Purge mock cards dc-1..dc-9, unmodified INITIAL_DAILY_CARD_ITEMS,
+      // tombstones, and orphaned mock items at 16:00
       let cards = (savedDailyCards?.value || []).filter(c => {
+        if (tombstoneIds.has(c.id)) return false;
+        if (initialInboxTitles.has(c.text) && (c.start === '16:00' || !c.start)) {
+          recordTombstone(c.id);
+          purgedMockInboxCount++;
+          return false;
+        }
         if (c.id === 'dc-migrated-b-ritual-close' || c.id === 'b-ritual-close' || c.text?.includes('Đóng ngày làm việc')) return false;
         const initCard = initialCardMap.get(c.id);
         if (initCard) {
@@ -2893,6 +2950,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (c.text === 'Dọn dẹp hòm thư và hủy đăng ký các bản tin cũ' && c.start === '20:00') return false;
         return true;
       });
+
+      if (purgedMockInboxCount > 0) {
+        console.warn(`[v0.3.57 Part J] Purged ${purgedMockInboxCount} orphaned mock inbox items at 16:00 and recorded tombstones.`);
+      }
 
       if (savedBlocks?.value) {
         // PRD v0.3.36 Part E: Merge b-ritual-close into dayCloseConfig and eliminate b-ritual-close completely
@@ -2921,6 +2982,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // and eliminate b-ritual-close so only single b-user-dayclose exists.
         const nowMins = getDeviceTimeMinutes();
         const rawBlocks = savedBlocks.value.filter(b => {
+          if (tombstoneIds.has(b.id)) return false;
           if (b.id === 'b-ritual-close' || b.title?.includes('Đóng ngày làm việc')) return false;
           const initB = initialBlockMap.get(b.id);
           if (!initB) return true;
@@ -3012,17 +3074,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (savedInbox?.value) {
         const initialInboxMap = new Map(INITIAL_INBOX.map(i => [i.id, i]));
         const cleanedInbox = savedInbox.value.filter(item => {
+          if (tombstoneIds.has(item.id)) return false;
           const init = initialInboxMap.get(item.id);
           if (!init) return true;
           return item.title !== init.title || item.estimatedMinutes !== init.estimatedMinutes;
         });
         setInbox(cleanedInbox);
+      } else if (!savedDailyCards?.value) {
+        setInbox(INITIAL_INBOX);
+        saveDurableState('inbox', INITIAL_INBOX, Date.now());
       }
 
-      // FIX v0.3.34 Part A2.1: Purge unmodified sample goals without attached user tasks
+      // FIX v0.3.34 Part A2.1 & v0.3.57 Part J: Purge unmodified sample goals & tombstones
       if (savedGoals?.value) {
         const rawGoals = savedGoals.value;
         const cleanedGoals = rawGoals.filter(g => {
+          if (tombstoneIds.has(g.id)) return false;
           const initG = initialGoalMap.get(g.id);
           if (!initG) return true; // user goal
           const isModified = g.name !== initG.name || g.measurableResult !== initG.measurableResult || g.committedHours !== initG.committedHours;
@@ -3034,11 +3101,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         setGoals([]);
       }
+      const tombstoneList = Array.from(tombstoneIds);
       if (savedLists?.value) {
-        setLists(mergeCollectionsByUpdatedAt(savedLists.value, INITIAL_LISTS));
+        setLists(mergeCollectionsByUpdatedAt(savedLists.value, INITIAL_LISTS, tombstoneList));
       }
       if (savedListItems?.value) {
-        setListItems(mergeCollectionsByUpdatedAt(savedListItems.value, INITIAL_LIST_ITEMS));
+        setListItems(mergeCollectionsByUpdatedAt(savedListItems.value, INITIAL_LIST_ITEMS, tombstoneList));
       }
       if (savedInterruptions?.value) {
         setInterruptions(savedInterruptions.value);
@@ -3157,11 +3225,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     broadcastWindowBus('listItems');
   }, [listItems]);
 
-  // PRD v0.3.50 Part A: Cross-window data synchronization listener
+  // PRD v0.3.50 Part A & v0.3.57 Part J: Cross-window data synchronization listener with tombstone propagation
   useEffect(() => {
     if (!isHydratedRef.current) return;
     const unsubscribe = subscribeWindowBus(async (msg) => {
       try {
+        const deletedIds = loadTombstones().map(t => t.id);
         if (msg.dataset === 'dailyCardItems') {
           const saved = await loadDurableState<DailyCardItem[]>('dailyCardItems');
           if (saved?.value && Array.isArray(saved.value)) {
@@ -3173,7 +3242,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   item.id === activeId ? { ...item, updatedAt: Math.max(Number(item.updatedAt) || 0, Date.now()) } : item
                 );
               }
-              return mergeCollectionsByUpdatedAt(local, saved.value);
+              return mergeCollectionsByUpdatedAt(local, saved.value, deletedIds);
             });
           }
         } else if (msg.dataset === 'blocks') {
@@ -3187,7 +3256,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   b.id === activeId ? { ...b, updatedAt: Math.max(Number(b.updatedAt) || 0, Date.now()) } : b
                 );
               }
-              return mergeCollectionsByUpdatedAt(local, saved.value);
+              return mergeCollectionsByUpdatedAt(local, saved.value, deletedIds);
             });
           }
         } else if (msg.dataset === 'goals') {
@@ -3201,7 +3270,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   g.id === activeId ? { ...g, updatedAt: Math.max(Number(g.updatedAt) || 0, Date.now()) } : g
                 );
               }
-              return mergeCollectionsByUpdatedAt(local, saved.value);
+              return mergeCollectionsByUpdatedAt(local, saved.value, deletedIds);
             });
           }
         } else if (msg.dataset === 'closedDays') {
@@ -3674,6 +3743,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteGoal = (goalId: string) => {
+    recordTombstone(goalId);
     setGoals(prev => {
       const next = prev.filter(g => g.id !== goalId);
       saveDurableState('goals', next, Date.now());
@@ -3718,7 +3788,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (bridge?.onTimerAction) {
       const unsub = bridge.onTimerAction((action: { type: string; minutes?: number; timerId?: string }) => {
-        const cur = currentBlockRef.current || scheduleBlocksRef.current.find(b => b.status === 'in_progress' || (b.extra as any)?.startedAt);
+        const todayStr = getDeviceCalendarDate();
+        const cur = (currentBlockRef.current && (!currentBlockRef.current.date || currentBlockRef.current.date === todayStr) && currentBlockRef.current.status === 'in_progress')
+          ? currentBlockRef.current
+          : scheduleBlocksRef.current.find(b => b.status === 'in_progress' && (!b.date || b.date === todayStr) && !b.isTemplateBlock && b.blockKind !== 'ritual');
         if (action.type === 'done') {
           if (cur) {
             markTaskDone(cur.id);
@@ -3731,22 +3804,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             showToast?.(language === 'vi' ? 'Chưa có việc đang làm để thêm giờ' : 'No active task to extend');
           }
         } else if (action.type === 'start-quick') {
-          if (cur) {
-            shiftTaskTime(cur.id, action.minutes || 15);
-            showToast?.(language === 'vi' ? `+${action.minutes || 15}p cho "${cur.title}"` : `+${action.minutes || 15}m for "${cur.title}"`);
-            return;
-          }
+          // PRD v0.3.57 Part I: ALWAYS start a new quick task, never hijack into shiftTaskTime
           const mins = action.minutes || 15;
           const startStr = getDeviceTimeString();
           const startM = getDeviceTimeMinutes();
           const endStr = minutesToTime((startM + mins) % 1440);
-          const newItem = {
+
+          // If a real task was currently in progress, pause it cleanly as partly_done
+          if (cur && !cur.isTemplateBlock && cur.blockKind !== 'ritual') {
+            updateScheduleEntry(
+              cur.id,
+              {
+                endTime: startStr,
+                status: 'partly_done',
+                returnPoint: cur.title,
+                timeboxEndOutcome: 'continue_later',
+                extra: {
+                  ...((cur.extra as Record<string, unknown>) || {}),
+                  startedAt: undefined,
+                },
+              },
+              { updateDailyCardItem, setBlocks, dailyCardItems }
+            );
+          }
+
+          const newItem: DailyCardItem = {
             id: `dc-${Date.now()}`,
-            date: getDeviceCalendarDate(),
+            date: todayStr,
             text: language === 'vi' ? 'Việc tập trung nhanh' : 'Quick focus task',
             start: startStr,
             end: endStr,
-            status: 'open' as const,
+            status: 'in_progress',
+            carryCount: 0,
+            origin: 'interruption',
             extra: { startedAt: Date.now(), estimateMins: mins },
           };
           addDailyCardItem(newItem);

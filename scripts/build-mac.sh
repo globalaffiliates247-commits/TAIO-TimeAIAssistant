@@ -29,21 +29,21 @@ node -e "const p=require('./desktop/package.json');p.version='$VERSION';require(
 cp -R out "$STAGE/app/web"
 
 # Icon (.icns)
-SRC_PNG="ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
+SRC_PNG="src/assets/icon/png/appicon-1024.png"
 if [ -f "$SRC_PNG" ]; then
-  echo "Generating .icns using sips & python3..."
+  echo "Generating .icns using multi-resolution assets & python3..."
   ICONSET="$STAGE/icon.iconset"
   mkdir -p "$ICONSET"
-  sips -z 16 16     "$SRC_PNG" --out "$ICONSET/icon_16x16.png" >/dev/null
-  sips -z 32 32     "$SRC_PNG" --out "$ICONSET/icon_16x16@2x.png" >/dev/null
-  sips -z 32 32     "$SRC_PNG" --out "$ICONSET/icon_32x32.png" >/dev/null
-  sips -z 64 64     "$SRC_PNG" --out "$ICONSET/icon_32x32@2x.png" >/dev/null
-  sips -z 128 128   "$SRC_PNG" --out "$ICONSET/icon_128x128.png" >/dev/null
-  sips -z 256 256   "$SRC_PNG" --out "$ICONSET/icon_128x128@2x.png" >/dev/null
-  sips -z 256 256   "$SRC_PNG" --out "$ICONSET/icon_256x256.png" >/dev/null
-  sips -z 512 512   "$SRC_PNG" --out "$ICONSET/icon_256x256@2x.png" >/dev/null
-  sips -z 512 512   "$SRC_PNG" --out "$ICONSET/icon_512x512.png" >/dev/null
-  sips -z 1024 1024 "$SRC_PNG" --out "$ICONSET/icon_512x512@2x.png" >/dev/null
+  cp "src/assets/icon/png/icon-16.png"      "$ICONSET/icon_16x16.png"
+  cp "src/assets/icon/png/icon-32.png"      "$ICONSET/icon_16x16@2x.png"
+  cp "src/assets/icon/png/icon-32.png"      "$ICONSET/icon_32x32.png"
+  cp "src/assets/icon/png/appicon-64.png"   "$ICONSET/icon_32x32@2x.png"
+  cp "src/assets/icon/png/appicon-128.png"  "$ICONSET/icon_128x128.png"
+  cp "src/assets/icon/png/appicon-256.png"  "$ICONSET/icon_128x128@2x.png"
+  cp "src/assets/icon/png/appicon-256.png"  "$ICONSET/icon_256x256.png"
+  cp "src/assets/icon/png/appicon-512.png"  "$ICONSET/icon_256x256@2x.png"
+  cp "src/assets/icon/png/appicon-512.png"  "$ICONSET/icon_512x512.png"
+  cp "src/assets/icon/png/appicon-1024.png" "$ICONSET/icon_512x512@2x.png"
 
   python3 -c "
 import struct, os

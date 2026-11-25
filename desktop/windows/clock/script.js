@@ -307,6 +307,18 @@
   }
   function triggerStartQuick(mins = 15) {
     try {
+      // PRD v0.3.57 Part I: Immediate local visual feedback on clock before IPC roundtrip
+      currentTask = {
+        id: 'quick-' + Date.now(),
+        title: currentLang === 'en' ? 'Quick focus task' : 'Việc tập trung nhanh',
+        subtitle: currentLang === 'en' ? 'In progress' : 'Đang thực hiện',
+        mode: 'task',
+        startedAt: Date.now(),
+        endsAt: Date.now() + mins * 60000,
+        remaining: mins + 'p',
+        isCountDown: true,
+      };
+      render();
       if (window.taioAPI && window.taioAPI.sendTimerAction) {
         window.taioAPI.sendTimerAction({ type: 'start-quick', minutes: mins });
       }

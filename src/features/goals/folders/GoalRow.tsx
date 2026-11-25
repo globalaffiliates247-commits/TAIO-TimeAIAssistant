@@ -121,7 +121,8 @@ export const GoalRow: React.FC<GoalRowProps> = ({
             size="line"
             activeGoalId={goal.id}
             activeGoalName={goal.name}
-            className="w-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 shadow-2xs"
+            palette={{ ink: '#1e293b', muted: '#64748b', line: '#e2e8f0', paper: '#ffffff' }}
+            className="w-full bg-white border border-slate-200/80 text-slate-800 shadow-2xs"
           />
         </div>
       )}

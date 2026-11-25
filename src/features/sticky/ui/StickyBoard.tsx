@@ -3,7 +3,8 @@
 // on screen even when the board is closed. Phone: one sheet at a time with colour tabs on top.
 import React, { useEffect, useState } from 'react';
 import { getDeviceCalendarDate } from '@/core/clock';
-import { STICKY_COLORS } from '../model/stickyTypes';
+import { STICKY_COLORS, getStickyNoteTitle } from '../model/stickyTypes';
+import { useApp } from '@/context/AppContext';
 import {
   closeStickyBoard,
   newFreeSticky,
@@ -21,6 +22,7 @@ import { Z_LAYERS } from '@/styles/layers';
 
 export const StickyBoard: React.FC = () => {
   const { notes, boardOpen, activeId, isTemporarilyHidden, cacheWipedWarning } = useStickyState();
+  const { language } = useApp();
   const [isPhone, setIsPhone] = useState(false);
 
   useEffect(() => {
@@ -116,7 +118,7 @@ export const StickyBoard: React.FC = () => {
                 className="h-8 px-3 rounded-full text-[13px] flex items-center gap-1.5 shrink-0"
                 style={{ background: STICKY_COLORS[n.color].bar, color: STICKY_COLORS[n.color].ink, fontWeight: n.id === (activeId || visible[0].id) ? 700 : 500 }}>
                 {n.pinned && <IconPin color={STICKY_COLORS[n.color].muted} size={11} filled />}
-                {n.kind === 'day' ? 'Hôm nay' : n.title}
+                {getStickyNoteTitle(n, getDeviceCalendarDate(), language, true)}
               </button>
             ))}
             <button aria-label="Tờ mới" onClick={() => newFreeSticky('pink')} className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0"><IconPlus color="#6B5E2A" /></button>

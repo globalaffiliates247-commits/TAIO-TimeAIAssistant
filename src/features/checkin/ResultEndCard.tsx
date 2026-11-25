@@ -255,8 +255,14 @@ export const ResultEndCard: React.FC<ResultEndCardProps> = ({
               <input
                 type="text"
                 autoFocus
+                enterKeyHint="done"
                 value={nextStepInput}
                 onChange={e => setNextStepInput(e.target.value)}
+                onBlur={() => {
+                  if (nextStepInput.trim()) {
+                    onAnswer('continue_later', 0, nextStepInput);
+                  }
+                }}
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     onAnswer('continue_later', 0, nextStepInput || t('checkin.unnamed_step', 'Làm tiếp việc dang dở'));

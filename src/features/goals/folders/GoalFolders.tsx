@@ -181,6 +181,7 @@ export const GoalFolders: React.FC<GoalFoldersProps> = ({
                 {editingAreaName === activeConfig.area ? (
                   <input
                     type="text"
+                    enterKeyHint="done"
                     value={editAreaValue}
                     onChange={e => setEditAreaValue(e.target.value)}
                     maxLength={20}
@@ -358,6 +359,7 @@ export const GoalFolders: React.FC<GoalFoldersProps> = ({
                 {editingAreaName === activeConfig.area ? (
                   <input
                     type="text"
+                    enterKeyHint="done"
                     value={editAreaValue}
                     onChange={e => setEditAreaValue(e.target.value)}
                     maxLength={20}

@@ -104,8 +104,12 @@ export const FreeTimerInput: React.FC<FreeTimerInputProps> = ({
       <div className="flex items-center gap-2">
         <input
           type="text"
+          enterKeyHint="done"
           value={inputText}
           onChange={e => setInputText(e.target.value)}
+          onBlur={() => {
+            if (inputText.trim()) handleSubmit();
+          }}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               e.preventDefault();

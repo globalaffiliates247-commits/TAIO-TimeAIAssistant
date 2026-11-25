@@ -1,10 +1,16 @@
 {
   "now": {
     "dod_input_label": "Tiêu chí hoàn thành",
-    "dod_input_placeholder": "Mỗi dòng một tiêu chí, Enter để thêm dòng"
+    "dod_input_placeholder": "Mỗi dòng một tiêu chí, Enter để thêm dòng",
+    "parallelRunningTasks": "{{count}} việc đang chạy",
+    "parallelRunningTooltip": "Xem các việc đang chạy song song",
+    "parallelRunningHeader": "Việc đang chạy song song",
+    "taskTransition": "Đã xong \"{{completed}}\" · Đang tiếp tục \"{{continuing}}\"",
+    "focusingTask": "Đang tập trung \"{{title}}\""
   },
   "checkin": {
     "done": "Xong",
+    "otherTaskRunning": "Còn \"{{title}}\" đang chạy tới {{endTime}}",
     "continue_later": "Chưa xong, để dành làm tiếp",
     "more_time": "Cần thêm +15 phút",
     "remind_10m": "Nhắc lại sau 10 phút",

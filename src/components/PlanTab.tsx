@@ -589,8 +589,13 @@ export const PlanTab: React.FC<PlanTabProps> = ({
                                 <div className="flex items-center gap-2">
                                   <input
                                     type="text"
+                                    enterKeyHint="done"
                                     value={editingTitle}
                                     onChange={e => setEditingTitle(e.target.value)}
+                                    onBlur={() => {
+                                      updateScheduleEntry(block.id, { title: editingTitle.trim() }, { updateDailyCardItem, setBlocks, dailyCardItems });
+                                      setEditingId(null);
+                                    }}
                                     onKeyDown={e => {
                                       if (e.key === 'Enter') {
                                         updateScheduleEntry(block.id, { title: editingTitle.trim() }, { updateDailyCardItem, setBlocks, dailyCardItems });

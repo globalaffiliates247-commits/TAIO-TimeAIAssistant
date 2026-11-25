@@ -909,7 +909,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
   const parsed = parseTimedText(draft);
   const suggested = parsed.time && parsed.rest && !parsed.durationMins ? suggestDuration(parsed.rest, undefined, dailyCardItems) : null;
 
-  const commitDraft = () => {
+  const commitDraft = (shouldRefocus: boolean = true) => {
     if (!draft.trim()) return;
     const p = parseTimedText(draft);
     if (!p.rest && !p.time) return;
@@ -922,7 +922,9 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     const dur = p.durationMins ?? pill ?? undefined;
     const end = dur && p.time ? toTime(toMins(p.time) + dur) : undefined;
     setDraft(end ? `${nextFreeStart([...timed, { id: createdId || 'new', start: p.time, end } as DailyCardItem], toMins(end))} ` : '');
-    setTimeout(() => inputRef.current?.focus(), 0);
+    if (shouldRefocus) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
   };
 
   const saveEdit = (it: DailyCardItem, keepEditing: boolean = false) => {
@@ -1286,6 +1288,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
           context="start_day"
           size="note"
           className="mb-1"
+          palette={c}
           collapsible
           isCollapsed={false}
           onToggleCollapse={() => {
@@ -1306,6 +1309,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
               slotKey="start_day_sheet"
               context="start_day"
               size="line"
+              palette={c}
               collapsible
               isCollapsed={true}
               onToggleCollapse={() => {
@@ -1559,7 +1563,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                     <Square className="w-3 h-3 fill-rose-700 stroke-none" />
                   </button>
                 </>
-              ) : (toMins(it.start || '00:00') > nowMins && (selectedIds.has(it.id))) ? (
+              ) : (it.status !== 'done' && it.status !== 'dropped') ? (
                 <button
                   type="button"
                   title={language === 'vi' ? 'Bắt đầu việc này ngay' : 'Start this task now'}
@@ -1567,7 +1571,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                     e.stopPropagation();
                     handleStartItemNow(it);
                   }}
-                  className="p-1 rounded-md hover:bg-black/10 text-slate-700 transition-all shrink-0 cursor-pointer"
+                  className="p-1 rounded-md hover:bg-black/10 text-slate-700 transition-all shrink-0 cursor-pointer opacity-70 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                 >
                   <Play className="w-3.5 h-3.5 fill-slate-700 stroke-none" />
                 </button>
@@ -1739,6 +1743,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                   <input
                     type="text"
                     autoFocus
+                    enterKeyHint="done"
                     value={activeGapInput.text}
                     onChange={(e) => setActiveGapInput({ ...activeGapInput, text: e.target.value })}
                     onKeyDown={(e) => {
@@ -1751,9 +1756,11 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                       }
                     }}
                     onBlur={() => {
-                      setTimeout(() => {
+                      if (activeGapInput?.text.trim()) {
+                        handleCommitGapInput(gap);
+                      } else {
                         setActiveGapInput(null);
-                      }, 150);
+                      }
                     }}
                     placeholder={language === 'vi' ? 'Làm gì trong lúc này?' : 'What to do during this time?'}
                     className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder-amber-700/50"
@@ -1845,11 +1852,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       <div className="flex items-center gap-2 flex-wrap">
         <input
           ref={inputRef} value={draft} placeholder="Hôm nay bạn muốn làm xong điều gì?"
+          enterKeyHint="done"
           onChange={e => { setDraft(e.target.value); setPill(null); }}
           onPaste={e => handlePasteMultiLine(e, false)}
+          onBlur={() => {
+            if (draft.trim()) commitDraft(false);
+          }}
           onKeyDown={e => {
             if (e.key === 'Tab' && suggested && pill === null) { e.preventDefault(); setPill(suggested); }
-            if (e.key === 'Enter') commitDraft();
+            if (e.key === 'Enter') commitDraft(true);
           }}
           className="flex-1 min-w-[160px] bg-transparent outline-none placeholder:opacity-60" style={{ color: c.ink }}
         />
@@ -2020,8 +2031,15 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
       })}
       <input
         value={flexDraft} placeholder="thêm việc chưa xếp giờ…"
+        enterKeyHint="done"
         onChange={e => setFlexDraft(e.target.value)}
         onPaste={e => handlePasteMultiLine(e, true)}
+        onBlur={() => {
+          if (flexDraft.trim()) {
+            commitQuickLine(flexDraft, day, { addDailyCardItem, goals });
+            setFlexDraft('');
+          }
+        }}
         onKeyDown={e => {
           if (e.key === 'Enter' && flexDraft.trim()) {
             commitQuickLine(flexDraft, day, { addDailyCardItem, goals });

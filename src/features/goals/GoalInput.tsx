@@ -71,15 +71,17 @@ export const GoalInput: React.FC = () => {
         }`}>
           <Target className="w-4 h-4" />
         </div>
-        <h3 className="text-sm font-bold text-slate-900">{t('goals.newGoalTitle')}</h3>
+        <h3 className="text-sm font-bold text-slate-900">{t('goals.newGoalTitle', 'Tạo mục tiêu mới')}</h3>
       </div>
 
       <input
         type="text"
+        enterKeyHint="done"
         value={text}
         onChange={e => setText(e.target.value)}
+        onBlur={() => { if (parsed) handleCreate(); }}
         onKeyDown={e => { if (e.key === 'Enter' && parsed) handleCreate(); }}
-        placeholder={t('goals.inputPlaceholder')}
+        placeholder={t('goals.inputPlaceholder', 'Nhập mục tiêu (vd: Đọc 20 cuốn sách #cánhân)...')}
         className="w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all"
       />
 
@@ -108,7 +110,7 @@ export const GoalInput: React.FC = () => {
                 {t('goals.previewTypeAttendance', { duration: parsed.duration })}
               </span>
             )}
-            {parsed.type === 'tasks' && t('goals.previewTypeTasks')}
+            {parsed.type === 'tasks' && t('goals.previewTypeTasks', 'Hoàn thành các việc')}
           </span>
 
           {/* Deadline badge */}
@@ -147,7 +149,7 @@ export const GoalInput: React.FC = () => {
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-[11px] text-slate-400">{t('goals.quickAddHint')}</p>
+        <p className="text-[11px] text-slate-400">{t('goals.quickAddHint', 'AI tự động nhận diện loại mục tiêu, số lượng và thời hạn khi bạn gõ.')}</p>
         <button
           type="button"
           onClick={handleCreate}
@@ -158,7 +160,7 @@ export const GoalInput: React.FC = () => {
               : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
           }`}
         >
-          {t('goals.createBtn')}
+          {t('goals.createBtn', 'Tạo mục tiêu')}
         </button>
       </div>
     </div>

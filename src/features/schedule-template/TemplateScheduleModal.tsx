@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { TimeBlock } from '@/types';
 import { saveDurableState } from '@/core/storage/durableStorage';
+import { recordTombstone } from '@/features/data-transfer';
 import { 
   X, 
   Calendar, 
@@ -44,6 +45,7 @@ export const TemplateScheduleModal: React.FC<TemplateScheduleModalProps> = ({ is
   ).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const handleDelete = (id: string) => {
+    recordTombstone(id);
     const next = blocks.filter(b => b.id !== id);
     setBlocks(next);
     saveDurableState('blocks', next, Date.now());

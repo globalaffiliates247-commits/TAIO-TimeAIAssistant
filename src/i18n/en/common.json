@@ -18,7 +18,12 @@
     "continue": "Continue",
     "add": "Add",
     "apply": "Apply",
-    "finish": "Finish"
+    "finish": "Finish",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "navbar": {
+    "goals": "Goals"
   },
   "nav": {
     "now": "Now",
@@ -36,6 +41,9 @@
     "miniClock": "Mini Clock",
     "pinnedClock": "Pinned Clock",
     "stopwatches": "Stopwatches",
+    "freeTimer": "Free timer",
+    "next": "Next",
+    "noMoreScheduledTasks": "No more upcoming tasks today",
     "timeLedger": "Time Notebook",
     "timetable": "Timetable",
     "templateSchedule": "Template Schedule",
@@ -76,6 +84,12 @@
     "startDayTitle": "Start the Day",
     "startDayBtn": "Start",
     "masterTitle": "Motivational Quotes",
+    "masterDesc": "Reminders and energy right where you look every day",
+    "slotsTitle": "Display slots",
+    "refresh": "New quote",
+    "favorite": "Save to favorites",
+    "hideToday": "Hide today",
+    "original": "Original",
     "enabledToast": "Motivational quotes enabled",
     "disabledToast": "Motivational quotes disabled",
     "slot_clock_idle": "On Mini Clock",
@@ -94,5 +108,26 @@
     "slot_alarm_start_desc": "Display reminder note below task title when alarm sounds",
     "slot_widget": "iPhone Widget & Lock Screen",
     "slot_widget_desc": "Display quote when no active countdown task"
+  },
+  "sync": {
+    "syncing": "Syncing...",
+    "idle": "Synced",
+    "error": "Sync error",
+    "off": "Device sync",
+    "desc": "Use the same sync code across devices. Data is encrypted locally before sending.",
+    "create_code": "Create new code on this device",
+    "enter_code": "Enter code from another device",
+    "join_warning": "First sync will replace local data with remote device data.",
+    "connect": "Connect",
+    "cancel": "Cancel",
+    "active_title": "Cross-device sync · Active",
+    "your_code_label": "Sync code (enter or send to other device)",
+    "share_btn": "Share code",
+    "security_note": "This code unlocks your data; do not share with others.",
+    "disconnect": "Disconnect sync on this device"
+  },
+  "profile": {
+    "sync_and_data": "Sync and data",
+    "sync_and_data_desc": "Cross-device sync, JSON backup/restore, and data management."
   }
 }

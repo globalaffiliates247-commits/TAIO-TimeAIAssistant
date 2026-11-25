@@ -196,7 +196,7 @@ export const GoalPicker: React.FC<GoalPickerProps> = ({
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder={t('goals.searchPlaceholder') || 'Tìm mục tiêu...'}
+            placeholder={t('goals.searchPlaceholder', 'Tìm mục tiêu...')}
             className="flex-1 bg-transparent outline-none text-xs text-slate-800 placeholder:text-slate-400 min-w-0"
             autoFocus
           />
@@ -256,7 +256,7 @@ export const GoalPicker: React.FC<GoalPickerProps> = ({
           onClick={handleClearGoal}
           className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-100 flex items-center justify-between text-slate-600 hover:text-slate-900 transition-colors"
         >
-          <span className="font-normal">{t('goals.noGoal') || 'Không gắn mục tiêu'}</span>
+          <span className="font-normal">{t('goals.noGoal', 'Không gắn mục tiêu')}</span>
           {!currentGoalId && <Check className="w-3.5 h-3.5 text-emerald-600" />}
         </button>
 
@@ -267,19 +267,24 @@ export const GoalPicker: React.FC<GoalPickerProps> = ({
             className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-100 flex items-center gap-1.5 text-blue-600 font-medium transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>{t('goals.newGoal') || 'Mục tiêu mới'}</span>
+            <span>{t('goals.newGoal', 'Mục tiêu mới')}</span>
           </button>
         ) : (
           <div className="p-1 flex items-center gap-1 bg-slate-50 rounded-lg border border-blue-200">
             <input
               type="text"
+              enterKeyHint="done"
               value={newGoalTitle}
               onChange={e => setNewGoalTitle(e.target.value)}
+              onBlur={() => {
+                if (newGoalTitle.trim()) handleCreateNewGoal();
+                else setIsCreatingNew(false);
+              }}
               onKeyDown={e => {
                 if (e.key === 'Enter') handleCreateNewGoal();
                 if (e.key === 'Escape') setIsCreatingNew(false);
               }}
-              placeholder={t('goals.enterNewGoalName') || 'Tên mục tiêu, Enter để tạo...'}
+              placeholder={t('goals.enterNewGoalName', 'Tên mục tiêu, Enter để tạo...')}
               className="flex-1 bg-transparent outline-none text-xs px-1 text-slate-800 placeholder:text-slate-400"
               autoFocus
             />

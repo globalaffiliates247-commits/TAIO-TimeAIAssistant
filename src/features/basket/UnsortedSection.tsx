@@ -45,7 +45,14 @@ export const UnsortedSection: React.FC = () => {
 
       <input
         value={draft}
+        enterKeyHint="done"
         onChange={e => setDraft(e.target.value)}
+        onBlur={() => {
+          if (draft.trim()) {
+            addInboxItem({ title: draft.trim(), source: 'quick' });
+            setDraft('');
+          }
+        }}
         onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { addInboxItem({ title: draft.trim(), source: 'quick' }); setDraft(''); } }}
         placeholder={t('basket.quick_placeholder', 'Ghi một việc vừa nghĩ ra, Enter để thêm…')}
         className="h-11 rounded-xl bg-white border border-[#E8E3D6] px-3.5 text-[15px] text-[#2B2A26] placeholder:text-[#A39E8E] outline-none focus:border-[#B9B29E]"

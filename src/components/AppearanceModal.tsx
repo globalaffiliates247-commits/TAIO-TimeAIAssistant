@@ -221,7 +221,7 @@ export const AppearanceModal: React.FC = () => {
           <div>
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Globe className="w-3.5 h-3.5" />
-              <span>{t('common.language')}</span>
+              <span>{t('common.language', 'Ngôn ngữ')}</span>
             </h3>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -234,7 +234,7 @@ export const AppearanceModal: React.FC = () => {
                 }`}
               >
                 <div>
-                  <div className="text-xs font-bold">{t('common.vietnamese')}</div>
+                  <div className="text-xs font-bold">{t('common.vietnamese', 'Tiếng Việt')}</div>
                   <div className="text-[10px] text-slate-500">Mặc định tiếng Việt</div>
                 </div>
                 {language === 'vi' && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
@@ -250,7 +250,7 @@ export const AppearanceModal: React.FC = () => {
                 }`}
               >
                 <div>
-                  <div className="text-xs font-bold">{t('common.english')}</div>
+                  <div className="text-xs font-bold">{t('common.english', 'English')}</div>
                   <div className="text-[10px] text-slate-500">English locale</div>
                 </div>
                 {language === 'en' && <Check className="w-4 h-4 text-blue-600 shrink-0" />}

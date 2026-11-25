@@ -6,6 +6,7 @@
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
       "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
       "Segoe UI Symbol", "Noto Color Emoji";
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
     --color-red-50: oklch(97.1% 0.013 17.38);
@@ -176,6 +177,7 @@
     --font-weight-extrabold: 800;
     --font-weight-black: 900;
     --tracking-tight: -0.025em;
+    --tracking-normal: 0em;
     --tracking-wide: 0.025em;
     --tracking-wider: 0.05em;
     --leading-tight: 1.25;
@@ -835,6 +837,9 @@
   }
   .min-h-\[92px\] {
     min-height: 92px;
+  }
+  .min-h-\[160px\] {
+    min-height: 160px;
   }
   .min-h-\[250px\] {
     min-height: 250px;
@@ -3247,6 +3252,9 @@
   .font-sans {
     font-family: var(--font-sans);
   }
+  .font-serif {
+    font-family: var(--font-serif);
+  }
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
@@ -3348,6 +3356,10 @@
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
   }
+  .tracking-normal {
+    --tw-tracking: var(--tracking-normal);
+    letter-spacing: var(--tracking-normal);
+  }
   .tracking-tight {
     --tw-tracking: var(--tracking-tight);
     letter-spacing: var(--tracking-tight);
@@ -3359,6 +3371,9 @@
   .tracking-wider {
     --tw-tracking: var(--tracking-wider);
     letter-spacing: var(--tracking-wider);
+  }
+  .break-words {
+    overflow-wrap: break-word;
   }
   .whitespace-nowrap {
     white-space: nowrap;
@@ -3731,6 +3746,9 @@
   }
   .lowercase {
     text-transform: lowercase;
+  }
+  .normal-case {
+    text-transform: none;
   }
   .uppercase {
     text-transform: uppercase;
@@ -4317,6 +4335,18 @@
   .last\:rounded-r-full:last-child {
     border-top-right-radius: calc(infinity * 1px);
     border-bottom-right-radius: calc(infinity * 1px);
+  }
+  .empty\:before\:pointer-events-none:empty::before {
+    content: var(--tw-content);
+    pointer-events: none;
+  }
+  .empty\:before\:opacity-40:empty::before {
+    content: var(--tw-content);
+    opacity: 40%;
+  }
+  .empty\:before\:content-\[attr\(data-placeholder\)\]:empty::before {
+    --tw-content: attr(data-placeholder);
+    content: var(--tw-content);
   }
   .focus-within\:opacity-100:focus-within {
     opacity: 100%;
@@ -5201,6 +5231,14 @@
     .sm\:text-\[11px\] {
       font-size: 11px;
     }
+    .sm\:opacity-0 {
+      opacity: 0%;
+    }
+    @media (hover: hover) {
+      :is(:where(.group):hover .sm\:group-hover\:opacity-100) {
+        opacity: 100%;
+      }
+    }
   }
   @media (width >= 48rem) {
     .md\:col-span-2 {
@@ -5292,9 +5330,6 @@
       align-items: center;
     }
   }
-  .dark\:border-blue-800:where(.dark, [data-theme="dark"], .dark *) {
-    border-color: var(--color-blue-800);
-  }
   .dark\:border-emerald-800:where(.dark, [data-theme="dark"], .dark *) {
     border-color: var(--color-emerald-800);
   }
@@ -5355,12 +5390,6 @@
       background-color: color-mix(in oklab, var(--color-black) 20%, transparent);
     }
   }
-  .dark\:bg-blue-950\/40:where(.dark, [data-theme="dark"], .dark *) {
-    background-color: color-mix(in srgb, oklch(28.2% 0.091 267.935) 40%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-blue-950) 40%, transparent);
-    }
-  }
   .dark\:bg-emerald-950\/40:where(.dark, [data-theme="dark"], .dark *) {
     background-color: color-mix(in srgb, oklch(26.2% 0.051 172.552) 40%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -5412,12 +5441,6 @@
       background-color: color-mix(in oklab, var(--color-slate-800) 80%, transparent);
     }
   }
-  .dark\:bg-slate-800\/90:where(.dark, [data-theme="dark"], .dark *) {
-    background-color: color-mix(in srgb, oklch(27.9% 0.041 260.031) 90%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-slate-800) 90%, transparent);
-    }
-  }
   .dark\:bg-slate-900:where(.dark, [data-theme="dark"], .dark *) {
     background-color: var(--color-slate-900);
   }
@@ -5436,9 +5459,6 @@
       background-color: color-mix(in oklab, var(--color-white) 3%, transparent);
     }
   }
-  .dark\:fill-emerald-950:where(.dark, [data-theme="dark"], .dark *) {
-    fill: var(--color-emerald-950);
-  }
   .dark\:text-amber-200:where(.dark, [data-theme="dark"], .dark *) {
     color: var(--color-amber-200);
   }
@@ -5447,9 +5467,6 @@
   }
   .dark\:text-amber-400:where(.dark, [data-theme="dark"], .dark *) {
     color: var(--color-amber-400);
-  }
-  .dark\:text-blue-300:where(.dark, [data-theme="dark"], .dark *) {
-    color: var(--color-blue-300);
   }
   .dark\:text-blue-400:where(.dark, [data-theme="dark"], .dark *) {
     color: var(--color-blue-400);
@@ -5512,24 +5529,8 @@
     --tw-ring-color: var(--color-slate-700);
   }
   @media (hover: hover) {
-    .dark\:hover\:bg-rose-900\/40:where(.dark, [data-theme="dark"], .dark *):hover {
-      background-color: color-mix(in srgb, oklch(41% 0.159 10.272) 40%, transparent);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .dark\:hover\:bg-rose-900\/40:where(.dark, [data-theme="dark"], .dark *):hover {
-        background-color: color-mix(in oklab, var(--color-rose-900) 40%, transparent);
-      }
-    }
     .dark\:hover\:bg-slate-600:where(.dark, [data-theme="dark"], .dark *):hover {
       background-color: var(--color-slate-600);
-    }
-    .dark\:hover\:bg-slate-700\/60:where(.dark, [data-theme="dark"], .dark *):hover {
-      background-color: color-mix(in srgb, oklch(37.2% 0.044 257.287) 60%, transparent);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .dark\:hover\:bg-slate-700\/60:where(.dark, [data-theme="dark"], .dark *):hover {
-        background-color: color-mix(in oklab, var(--color-slate-700) 60%, transparent);
-      }
     }
     .dark\:hover\:bg-slate-800:where(.dark, [data-theme="dark"], .dark *):hover {
       background-color: var(--color-slate-800);

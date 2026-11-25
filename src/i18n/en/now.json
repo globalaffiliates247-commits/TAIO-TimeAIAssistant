@@ -1,10 +1,16 @@
 {
   "now": {
     "dod_input_label": "Completion criteria",
-    "dod_input_placeholder": "One criterion per line, press Enter to add"
+    "dod_input_placeholder": "One criterion per line, press Enter to add",
+    "parallelRunningTasks": "{{count}} running",
+    "parallelRunningTooltip": "View parallel running tasks",
+    "parallelRunningHeader": "Parallel Running Tasks",
+    "taskTransition": "Finished \"{{completed}}\" · Continuing \"{{continuing}}\"",
+    "focusingTask": "Focusing on \"{{title}}\""
   },
   "checkin": {
     "done": "Done",
+    "otherTaskRunning": "\"{{title}}\" is also running until {{endTime}}",
     "continue_later": "Not finished, save for later",
     "more_time": "Need +15 more minutes",
     "remind_10m": "Remind me in 10 minutes",

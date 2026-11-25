@@ -13,7 +13,7 @@ const dd = String(gmt7.getDate()).padStart(2, '0');
 const mm = String(gmt7.getMonth() + 1).padStart(2, '0');
 const yy = String(gmt7.getFullYear()).slice(-2);
 const hh = String(gmt7.getHours()).padStart(2, '0');
-const buildStamp = `${dd}${mm}${yy}${hh}`;
+const buildStamp = process.env.BUILD_STAMP || '25112600';
 
 const version = pkg.version || '0.3.22';
 const versionLabel = `v${version} · ${buildStamp}`;

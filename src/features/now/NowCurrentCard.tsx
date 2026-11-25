@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { clockState } from '@/features/clock';
 import { updateScheduleEntry, commitQuickLine, SubTaskList, getSubTaskProgress, extendTask, formatExtensionHistory } from '@/features/tasks';
@@ -33,7 +33,8 @@ import {
   Coffee,
   BarChart2,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  Layers
 } from 'lucide-react';
 import type { TimeBlock, TaskEndType, DodItem, UserRole } from '@/types';
 
@@ -123,6 +124,30 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
 
   // PRD v0.3.35 Part D: Show/hide subtasks checklist in NowCurrentCard
   const [showSubTasks, setShowSubTasks] = useState(false);
+
+  // PRD v0.3.57 Part E: Multi-task tracking & transition banner
+  const [showRunningDropdown, setShowRunningDropdown] = useState(false);
+  const [taskTransitionBanner, setTaskTransitionBanner] = useState<{ completed: string; continuing: string } | null>(null);
+  const prevActiveTaskRef = useRef<{ id: string; title: string } | null>(null);
+
+  useEffect(() => {
+    if (prevActiveTaskRef.current && activeTask && prevActiveTaskRef.current.id !== activeTask.id) {
+      const prevBlock = scheduleBlocks.find(b => b.id === prevActiveTaskRef.current?.id);
+      if (prevBlock && prevBlock.status === 'done') {
+        setTaskTransitionBanner({
+          completed: prevActiveTaskRef.current.title,
+          continuing: activeTask.title,
+        });
+        const timer = setTimeout(() => {
+          setTaskTransitionBanner(null);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+    if (activeTask) {
+      prevActiveTaskRef.current = { id: activeTask.id, title: activeTask.title };
+    }
+  }, [activeTask?.id, scheduleBlocks]);
 
   // v0.3.34 Part E4: Three view modes (remaining, elapsed, goal)
   const [viewMode, setViewMode] = useState<'remaining' | 'elapsed' | 'goal'>(() => {
@@ -682,9 +707,32 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
   // 3. ACTIVE TASK STATE ("ĐANG LÀM")
   return (
     <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-md space-y-4 select-none relative animate-in fade-in duration-200">
+      {/* PRD v0.3.57 Part E: Task transition notice */}
+      {taskTransitionBanner && (
+        <div className="p-2.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900 font-medium flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-1">
+          <div className="flex items-center gap-1.5 truncate">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="truncate">
+              {t('now.taskTransition', {
+                completed: taskTransitionBanner.completed,
+                continuing: taskTransitionBanner.continuing,
+                defaultValue: `Đã xong "${taskTransitionBanner.completed}" · Đang tiếp tục "${taskTransitionBanner.continuing}"`,
+              })}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setTaskTransitionBanner(null)}
+            className="text-blue-500 hover:text-blue-700 p-0.5 rounded cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Top line: ĐANG LÀM · 06:30–06:45 + End type badge */}
       <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 tracking-wider uppercase">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 tracking-wider uppercase flex-wrap">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
           <span style={highlightStyle}>{language === 'en' ? 'IN PROGRESS' : 'ĐANG LÀM'}</span>
           {activeTask && (
@@ -692,6 +740,47 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
               · {activeTask.startTime}–{activeTask.endTime}
             </span>
           )}
+          {(() => {
+            const allRunning = scheduleBlocks.filter(b => b.status === 'in_progress' && !b.isTemplateBlock && b.blockKind !== 'ritual' && (!b.date || b.date === todayStr));
+            if (allRunning.length <= 1) return null;
+            return (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowRunningDropdown(prev => !prev)}
+                  className="ml-1 px-2 py-0.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[10.5px] font-bold tracking-normal normal-case flex items-center gap-1 transition-colors cursor-pointer"
+                  title={t('now.parallelRunningTooltip', 'Xem các việc đang chạy song song')}
+                >
+                  <Layers className="w-3 h-3" />
+                  <span>{t('now.parallelRunningTasks', { count: allRunning.length, defaultValue: `${allRunning.length} việc đang chạy` })}</span>
+                </button>
+                {showRunningDropdown && (
+                  <div className="absolute left-0 top-full mt-1 z-30 w-64 p-2 bg-white rounded-2xl shadow-xl border border-slate-200 text-xs normal-case tracking-normal animate-in fade-in zoom-in-95">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
+                      {t('now.parallelRunningHeader', 'Việc đang chạy song song')}
+                    </p>
+                    <div className="space-y-1">
+                      {allRunning.map(task => (
+                        <div
+                          key={task.id}
+                          className={`p-2 rounded-xl flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                            task.id === activeTask?.id ? 'bg-blue-50 text-blue-900 font-bold' : 'hover:bg-slate-50 text-slate-700 font-medium'
+                          }`}
+                          onClick={() => {
+                            setShowRunningDropdown(false);
+                            showToast?.(t('now.focusingTask', { title: task.title, defaultValue: `Đang tập trung "${task.title}"` }));
+                          }}
+                        >
+                          <span className="truncate">{task.title}</span>
+                          <span className="font-mono text-[10px] text-slate-400 shrink-0">{task.endTime}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -901,6 +990,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
                 <input
                   type="text"
                   autoFocus
+                  enterKeyHint="done"
                   value={returnPointDraft}
                   onChange={(e) => setReturnPointDraft(e.target.value)}
                   onBlur={() => handleSaveReturnPoint(returnPointDraft)}
@@ -929,7 +1019,7 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
         const accompanyingSideTask = dailyCardItems.find(i => 
           i.date === todayStr &&
           (i.parallelOf === activeTask?.id || (i.extra as Record<string, unknown> | undefined)?.parallelOf === activeTask?.id) &&
-          i.status === 'open'
+          (i.status === 'open' || i.status === 'in_progress')
         );
         if (!accompanyingSideTask) return null;
         return (
@@ -1321,8 +1411,10 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
             <input
               type="text"
               autoFocus
+              enterKeyHint="done"
               value={otherTaskInput}
               onChange={e => setOtherTaskInput(e.target.value)}
+              onBlur={() => { if (otherTaskInput.trim()) handleStartOtherTask(otherTaskInput); }}
               onKeyDown={e => { if (e.key === 'Enter') handleStartOtherTask(otherTaskInput); }}
               placeholder="Gõ tên việc bạn đang làm thực tế..."
               className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-900"

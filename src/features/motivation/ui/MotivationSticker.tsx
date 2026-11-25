@@ -37,6 +37,13 @@ export interface MotivationStickerProps {
   collapsible?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  palette?: {
+    paper?: string;
+    bar?: string;
+    ink?: string;
+    muted?: string;
+    line?: string;
+  };
 }
 
 export const MotivationSticker: React.FC<MotivationStickerProps> = ({
@@ -51,6 +58,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   collapsible = false,
   isCollapsed = false,
   onToggleCollapse,
+  palette: propPalette,
 }) => {
   const effectiveKey = instanceKey || slotKey;
   const { language, palette } = useApp();
@@ -179,9 +187,20 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
 
   // Render by size
   if (size === 'line') {
+    const containerClasses = propPalette
+      ? `group relative flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs rounded-xl border transition-colors ${className}`
+      : `group relative flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl border border-black/5 dark:border-white/5 transition-colors ${className}`;
+    const containerStyle = propPalette
+      ? {
+          borderColor: propPalette.line,
+          backgroundColor: 'rgba(0,0,0,0.03)',
+        }
+      : undefined;
+
     return (
       <div
-        className={`group relative flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl border border-black/5 dark:border-white/5 transition-colors ${className}`}
+        className={containerClasses}
+        style={containerStyle}
         title={currentQuote.text}
       >
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -190,11 +209,17 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             className="flex-1 cursor-pointer truncate"
             onClick={() => setIsExpanded(!isExpanded)}
           >
-            <span className="font-normal italic text-slate-800 dark:text-slate-100">
+            <span
+              className={`font-normal italic ${propPalette ? '' : 'text-slate-800 dark:text-slate-100'}`}
+              style={propPalette?.ink ? { color: propPalette.ink } : undefined}
+            >
               "{currentQuote.text}"
             </span>
             {currentQuote.author && (
-              <span className="ml-1 text-[10px] text-neutral-400 dark:text-neutral-500 not-italic">
+              <span
+                className={`ml-1 text-[10px] not-italic ${propPalette ? '' : 'text-neutral-400 dark:text-neutral-500'}`}
+                style={propPalette?.muted ? { color: propPalette.muted } : undefined}
+              >
                 — {currentQuote.author}
               </span>
             )}
@@ -275,15 +300,27 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   }
 
   if (size === 'note') {
+    const containerClasses = propPalette
+      ? `group relative p-2.5 rounded-lg border transition-all ${className}`
+      : `group relative p-2.5 rounded-lg border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] transition-all ${className}`;
+    const containerStyle = propPalette
+      ? {
+          borderColor: propPalette.line,
+          backgroundColor: 'rgba(0,0,0,0.03)',
+        }
+      : undefined;
+
     return (
       <div
-        className={`group relative p-2.5 rounded-lg border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] transition-all ${className}`}
+        className={containerClasses}
+        style={containerStyle}
       >
         <div className="flex items-start justify-between gap-2">
           <div
-            className={`flex-1 cursor-pointer text-xs text-neutral-800 dark:text-neutral-100 font-normal italic leading-relaxed ${
-              isExpanded ? '' : 'line-clamp-3'
-            }`}
+            className={`flex-1 cursor-pointer text-xs font-normal italic leading-relaxed ${
+              propPalette ? '' : 'text-neutral-800 dark:text-neutral-100'
+            } ${isExpanded ? '' : 'line-clamp-3'}`}
+            style={propPalette?.ink ? { color: propPalette.ink } : undefined}
             onClick={() => setIsExpanded(!isExpanded)}
           >
             "{currentQuote.text}"
@@ -327,7 +364,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
         </div>
 
         {currentQuote.author && (
-          <div className="mt-1 text-right text-[10px] text-neutral-400 dark:text-neutral-500 not-italic">
+          <div
+            className={`mt-1 text-right text-[10px] not-italic ${propPalette ? '' : 'text-neutral-400 dark:text-neutral-500'}`}
+            style={propPalette?.muted ? { color: propPalette.muted } : undefined}
+          >
             — {currentQuote.author}
           </div>
         )}
@@ -345,9 +385,20 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   }
 
   // Card size (e.g. GoalsTab, CloseDayModal)
+  const cardClasses = propPalette
+    ? `group relative p-3.5 rounded-2xl border transition-all ${className}`
+    : `group relative p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 shadow-2xs transition-all ${className}`;
+  const cardStyle = propPalette
+    ? {
+        borderColor: propPalette.line,
+        backgroundColor: 'rgba(0,0,0,0.02)',
+      }
+    : undefined;
+
   return (
     <div
-      className={`group relative p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 shadow-2xs transition-all ${className}`}
+      className={cardClasses}
+      style={cardStyle}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5 flex-1 min-w-0">
@@ -355,9 +406,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             <Lightbulb className="w-4 h-4 text-[var(--taio-brand)] stroke-[1.75]" />
           </div>
           <div
-            className={`flex-1 cursor-pointer text-xs sm:text-sm text-slate-800 dark:text-slate-100 font-normal italic leading-relaxed ${
-              isExpanded ? '' : 'line-clamp-3'
-            }`}
+            className={`flex-1 cursor-pointer text-xs sm:text-sm font-normal italic leading-relaxed ${
+              propPalette ? '' : 'text-slate-800 dark:text-slate-100'
+            } ${isExpanded ? '' : 'line-clamp-3'}`}
+            style={propPalette?.ink ? { color: propPalette.ink } : undefined}
             onClick={() => setIsExpanded(!isExpanded)}
           >
             "{currentQuote.text}"
@@ -371,7 +423,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
               </div>
             )}
             {currentQuote.author && (
-              <div className="mt-1.5 text-right text-xs text-neutral-500 dark:text-neutral-400 not-italic">
+              <div
+                className={`mt-1.5 text-right text-xs not-italic ${propPalette ? '' : 'text-neutral-500 dark:text-neutral-400'}`}
+                style={propPalette?.muted ? { color: propPalette.muted } : undefined}
+              >
                 — {currentQuote.author}
               </div>
             )}

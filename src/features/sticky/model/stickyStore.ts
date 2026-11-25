@@ -80,8 +80,8 @@ function purgeExpired(notes: StickyNote[]): StickyNote[] {
   return notes.filter(n => !n.deletedAt || n.deletedAt > cutoff);
 }
 
-function load() {
-  if (loaded || typeof window === 'undefined') return;
+function load(force = false) {
+  if ((loaded && !force) || typeof window === 'undefined') return;
   loaded = true;
   try {
     const raw = localStorage.getItem(KEY);
@@ -167,14 +167,103 @@ export function useStickyState(): State {
   );
 }
 
+/** PRD v0.3.57 Part C: Deduplicate day notes by date and ensure deterministic IDs day-YYYY-MM-DD */
+export function runDayStickyDeduplication(): { mergedNotes: number; mergedLines: number } {
+  load(false);
+  const notes = state.notes;
+  const dayNotesByDate = new Map<string, StickyNote[]>();
+
+  for (const n of notes) {
+    if (n.kind === 'day' && n.date && !n.deletedAt) {
+      const list = dayNotesByDate.get(n.date) || [];
+      list.push(n);
+      dayNotesByDate.set(n.date, list);
+    }
+  }
+
+  let mergedNotes = 0;
+  let mergedLines = 0;
+  let hasChanges = false;
+  const tombstonesToRecord: string[] = [];
+  const processedOldIds = new Set<string>();
+  const mergedDayMap = new Map<string, StickyNote>();
+
+  for (const [date, list] of dayNotesByDate.entries()) {
+    const deterministicId = `day-${date}`;
+    if (list.length > 1) {
+      // Sort: prefer deterministic ID, then earliest updatedAt
+      list.sort((a, b) => {
+        const aIsExact = a.id === deterministicId;
+        const bIsExact = b.id === deterministicId;
+        if (aIsExact && !bIsExact) return -1;
+        if (!aIsExact && bIsExact) return 1;
+        return (Number(a.updatedAt) || 0) - (Number(b.updatedAt) || 0);
+      });
+
+      const primary = { ...list[0], id: deterministicId };
+      const combinedLines = [...(primary.lines || [])];
+      const lineTextSet = new Set(combinedLines.map(l => (l.text || '').trim().toLowerCase()));
+
+      for (let i = 1; i < list.length; i++) {
+        const dup = list[i];
+        processedOldIds.add(dup.id);
+        tombstonesToRecord.push(dup.id);
+        mergedNotes++;
+
+        for (const line of dup.lines || []) {
+          const norm = (line.text || '').trim().toLowerCase();
+          if (norm && !lineTextSet.has(norm)) {
+            lineTextSet.add(norm);
+            combinedLines.push(line);
+            mergedLines++;
+          }
+        }
+      }
+
+      primary.lines = combinedLines;
+      primary.updatedAt = Date.now();
+      processedOldIds.add(list[0].id);
+      mergedDayMap.set(date, primary);
+      hasChanges = true;
+    } else if (list.length === 1 && list[0].id !== deterministicId) {
+      const single = list[0];
+      processedOldIds.add(single.id);
+      tombstonesToRecord.push(single.id);
+      mergedDayMap.set(date, { ...single, id: deterministicId, updatedAt: Date.now() });
+      hasChanges = true;
+    }
+  }
+
+  if (hasChanges) {
+    const updatedNotes: StickyNote[] = [];
+    for (const n of notes) {
+      if (n.kind === 'day' && n.date && mergedDayMap.has(n.date)) {
+        const merged = mergedDayMap.get(n.date)!;
+        if (!updatedNotes.some(x => x.id === merged.id)) {
+          updatedNotes.push(merged);
+        }
+      } else if (!processedOldIds.has(n.id)) {
+        updatedNotes.push(n);
+      }
+    }
+    tombstonesToRecord.forEach(id => recordStickyTombstone(id));
+    console.info(`[StickyDeduplication] Merged ${mergedNotes} duplicate day notes and ${mergedLines} lines.`);
+    commit({ ...state, notes: updatedNotes });
+  }
+
+  return { mergedNotes, mergedLines };
+}
+
 /** Opens the board and restores previous open sheets or makes sure today's day sheet exists. */
 export function openStickyBoard(today: string, focusId?: string, reopenPrevious = true) {
-  load();
+  load(true);
+  runDayStickyDeduplication();
   let notes = state.notes;
-  let day = notes.find(n => n.kind === 'day' && n.date === today && !n.deletedAt);
+  const deterministicId = `day-${today}`;
+  let day = notes.find(n => n.kind === 'day' && (n.id === deterministicId || n.date === today) && !n.deletedAt);
   if (!day) {
     day = {
-      id: uid(),
+      id: deterministicId,
       kind: 'day',
       date: today,
       title: 'Hôm nay',
@@ -190,6 +279,10 @@ export function openStickyBoard(today: string, focusId?: string, reopenPrevious 
     };
     // Yesterday's day sheet closes and stays as a diary page.
     notes = [...notes.map(n => (n.kind === 'day' ? { ...n, open: false, lastOpen: false } : n)), day];
+  } else if (day.id !== deterministicId) {
+    recordStickyTombstone(day.id);
+    day = { ...day, id: deterministicId };
+    notes = notes.map(n => (n.date === today && n.kind === 'day' ? day! : n));
   }
 
   const target = focusId || day.id;
@@ -205,6 +298,33 @@ export function openStickyBoard(today: string, focusId?: string, reopenPrevious 
   });
 
   commit({ ...state, notes, boardOpen: true, activeId: target, isTemporarilyHidden: false });
+}
+
+/** PRD v0.3.57 Part L: Open a sticky note directly from list panel in a single atomic commit */
+export function openStickyNote(id: string): void {
+  load(true);
+  const notes = state.notes.map(n => {
+    if (n.id === id) {
+      const needsShift = typeof window !== 'undefined' && window.innerWidth >= 640 && (typeof n.x !== 'number' || n.x < 310);
+      return {
+        ...n,
+        open: true,
+        lastOpen: true,
+        collapsed: false,
+        x: needsShift ? 320 : n.x,
+        updatedAt: Date.now(),
+      };
+    }
+    return n;
+  });
+
+  commit({
+    ...state,
+    notes,
+    boardOpen: true,
+    activeId: id,
+    isTemporarilyHidden: false,
+  });
 }
 
 export function closeStickyBoard() {
