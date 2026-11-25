@@ -169,7 +169,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
       {/* Close button */}
       <button
         onClick={handleDismiss}
-        className="absolute top-3 right-3 p-1 rounded-full text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-black/5 transition-colors"
+        className="absolute top-3 right-3 p-1 rounded-full text-neutral-500 hover:text-neutral-800 hover:bg-black/5 transition-colors"
         title={t('common.close', 'Bỏ qua')}
       >
         <X size={15} />
@@ -184,7 +184,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
       {/* Part B2 #4b: Unfinished tasks from yesterday reminder */}
       {!yesterdayClosed && unfinishedYesterday.length > 0 && (
         <div className="mb-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
-          <div className="font-semibold text-amber-900 dark:text-amber-200">
+          <div className="font-semibold text-amber-900">
             {language === 'vi'
               ? `Còn ${unfinishedYesterday.length} việc từ hôm qua đang chờ bạn`
               : `You have ${unfinishedYesterday.length} tasks from yesterday waiting`}
@@ -198,7 +198,7 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
             </button>
             <button
               onClick={() => setCloseDayModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-white/80 dark:bg-black/20 hover:bg-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-amber-500/30 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-white/80 hover:bg-white text-slate-700 text-xs font-semibold border border-amber-500/30 transition-colors"
             >
               {language === 'vi' ? 'Xem lại' : 'Review'}
             </button>
@@ -224,8 +224,8 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
 
       {/* Part B2 #4c: Morning Top Task prompt if not answered last night */}
       {!hasTodayTasks && (
-        <div className="mt-3 pt-3 border-t border-slate-200/60 dark:border-white/10 text-xs">
-          <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+        <div className="mt-3 pt-3 border-t border-slate-200/60 text-xs">
+          <label className="block font-bold text-slate-800 mb-1.5">
             {language === 'vi' ? 'Sáng nay, bạn làm gì đầu tiên?' : "What's your #1 task first thing this morning?"}
           </label>
           <div className="flex items-center gap-2">
@@ -241,12 +241,12 @@ export const StartDayCard: React.FC<{ onOpenTodaySheet?: () => void }> = ({ onOp
                 if (e.key === 'Enter') handleAddFirstTask();
               }}
               placeholder={language === 'vi' ? 'Nhập việc bạn muốn làm đầu tiên...' : 'Enter your first task...'}
-              className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-slate-300 dark:border-neutral-700 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
+              className="flex-1 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
             />
             <button
               onClick={handleAddFirstTask}
               disabled={!firstTaskText.trim()}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold text-xs disabled:opacity-40 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white font-semibold text-xs disabled:opacity-40 transition-colors"
             >
               <Plus size={13} />
               <span>{language === 'vi' ? 'Ghi việc' : 'Add'}</span>

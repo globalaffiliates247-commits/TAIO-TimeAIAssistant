@@ -609,10 +609,10 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     showToast?.(language === 'vi' ? `Đã lùi khung "${templateItem.text}" thêm ${minutes}p (${newStart}–${newEnd})` : `Postponed "${templateItem.text}" by ${minutes}m (${newStart}–${newEnd})`);
   };
 
-  // v0.3.34 Part B: Instant Start button & Overrun / Replacement Conflict Modal
+  // v0.3.34 Part B: Instant Start button & Overrun / Replacement / Past-time Conflict Modal
   const [startConflictModal, setStartConflictModal] = useState<{
     item: DailyCardItem;
-    type: 'overrun' | 'already_running';
+    type: 'overrun' | 'already_running' | 'past_time';
     mode?: 'replace' | 'parallel';
     runningTask?: any;
     nextTask?: any;
@@ -622,7 +622,7 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
 
   const handleStartItemNow = (
     it: DailyCardItem,
-    options?: { fitGap?: boolean; mode?: 'replace' | 'parallel' }
+    options?: { fitGap?: boolean; mode?: 'replace' | 'parallel'; keepOriginalTime?: boolean }
   ) => {
     const startHM = toTime(nowMins);
 
@@ -633,6 +633,16 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
         item: it,
         type: 'already_running',
         runningTask: currentBlock,
+      });
+      return;
+    }
+
+    // 1b. PRD v0.3.57 Part H2.4: If task's scheduled start is in the past, ask whether to move to now (default) or keep original time
+    if (it.start && toMins(it.start) < nowMins && options?.keepOriginalTime === undefined) {
+      setStartConflictModal({
+        item: it,
+        type: 'past_time',
+        mode: options?.mode,
       });
       return;
     }
@@ -686,15 +696,16 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
     }
 
     // 4. Update started item
-    const endHM = toTime((nowMins + dur) % 1440);
+    const effectiveStart = (options?.keepOriginalTime && it.start) ? it.start : startHM;
+    const effectiveEnd = (options?.keepOriginalTime && it.end) ? it.end : toTime((nowMins + dur) % 1440);
     const extra = (it.extra as Record<string, unknown> | undefined) || {};
     const isParallel = options?.mode === 'parallel';
 
     updateScheduleEntry(
       it.id,
       {
-        startTime: startHM,
-        endTime: endHM,
+        startTime: effectiveStart,
+        endTime: effectiveEnd,
         status: 'in_progress',
         extra: {
           ...extra,
@@ -2193,6 +2204,49 @@ export const DaySheetBody: React.FC<{ note: StickyNote }> = ({ note }) => {
                     className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
                   >
                     {language === 'vi' ? 'Hủy' : 'Cancel'}
+                  </button>
+                </div>
+              </>
+            ) : startConflictModal.type === 'past_time' ? (
+              <>
+                <div className="flex items-center gap-2 text-blue-700 font-bold text-xs uppercase tracking-wide">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <span>{t('now.pastTimeTitle', 'Việc đã qua giờ đặt')}</span>
+                </div>
+                <div className="text-xs space-y-1 text-slate-700">
+                  <p>
+                    <strong className="text-slate-900">"{startConflictModal.item.text}"</strong>{' '}
+                    {t('now.pastTimeBody', {
+                      time: startConflictModal.item.start,
+                      now: toTime(nowMins),
+                      defaultValue: `được đặt lúc ${startConflictModal.item.start}. Bạn muốn dời giờ bắt đầu về bây giờ (${toTime(nowMins)}) hay giữ nguyên?`,
+                    })}
+                  </p>
+                </div>
+                <div className="space-y-1.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleStartItemNow(startConflictModal.item, { mode: startConflictModal.mode, keepOriginalTime: false })}
+                    className="w-full py-2.5 px-3 rounded-xl bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs taio-btn-primary"
+                  >
+                    <span>{t('now.moveToNow', { now: toTime(nowMins), defaultValue: `Dời về bây giờ (${toTime(nowMins)})` })}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStartItemNow(startConflictModal.item, { mode: startConflictModal.mode, keepOriginalTime: true })}
+                    className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{t('now.keepOriginalTime', { time: startConflictModal.item.start, defaultValue: `Giữ nguyên giờ đặt (${startConflictModal.item.start})` })}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setStartConflictModal(null);
+                    }}
+                    className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
+                  >
+                    {t('now.cancel', 'Huỷ')}
                   </button>
                 </div>
               </>

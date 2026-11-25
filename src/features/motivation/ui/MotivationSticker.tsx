@@ -231,9 +231,12 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           {activeGoalId && (
             <button
               onClick={handleTogglePinGoal}
-              className={`p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${
-                isGoalPinned ? 'text-[var(--taio-brand)] font-bold' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              className={`p-1 rounded transition-colors ${
+                propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5 dark:hover:bg-white/10'
+              } ${
+                isGoalPinned ? 'text-[var(--taio-brand)] font-bold' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
               }`}
+              style={propPalette && !isGoalPinned ? { color: propPalette.muted } : undefined}
               title={isGoalPinned ? (language === 'en' ? 'Unpin from this goal' : 'Bỏ gắn cho mục tiêu này') : (language === 'en' ? 'Pin to this goal' : 'Gắn cho mục tiêu này')}
             >
               <Pin size={12} className={isGoalPinned ? 'fill-current' : ''} />
@@ -241,23 +244,32 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           )}
           <button
             onClick={handleRefresh}
-            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+            className={`p-1 rounded transition-colors ${
+              propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+            }`}
+            style={propPalette ? { color: propPalette.muted } : undefined}
             title={t('motivation.refresh', 'Đổi câu khác')}
           >
             <RefreshCw size={11} />
           </button>
           <button
             onClick={handleToggleFavorite}
-            className={`p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${
-              isFavorited ? 'text-red-500 hover:text-red-600' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+            className={`p-1 rounded transition-colors ${
+              propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5 dark:hover:bg-white/10'
+            } ${
+              isFavorited ? 'text-red-500 hover:text-red-600' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
             }`}
+            style={propPalette && !isFavorited ? { color: propPalette.muted } : undefined}
             title={t('motivation.favorite', 'Lưu vào kho của tôi')}
           >
             <Heart size={11} className={isFavorited ? 'fill-current' : ''} />
           </button>
           <button
             onClick={handleHideToday}
-            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+            className={`p-1 rounded transition-colors ${
+              propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+            }`}
+            style={propPalette ? { color: propPalette.muted } : undefined}
             title={t('motivation.hideToday', 'Ẩn hết hôm nay')}
           >
             <X size={11} />
@@ -265,7 +277,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           {collapsible && isCollapsed && onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
-              className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+              className={`p-1 rounded transition-colors ${
+                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              }`}
+              style={propPalette ? { color: propPalette.muted } : undefined}
               title={t('common.expand', 'Mở rộng')}
             >
               <ChevronDown size={11} />
@@ -330,23 +345,32 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           <div className="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
             <button
               onClick={handleRefresh}
-              className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+              className={`p-1 rounded transition-colors ${
+                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              }`}
+              style={propPalette ? { color: propPalette.muted } : undefined}
               title={t('motivation.refresh', 'Đổi câu khác')}
             >
               <RefreshCw size={12} />
             </button>
             <button
               onClick={handleToggleFavorite}
-              className={`p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${
-                isFavorited ? 'text-red-500 hover:text-red-600' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              className={`p-1 rounded transition-colors ${
+                propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5 dark:hover:bg-white/10'
+              } ${
+                isFavorited ? 'text-red-500 hover:text-red-600' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
               }`}
+              style={propPalette && !isFavorited ? { color: propPalette.muted } : undefined}
               title={t('motivation.favorite', 'Lưu vào kho của tôi')}
             >
               <Heart size={12} className={isFavorited ? 'fill-current' : ''} />
             </button>
             <button
               onClick={handleHideToday}
-              className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+              className={`p-1 rounded transition-colors ${
+                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              }`}
+              style={propPalette ? { color: propPalette.muted } : undefined}
               title={t('motivation.hideToday', 'Ẩn hết hôm nay')}
             >
               <X size={12} />
@@ -354,7 +378,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             {collapsible && !isCollapsed && onToggleCollapse && (
               <button
                 onClick={onToggleCollapse}
-                className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+                className={`p-1 rounded transition-colors ${
+                  propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                }`}
+                style={propPalette ? { color: propPalette.muted } : undefined}
                 title={t('common.collapse', 'Thu gọn')}
               >
                 <ChevronUp size={12} />
@@ -374,8 +401,16 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
 
         {/* v0.3.34 Part C5: Original quote text when viewing a translation */}
         {currentQuote.originalText && isExpanded && (
-          <div className="mt-1.5 pt-1.5 border-t border-black/5 dark:border-white/10 text-[10.5px] text-neutral-500 dark:text-neutral-400 italic">
-            <span className="font-semibold not-italic text-neutral-600 dark:text-neutral-300">
+          <div
+            className={`mt-1.5 pt-1.5 border-t text-[10.5px] italic ${
+              propPalette ? '' : 'border-black/5 dark:border-white/10 text-neutral-500 dark:text-neutral-400'
+            }`}
+            style={propPalette ? { borderColor: propPalette.line, color: propPalette.muted } : undefined}
+          >
+            <span
+              className={`font-semibold not-italic ${propPalette ? '' : 'text-neutral-600 dark:text-neutral-300'}`}
+              style={propPalette ? { color: propPalette.ink } : undefined}
+            >
               {t('motivation.original', 'Nguyên văn')} ({currentQuote.originalLang || 'en'}):
             </span> "{currentQuote.originalText}"
           </div>

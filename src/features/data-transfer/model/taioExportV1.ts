@@ -1259,7 +1259,11 @@ export function applyTaioImport(
   if (Array.isArray(payload.events)) {
     try {
       const existing = getStorageItemSync<any[]>('scheduled_events_store', []);
-      const merged = mergeCollectionsByUpdatedAt(existing, payload.events as any[]);
+      const merged = mergeCollectionsByUpdatedAt(
+        existing,
+        payload.events as any[],
+        activeTombstones.map(t => t.id)
+      );
       setStorageItemSync('scheduled_events_store', merged);
     } catch (e) {
       console.warn('Failed to import scheduled events:', e);

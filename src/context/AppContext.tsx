@@ -580,7 +580,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isOffPlan, setIsOffPlan] = useState<boolean>(false);
   const [offPlanMinutes, setOffPlanMinutes] = useState<number>(79); // e.g. 1h 19m past wind-down
 
-  const [goals, setGoals] = useState<Goal[]>(INITIAL_GOALS);
+  // PRD v0.3.57 Part J5: default empty array, never seed mock state before hydration
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [blocks, setBlocks] = useState<TimeBlock[]>([]);
   const [deadlines, setDeadlines] = useState<HardDeadline[]>(INITIAL_DEADLINES);
   const [interruptions, setInterruptions] = useState<InterruptionRecord[]>(INITIAL_INTERRUPTIONS);
@@ -3080,9 +3081,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return item.title !== init.title || item.estimatedMinutes !== init.estimatedMinutes;
         });
         setInbox(cleanedInbox);
-      } else if (!savedDailyCards?.value) {
+      } else if (!savedDailyCards?.value && !savedBlocks?.value && !savedGoals?.value) {
+        // Only seed initial inbox for a completely fresh account with no prior saved data
         setInbox(INITIAL_INBOX);
         saveDurableState('inbox', INITIAL_INBOX, Date.now());
+      } else {
+        setInbox([]);
       }
 
       // FIX v0.3.34 Part A2.1 & v0.3.57 Part J: Purge unmodified sample goals & tombstones

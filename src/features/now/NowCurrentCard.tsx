@@ -34,7 +34,9 @@ import {
   BarChart2,
   ArrowRight,
   AlertCircle,
-  Layers
+  Layers,
+  Pencil,
+  ArrowLeftRight
 } from 'lucide-react';
 import type { TimeBlock, TaskEndType, DodItem, UserRole } from '@/types';
 
@@ -129,6 +131,59 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
   const [showRunningDropdown, setShowRunningDropdown] = useState(false);
   const [taskTransitionBanner, setTaskTransitionBanner] = useState<{ completed: string; continuing: string } | null>(null);
   const prevActiveTaskRef = useRef<{ id: string; title: string } | null>(null);
+
+  // PRD v0.3.57 Part H2.5, H3, H4: Task switcher, idle next-task suggestions, quick task inline edit & goal link
+  const [showTaskSwitcher, setShowTaskSwitcher] = useState(false);
+  const [dismissedNextSuggestions, setDismissedNextSuggestions] = useState(false);
+  const [isEditingTaskTitle, setIsEditingTaskTitle] = useState(false);
+  const [taskTitleDraft, setTaskTitleDraft] = useState('');
+  const [showQuickGoalPicker, setShowQuickGoalPicker] = useState(false);
+
+  const handleSwitchToDailyTask = (item: (typeof dailyCardItems)[number]) => {
+    const startHM = minutesToTime(nowMins);
+    const estDur = (item.extra as Record<string, unknown> | undefined)?.estimateMins as number | undefined
+      || (item.start && item.end ? Math.max(15, (timeToMinutes(item.end) - timeToMinutes(item.start) + 1440) % 1440) : 30);
+    const endHM = minutesToTime((nowMins + estDur) % 1440);
+
+    if (activeTask && !activeTask.isTemplateBlock && activeTask.blockKind !== 'ritual' && activeTask.id !== item.id) {
+      updateScheduleEntry(
+        activeTask.id,
+        {
+          endTime: startHM,
+          status: 'partly_done',
+          returnPoint: activeTask.title,
+          timeboxEndOutcome: 'continue_later',
+          extra: { ...((activeTask.extra as Record<string, unknown>) || {}), startedAt: undefined },
+        },
+        { updateDailyCardItem, setBlocks, dailyCardItems }
+      );
+    }
+
+    updateScheduleEntry(
+      item.id,
+      {
+        startTime: startHM,
+        endTime: endHM,
+        status: 'in_progress',
+        extra: { ...((item.extra as Record<string, unknown>) || {}), startedAt: Date.now(), estimateMins: estDur },
+      },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+    setShowTaskSwitcher(false);
+    showToast?.(t('now.startedTask', { title: item.text, defaultValue: `▶ Đang làm "${item.text}"` }));
+  };
+
+  const handleSaveTaskTitle = (newTitle: string) => {
+    setIsEditingTaskTitle(false);
+    const trimmed = newTitle.trim();
+    if (!activeTask || !trimmed || trimmed === activeTask.title) return;
+    updateScheduleEntry(
+      activeTask.id,
+      { title: trimmed },
+      { updateDailyCardItem, setBlocks, dailyCardItems }
+    );
+    showToast?.(t('now.renamedTo', { title: trimmed, defaultValue: `Đã đổi tên thành "${trimmed}"` }));
+  };
 
   useEffect(() => {
     if (prevActiveTaskRef.current && activeTask && prevActiveTaskRef.current.id !== activeTask.id) {
@@ -670,6 +725,44 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
                     ))}
                   </div>
                 )}
+
+                {/* PRD v0.3.57 Part H3: Next-task suggestion strip after stopping/finishing a task */}
+                {!dismissedNextSuggestions && (() => {
+                  const nextCandidates = dailyCardItems
+                    .filter(i => i.date === todayStr && (i.status === 'open' || i.status === 'left'))
+                    .sort((a, b) => (a.start || '23:59').localeCompare(b.start || '23:59'))
+                    .slice(0, 3);
+                  if (nextCandidates.length === 0) return null;
+                  return (
+                    <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[11px] font-bold text-slate-600">
+                          {t('now.whatsNext', 'Làm việc gì tiếp?')}
+                        </span>
+                        {nextCandidates.map(item => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => handleSwitchToDailyTask(item)}
+                            className="px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200/80 text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer max-w-[190px]"
+                          >
+                            <Play className="w-2.5 h-2.5 shrink-0" />
+                            <span className="truncate">{item.text}</span>
+                            {item.start && <span className="text-[10px] font-mono text-blue-600 shrink-0">{item.start}</span>}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDismissedNextSuggestions(true)}
+                        className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+                        title={t('now.dismiss', 'Bỏ qua')}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
@@ -866,30 +959,167 @@ export const NowCurrentCard: React.FC<NowCurrentCardProps> = ({ size = 'card' })
         </div>
       </div>
 
-      {/* Task Name with › and Pin Icon */}
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => setDetailOpen(true)}
-          className="text-left font-black text-xl sm:text-2xl text-slate-900 hover:text-blue-600 transition-colors flex items-center gap-1.5 group min-w-0"
-        >
-          <span className="truncate" style={highlightStyle}>{activeTask?.title || state.title}</span>
-          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 shrink-0 transition-transform group-hover:translate-x-0.5" />
-        </button>
+      {/* Task Name with inline edit (H4), task switcher (H2.5), › and Pin Icon */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          {isEditingTaskTitle && activeTask ? (
+            <input
+              type="text"
+              autoFocus
+              enterKeyHint="done"
+              value={taskTitleDraft}
+              onChange={e => setTaskTitleDraft(e.target.value)}
+              onBlur={() => handleSaveTaskTitle(taskTitleDraft)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') handleSaveTaskTitle(taskTitleDraft);
+                if (e.key === 'Escape') setIsEditingTaskTitle(false);
+              }}
+              className="flex-1 min-w-0 font-bold text-lg sm:text-xl text-slate-900 bg-slate-50 border border-blue-300 rounded-xl px-2.5 py-1 outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          ) : (() => {
+            const displayTitle = activeTask?.title || state.title;
+            const isDefaultQuickName = displayTitle === 'Việc tập trung nhanh' || displayTitle === 'Quick focus task';
+            return (
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isDefaultQuickName && activeTask) {
+                      setTaskTitleDraft('');
+                      setIsEditingTaskTitle(true);
+                    } else {
+                      setDetailOpen(true);
+                    }
+                  }}
+                  className="text-left font-black text-xl sm:text-2xl text-slate-900 hover:text-blue-600 transition-colors flex items-center gap-1.5 group min-w-0"
+                >
+                  <span
+                    className={`truncate ${isDefaultQuickName ? 'opacity-65' : ''}`}
+                    style={highlightStyle}
+                  >
+                    {displayTitle}
+                  </span>
+                  {isDefaultQuickName ? (
+                    <span className="text-xs font-medium text-slate-400 shrink-0">
+                      ({t('now.clickToName', 'bấm để đặt tên')})
+                    </span>
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                  )}
+                </button>
+                {activeTask && !isDefaultQuickName && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTaskTitleDraft(activeTask.title);
+                      setIsEditingTaskTitle(true);
+                    }}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 shrink-0 cursor-pointer"
+                    title={t('now.renameTask', 'Đổi tên việc')}
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
-        {/* Pin icon */}
-        <button
-          type="button"
-          onClick={togglePin}
-          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 border ${
-            isPinned 
-              ? 'bg-amber-100 border-amber-300 text-amber-800 shadow-xs' 
-              : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-400'
-          }`}
-          title={isPinned ? 'Bỏ ghim đồng hồ' : 'Ghim đồng hồ'}
-        >
-          <Pin className={`w-4 h-4 ${isPinned ? 'fill-amber-700' : ''}`} />
-        </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* PRD v0.3.57 Part H2.5: Switch task directly from clock */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowTaskSwitcher(v => !v)}
+                className="h-9 px-2.5 rounded-xl flex items-center gap-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+                title={t('now.switchTaskTooltip', 'Đổi sang việc khác hôm nay')}
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t('now.switchTask', 'Đổi việc')}</span>
+              </button>
+              {showTaskSwitcher && (() => {
+                const switchable = dailyCardItems
+                  .filter(i => i.date === todayStr && i.id !== activeTask?.id && (i.status === 'open' || i.status === 'left'))
+                  .sort((a, b) => (a.start || '23:59').localeCompare(b.start || '23:59'));
+                return (
+                  <div className="absolute right-0 top-full mt-1 z-40 w-64 max-h-60 overflow-y-auto p-2 bg-white rounded-2xl shadow-xl border border-slate-200 text-xs">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1.5 pb-1">
+                      {t('now.switchTaskHeader', 'Đổi sang việc hôm nay')}
+                    </p>
+                    {switchable.length === 0 ? (
+                      <p className="px-2 py-2 text-slate-400 text-[11px]">
+                        {t('now.noRemainingToday', 'Không còn việc nào đang chờ hôm nay')}
+                      </p>
+                    ) : (
+                      <div className="space-y-1">
+                        {switchable.map(item => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => handleSwitchToDailyTask(item)}
+                            className="w-full text-left px-2 py-1.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-blue-900 flex items-center justify-between gap-2 cursor-pointer"
+                          >
+                            <span className="truncate font-medium">{item.text}</span>
+                            {item.start && <span className="font-mono text-[10px] text-slate-400 shrink-0">{item.start}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Pin icon */}
+            <button
+              type="button"
+              onClick={togglePin}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 border ${
+                isPinned 
+                  ? 'bg-amber-100 border-amber-300 text-amber-800 shadow-xs' 
+                  : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-400'
+              }`}
+              title={isPinned ? 'Bỏ ghim đồng hồ' : 'Ghim đồng hồ'}
+            >
+              <Pin className={`w-4 h-4 ${isPinned ? 'fill-amber-700' : ''}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* PRD v0.3.57 Part H4.4: Optional goal link right on clock when task has no goal */}
+        {activeTask && !activeTask.goalId && goals.length > 0 && (
+          <div className="relative inline-block">
+            <button
+              type="button"
+              onClick={() => setShowQuickGoalPicker(v => !v)}
+              className="px-2 py-0.5 rounded-lg border border-slate-200 hover:border-blue-300 text-[11px] font-medium text-slate-500 hover:text-blue-700 flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <Target className="w-3 h-3" />
+              <span>{t('now.linkGoal', '+ Gắn mục tiêu')}</span>
+            </button>
+            {showQuickGoalPicker && (
+              <div className="absolute left-0 top-full mt-1 z-40 w-60 max-h-48 overflow-y-auto p-1.5 bg-white rounded-2xl shadow-xl border border-slate-200 text-xs space-y-0.5">
+                {goals.map(g => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      updateScheduleEntry(
+                        activeTask.id,
+                        { goalId: g.id },
+                        { updateDailyCardItem, setBlocks, dailyCardItems }
+                      );
+                      setShowQuickGoalPicker(false);
+                      showToast?.(t('now.linkedGoal', { name: g.name, defaultValue: `Đã gắn mục tiêu "${g.name}"` }));
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 rounded-xl hover:bg-slate-50 text-slate-700 truncate font-medium cursor-pointer"
+                  >
+                    {g.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* PRD v0.3.36 Part A3: Overdue check-in prompt */}
