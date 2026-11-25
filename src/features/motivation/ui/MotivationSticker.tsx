@@ -189,7 +189,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   if (size === 'line') {
     const containerClasses = propPalette
       ? `group relative flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs rounded-xl border transition-colors ${className}`
-      : `group relative flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl border border-black/5 dark:border-white/5 transition-colors ${className}`;
+      : `group relative flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs text-neutral-600 bg-black/[0.02] rounded-xl border border-black/5 transition-colors ${className}`;
     const containerStyle = propPalette
       ? {
           borderColor: propPalette.line,
@@ -210,14 +210,14 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             onClick={() => setIsExpanded(!isExpanded)}
           >
             <span
-              className={`font-normal italic ${propPalette ? '' : 'text-slate-800 dark:text-slate-100'}`}
+              className={`font-normal italic ${propPalette ? '' : 'text-slate-800'}`}
               style={propPalette?.ink ? { color: propPalette.ink } : undefined}
             >
               "{currentQuote.text}"
             </span>
             {currentQuote.author && (
               <span
-                className={`ml-1 text-[10px] not-italic ${propPalette ? '' : 'text-neutral-400 dark:text-neutral-500'}`}
+                className={`ml-1 text-[10px] not-italic ${propPalette ? '' : 'text-neutral-400'}`}
                 style={propPalette?.muted ? { color: propPalette.muted } : undefined}
               >
                 — {currentQuote.author}
@@ -232,9 +232,9 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             <button
               onClick={handleTogglePinGoal}
               className={`p-1 rounded transition-colors ${
-                propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5 dark:hover:bg-white/10'
+                propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5:bg-white/10'
               } ${
-                isGoalPinned ? 'text-[var(--taio-brand)] font-bold' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                isGoalPinned ? 'text-[var(--taio-brand)] font-bold' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700:text-neutral-200'
               }`}
               style={propPalette && !isGoalPinned ? { color: propPalette.muted } : undefined}
               title={isGoalPinned ? (language === 'en' ? 'Unpin from this goal' : 'Bỏ gắn cho mục tiêu này') : (language === 'en' ? 'Pin to this goal' : 'Gắn cho mục tiêu này')}
@@ -245,7 +245,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           <button
             onClick={handleRefresh}
             className={`p-1 rounded transition-colors ${
-              propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200'
             }`}
             style={propPalette ? { color: propPalette.muted } : undefined}
             title={t('motivation.refresh', 'Đổi câu khác')}
@@ -255,9 +255,9 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           <button
             onClick={handleToggleFavorite}
             className={`p-1 rounded transition-colors ${
-              propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5 dark:hover:bg-white/10'
+              propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5:bg-white/10'
             } ${
-              isFavorited ? 'text-red-500 hover:text-red-600' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              isFavorited ? 'text-red-500 hover:text-red-600' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700:text-neutral-200'
             }`}
             style={propPalette && !isFavorited ? { color: propPalette.muted } : undefined}
             title={t('motivation.favorite', 'Lưu vào kho của tôi')}
@@ -267,7 +267,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           <button
             onClick={handleHideToday}
             className={`p-1 rounded transition-colors ${
-              propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+              propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200'
             }`}
             style={propPalette ? { color: propPalette.muted } : undefined}
             title={t('motivation.hideToday', 'Ẩn hết hôm nay')}
@@ -278,7 +278,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             <button
               onClick={onToggleCollapse}
               className={`p-1 rounded transition-colors ${
-                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200'
               }`}
               style={propPalette ? { color: propPalette.muted } : undefined}
               title={t('common.expand', 'Mở rộng')}
@@ -291,10 +291,10 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
         {/* Expanded popup if clicked on line */}
         {isExpanded && (
           <div
-            className="absolute left-0 top-full mt-1 z-30 w-full max-w-md p-3 rounded-xl bg-[var(--surface-card,#FFFFFF)] text-[var(--text-primary,#0F172A)] shadow-xl border border-[var(--border-subtle,#E2E8F0)] dark:bg-neutral-800 dark:text-neutral-200 text-xs"
+            className="absolute left-0 top-full mt-1 z-30 w-full max-w-md p-3 rounded-xl bg-[var(--surface-card,#FFFFFF)] text-[var(--text-primary,#0F172A)] shadow-xl border border-[var(--border-subtle,#E2E8F0)] text-xs"
             onClick={e => e.stopPropagation()}
           >
-            <div className="font-normal italic leading-relaxed text-slate-800 dark:text-slate-100">
+            <div className="font-normal italic leading-relaxed text-slate-800">
               "{currentQuote.text}"
             </div>
             {currentQuote.author && (
@@ -317,7 +317,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   if (size === 'note') {
     const containerClasses = propPalette
       ? `group relative p-2.5 rounded-lg border transition-all ${className}`
-      : `group relative p-2.5 rounded-lg border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] transition-all ${className}`;
+      : `group relative p-2.5 rounded-lg border border-black/5 bg-black/[0.02] transition-all ${className}`;
     const containerStyle = propPalette
       ? {
           borderColor: propPalette.line,
@@ -333,7 +333,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
         <div className="flex items-start justify-between gap-2">
           <div
             className={`flex-1 cursor-pointer text-xs font-normal italic leading-relaxed ${
-              propPalette ? '' : 'text-neutral-800 dark:text-neutral-100'
+              propPalette ? '' : 'text-neutral-800'
             } ${isExpanded ? '' : 'line-clamp-3'}`}
             style={propPalette?.ink ? { color: propPalette.ink } : undefined}
             onClick={() => setIsExpanded(!isExpanded)}
@@ -346,7 +346,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             <button
               onClick={handleRefresh}
               className={`p-1 rounded transition-colors ${
-                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200'
               }`}
               style={propPalette ? { color: propPalette.muted } : undefined}
               title={t('motivation.refresh', 'Đổi câu khác')}
@@ -356,9 +356,9 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             <button
               onClick={handleToggleFavorite}
               className={`p-1 rounded transition-colors ${
-                propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5 dark:hover:bg-white/10'
+                propPalette ? 'hover:bg-black/5' : 'hover:bg-black/5:bg-white/10'
               } ${
-                isFavorited ? 'text-red-500 hover:text-red-600' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                isFavorited ? 'text-red-500 hover:text-red-600' : propPalette ? 'opacity-70 hover:opacity-100' : 'text-neutral-400 hover:text-neutral-700:text-neutral-200'
               }`}
               style={propPalette && !isFavorited ? { color: propPalette.muted } : undefined}
               title={t('motivation.favorite', 'Lưu vào kho của tôi')}
@@ -368,7 +368,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
             <button
               onClick={handleHideToday}
               className={`p-1 rounded transition-colors ${
-                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200'
               }`}
               style={propPalette ? { color: propPalette.muted } : undefined}
               title={t('motivation.hideToday', 'Ẩn hết hôm nay')}
@@ -379,7 +379,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
               <button
                 onClick={onToggleCollapse}
                 className={`p-1 rounded transition-colors ${
-                  propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                  propPalette ? 'hover:bg-black/5 opacity-70 hover:opacity-100' : 'hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200'
                 }`}
                 style={propPalette ? { color: propPalette.muted } : undefined}
                 title={t('common.collapse', 'Thu gọn')}
@@ -392,7 +392,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
 
         {currentQuote.author && (
           <div
-            className={`mt-1 text-right text-[10px] not-italic ${propPalette ? '' : 'text-neutral-400 dark:text-neutral-500'}`}
+            className={`mt-1 text-right text-[10px] not-italic ${propPalette ? '' : 'text-neutral-400'}`}
             style={propPalette?.muted ? { color: propPalette.muted } : undefined}
           >
             — {currentQuote.author}
@@ -403,12 +403,12 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
         {currentQuote.originalText && isExpanded && (
           <div
             className={`mt-1.5 pt-1.5 border-t text-[10.5px] italic ${
-              propPalette ? '' : 'border-black/5 dark:border-white/10 text-neutral-500 dark:text-neutral-400'
+              propPalette ? '' : 'border-black/5 text-neutral-500'
             }`}
             style={propPalette ? { borderColor: propPalette.line, color: propPalette.muted } : undefined}
           >
             <span
-              className={`font-semibold not-italic ${propPalette ? '' : 'text-neutral-600 dark:text-neutral-300'}`}
+              className={`font-semibold not-italic ${propPalette ? '' : 'text-neutral-600'}`}
               style={propPalette ? { color: propPalette.ink } : undefined}
             >
               {t('motivation.original', 'Nguyên văn')} ({currentQuote.originalLang || 'en'}):
@@ -422,7 +422,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
   // Card size (e.g. GoalsTab, CloseDayModal)
   const cardClasses = propPalette
     ? `group relative p-3.5 rounded-2xl border transition-all ${className}`
-    : `group relative p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 shadow-2xs transition-all ${className}`;
+    : `group relative p-3.5 rounded-2xl border border-slate-200 bg-slate-50 shadow-2xs transition-all ${className}`;
   const cardStyle = propPalette
     ? {
         borderColor: propPalette.line,
@@ -442,7 +442,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           </div>
           <div
             className={`flex-1 cursor-pointer text-xs sm:text-sm font-normal italic leading-relaxed ${
-              propPalette ? '' : 'text-slate-800 dark:text-slate-100'
+              propPalette ? '' : 'text-slate-800'
             } ${isExpanded ? '' : 'line-clamp-3'}`}
             style={propPalette?.ink ? { color: propPalette.ink } : undefined}
             onClick={() => setIsExpanded(!isExpanded)}
@@ -451,15 +451,15 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
 
             {/* v0.3.34 Part C5: Original quote text when viewing a translation */}
             {currentQuote.originalText && isExpanded && (
-              <div className="mt-2 pt-2 border-t border-slate-100 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400 italic font-normal">
-                <span className="font-semibold not-italic text-neutral-700 dark:text-neutral-300">
+              <div className="mt-2 pt-2 border-t border-slate-100 text-xs text-neutral-500 italic font-normal">
+                <span className="font-semibold not-italic text-neutral-700">
                   {t('motivation.original', 'Nguyên văn')} ({currentQuote.originalLang || 'en'}):
                 </span> "{currentQuote.originalText}"
               </div>
             )}
             {currentQuote.author && (
               <div
-                className={`mt-1.5 text-right text-xs not-italic ${propPalette ? '' : 'text-neutral-500 dark:text-neutral-400'}`}
+                className={`mt-1.5 text-right text-xs not-italic ${propPalette ? '' : 'text-neutral-500'}`}
                 style={propPalette?.muted ? { color: propPalette.muted } : undefined}
               >
                 — {currentQuote.author}
@@ -472,15 +472,15 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
         <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity shrink-0">
           <button
             onClick={handleRefresh}
-            className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200 transition-colors"
             title={t('motivation.refresh', 'Đổi câu khác')}
           >
             <RefreshCw size={14} />
           </button>
           <button
             onClick={handleToggleFavorite}
-            className={`p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${
-              isFavorited ? 'text-red-500 hover:text-red-600' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+            className={`p-1.5 rounded-lg hover:bg-black/5:bg-white/10 transition-colors ${
+              isFavorited ? 'text-red-500 hover:text-red-600' : 'text-neutral-400 hover:text-neutral-700:text-neutral-200'
             }`}
             title={t('motivation.favorite', 'Lưu vào kho của tôi')}
           >
@@ -488,7 +488,7 @@ export const MotivationSticker: React.FC<MotivationStickerProps> = ({
           </button>
           <button
             onClick={handleHideToday}
-            className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-black/5:bg-white/10 text-neutral-400 hover:text-neutral-700:text-neutral-200 transition-colors"
             title={t('motivation.hideToday', 'Ẩn hết hôm nay')}
           >
             <X size={14} />

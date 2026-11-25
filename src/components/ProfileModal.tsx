@@ -343,11 +343,11 @@ export const ProfileModal: React.FC = () => {
             <div className="space-y-5">
               {/* Avatar Selector (PRD v0.3.54 Part J: Photo upload & 5 Mascots, no 5-color dot picker) */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
                   {t('settings.avatarLabel', 'Ảnh đại diện')}
                 </label>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className={`w-16 h-16 rounded-full bg-gradient-to-tr ${activeAvatarBg} flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-slate-100 dark:ring-slate-700 shrink-0 overflow-hidden`}>
+                  <div className={`w-16 h-16 rounded-full bg-gradient-to-tr ${activeAvatarBg} flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-slate-100 shrink-0 overflow-hidden`}>
                     {userProfileDetail.customPhotoUrl ? (
                       <img src={userProfileDetail.customPhotoUrl} alt="" className="w-full h-full object-cover" />
                     ) : userProfileDetail.avatarMascot ? (
@@ -420,13 +420,13 @@ export const ProfileModal: React.FC = () => {
               {/* Name & Salutation */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-1">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     {t('settings.salutation', 'Xưng hô')}
                   </label>
                   <select
                     value={userProfileDetail.salutation}
                     onChange={(e) => updateUserProfileDetail({ salutation: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[var(--taio-brand)]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                   >
                     <option value="Anh">Anh</option>
                     <option value="Chị">Chị</option>
@@ -435,21 +435,21 @@ export const ProfileModal: React.FC = () => {
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     {t('settings.displayName', 'Tên hiển thị')}
                   </label>
                   <input
                     type="text"
                     value={userProfileDetail.displayName}
                     onChange={(e) => updateUserProfileDetail({ displayName: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[var(--taio-brand)]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-[var(--taio-brand)]"
                   />
                 </div>
               </div>
 
               {/* Profile Group Selector (Part G3: 3x2 grid of 6 clean icon tiles) */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
                   {t('settings.productivityProfile', 'Nhóm hồ sơ năng suất')}
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -471,11 +471,11 @@ export const ProfileModal: React.FC = () => {
                         onClick={() => p && setProfile(p)}
                         className={`aspect-square p-2 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-slate-100 dark:bg-slate-700 border-2 border-slate-700 dark:border-slate-300 text-slate-900 dark:text-slate-100 shadow-xs'
-                            : 'bg-slate-50/70 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                            ? 'bg-slate-100 border-2 border-slate-700 text-slate-900 shadow-xs'
+                            : 'bg-slate-50/70 border border-slate-200/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                       >
-                        <IconComponent className={`w-5 h-5 ${isSelected ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}`} strokeWidth={1.75} />
+                        <IconComponent className={`w-5 h-5 ${isSelected ? 'text-slate-900' : 'text-slate-500'}`} strokeWidth={1.75} />
                         <span className="text-[11px] font-bold text-center leading-tight truncate w-full">
                           {t(tile.key, tile.fallback)}
                         </span>
@@ -523,10 +523,10 @@ export const ProfileModal: React.FC = () => {
               
               {/* Default Home Screen */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
                   {t('settings.startScreen', 'Màn hình mở đầu mặc định')}
                 </label>
-                <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-2xl flex flex-col sm:flex-row gap-1">
+                <div className="bg-slate-100/90 p-1 rounded-2xl flex flex-col sm:flex-row gap-1">
                   {[
                     { id: 'inbox', label: t('settings.startScreenInbox', 'Rổ công việc'), desc: t('settings.startScreenInboxDesc', 'Ghi nhanh & việc chờ'), icon: Inbox },
                     { id: 'daycard', label: t('settings.startScreenDaycard', 'Thẻ ngày'), desc: t('settings.startScreenDaycardDesc', 'Danh sách việc hôm nay'), icon: Calendar },
@@ -541,20 +541,20 @@ export const ProfileModal: React.FC = () => {
                         onClick={() => updateUserProfileDetail({ defaultHomeScreen: item.id as any })}
                         className={`flex-1 p-2.5 rounded-xl flex items-center gap-2.5 transition-all text-left ${
                           isSelected
-                            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs font-bold'
-                            : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                            ? 'bg-white text-slate-900 shadow-xs font-bold'
+                            : 'text-slate-500 hover:text-slate-800 hover:bg-white/40 font-medium'
                         }`}
                       >
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                           isSelected 
                             ? 'bg-[var(--taio-brand)] text-[var(--taio-on-brand)]' 
-                            : 'bg-slate-200/70 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                            : 'bg-slate-200/70 text-slate-600'
                         }`}>
                           <Icon className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-bold truncate">{item.label}</p>
-                          <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{item.desc}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{item.desc}</p>
                         </div>
                       </button>
                     );
@@ -566,10 +566,10 @@ export const ProfileModal: React.FC = () => {
               <div className="space-y-4">
                 {/* Device style */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-2">
                     {t('settings.deviceLook', 'Giao diện thiết bị')}
                   </label>
-                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
+                  <div className="bg-slate-100/90 p-1 rounded-xl flex gap-1">
                     {[
                       { id: 'auto', label: t('settings.deviceAuto', 'Tự động'), icon: Sparkles },
                       { id: 'macos', label: 'macOS', icon: Laptop },
@@ -585,8 +585,8 @@ export const ProfileModal: React.FC = () => {
                           onClick={() => setDeviceLook(item.id as DeviceLook)}
                           className={`flex-1 py-2 px-1.5 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
                             isSelected
-                              ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
-                              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                              ? 'bg-white text-[var(--taio-brand)] shadow-xs font-bold'
+                              : 'text-slate-500 hover:text-slate-800 hover:bg-white/40 font-medium'
                           }`}
                         >
                           <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -599,10 +599,10 @@ export const ProfileModal: React.FC = () => {
 
                 {/* Light / Dark Mode */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-2">
                     {t('settings.displayMode', 'Chế độ hiển thị')}
                   </label>
-                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
+                  <div className="bg-slate-100/90 p-1 rounded-xl flex gap-1">
                     {[
                       { id: 'light', label: t('settings.modeLight', 'Sáng'), icon: Sun },
                       { id: 'dark', label: t('settings.modeDark', 'Tối'), icon: Moon },
@@ -617,8 +617,8 @@ export const ProfileModal: React.FC = () => {
                           onClick={() => setThemeMode(item.id as ThemeMode)}
                           className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
                             isSelected
-                              ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
-                              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                              ? 'bg-white text-[var(--taio-brand)] shadow-xs font-bold'
+                              : 'text-slate-500 hover:text-slate-800 hover:bg-white/40 font-medium'
                           }`}
                         >
                           <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -631,10 +631,10 @@ export const ProfileModal: React.FC = () => {
 
                 {/* Palette */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-2">
                     {t('settings.colorPalette', 'Tông màu chủ đạo')}
                   </label>
-                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-1">
+                  <div className="bg-slate-100/90 p-1 rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-1">
                     {[
                       { id: 'red', label: t('settings.paletteRed', 'Đỏ TAIO'), color: '#E11D2E', textColor: '#ffffff', icon: Hourglass },
                       { id: 'gold', label: t('settings.paletteGold', 'Vàng TAIO'), color: '#F7C531', textColor: '#14161A', icon: Sparkles },
@@ -650,8 +650,8 @@ export const ProfileModal: React.FC = () => {
                           onClick={() => setPalette(p.id as ColorPalette)}
                           className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
                             isSelected
-                              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs font-bold'
-                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-white/40 font-medium'
+                              ? 'bg-white text-slate-900 shadow-xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40 font-medium'
                           }`}
                         >
                           <div 
@@ -670,10 +670,10 @@ export const ProfileModal: React.FC = () => {
 
                 {/* Language Switcher */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-2">
                     {t('settings.language', 'Ngôn ngữ hiển thị')}
                   </label>
-                  <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
+                  <div className="bg-slate-100/90 p-1 rounded-xl flex gap-1">
                     {[
                       { id: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
                       { id: 'en', label: 'English', flag: '🇬🇧' },
@@ -686,8 +686,8 @@ export const ProfileModal: React.FC = () => {
                           onClick={() => setLanguage(l.id as any)}
                           className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 text-xs transition-all ${
                             isSelected
-                              ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
-                              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                              ? 'bg-white text-[var(--taio-brand)] shadow-xs font-bold'
+                              : 'text-slate-500 hover:text-slate-800 hover:bg-white/40 font-medium'
                           }`}
                         >
                           <span className="text-sm">{l.flag}</span>
@@ -704,10 +704,10 @@ export const ProfileModal: React.FC = () => {
 
               {/* Tone of Voice */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
                   {t('settings.reminderTone', 'Tông giọng nhắc nhở')}
                 </label>
-                <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl flex gap-1">
+                <div className="bg-slate-100/90 p-1 rounded-xl flex gap-1">
                   {[
                     { lvl: 1, label: t('settings.toneGentle', 'Dịu dàng'), icon: Smile },
                     { lvl: 2, label: t('settings.toneClear', 'Rõ ràng'), icon: Bell },
@@ -722,8 +722,8 @@ export const ProfileModal: React.FC = () => {
                         onClick={() => setToneLevel(tItem.lvl as ToneLevel)}
                         className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-all ${
                           isSelected
-                            ? 'bg-white dark:bg-slate-900 text-[var(--taio-brand)] dark:text-slate-100 shadow-xs font-bold'
-                            : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-white/40 font-medium'
+                            ? 'bg-white text-[var(--taio-brand)] shadow-xs font-bold'
+                            : 'text-slate-500 hover:text-slate-800 hover:bg-white/40 font-medium'
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -772,15 +772,15 @@ export const ProfileModal: React.FC = () => {
                 </div>
 
                 {/* PRD v0.3.48 Part C2: Tự thu nhỏ màn hình chính khi mở đồng hồ nổi */}
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-slate-200">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <Minimize2 className="w-4 h-4 text-[var(--taio-brand)]" />
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <h4 className="text-xs font-bold text-slate-900">
                         {t('settings.autoMinimizeFloatClock', 'Tự thu nhỏ màn hình chính khi mở đồng hồ nổi')}
                       </h4>
                     </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    <p className="text-[11px] text-slate-600">
                       {t('settings.autoMinimizeFloatClockDesc', 'Giữ không gian làm việc gọn gàng khi đồng hồ nổi xuất hiện')}
                     </p>
                   </div>
@@ -871,16 +871,16 @@ export const ProfileModal: React.FC = () => {
                 <MotivationSettingsSection />
 
                 {/* PRD v0.3.37 Part C5: Hiện gợi ý mục tiêu ngay trên dòng việc */}
-                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80">
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div className="pt-2 border-t border-slate-200/80">
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-slate-200">
                     <div className="space-y-0.5 pr-2">
                       <div className="flex items-center gap-2">
                         <Target className="w-4 h-4 text-rose-500" />
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        <h4 className="text-xs font-bold text-slate-900">
                           {t('settings.showGoalHints', 'Hiện gợi ý mục tiêu ngay trên dòng việc')}
                         </h4>
                       </div>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                      <p className="text-[11px] text-slate-600">
                         {t('settings.showGoalHintsDesc', 'Tự động phát hiện và gợi ý gắn mục tiêu khi bạn thêm công việc mới')}
                       </p>
                     </div>
@@ -894,7 +894,7 @@ export const ProfileModal: React.FC = () => {
                         setInlineGoalSuggestionEnabled(next);
                       }}
                       className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
-                        inlineGoalSuggestionEnabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300 dark:bg-slate-600'
+                        inlineGoalSuggestionEnabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
                       }`}
                     >
                       <span
@@ -910,17 +910,17 @@ export const ProfileModal: React.FC = () => {
                 <ScreenTimeSettingsSection language={language} />
 
                 {/* PRD v0.3.53 Part A6: Đo thời gian thật trên máy (Mac App Telemetry) */}
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0 mt-0.5">
                         <Laptop className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900">
                           {t('settings.macTelemetry', 'Đo lường ứng dụng trên máy')}
                         </h4>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
+                        <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
                           {t('settings.macTelemetryDesc', 'Tự động đo thời gian khi bạn chuyển sang ứng dụng khác để đối chiếu kế hoạch.')}
                         </p>
                       </div>
@@ -932,7 +932,7 @@ export const ProfileModal: React.FC = () => {
                       aria-checked={appUsageSettings.enabled}
                       onClick={handleToggleAppUsage}
                       className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none cursor-pointer ${
-                        appUsageSettings.enabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300 dark:bg-slate-600'
+                        appUsageSettings.enabled ? 'bg-[var(--taio-brand)]' : 'bg-slate-300'
                       }`}
                     >
                       <span
@@ -944,14 +944,14 @@ export const ProfileModal: React.FC = () => {
                   </div>
 
                   {appUsageSettings.enabled && (
-                    <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-600 dark:text-slate-300">
+                    <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-600">
                         {t('settings.localTelemetryData', 'Dữ liệu đo lường cục bộ:')}
                       </span>
                       <button
                         type="button"
                         onClick={handleClearAppUsage}
-                        className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 text-xs font-bold transition-colors"
+                        className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition-colors"
                       >
                         {t('settings.clearTelemetry', 'Xoá toàn bộ dữ liệu máy đo')}
                       </button>
@@ -961,25 +961,25 @@ export const ProfileModal: React.FC = () => {
               </div>
 
               {/* Data Export & Privacy */}
-              <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 space-y-3">
+              <div className="pt-2 border-t border-slate-200/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{t('settings.exportAI', 'Xuất dữ liệu cho Trợ lý AI')}</h4>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-300">{t('settings.exportAIDesc', 'Tạo bản snapshot định dạng văn bản cho các mô hình AI')}</p>
+                    <h4 className="text-xs font-bold text-slate-900">{t('settings.exportAI', 'Xuất dữ liệu cho Trợ lý AI')}</h4>
+                    <p className="text-[11px] text-slate-600">{t('settings.exportAIDesc', 'Tạo bản snapshot định dạng văn bản cho các mô hình AI')}</p>
                   </div>
                   <button
                     onClick={() => { setIsProfileModalOpen(false); setExportModalOpen(true); }}
-                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-slate-100 text-xs font-semibold transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200:bg-slate-600 text-slate-900 text-xs font-semibold transition-colors"
                   >
                     {t('settings.openExportAI', 'Mở trung tâm Xuất AI')}
                   </button>
                 </div>
 
                 {/* Opt-out of analytics */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200">
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200">{t('settings.optOutAnalytics', 'Từ chối ghi nhận thống kê ẩn danh')}</h4>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-300">{t('settings.optOutAnalyticsDesc', 'Tắt theo dõi thời gian dừng màn hình')}</p>
+                    <h4 className="text-xs font-semibold text-slate-800">{t('settings.optOutAnalytics', 'Từ chối ghi nhận thống kê ẩn danh')}</h4>
+                    <p className="text-[11px] text-slate-600">{t('settings.optOutAnalyticsDesc', 'Tắt theo dõi thời gian dừng màn hình')}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -991,13 +991,13 @@ export const ProfileModal: React.FC = () => {
               </div>
 
               {/* PRD Part P4.4: Custom Area Folder Renaming */}
-              <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+              <div className="space-y-3 pt-3 border-t border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    <h4 className="text-xs font-semibold text-slate-800">
                       {t('settings.areaFoldersTitle', 'Tên 4 thư mục mục tiêu')}
                     </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="text-[11px] text-slate-500">
                       {t('settings.areaFoldersDesc', 'Tự đặt tên cho 4 nhóm. Tên tự đặt sẽ được giữ nguyên khi đổi nghề.')}
                     </p>
                   </div>
@@ -1007,7 +1007,7 @@ export const ProfileModal: React.FC = () => {
                       resetCustomAreaNames();
                       showToast(t('settings.areaFoldersResetToast', 'Đã khôi phục tên nhóm mặc định theo nghề!'));
                     }}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold cursor-pointer shrink-0"
+                    className="text-xs text-blue-600 hover:underline font-semibold cursor-pointer shrink-0"
                   >
                     {t('settings.areaFoldersResetBtn', 'Khôi phục mặc định')}
                   </button>
@@ -1022,11 +1022,11 @@ export const ProfileModal: React.FC = () => {
                     const isCustomized = Boolean(customAreaNames[areaKey]?.trim());
 
                     return (
-                      <div key={areaKey} className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 space-y-1">
+                      <div key={areaKey} className="p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="font-mono text-slate-400">{areaKey}</span>
                           {isCustomized ? (
-                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                            <span className="text-[10px] text-amber-600 font-medium">
                               {t('settings.areaCustomBadge', 'Tự đặt')}
                             </span>
                           ) : (
@@ -1042,7 +1042,7 @@ export const ProfileModal: React.FC = () => {
                           onChange={e => {
                             updateCustomAreaNames({ [areaKey]: e.target.value });
                           }}
-                          className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
+                          className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
                         />
                       </div>
                     );
@@ -1176,15 +1176,15 @@ export const ProfileModal: React.FC = () => {
                       <Calendar className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <span>{t('settings.iphoneCalendar', 'Kết nối Lịch iPhone')}</span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          iosCalConnected ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+                          iosCalConnected ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'
                         }`}>
                           {iosCalConnected ? t('settings.calendarConnected', 'Đã kết nối') : t('settings.calendarNotConnected', 'Chưa kết nối')}
                         </span>
                       </h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                      <p className="text-xs text-slate-600 mt-0.5">
                         {t('settings.iphoneCalendarDesc', 'Đọc sự kiện từ Apple Calendar để hiển thị trong Lịch sự kiện và phiếu ngày')}
                       </p>
                     </div>
@@ -1193,7 +1193,7 @@ export const ProfileModal: React.FC = () => {
                     onClick={handleToggleIOSCalendar}
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0 ${
                       iosCalConnected
-                        ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800'
+                        ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
                         : 'bg-[var(--taio-brand)] hover:bg-[var(--taio-brand-hover)] text-[var(--taio-on-brand)] taio-btn-primary'
                     }`}
                   >
